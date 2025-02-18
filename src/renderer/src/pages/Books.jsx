@@ -127,7 +127,7 @@ function Books() {
                     <th className="col-volume">VOLUME</th>
                     <th className="col-physical">PHYSICAL DESCRIPTION</th>
                     <th className="col-isbn">ISBN</th>
-                    <th className="col-accession">ACCESSION NO.</th>
+                    <th className="col-accession">ACCESSION NUMBER</th>
                     <th className="col-barcode">BARCODE</th>
                     <th className="col-date">DATE RECEIVED</th>
                     <th className="col-subject">SUBJECT</th>
