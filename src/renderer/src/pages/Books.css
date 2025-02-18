@@ -148,10 +148,6 @@
   line-height: 1.5;
 }
 
-.books-table td:hover {
-  position: relative;
-}
-
 .books-table td:hover::after {
   content: attr(data-content);
   position: absolute;
