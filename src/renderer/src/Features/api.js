@@ -144,3 +144,51 @@ export const fetchBooks = async (token, page = 1, search = '') => {
     throw new Error(error.response?.data?.message || 'Failed to fetch books')
   }
 }
+
+export const addNewBook = async (token, bookData) => {
+  try {
+    const response = await axios.post(`${API_URL}/marc/record/`, bookData, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to add new book')
+  }
+}
+
+export const updateBook = async (token, bookId, bookData) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/marc/record/${bookId}/`,
+      bookData,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to update book')
+  }
+}
+
+export const deleteBook = async (token, bookId) => {
+  try {
+    await axios.delete(`${API_URL}/marc/record/${bookId}/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    return true // Return success flag since delete usually doesn't return data
+  } catch (error) {
+    console.error('Delete error:', error.response?.data || error.message)
+    throw new Error(error.response?.data?.detail || 'Failed to delete book')
+  }
+}
+
+export const fetchStatus = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/marc/status/`, getAuthHeaders(token))
+    // The API returns status list as an array of strings
+    return response.data
+  } catch (error) {
+    console.error('Error fetching status:', error)
+    return ['Available', 'Borrowed', 'Lost'] // Fallback default values
+  }
+}

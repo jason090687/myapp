@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { FaSearch, FaPlus, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import './Books.css'
-import { fetchBooks } from '../Features/api'
+import { fetchBooks, addNewBook, deleteBook } from '../Features/api'
 import { useSelector } from 'react-redux'
+import AddBookModal from '../components/AddBookModal'
+import EditBookModal from '../components/EditBookModal'
 
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -17,8 +19,10 @@ function Books() {
     previous: null,
     currentPage: 1
   })
-
-  const { token } = useSelector((state) => state.auth)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingBook, setEditingBook] = useState(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const { token, user } = useSelector((state) => state.auth)
 
   // Add debounce effect for search
   useEffect(() => {
@@ -36,6 +40,7 @@ function Books() {
       const response = await fetchBooks(token, page, debouncedSearchTerm)
       if (response) {
         const booksData = response.results.map((book) => ({
+          id: book.id, // Add this line to include the book ID
           title: book.title,
           author: book.author,
           seriesTitle: book.series_title,
@@ -69,6 +74,27 @@ function Books() {
     }
   }
 
+  const handleEditBook = (book) => {
+    setEditingBook(book)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSubmitBook = async (bookData) => {
+    try {
+      if (editingBook) {
+        await updateBook(token, { ...editingBook, ...bookData }) // Update the existing book
+      } else {
+        await addNewBook(token, bookData) // Add new book
+      }
+      setIsModalOpen(false)
+      setEditingBook(null)
+      await fetchBooksData(pagination.currentPage)
+      alert(editingBook ? 'Book updated successfully!' : 'Book added successfully!')
+    } catch (error) {
+      console.error('Error saving book:', error)
+    }
+  }
+
   useEffect(() => {
     fetchBooksData()
   }, [token])
@@ -90,8 +116,11 @@ function Books() {
   const filteredBooks = books
 
   const handleAddBook = () => {
-    // Add new book logic here
-    console.log('Add new book')
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
   }
 
   const handleSort = (columnIndex) => {
@@ -104,6 +133,45 @@ function Books() {
   }
 
   const totalPages = Math.ceil(pagination.count / 10) // Assuming 10 items per page
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false)
+    setEditingBook(null)
+  }
+
+  const handleEditSubmit = async () => {
+    try {
+      // The actual API call is now handled in EditBookModal
+      setIsEditModalOpen(false)
+      setEditingBook(null)
+      await fetchBooksData(pagination.currentPage) // Refresh the books list
+      alert('Book updated successfully!')
+    } catch (error) {
+      console.error('Error updating book:', error)
+      throw error
+    }
+  }
+
+  const handleDeleteBook = async (bookId) => {
+    if (window.confirm('Are you sure you want to delete this book?')) {
+      try {
+        const result = await deleteBook(token, bookId)
+        if (result) {
+          // Remove book from local state
+          setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
+          // Update pagination count
+          setPagination((prev) => ({
+            ...prev,
+            count: Math.max(0, prev.count - 1)
+          }))
+          alert('Book deleted successfully!')
+        }
+      } catch (error) {
+        console.error('Error deleting book:', error)
+        alert(error.message || 'Failed to delete book')
+      }
+    }
+  }
 
   return (
     <div className="app-wrapper">
@@ -208,8 +276,15 @@ function Books() {
                       </td>
                       <td className="col-action">
                         <div className="action-buttons-container">
-                          <button className="action-btn edit">Edit</button>
-                          <button className="action-btn delete">Delete</button>
+                          <button className="action-btn edit" onClick={() => handleEditBook(book)}>
+                            Edit
+                          </button>
+                          <button
+                            className="action-btn delete"
+                            onClick={() => handleDeleteBook(book.id)}
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -243,6 +318,19 @@ function Books() {
           </div>
         </div>
       </div>
+      <AddBookModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitBook}
+        currentUser={user}
+      />
+      <EditBookModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSubmit={handleEditSubmit}
+        bookData={editingBook}
+        currentUser={user}
+      />
     </div>
   )
 }
