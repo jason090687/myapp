@@ -1,0 +1,67 @@
+/* Same styles as SignInPage.css */
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.left-side {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f3f4f6;
+  padding: 2rem;
+  text-align: center;
+}
+
+.left-side h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 3rem;
+  color: #1a1a1a;
+}
+
+.input-field-wrapper {
+  width: 80%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0 auto;
+}
+
+/* ...rest of the styles from SignInPage.css... */
+
+.password-requirements {
+  width: 100%;
+  max-width: 320px;
+  text-align: left;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+}
+
+.password-requirements p,
+.password-match {
+  margin: 0.25rem 0;
+  transition: color 0.2s;
+}
+
+.valid {
+  color: #10b981;
+}
+
+.invalid {
+  color: #ef4444;
+}
+
+.password-match {
+  width: 100%;
+  max-width: 320px;
+  text-align: left;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+}

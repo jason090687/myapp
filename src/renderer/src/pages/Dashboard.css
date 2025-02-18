@@ -1,0 +1,164 @@
+.dashboard-container {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  transition: margin-left var(--transition-speed) ease;
+}
+
+.dashboard-container.collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+.dashboard-content {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.dashboard {
+  padding: 2rem;
+  display: grid;
+  gap: 2rem;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background-color: #0a0b64;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.card p {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.chart,
+.overdue {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.top-books_and_Checkout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.recent-checkouts,
+.top-books {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* Book filters */
+.book-filter-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 1.5rem;
+  border: none;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+.book-filter-btn.active {
+  background-color: #ef4444;
+  color: white;
+}
+
+.book-filter-btn.inactive {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+/* Book cards */
+.book {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-top: 1rem;
+}
+
+.available {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background-color: #0022cc;
+  color: white;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .stats-container,
+  .top-books_and_Checkout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    margin-left: 0;
+  }
+
+  .dashboard-content {
+    padding: 1rem;
+  }
+
+  .navbar {
+    left: 0;
+    width: 100%;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+}

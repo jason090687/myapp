@@ -1,0 +1,129 @@
+/* SignInPage.css */
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.left-side {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f3f4f6;
+  padding: 2rem;
+  text-align: center;
+}
+
+.left-side h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 3rem;
+  color: #1a1a1a;
+}
+
+.input-field-wrapper {
+  width: 80%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0 auto;
+}
+
+.input-field-wrapper > * {
+  width: 100%;
+  max-width: 320px;
+}
+
+.forgot-password {
+  width: 100%;
+  text-align: right;
+  font-size: 0.875rem;
+  color: #4b5563;
+  text-decoration: none;
+  margin: 0.25rem 0 1rem;
+}
+
+.or-divider {
+  width: 100%;
+  max-width: 320px;
+  margin: 1.5rem 0;
+}
+
+.or-divider div {
+  flex: 1;
+  height: 1px;
+  background-color: #e5e7eb;
+}
+
+.or-divider span {
+  padding: 0 1rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.sign-up {
+  font-size: 0.875rem;
+  text-align: center;
+  color: #4b5563;
+}
+
+.sign-up a {
+  color: #2563eb;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.right-side {
+  width: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.right-side img:first-child {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: auto;
+}
+
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.input-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.forgot-password {
+  align-self: flex-end;
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-top: 0.5rem;
+  margin-bottom: 3rem;
+}
+
+.login-button {
+  width: 50%;
+  margin-bottom: 1rem;
+}
