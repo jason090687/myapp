@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {
@@ -16,9 +16,36 @@ import {
 import logo from '../assets/logo.png'
 import profilePic from '../assets/profile.jpg'
 import './Sidebar.css'
+import { fetchUserDetails } from '../Features/api'
+import { useSelector } from 'react-redux'
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
+  const [userDetails, setUserDetails] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
   const location = useLocation()
+
+  const { token } = useSelector((state) => state.auth)
+
+  useEffect(() => {
+    setIsLoading(true)
+    const fetchUserData = async () => {
+      try {
+        const response = await fetchUserDetails(token)
+        setUserDetails(response)
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          processed_by: response.id || currentUser.id
+        }))
+        console.log('User details:', setFormData)
+      } catch (error) {
+        console.error('Error fetching user details:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    if (token) fetchUserData()
+  }, [token])
 
   const menuItems = [
     { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
@@ -33,8 +60,10 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     <>
       <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
-          <img src={logo} alt="Logo" className="logo" />
-          <span className="brand-text">E-Library</span>
+          <div className="logo-container">
+            <img src={logo} alt="logo" style={{ width: '30px', height: '30px' }} />
+            <h2 className="brand-text">E-Library</h2>
+          </div>
         </div>
 
         <nav className="sidebar-nav">
@@ -75,7 +104,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
           </div>
           <div className="nav-item user-profile">
             <img src={profilePic} alt="User" className="avatar" />
-            <span>John Doe</span>
+            <span>{userDetails.first_name}</span>
           </div>
         </div>
       </nav>

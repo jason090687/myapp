@@ -197,6 +197,12 @@
   overflow: hidden;
 }
 
+.books-table tbody td[colspan] {
+  color: #666;
+  font-style: italic;
+  background-color: #f9f9f9;
+}
+
 .action-btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -419,4 +425,30 @@
 
 .books-table tbody tr:hover td.col-action {
   background-color: white;
+}
+
+.loading-cell {
+  height: 60vh;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
