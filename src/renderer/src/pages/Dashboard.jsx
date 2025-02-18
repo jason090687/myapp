@@ -6,10 +6,26 @@ function Dashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [yearSelect, setYearSelect] = useState('2023')
   const [totalBooks, setTotalBooks] = useState('Loading...')
+  const [borrowedBooks, setBorrowedBooks] = useState('Loading...')
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
   }
+
+  useEffect(() => {
+    const fetchTotalBooksCount = async () => {
+      try {
+        const response = await fetch('https://countmein.pythonanywhere.com/api/v1/marc/search/')
+        const data = await response.json()
+        setTotalBooks(data.count)
+      } catch (error) {
+        console.error('Error fetching total books count:', error)
+        setTotalBooks('Error')
+      }
+    }
+
+    fetchTotalBooksCount()
+  }, [])
 
   useEffect(() => {
     // Add your API fetch logic here later
@@ -23,11 +39,11 @@ function Dashboard() {
           <div className="cards-grid">
             <div className="card">
               <h3>Total Books</h3>
-              <p id="totalBooksCount">{totalBooks}</p>
+              <p>{totalBooks}</p>
             </div>
             <div className="card">
               <h3>Borrowed Books</h3>
-              <p>232</p>
+              <p>10</p>
             </div>
             <div className="card">
               <h3>Returned Books</h3>
