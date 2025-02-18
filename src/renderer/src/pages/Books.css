@@ -148,10 +148,6 @@
   line-height: 1.5;
 }
 
-.books-table td:hover {
-  position: relative;
-}
-
 .books-table td:hover::after {
   content: attr(data-content);
   position: absolute;
@@ -388,9 +384,11 @@
   z-index: 2;
   padding: 0.75rem;
   box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
+  overflow: visible; /* Change from hidden to visible */
 }
 
 .books-table td.col-action {
+  overflow: visible; /* Change from hidden to visible */
   border-bottom: 1px solid #e2e8f0;
   border-left: none;
   border-right: none;
@@ -415,14 +413,8 @@
   padding: 0;
   margin: 0;
   border: none;
-  overflow: hidden;
+  overflow: visible; /* Change from hidden to visible */
   position: relative;
-  z-index: 1;
-}
-
-.action-btn {
-  flex: 0 0 auto;
-  min-width: 60px;
   z-index: 1;
 }
 
