@@ -221,74 +221,91 @@ function Books() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBooks.map((book, index) => (
-                    <tr key={index}>
-                      <td className="col-title" data-content={book.title}>
-                        {book.title}
-                      </td>
-                      <td className="col-author" data-content={book.author}>
-                        {book.author}
-                      </td>
-                      <td className="col-series" data-content={book.seriesTitle}>
-                        {book.seriesTitle}
-                      </td>
-                      <td className="col-publisher" data-content={book.publisher}>
-                        {book.publisher}
-                      </td>
-                      <td className="col-place" data-content={book.placeOfPublication}>
-                        {book.placeOfPublication}
-                      </td>
-                      <td className="col-year" data-content={book.year}>
-                        {book.year}
-                      </td>
-                      <td className="col-edition" data-content={book.edition}>
-                        {book.edition}
-                      </td>
-                      <td className="col-volume" data-content={book.volume}>
-                        {book.volume}
-                      </td>
-                      <td className="col-physical" data-content={book.physicalDescription}>
-                        {book.physicalDescription}
-                      </td>
-                      <td className="col-isbn" data-content={book.isbn}>
-                        {book.isbn}
-                      </td>
-                      <td className="col-accession" data-content={book.accessionNo}>
-                        {book.accessionNo}
-                      </td>
-                      <td className="col-barcode" data-content={book.barcode}>
-                        {book.barcode}
-                      </td>
-                      <td className="col-date" data-content={book.dateReceived}>
-                        {book.dateReceived}
-                      </td>
-                      <td className="col-subject" data-content={book.subject}>
-                        {book.subject}
-                      </td>
-                      <td className="col-processed-date" data-content={book.dateProcessed}>
-                        {book.dateProcessed}
-                      </td>
-                      <td className="col-processor" data-content={book.processedBy}>
-                        {book.processedBy}
-                      </td>
-                      <td className="col-status" data-content={book.status}>
-                        {book.status}
-                      </td>
-                      <td className="col-action">
-                        <div className="action-buttons-container">
-                          <button className="action-btn edit" onClick={() => handleEditBook(book)}>
-                            Edit
-                          </button>
-                          <button
-                            className="action-btn delete"
-                            onClick={() => handleDeleteBook(book.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan="18" className="loading-cell">
+                        <div className="spinner"></div>
                       </td>
                     </tr>
-                  ))}
+                  ) : filteredBooks.length === 0 ? (
+                    <tr>
+                      <td colSpan="18" style={{ textAlign: 'center', padding: '20px' }}>
+                        No books found
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredBooks.map((book, index) => (
+                      <tr key={index}>
+                        <td className="col-title" data-content={book.title}>
+                          {book.title}
+                        </td>
+                        <td className="col-author" data-content={book.author}>
+                          {book.author}
+                        </td>
+                        <td className="col-series" data-content={book.seriesTitle}>
+                          {book.seriesTitle}
+                        </td>
+                        <td className="col-publisher" data-content={book.publisher}>
+                          {book.publisher}
+                        </td>
+                        <td className="col-place" data-content={book.placeOfPublication}>
+                          {book.placeOfPublication}
+                        </td>
+                        <td className="col-year" data-content={book.year}>
+                          {book.year}
+                        </td>
+                        <td className="col-edition" data-content={book.edition}>
+                          {book.edition}
+                        </td>
+                        <td className="col-volume" data-content={book.volume}>
+                          {book.volume}
+                        </td>
+                        <td className="col-physical" data-content={book.physicalDescription}>
+                          {book.physicalDescription}
+                        </td>
+                        <td className="col-isbn" data-content={book.isbn}>
+                          {book.isbn}
+                        </td>
+                        <td className="col-accession" data-content={book.accessionNo}>
+                          {book.accessionNo}
+                        </td>
+                        <td className="col-barcode" data-content={book.barcode}>
+                          {book.barcode}
+                        </td>
+                        <td className="col-date" data-content={book.dateReceived}>
+                          {book.dateReceived}
+                        </td>
+                        <td className="col-subject" data-content={book.subject}>
+                          {book.subject}
+                        </td>
+                        <td className="col-processed-date" data-content={book.dateProcessed}>
+                          {book.dateProcessed}
+                        </td>
+                        <td className="col-processor" data-content={book.processedBy}>
+                          {book.processedBy}
+                        </td>
+                        <td className="col-status" data-content={book.status}>
+                          {book.status}
+                        </td>
+                        <td className="col-action">
+                          <div className="action-buttons-container">
+                            <button
+                              className="action-btn edit"
+                              onClick={() => handleEditBook(book)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={() => handleDeleteBook(book.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
