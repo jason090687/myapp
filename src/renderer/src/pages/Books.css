@@ -119,13 +119,18 @@
 
 .books-table th {
   background-color: #f8fafc;
-  padding: 1rem 1.5rem;
-  text-align: left;
+  padding: 0.825rem;
+  text-align: center;
   font-weight: 600;
   color: #475569;
   border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: background-color 0.2s;
+  vertical-align: middle;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .books-table th:hover {
@@ -134,15 +139,16 @@
 }
 
 .books-table td {
-  padding: 1rem 1rem;
+  padding: 0.825rem;
   color: #334155;
   border-bottom: 1px solid #e2e8f0;
-  white-space: normal;
+  white-space: nowrap;
   overflow: hidden;
-  word-break: break-word;
-  vertical-align: top;
-  max-height: 100px;
+  text-overflow: ellipsis;
+  vertical-align: middle;
   line-height: 1.5;
+  text-align: center;
+  word-break: break-word;
 }
 
 .books-table td:hover::after {
@@ -175,11 +181,12 @@
   border-radius: 0.375rem;
   z-index: 1000;
   white-space: normal;
+  min-width: 200px;
   max-width: 300px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   word-break: break-word;
   font-size: 0.875rem;
   line-height: 1.5;
+  text-align: left;
 }
 
 .books-table tbody tr:hover {
@@ -316,105 +323,44 @@
 
 /* Column width styles */
 .books-table .col-title {
-  width: 300px;
-  min-width: 250px;
-  max-width: 400px;
+  width: 250px;
 }
 
-.books-table .col-author {
+.books-table .col-author,
+.books-table .col-series,
+.books-table .col-publisher,
+.books-table .col-subject {
   width: 180px;
-  min-width: 150px;
-  max-width: 250px;
 }
 
-.books-table .col-series {
-  width: 200px;
-  min-width: 150px;
-  max-width: 300px;
-}
-
-.books-table .col-publisher {
+.books-table .col-place,
+.books-table .col-physical {
   width: 160px;
-  min-width: 140px;
-  max-width: 220px;
 }
 
-.books-table .col-place {
-  width: 140px;
-  min-width: 120px;
-  max-width: 200px;
-}
-
-.books-table .col-year {
-  width: 70px;
-  min-width: 60px;
-  max-width: 80px;
-}
-
-.books-table .col-edition {
-  width: 90px;
-  min-width: 80px;
-  max-width: 120px;
-}
-
+.books-table .col-year,
+.books-table .col-edition,
 .books-table .col-volume {
   width: 80px;
-  min-width: 70px;
-  max-width: 100px;
 }
 
-.books-table .col-physical {
-  width: 200px;
-  min-width: 180px;
-  max-width: 300px;
-}
-
-.books-table .col-isbn {
-  width: 130px;
-  min-width: 120px;
-  max-width: 150px;
-}
-
-.books-table .col-accession {
-  width: 120px;
-  min-width: 110px;
-  max-width: 140px;
-}
-
+.books-table .col-isbn,
+.books-table .col-accession,
 .books-table .col-barcode {
-  width: 120px;
-  min-width: 110px;
-  max-width: 140px;
+  width: 150px;
 }
 
-.books-table .col-date {
-  width: 110px;
-  min-width: 100px;
-  max-width: 130px;
-}
-
-.books-table .col-subject {
-  width: 170px;
-  min-width: 150px;
-  max-width: 250px;
-}
-
+.books-table .col-date,
 .books-table .col-processed-date {
   width: 110px;
-  min-width: 100px;
-  max-width: 130px;
 }
 
 .books-table .col-processor {
-  width: 150px;
-  min-width: 130px;
-  max-width: 200px;
+  width: 130px;
 }
 
 .books-table .col-status {
-  width: 100px;
-  min-width: 90px;
-  max-width: 120px;
+  width: 90px;
 }
 
 /* Update action column styles to be consistent with other columns */
@@ -422,17 +368,13 @@
   position: sticky;
   right: 0;
   width: 180px;
-  min-width: 180px;
-  max-width: 180px;
   background: white;
   z-index: 2;
   padding: 0.75rem;
   box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
-  overflow: visible; /* Change from hidden to visible */
 }
 
 .books-table td.col-action {
-  overflow: visible; /* Change from hidden to visible */
   border-bottom: 1px solid #e2e8f0;
   border-left: none;
   border-right: none;
@@ -453,12 +395,19 @@
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+  align-items: center;
   width: 100%;
   padding: 0;
   margin: 0;
   border: none;
-  overflow: visible; /* Change from hidden to visible */
+  overflow: hidden;
   position: relative;
+  z-index: 1;
+}
+
+.action-btn {
+  flex: 0 0 auto;
+  min-width: 60px;
   z-index: 1;
 }
 
