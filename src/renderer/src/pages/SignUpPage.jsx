@@ -30,6 +30,23 @@ function SignUpPage() {
     match: false
   })
 
+  const resetForm = () => {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    })
+    setPasswordValidation({
+      length: false,
+      uppercase: false,
+      number: false,
+      special: false,
+      match: false
+    })
+  }
+
   useEffect(() => {
     if (isError) {
       // Handle error - you might want to show this in your UI
@@ -37,7 +54,8 @@ function SignUpPage() {
     }
 
     if (isSuccess) {
-      navigate('/dashboard')
+      resetForm()
+      navigate('/')
     }
 
     dispatch(reset())
