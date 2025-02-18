@@ -133,7 +133,11 @@ export const updateUserProfile = async (token, formData) => {
   }
 }
 
-export const fetchBooks = async (token) => {
-  const response = await axios.get(`${API_URL}/marc/search/`, getAuthHeaders(token))
-  return response.data
+export const fetchBooks = async (token, page = 1) => {
+  try {
+    const response = await axios.get(`${API_URL}/marc/search/?page=${page}`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch books')
+  }
 }
