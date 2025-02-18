@@ -91,10 +91,10 @@
 
 .books-table-wrapper {
   flex: 1;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   border-radius: 1rem;
   position: relative;
-  max-width: 100%;
 }
 
 .books-table {
@@ -107,7 +107,7 @@
 .books-table thead {
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: 5;
   background-color: #f8fafc;
 }
 
@@ -140,15 +140,12 @@
   padding: 0.825rem;
   color: #334155;
   border-bottom: 1px solid #e2e8f0;
-  white-space: normal; /* Changed from nowrap to normal */
-  overflow: visible; /* Changed from hidden to visible */
-  text-overflow: clip; /* Changed from ellipsis to clip */
-  vertical-align: middle;
-  line-height: 3;
-  text-align: center;
-  font-size: 0.875rem;
-  word-break: break-all; /* Add this to break long content */
-  min-width: fit-content; /* Add this to allow content-based width */
+  white-space: normal;
+  overflow: hidden;
+  word-break: break-word;
+  vertical-align: top;
+  max-height: 100px;
+  line-height: 1.5;
 }
 
 .books-table td:hover {
@@ -197,6 +194,10 @@
   background-color: #f8fafc;
 }
 
+.books-table tbody tr {
+  overflow: hidden;
+}
+
 .action-btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -207,10 +208,10 @@
   transition: all 0.2s;
   transform: none !important;
   box-shadow: none !important;
-  flex: 0 0 auto; /* Prevent shrinking */
-  min-width: 60px; /* Minimum width for buttons */
+  flex: 0 0 auto;
+  min-width: 60px;
   position: relative;
-  z-index: 5;
+  z-index: 1;
 }
 
 .action-btn.edit {
@@ -376,60 +377,61 @@
   min-width: 90px;
 }
 
-/* Make sure the action column stays fixed */
+/* Update action column styles to be consistent with other columns */
 .books-table .col-action {
+  position: sticky;
+  right: 0;
   width: 180px;
   min-width: 180px;
-  position: sticky;
-  right: 0;
+  max-width: 180px;
   background: white;
   z-index: 2;
-  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background-color: white !important;
-  z-index: 4;
   padding: 0.75rem;
-  overflow: visible !important; /* Force overflow visible */
+  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Prevent hover effect on action column */
-.books-table td.col-action:hover::after {
-  display: none;
+.books-table td.col-action {
+  border-bottom: 1px solid #e2e8f0;
+  border-left: none;
+  border-right: none;
+  overflow: hidden;
 }
 
-/* Ensure action column background stays white on row hover */
-.books-table tbody tr:hover td.col-action {
-  background-color: white;
-  background-color: white !important;
-}
-
-/* Make sure action header also stays fixed */
 .books-table thead th.col-action {
   position: sticky;
-  top: 0;
   right: 0;
+  top: 0;
   background-color: #f8fafc !important;
-  z-index: 6; /* Increase z-index */
+  z-index: 10;
   box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-/* Remove hover effects for action column */
+.action-buttons-container {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.action-btn {
+  flex: 0 0 auto;
+  min-width: 60px;
+  z-index: 1;
+}
+
+/* Remove any sticky positioning or special hover effects */
 .books-table td.col-action:hover::after,
 .books-table td.col-action[data-content]:hover::after {
   display: none;
 }
 
-/* Add this to handle action buttons container */
-.action-buttons-container {
-  display: flex;
-  gap: 0.5rem;
-  min-width: 160px; /* Ensure minimum width for buttons */
-  justify-content: center;
-  position: relative; /* Add this */
-  z-index: 5; /* Add this */
-  background: inherit; /* Add this */
+.books-table tbody tr:hover td.col-action {
+  background-color: white;
 }
