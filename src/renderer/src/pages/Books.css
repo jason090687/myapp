@@ -22,13 +22,15 @@
 
 .books-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  /* margin-bottom: 2rem; */
   background: white;
-  padding: 1rem 1.5rem;
+  padding: 1rem 1.2rem;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }
 
 .search-bar {
@@ -64,7 +66,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1.2rem;
   background-color: #0f172a;
   color: white;
   border: none;

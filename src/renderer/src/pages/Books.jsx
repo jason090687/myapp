@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux'
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [isLoading, setLoading] = useState(false)
   const [books, setBooks] = useState([])
   const [pagination, setPagination] = useState({
@@ -19,10 +20,20 @@ function Books() {
 
   const { token } = useSelector((state) => state.auth)
 
+  // Add debounce effect for search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Update fetchBooksData to include search term
   const fetchBooksData = async (page = 1) => {
     setLoading(true)
     try {
-      const response = await fetchBooks(token, page)
+      const response = await fetchBooks(token, page, debouncedSearchTerm)
       if (response) {
         const booksData = response.results.map((book) => ({
           title: book.title,
@@ -62,17 +73,21 @@ function Books() {
     fetchBooksData()
   }, [token])
 
+  // Update search effect
+  useEffect(() => {
+    fetchBooksData(1) // Reset to first page when search term changes
+  }, [debouncedSearchTerm])
+
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
   }
 
   const handleSearch = (e) => {
-    setSearchTerm(e.target.value.toLowerCase())
+    setSearchTerm(e.target.value)
   }
 
-  const filteredBooks = books.filter((book) =>
-    Object.values(book).some((value) => value.toString().toLowerCase().includes(searchTerm))
-  )
+  // Remove the local filtering since we're using API search
+  const filteredBooks = books
 
   const handleAddBook = () => {
     // Add new book logic here
