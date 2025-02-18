@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MdEmail, MdPerson } from 'react-icons/md'
 import { FaLock } from 'react-icons/fa'
 import InputField from '../components/InputField'
@@ -7,8 +7,13 @@ import Button from '../components/Button'
 import background from '../assets/background.png'
 import logo from '../assets/logo.png'
 import './SignUpPage.css'
+import { useDispatch, useSelector } from 'react-redux'
+import { register, reset } from '../Features/authSlice'
 
 function SignUpPage() {
+  const dispatch = useDispatch()
+  const { isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
+  
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: '',
@@ -24,7 +29,19 @@ function SignUpPage() {
     special: false,
     match: false
   })
-  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (isError) {
+      // Handle error - you might want to show this in your UI
+      console.error(message)
+    }
+
+    if (isSuccess) {
+      navigate('/dashboard')
+    }
+
+    dispatch(reset())
+  }, [isError, isSuccess, message, navigate, dispatch])
 
   const validatePassword = (password) => {
     setPasswordValidation({
@@ -62,14 +79,15 @@ function SignUpPage() {
   }
 
   const handleRegister = async () => {
-    try {
-      setIsLoading(true)
-      // Handle registration logic here
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      navigate('/dashboard')
-    } finally {
-      setIsLoading(false)
+    const userData = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      re_password: formData.confirmPassword
     }
+
+    dispatch(register(userData))
   }
 
   return (

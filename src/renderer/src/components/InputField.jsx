@@ -29,7 +29,7 @@ const InputField = ({ type, placeholder, icon: Icon, value, onChange, name }) =>
       />
       {type === 'password' && (
         <button type="button" onClick={togglePasswordVisibility} className="password-toggle">
-          {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+          {showPassword ? <FaEye size={20} /> : <FaEyeSlash size={20} />}
         </button>
       )}
     </div>
