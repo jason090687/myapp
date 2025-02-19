@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   background: #f1f5f9;
-  padding: 0.75rem 1.25rem;
+  padding: 0.4rem 1rem;
   border-radius: 0.75rem;
   width: 360px;
   transition: all 0.2s;
@@ -434,8 +434,8 @@
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border: 3px solid #f3f3f3;
   border-top: 3px solid #3498db;
   border-radius: 50%;

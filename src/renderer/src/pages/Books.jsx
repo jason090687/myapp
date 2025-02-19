@@ -19,10 +19,12 @@ function Books() {
     previous: null,
     currentPage: 1
   })
+  const { token, user } = useSelector((state) => state.auth)
+
+  // Initialize both modal states as false
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBook, setEditingBook] = useState(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const { token, user } = useSelector((state) => state.auth)
 
   // Add debounce effect for search
   useEffect(() => {
@@ -74,9 +76,16 @@ function Books() {
     }
   }
 
+  // Update the edit button handler
   const handleEditBook = (book) => {
-    setEditingBook(book)
-    setIsEditModalOpen(true)
+    setEditingBook(null) // Reset first
+    setIsEditModalOpen(false) // Reset modal state
+    // Short delay to ensure state is cleared before setting new values
+    setTimeout(() => {
+      setEditingBook(book)
+      setIsEditModalOpen(true)
+      setIsModalOpen(false)
+    }, 0)
   }
 
   const handleSubmitBook = async (bookData) => {
@@ -115,10 +124,14 @@ function Books() {
   // Remove the local filtering since we're using API search
   const filteredBooks = books
 
+  // Update the handleAddBook function
   const handleAddBook = () => {
     setIsModalOpen(true)
+    setIsEditModalOpen(false) // Close the edit modal if it's open
+    setEditingBook(null) // Reset any editing state
   }
 
+  // Update the close handlers to reset all modal states
   const handleCloseModal = () => {
     setIsModalOpen(false)
   }
@@ -136,16 +149,17 @@ function Books() {
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false)
-    setEditingBook(null)
+    setTimeout(() => {
+      setEditingBook(null) // Clear the editing book after modal closes
+    }, 100)
   }
 
   const handleEditSubmit = async () => {
     try {
-      // The actual API call is now handled in EditBookModal
       setIsEditModalOpen(false)
       setEditingBook(null)
       await fetchBooksData(pagination.currentPage) // Refresh the books list
-      alert('Book updated successfully!')
+      // Remove the alert since EditBookModal will handle its own success state
     } catch (error) {
       console.error('Error updating book:', error)
       throw error
@@ -336,13 +350,13 @@ function Books() {
         </div>
       </div>
       <AddBookModal
-        isOpen={isModalOpen}
+        isOpen={isModalOpen} // Simplified condition
         onClose={handleCloseModal}
         onSubmit={handleSubmitBook}
         currentUser={user}
       />
       <EditBookModal
-        isOpen={isEditModalOpen}
+        isOpen={isEditModalOpen && editingBook !== null}
         onClose={handleCloseEditModal}
         onSubmit={handleEditSubmit}
         bookData={editingBook}

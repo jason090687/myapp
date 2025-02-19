@@ -1,0 +1,421 @@
+/* Base modal structure */
+.borrow-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.borrow-modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  width: 95%;
+  max-width: 900px;
+  max-height: 500px;
+  min-height: 400px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.borrow-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.borrow-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #64748b;
+}
+
+/* Add unique button styles */
+.borrow-submit-btn,
+.borrow-cancel-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.borrow-submit-btn {
+  background-color: #0f172a;
+  color: white;
+  border: none;
+}
+
+.borrow-cancel-btn {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+}
+
+.borrow-spinner-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.borrow-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: borrowSpin 0.8s linear infinite;
+}
+
+@keyframes borrowSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.borrow-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.borrow-modal-content {
+  background: white;
+  /* padding: 2rem; */
+  border-radius: 0.75rem;
+  width: 95%;
+  max-width: 900px; /* Smaller for BorrowBookModal's 2 columns */
+  max-height: 500px; /* Set specific height instead of 90vh */
+  min-height: 400px; /* Add minimum height */
+  overflow-y: hidden; /* Change from auto to hidden */
+  position: relative; /* Add this */
+}
+
+.borrow-modal-overlay.active .modal-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.borrow-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem; /* Reduce margin */
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #64748b;
+}
+
+/* Form elements */
+.borrow-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns for BorrowBookModal */
+  max-height: 350px; /* Adjust to fit within modal */
+  overflow-y: auto;
+  gap: 1rem; /* Reduce gap between form elements */
+  padding: 1rem 1.5rem; /* Adjust padding */
+}
+
+.borrow-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative; /* Add this */
+  margin-bottom: 0.5rem; /* Add space between form groups */
+}
+
+.borrow-form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.borrow-form-group input,
+.borrow-form-group select {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.borrow-form-group input:disabled,
+.borrow-form-group input[readonly] {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.borrow-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.5rem; /* Add consistent padding */
+  border-top: 1px solid #e5e7eb;
+  margin-top: 0; /* Remove top margin */
+  z-index: 1; /* Add lower z-index */
+  position: relative; /* Add position relative */
+}
+
+/* Add scrollbar styling */
+.borrow-form-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.borrow-form-grid::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.borrow-form-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.borrow-form-grid::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.submit-btn,
+.cancel-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.submit-btn {
+  background-color: #0f172a;
+  color: white;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-field {
+  padding: 0.625rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  width: 100%;
+  background-color: white;
+  height: 40px; /* Match input height */
+  padding-left: 40px; /* Space for icon alignment */
+  position: relative;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  min-height: 40px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.select-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* Status-specific colors */
+.select-icon svg[data-icon*='check'] {
+  color: #22c55e; /* green */
+}
+
+.select-icon svg[data-icon*='exchange'] {
+  color: #f59e0b; /* amber */
+}
+
+.select-icon svg[data-icon*='times'] {
+  color: #ef4444; /* red */
+}
+
+.select-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.select-field option {
+  padding: 8px;
+  font-size: 0.875rem;
+}
+
+/* Update form-group for InputField compatibility */
+.form-group .input-container {
+  margin: 0;
+  height: 40px; /* Add consistent height */
+}
+
+.form-group svg {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* New styles for search select */
+.borrow-search-wrapper {
+  position: relative;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  background-color: white;
+  transition: border-color 0.2s;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.borrow-search-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.borrow-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.borrow-search-input {
+  width: 100%;
+  height: 100%;
+  padding: 8px 12px 8px 36px;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background: transparent;
+}
+
+.borrow-search-input:focus {
+  outline: none;
+}
+
+.borrow-search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.borrow-search-wrapper .select-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  z-index: 1;
+}
+
+.borrow-search-input {
+  width: 100%;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+  height: 40px; /* Match the wrapper height */
+}
+
+.borrow-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.borrow-search-results {
+  position: absolute; /* Change from fixed to absolute */
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050; /* Increase z-index to be higher than modal-footer */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  /* width: calc(100% - 2rem); /* Account for padding */
+}
+
+.borrow-search-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.borrow-search-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Add scrollbar styling for search results */
+.borrow-search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.borrow-search-results::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.borrow-search-results::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.borrow-search-item.no-results {
+  color: #64748b;
+  font-style: italic;
+  cursor: default;
+}
+
+.borrow-search-item.no-results:hover {
+  background-color: transparent;
+}
+
+.borrow-search-item.highlighted {
+  background-color: #e5e7eb;
+}
+
+.borrow-search-input.has-selection {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}

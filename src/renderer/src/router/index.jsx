@@ -4,6 +4,7 @@ import SignUpPage from '../pages/SignUpPage'
 import ForgotPassword from '../pages/ForgotPassword'
 import Dashboard from '../pages/Dashboard'
 import Books from '../pages/Books'
+import Borrowed from '../pages/Borrowed'
 
 const router = createHashRouter([
   {
@@ -25,6 +26,10 @@ const router = createHashRouter([
   {
     path: '/books',
     element: <Books />
+  },
+  {
+    path: '/borrowed',
+    element: <Borrowed />
   }
 ])
 
