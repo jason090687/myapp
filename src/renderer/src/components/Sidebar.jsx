@@ -51,9 +51,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
     { path: '/books', icon: FaBook, label: 'Books' },
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
-    { path: '/history', icon: FaHistory, label: 'History' },
-    { path: '/settings', icon: FaCog, label: 'Settings' },
-    { path: '/help', icon: FaQuestionCircle, label: 'Help' }
+    { path: '/history', icon: FaHistory, label: 'History' }, // Ensure this exists
+    { path: '/settings', icon: FaCog, label: 'Settings' }
   ]
 
   return (
@@ -77,6 +76,20 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
               </li>
             ))}
           </ul>
+
+          <div className="sidebar-help">
+            <h3>Quick Help</h3>
+            <ul className="help-topics">
+              <li>Getting Started</li>
+              <li>Using the Library</li>
+              <li>Managing Books</li>
+              <li>Borrowing Process</li>
+              <li>FAQ</li>
+            </ul>
+            <div className="help-content">
+              <p>Need help? Contact support.</p>
+            </div>
+          </div>
 
           <div className="logout-container">
             <Link to="/" className="logout-btn" data-tooltip="Logout">

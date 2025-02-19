@@ -9,6 +9,7 @@ import BorrowBookModal from '../components/BorrowBookModal'
 function Borrowed() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [isLoading, setLoading] = useState(false)
   const [borrowedBooks, setBorrowedBooks] = useState([])
   // const [students, setStudents] = useState({})
@@ -22,10 +23,19 @@ function Borrowed() {
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  // Add debounce effect for search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Update fetchBorrowedData to include search
   const fetchBorrowedData = async () => {
     setLoading(true)
     try {
-      const response = await fetchBorrowedBooks(token)
+      const response = await fetchBorrowedBooks(token, debouncedSearchTerm)
       if (response && response.results) {
         setBorrowedBooks(response.results)
       }
@@ -36,9 +46,10 @@ function Borrowed() {
     }
   }
 
+  // Add effect for search updates
   useEffect(() => {
     fetchBorrowedData()
-  }, [token])
+  }, [debouncedSearchTerm, token])
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
 
@@ -83,6 +94,10 @@ function Borrowed() {
     }
   }
 
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value)
+  }
+
   const totalPages = Math.ceil(pagination.count / 10)
 
   return (
@@ -95,8 +110,9 @@ function Borrowed() {
               <FaSearch className="search-icon" />
               <input
                 type="text"
-                placeholder="Search borrowed books..."
-                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by student or book..."
+                value={searchTerm}
+                onChange={handleSearch}
                 className="search-input"
               />
             </div>
@@ -138,7 +154,13 @@ function Borrowed() {
                         <td>{item.book_title}</td>
                         <td>{formatDate(item.borrowed_date)}</td>
                         <td>{formatDate(item.due_date)}</td>
-                        <td>{item.is_returned ? 'Returned' : 'Borrowed'}</td>
+                        <td>
+                          <span
+                            className={`status-badge ${item.is_returned ? 'returned' : 'borrowed'}`}
+                          >
+                            {item.is_returned ? 'Returned' : 'Borrowed'}
+                          </span>
+                        </td>
                         <td>
                           <div className="action-buttons-container">
                             <button

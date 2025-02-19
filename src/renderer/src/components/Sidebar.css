@@ -75,7 +75,7 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  /* gap: 10px; */
 }
 
 .sidebar-nav li {
@@ -231,7 +231,7 @@ body {
   background: var(--secondary-color);
   transition:
     margin-left var(--transition-duration) var(--transition-timing),
-    width var(--transition-duration) var(--transition-timing);
+    width var(--transition-duration) var (--transition-timing);
   width: calc(100% - var(--sidebar-width));
 }
 
@@ -599,4 +599,57 @@ table th {
 .sidebar-nav a:hover {
   transform: translateX(5px);
   transition: transform var(--transition-duration) var(--transition-timing);
+}
+
+/* Update Help Section Styles */
+.sidebar-help {
+  margin: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  position: relative;
+  margin-top: 2rem;
+}
+
+.sidebar-help h3 {
+  color: #fff;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+}
+
+.help-topics {
+  list-style: none;
+  padding: 0;
+}
+
+.help-topics li {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.help-topics li:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sidebar-help .help-content {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-help .help-content p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Update for collapsed state */
+.sidebar.collapsed .sidebar-help {
+  display: none;
 }

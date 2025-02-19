@@ -299,8 +299,10 @@ function Books() {
                         <td className="col-processor" data-content={book.processedBy}>
                           {book.processedBy}
                         </td>
-                        <td className="col-status" data-content={book.status}>
-                          {book.status}
+                        <td className="col-status">
+                          <span className={`status-badge ${book.status.toLowerCase()}`}>
+                            {book.status}
+                          </span>
                         </td>
                         <td className="col-action">
                           <div className="action-buttons-container">

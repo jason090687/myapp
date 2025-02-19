@@ -1,10 +1,18 @@
-import { createHashRouter } from 'react-router-dom'
+import { createHashRouter, Navigate } from 'react-router-dom'
 import SignInPage from '../pages/SignInPage'
 import SignUpPage from '../pages/SignUpPage'
 import ForgotPassword from '../pages/ForgotPassword'
 import Dashboard from '../pages/Dashboard'
 import Books from '../pages/Books'
 import Borrowed from '../pages/Borrowed'
+import History from '../pages/History'
+import Settings from '../pages/Settings'
+import GeneralSettings from '../components/settings/GeneralSettings.jsx'
+import BookManagement from '../components/settings/BookManagement.jsx'
+import NotificationsSettings from '../components/settings/NotificationsSettings.jsx'
+import SecuritySettings from '../components/settings/SecuritySettings.jsx'
+import BackupSettings from '../components/settings/BackupSettings.jsx'
+import Help from '../pages/Help'
 
 const router = createHashRouter([
   {
@@ -30,6 +38,48 @@ const router = createHashRouter([
   {
     path: '/borrowed',
     element: <Borrowed />
+  },
+  {
+    path: '/history',
+    element: <History />
+  },
+  {
+    path: '/settings',
+    element: <Settings />,
+    children: [
+      {
+        index: true, // Add this
+        element: <GeneralSettings />
+      },
+      {
+        path: 'general',
+        element: <GeneralSettings />
+      },
+      {
+        path: 'books',
+        element: <BookManagement />
+      },
+      {
+        path: 'notifications',
+        element: <NotificationsSettings />
+      },
+      {
+        path: 'security',
+        element: <SecuritySettings />
+      },
+      {
+        path: 'backup',
+        element: <BackupSettings />
+      }
+    ]
+  },
+  {
+    path: '/settings/*',
+    element: <Navigate to="/settings" replace />
+  },
+  {
+    path: '/help',
+    element: <Help />
   }
 ])
 
