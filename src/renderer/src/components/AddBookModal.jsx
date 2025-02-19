@@ -106,17 +106,21 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
-    const bookData = {
-      ...formData,
-      status: status.find((s) => s.value === formData.status)?.value || formData.status,
-      year: formData.year ? parseInt(formData.year) : null,
-      processed_by: formData.processed_by // Ensure processed_by is set correctly
-    }
+    setIsLoading(true)
 
     try {
-      setIsLoading(true)
+      // Simplify the status handling - just use the selected value directly
+      const bookData = {
+        ...formData,
+        year: formData.year ? parseInt(formData.year) : null,
+        processed_by: formData.processed_by,
+        // Don't transform status, use it directly from form
+        status: formData.status
+      }
+
       await onSubmit(bookData)
+
+      // Reset form after successful submission
       setFormData({
         title: '',
         author: '',
@@ -133,10 +137,11 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
         date_received: '',
         subject: '',
         additional_author: '',
-        status: status.length > 0 ? status[0].value : 'available', // Default to available
+        status: 'available', // Set default status directly
         date_processed: new Date().toISOString().split('T')[0],
-        processed_by: currentUser.id
+        processed_by: userDetails.id || currentUser.id // Ensure correct user
       })
+
       onClose()
     } catch (error) {
       console.error('Error adding book:', error)
@@ -216,15 +221,15 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
                   className="select-field"
                   disabled={status.length === 0}
                 >
-                  {status.length > 0 ? (
-                    status.map(({ value, label }) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))
-                  ) : (
-                    <option>Loading...</option>
-                  )}
+                  {status.length > 0 &&
+                    status.map(
+                      ({ value, label }) =>
+                        value !== 'available' && (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        )
+                    )}
                 </select>
               </div>
             </div>
@@ -254,11 +259,18 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
           </div>
 
           <div className="modal-footer">
-            <button type="button" onClick={onClose} className="cancel-btn">
+            <button type="button" onClick={onClose} className="cancel-btn" disabled={isLoading}>
               Cancel
             </button>
-            <button type="submit" className="submit-btn">
-              Add Book
+            <button type="submit" className="submit-btn" disabled={isLoading}>
+              {isLoading ? (
+                <span className="spinner-wrapper">
+                  <div className="spinner"></div>
+                  <span>Adding...</span>
+                </span>
+              ) : (
+                'Add Book'
+              )}
             </button>
           </div>
         </form>

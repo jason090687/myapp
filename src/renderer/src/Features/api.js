@@ -145,6 +145,32 @@ export const fetchBooks = async (token, page = 1, search = '') => {
   }
 }
 
+// Add new function to fetch all books across pages
+export const fetchAllBooks = async (token, search = '') => {
+  try {
+    let allBooks = []
+    let nextPage = 1
+    let hasMore = true
+
+    while (hasMore) {
+      const response = await axios.get(
+        `${API_URL}/marc/search/?page=${nextPage}&search=${encodeURIComponent(search)}`,
+        getAuthHeaders(token)
+      )
+
+      allBooks = [...allBooks, ...response.data.results]
+
+      hasMore = response.data.next !== null
+      nextPage += 1
+    }
+
+    return { results: allBooks }
+  } catch (error) {
+    console.error('Error fetching all books:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch all books')
+  }
+}
+
 export const addNewBook = async (token, bookData) => {
   try {
     const response = await axios.post(`${API_URL}/marc/record/`, bookData, getAuthHeaders(token))
@@ -190,5 +216,51 @@ export const fetchStatus = async (token) => {
   } catch (error) {
     console.error('Error fetching status:', error)
     return ['Available', 'Borrowed', 'Lost'] // Fallback default values
+  }
+}
+
+export const fetchBorrowedBooks = async (token, page = 1) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/list/?page=${page}`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error fetching borrowed books:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrowed books')
+  }
+}
+
+export const fetchStudents = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/students/`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error fetching students:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch students')
+  }
+}
+
+// Add this new function for borrowing books
+export const borrowBook = async (token, borrowData) => {
+  try {
+    const response = await axios.post(`${API_URL}/borrow/`, borrowData, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error borrowing book:', error)
+    throw new Error(error.response?.data?.message || 'Failed to borrow book')
+  }
+}
+
+// Update the return book function to use the simple endpoint
+export const returnBook = async (token, returnData) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/borrow/return/`,
+      returnData,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error returning book:', error)
+    throw new Error(error.response?.data?.message || 'Failed to return book')
   }
 }

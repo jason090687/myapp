@@ -11,10 +11,10 @@ import {
   FaSignOutAlt,
   FaBars,
   FaSearch,
-  FaBell
+  FaBell,
+  FaUserCircle // Add this import
 } from 'react-icons/fa'
 import logo from '../assets/logo.png'
-import profilePic from '../assets/profile.jpg'
 import './Sidebar.css'
 import { fetchUserDetails } from '../Features/api'
 import { useSelector } from 'react-redux'
@@ -51,9 +51,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
     { path: '/books', icon: FaBook, label: 'Books' },
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
-    { path: '/history', icon: FaHistory, label: 'History' },
-    { path: '/settings', icon: FaCog, label: 'Settings' },
-    { path: '/help', icon: FaQuestionCircle, label: 'Help' }
+    { path: '/history', icon: FaHistory, label: 'History' }, // Ensure this exists
+    { path: '/settings', icon: FaCog, label: 'Settings' }
   ]
 
   return (
@@ -78,10 +77,24 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             ))}
           </ul>
 
+          <div className="sidebar-help">
+            <h3>Quick Help</h3>
+            <ul className="help-topics">
+              <li>Getting Started</li>
+              <li>Using the Library</li>
+              <li>Managing Books</li>
+              <li>Borrowing Process</li>
+              <li>FAQ</li>
+            </ul>
+            <div className="help-content">
+              <p>Need help? Contact support.</p>
+            </div>
+          </div>
+
           <div className="logout-container">
             <Link to="/" className="logout-btn" data-tooltip="Logout">
-              <FaSignOutAlt />
-              <span>Logout</span>
+              <FaSignOutAlt className="logout-icon" />
+              <span className="logout-text">Logout</span>
             </Link>
           </div>
         </nav>
@@ -103,7 +116,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             <FaBell />
           </div>
           <div className="nav-item user-profile">
-            <img src={profilePic} alt="User" className="avatar" />
+            <FaUserCircle className="user-avatar" />
             <span>{userDetails.first_name}</span>
           </div>
         </div>

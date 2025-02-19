@@ -1,0 +1,244 @@
+.borrowed-container {
+  margin-left: var(--sidebar-width);
+  padding-top: var(--navbar-height);
+  transition: margin-left var(--transition-speed) ease;
+  height: calc(100vh - var(--navbar-height));
+  overflow: hidden;
+  background-color: #f8fafc;
+  height: 100vh;
+}
+
+.borrowed-container.collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+.borrowed-content {
+  height: 100%;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.borrowed-header {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 1rem 1.2rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+}
+
+.borrow-book-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #0f172a;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.borrow-book-btn:hover {
+  background-color: #1e293b;
+  transform: translateY(-1px);
+}
+
+.table-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.borrowed-table-wrapper {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  border-radius: 1rem;
+  position: relative;
+  width: 100%;
+}
+
+.borrowed-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9375rem;
+  table-layout: fixed;
+}
+
+.borrowed-table th {
+  padding: 1rem;
+  text-align: center; /* Changed from left to center */
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  white-space: nowrap;
+}
+
+.borrowed-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center; /* Added this line */
+}
+
+.loading-cell {
+  height: 60vh;
+  text-align: center;
+  vertical-align: middle;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+}
+
+.borrowed-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0f172a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.borrowed-loading-text {
+  display: block;
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.action-btn.return {
+  background-color: #0ea5e9;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn.return:disabled {
+  background-color: #22c55e;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.action-btn.return:not(:disabled):hover {
+  opacity: 0.9;
+}
+
+.action-buttons-container {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btn.renew {
+  background-color: #6366f1;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn.renew:disabled {
+  background-color: #94a3b8;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.action-btn.renew:not(:disabled):hover {
+  opacity: 0.9;
+}
+
+.pagination {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 1rem;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: white;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 0.9375rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.pagination-total {
+  margin-left: 0.5rem;
+  color: #64748b;
+  font-weight: normal;
+}
+
+.status-badge {
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status-badge.borrowed {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.returned {
+  background-color: #dcfce7;
+  color: #16a34a;
+}

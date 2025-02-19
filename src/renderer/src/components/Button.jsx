@@ -13,7 +13,6 @@ const Button = ({ children, disabled = false, type = 'button', onClick, isLoadin
       {isLoading ? (
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <span>Loading...</span>
         </div>
       ) : (
         children

@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fa'
 import { fetchStatus, fetchUserDetails, updateBook } from '../Features/api'
 import { useSelector } from 'react-redux'
+import './AddBookModal.css' // Use the same modal styles
 
 const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -81,7 +82,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
   useEffect(() => {
     if (bookData) {
       setFormData({
-        id: bookData.id, // Add this line to include the book ID
+        id: bookData.id,
         title: bookData.title || '',
         author: bookData.author || '',
         series_title: bookData.seriesTitle || '',
@@ -102,7 +103,38 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
         processed_by: bookData.processedBy || currentUser.id
       })
     }
-  }, [bookData])
+  }, [bookData]) // Ensure effect runs when `bookData` updates
+
+  // Add a reset function
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      author: '',
+      series_title: '',
+      publisher: '',
+      place_of_publication: '',
+      year: '',
+      edition: '',
+      volume: '',
+      physical_description: '',
+      isbn: '',
+      accession_number: '',
+      barcode: '',
+      date_received: '',
+      subject: '',
+      additional_author: '',
+      status: 'available',
+      date_processed: new Date().toISOString().split('T')[0],
+      processed_by: currentUser.id
+    })
+  }
+
+  // Add cleanup effect when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      resetForm()
+    }
+  }, [isOpen, currentUser.id])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -141,9 +173,9 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
       }
 
       await updateBook(token, updatedData.id, updatedData)
-      onClose()
-      // Refresh the books list
       onSubmit(updatedData)
+      resetForm() // Reset the form after successful submission
+      onClose() // Close the modal
     } catch (error) {
       console.error('Error updating book:', error)
       alert(error.message || 'Failed to update book')
@@ -151,8 +183,6 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
       setIsLoading(false)
     }
   }
-
-  if (!isOpen) return null
 
   const inputFields = [
     { name: 'title', label: 'Title*', icon: FaBook, required: true },
@@ -170,6 +200,9 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     { name: 'subject', label: 'Subject', icon: FaTag },
     { name: 'additional_author', label: 'Additional Author', icon: FaPen }
   ]
+
+  // Add an early return if the modal shouldn't be visible
+  if (!isOpen || !bookData) return null
 
   return (
     <div className="modal-overlay">
@@ -255,11 +288,18 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
           </div>
 
           <div className="modal-footer">
-            <button type="button" onClick={onClose} className="cancel-btn">
+            <button type="button" onClick={onClose} className="cancel-btn" disabled={isLoading}>
               Cancel
             </button>
-            <button type="submit" className="submit-btn">
-              Save Changes
+            <button type="submit" className="submit-btn" disabled={isLoading}>
+              {isLoading ? (
+                <span className="spinner-wrapper">
+                  <div className="spinner"></div>
+                  <span>Saving...</span>
+                </span>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </div>
         </form>
