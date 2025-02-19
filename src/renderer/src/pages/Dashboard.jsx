@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import './Dashboard.css'
+import {
+  FaBook,
+  FaBookReader,
+  FaUndo,
+  FaClock,
+  FaExclamationTriangle,
+  FaUsers,
+  FaMoneyBill
+} from 'react-icons/fa'
 
 function Dashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -15,40 +24,33 @@ function Dashboard() {
     // Add your API fetch logic here later
   }, [])
 
+  const cards = [
+    { title: 'Total Books', value: totalBooks, icon: FaBook },
+    { title: 'Borrowed Books', value: '232', icon: FaBookReader },
+    { title: 'Returned Books', value: '10', icon: FaUndo },
+    { title: 'Overdue Books', value: '20', icon: FaClock },
+    { title: 'Missing Books', value: '290', icon: FaExclamationTriangle },
+    { title: 'Visitors', value: '100', icon: FaUsers },
+    { title: 'Pending Fees', value: '₱339', icon: FaMoneyBill }
+  ]
+
   return (
     <div className="app-wrapper">
       <Sidebar isCollapsed={isCollapsed} onToggle={handleSidebarToggle} />
       <div className={`dashboard-container ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="dashboard-content">
           <div className="cards-grid">
-            <div className="card">
-              <h3>Total Books</h3>
-              <p id="totalBooksCount">{totalBooks}</p>
-            </div>
-            <div className="card">
-              <h3>Borrowed Books</h3>
-              <p>232</p>
-            </div>
-            <div className="card">
-              <h3>Returned Books</h3>
-              <p>10</p>
-            </div>
-            <div className="card">
-              <h3>Overdue Books</h3>
-              <p>20</p>
-            </div>
-            <div className="card">
-              <h3>Missing Books</h3>
-              <p>290</p>
-            </div>
-            <div className="card">
-              <h3>Visitors</h3>
-              <p>100</p>
-            </div>
-            <div className="card">
-              <h3>Pending Fees</h3>
-              <p>₱339</p>
-            </div>
+            {cards.map((card, index) => (
+              <div className="card" key={index}>
+                <div className="card-icon">
+                  <card.icon />
+                </div>
+                <div className="card-content">
+                  <h3>{card.title}</h3>
+                  <p>{card.value}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="stats-container">
