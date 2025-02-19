@@ -238,7 +238,8 @@ function Books() {
                   {isLoading ? (
                     <tr>
                       <td colSpan="18" className="loading-cell">
-                        <div className="spinner"></div>
+                        <div className="table-spinner"></div>
+                        <span className="table-loading-text">Loading books...</span>
                       </td>
                     </tr>
                   ) : filteredBooks.length === 0 ? (

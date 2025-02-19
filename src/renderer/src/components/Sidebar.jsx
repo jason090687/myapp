@@ -11,10 +11,10 @@ import {
   FaSignOutAlt,
   FaBars,
   FaSearch,
-  FaBell
+  FaBell,
+  FaUserCircle // Add this import
 } from 'react-icons/fa'
 import logo from '../assets/logo.png'
-import profilePic from '../assets/profile.jpg'
 import './Sidebar.css'
 import { fetchUserDetails } from '../Features/api'
 import { useSelector } from 'react-redux'
@@ -80,8 +80,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
           <div className="logout-container">
             <Link to="/" className="logout-btn" data-tooltip="Logout">
-              <FaSignOutAlt />
-              <span>Logout</span>
+              <FaSignOutAlt className="logout-icon" />
+              <span className="logout-text">Logout</span>
             </Link>
           </div>
         </nav>
@@ -103,7 +103,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             <FaBell />
           </div>
           <div className="nav-item user-profile">
-            <img src={profilePic} alt="User" className="avatar" />
+            <FaUserCircle className="user-avatar" />
             <span>{userDetails.first_name}</span>
           </div>
         </div>

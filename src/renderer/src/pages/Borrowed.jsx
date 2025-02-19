@@ -120,8 +120,9 @@ function Borrowed() {
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td colSpan="7" className="loading-cell">
-                        <div className="spinner"></div>
+                      <td colSpan="6" className="loading-cell">
+                        <div className="borrowed-spinner"></div>
+                        <span className="borrowed-loading-text">Loading borrowed books...</span>
                       </td>
                     </tr>
                   ) : borrowedBooks.length === 0 ? (

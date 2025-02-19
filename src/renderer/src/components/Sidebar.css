@@ -6,6 +6,8 @@
   --secondary-color: #f8f9fa;
   --text-color: #333;
   --background-color: #0a0b64;
+  --transition-duration: 0.3s;
+  --transition-timing: ease-in-out;
 }
 
 * {
@@ -30,7 +32,7 @@ body {
   position: fixed;
   background-color: #0a0b64;
   color: white;
-  transition: width var(--transition-speed) ease;
+  transition: width var(--transition-duration) var(--transition-timing);
   z-index: 1000;
 }
 
@@ -53,22 +55,24 @@ body {
 
 .brand-text {
   color: var(--primary-color);
-}
-
-.sidebar-header .brand-text {
   font-size: 1.2rem;
   font-weight: bold;
-  transition: opacity 0.3s ease;
+  transition:
+    opacity var(--transition-duration) var(--transition-timing),
+    visibility var(--transition-duration) var(--transition-timing);
 }
 
 .sidebar.collapsed .brand-text {
   opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-duration) var(--transition-timing),
+    visibility 0s linear var(--transition-duration);
   display: none;
 }
 
 .sidebar-nav ul {
   list-style: none;
-  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -89,7 +93,7 @@ body {
   text-decoration: none;
   gap: 10px;
   width: 200px;
-  transition: all 0.3s ease;
+  transition: all var(--transition-duration) var(--transition-timing);
   margin-left: 10px;
 }
 
@@ -97,7 +101,7 @@ body {
 .sidebar-nav li.active a {
   background: #ff0000;
   color: white;
-  transition: all 0.3s ease;
+  transition: all var(--transition-duration) var(--transition-timing);
   border-radius: 10px;
 }
 
@@ -112,11 +116,17 @@ body {
 }
 
 .sidebar-nav span {
-  transition: opacity 0.3s ease;
+  transition:
+    opacity var(--transition-duration) var(--transition-timing),
+    visibility var(--transition-duration) var(--transition-timing);
 }
 
 .sidebar.collapsed .sidebar-nav span {
   opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-duration) var(--transition-timing),
+    visibility 0s linear var(--transition-duration);
   display: none;
 }
 
@@ -157,10 +167,13 @@ body {
   padding: 12px 20px;
   color: var(--primary-color);
   text-decoration: none;
-  width: 100%;
-  justify-content: center;
-  transition: all 0.3s ease;
+  width: 200px;
+  transition:
+    all var(--transition-duration) var(--transition-timing),
+    width var(--transition-duration) var(--transition-timing),
+    margin var(--transition-duration) var(--transition-timing);
   border-radius: 10px;
+  margin-left: 10px;
 }
 
 .logout-btn:hover {
@@ -168,25 +181,45 @@ body {
   color: white;
 }
 
-.sidebar.collapsed .logout-btn span {
+.logout-icon {
+  font-size: 1.2rem;
+  min-width: 20px; /* Ensure icon has minimum width */
+}
+
+.logout-text {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--transition-duration) var(--transition-timing),
+    visibility var(--transition-duration) var(--transition-timing);
+}
+
+.sidebar.collapsed .logout-text {
   opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-duration) var(--transition-timing),
+    visibility 0s linear var(--transition-duration);
   display: none;
+}
+
+.sidebar.collapsed .logout-btn {
+  width: 45px;
+  justify-content: center;
+  margin-left: 5px;
 }
 
 /* Update tooltip for logout */
 .sidebar.collapsed .logout-btn:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
+  left: 60px;
   background: var(--background-color);
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
   white-space: nowrap;
-  opacity: 1;
-  pointer-events: none;
+  z-index: 1000;
 }
 
 /* Main Content Styles */
@@ -197,8 +230,8 @@ body {
   padding-top: var(--navbar-height);
   background: var(--secondary-color);
   transition:
-    margin-left 0.3s ease,
-    width 0.3s ease;
+    margin-left var(--transition-duration) var(--transition-timing),
+    width var(--transition-duration) var(--transition-timing);
   width: calc(100% - var(--sidebar-width));
 }
 
@@ -219,7 +252,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: left var(--transition-speed) ease;
+  transition: left var(--transition-duration) var(--transition-timing);
   z-index: 999;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -289,6 +322,18 @@ body {
 .user-name {
   font-weight: 500;
   color: var(--text-color);
+}
+
+/* Add these new styles */
+.user-avatar {
+  font-size: 24px;
+  color: #64748b;
+}
+
+.nav-item.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Content Area */
@@ -538,6 +583,7 @@ table th {
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: gap var(--transition-duration) var(--transition-timing);
 }
 
 .brand-text {
@@ -548,4 +594,9 @@ table th {
 
 .sidebar.collapsed .logo-container h2 {
   display: none;
+}
+
+.sidebar-nav a:hover {
+  transform: translateX(5px);
+  transition: transform var(--transition-duration) var(--transition-timing);
 }
