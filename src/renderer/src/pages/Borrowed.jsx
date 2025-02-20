@@ -138,7 +138,7 @@ function Borrowed() {
               ...book,
               is_returned: true,
               returned_date: returnData.returned_date,
-              status: 'Returned'
+              status: 'Available'
             }
           }
           return book
@@ -172,7 +172,7 @@ function Borrowed() {
                 />
               </div>
               <button className="borrow-book-btn" onClick={handleBorrowBook}>
-                <FaPlus /> Borrow Book
+                <FaPlus /> Borrow BooK
               </button>
             </div>
             <div className="table-container">
