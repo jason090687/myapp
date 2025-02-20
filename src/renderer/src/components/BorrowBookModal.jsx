@@ -34,13 +34,10 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       setIsLoading(true)
       try {
         const booksResponse = await fetchAllBooks(token, bookSearch)
-        console.log('Books Response:', booksResponse)
-
         const booksWithTitles = booksResponse.results.map((book) => ({
           id: book.id,
           title: book.title
         }))
-
         setBooks(booksWithTitles)
       } catch (error) {
         console.error('Error fetching books:', error)
@@ -59,13 +56,13 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         setShowBookDropdown(false)
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (isLoading) return // Prevent duplicate submissions
     setIsLoading(true)
     try {
       const borrowData = {
@@ -73,9 +70,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         book: formData.book,
         due_date: formData.due_date
       }
-
       const response = await borrowBook(token, borrowData)
-      console.log('Borrow response:', response)
       onSubmit(response)
       setFormData(initialFormData)
       setBookSearch('')
@@ -104,7 +99,6 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     setShowBookDropdown(false)
   }
 
-  // Remove any transition classes that might interfere
   return isOpen ? (
     <div className="borrow-modal-overlay">
       <div className="borrow-modal-content">
@@ -120,27 +114,22 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
               <label htmlFor="student" className="required">
                 Student ID
               </label>
-              <div className="borrow-input-container">
-                <InputField
-                  type="text"
-                  id="student"
-                  name="student"
-                  value={formData.student}
-                  onChange={handleChange}
-                  required
-                  icon={FaUser}
-                  placeholder="Enter student ID"
-                  className="borrow-input"
-                />
-              </div>
+              <InputField
+                type="text"
+                id="student"
+                name="student"
+                value={formData.student}
+                onChange={handleChange}
+                required
+                icon={FaUser}
+                placeholder="Enter student ID"
+                className="borrow-input"
+              />
             </div>
-
             <div className="borrow-form-group">
               <label htmlFor="book-search">Book*</label>
               <div className="borrow-search-wrapper" ref={bookInputRef}>
-                <div className="borrow-search-icon">
-                  <FaBook />
-                </div>
+                <FaBook className="borrow-search-icon" />
                 <input
                   type="text"
                   id="book-search"
@@ -172,7 +161,6 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                 )}
               </div>
             </div>
-
             <div className="borrow-form-group">
               <label htmlFor="due_date">Due Date*</label>
               <InputField
@@ -187,7 +175,6 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
               />
             </div>
           </div>
-
           <div className="borrow-modal-footer">
             <button
               type="button"
@@ -198,14 +185,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
               Cancel
             </button>
             <button type="submit" className="borrow-submit-btn" disabled={isLoading}>
-              {isLoading ? (
-                <span className="borrow-spinner-wrapper">
-                  <div className="borrow-spinner"></div>
-                  <span>Processing...</span>
-                </span>
-              ) : (
-                'Borrow Book'
-              )}
+              {isLoading ? <div className="borrow-spinner"></div> : 'Borrow Book'}
             </button>
           </div>
         </form>

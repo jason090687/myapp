@@ -10,12 +10,16 @@ import {
   FaUsers,
   FaMoneyBill
 } from 'react-icons/fa'
+import { fetchAllBooks } from '../Features/api'
+import { useSelector } from 'react-redux'
 
 function Dashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [yearSelect, setYearSelect] = useState('2023')
   const [totalBooks, setTotalBooks] = useState('Loading...')
   const [borrowedBooks, setBorrowedBooks] = useState('Loading...')
+
+  const { token } = useSelector((state) => state.auth)
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -24,7 +28,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchTotalBooksCount = async () => {
       try {
-        const response = await fetch('https://countmein.pythonanywhere.com/api/v1/marc/search/')
+        const response = await fetchAllBooks(token)
         const data = await response.json()
         setTotalBooks(data.count)
       } catch (error) {
@@ -34,7 +38,7 @@ function Dashboard() {
     }
 
     fetchTotalBooksCount()
-  }, [])
+  }, [token])
 
   useEffect(() => {
     // Add your API fetch logic here later
