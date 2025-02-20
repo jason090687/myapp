@@ -11,7 +11,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
     student: '',
     book: '',
-    due_date: ''
+    due_date: '',
+    status: ''
   }
   const [formData, setFormData] = useState(initialFormData)
   const [books, setBooks] = useState([])
@@ -30,25 +31,23 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const notifySuccess = () =>
     toast.success('Book borrowed successfully!', {
       position: 'top-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
+      autoClose: 3000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: false,
       theme: 'light',
       transition: Bounce
     })
 
-  const notifyError = () =>
-    toast.error('Failed to borrow book!', {
+  const notifyError = (message) =>
+    toast.error(message || 'Failed to borrow book', {
       position: 'top-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
+      autoClose: 3000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: false,
       theme: 'light',
       transition: Bounce
     })
@@ -97,7 +96,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       const borrowData = {
         student: formData.student,
         book: formData.book,
-        due_date: formData.due_date
+        due_date: formData.due_date,
+        status: formData.status
       }
 
       await borrowBook(token, borrowData)

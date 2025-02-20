@@ -176,6 +176,7 @@ export const addNewBook = async (token, bookData) => {
     const response = await axios.post(`${API_URL}/marc/record/`, bookData, getAuthHeaders(token))
     return response.data
   } catch (error) {
+    console.error('API Error:', error.response?.data || error.message)
     throw new Error(error.response?.data?.message || 'Failed to add new book')
   }
 }

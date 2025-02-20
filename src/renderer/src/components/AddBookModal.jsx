@@ -15,15 +15,13 @@ import {
   FaHashtag,
   FaQrcode,
   FaTag,
-  FaPen,
-  FaFileAlt,
-  FaCheck,
-  FaTimesCircle,
-  FaExchangeAlt
+  FaPen
 } from 'react-icons/fa'
 import './AddBookModal.css'
 import { fetchStatus, fetchUserDetails } from '../Features/api'
 import { useSelector } from 'react-redux'
+import { Bounce, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -45,7 +43,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     date_received: '',
     subject: '',
     additional_author: '',
-    status: 'available',
+    status: '',
     date_processed: new Date().toISOString().split('T')[0],
     processed_by: currentUser.id // Ensure it's set correctly
   })
@@ -58,12 +56,6 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
       try {
         const response = await fetchUserDetails(token)
         setUserDetails(response)
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          processed_by: response.id || currentUser.id
-        }))
-        console.log('User details:', setFormData)
       } catch (error) {
         console.error('Error fetching user details:', error)
       } finally {
@@ -78,16 +70,13 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     const fetchStatusData = async () => {
       try {
         const response = await fetchStatus(token)
-
-        // Convert object to array, but keep values exactly as they are
         const statusArray = Object.entries(response).map(([key, value]) => ({
-          value: key, // Keep original case
+          value: key,
           label: value
         }))
-
         setStatus(statusArray)
       } catch (error) {
-        console.log('Error fetching status', error)
+        console.error('Error fetching status:', error)
         setStatus([])
       } finally {
         setIsLoading(false)
@@ -104,48 +93,68 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     }))
   }
 
+  const toastConfig = {
+    position: 'top-right',
+    autoClose: 2000, // Shorter duration
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: false,
+    theme: 'light',
+    transition: Bounce,
+    closeButton: true // Enable close button
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // Simplify the status handling - just use the selected value directly
       const bookData = {
         ...formData,
         year: formData.year ? parseInt(formData.year) : null,
         processed_by: formData.processed_by,
-        // Don't transform status, use it directly from form
         status: formData.status
       }
 
       await onSubmit(bookData)
 
-      // Reset form after successful submission
-      setFormData({
-        title: '',
-        author: '',
-        series_title: '',
-        publisher: '',
-        place_of_publication: '',
-        year: '',
-        edition: '',
-        volume: '',
-        physical_description: '',
-        isbn: '',
-        accession_number: '',
-        barcode: '',
-        date_received: '',
-        subject: '',
-        additional_author: '',
-        status: 'available', // Set default status directly
-        date_processed: new Date().toISOString().split('T')[0],
-        processed_by: userDetails.id || currentUser.id // Ensure correct user
-      })
-
+      // Close modal first
       onClose()
+
+      // Show success toast after modal closes
+      toast.success('Book added successfully!', {
+        ...toastConfig,
+        onClose: () => {
+          // Additional cleanup after toast closes if needed
+          setFormData({
+            title: '',
+            author: '',
+            series_title: '',
+            publisher: '',
+            place_of_publication: '',
+            year: '',
+            edition: '',
+            volume: '',
+            physical_description: '',
+            isbn: '',
+            accession_number: '',
+            barcode: '',
+            date_received: '',
+            subject: '',
+            additional_author: '',
+            status: '',
+            date_processed: new Date().toISOString().split('T')[0],
+            processed_by: userDetails.id || currentUser.id // Ensure correct user
+          })
+        }
+      })
     } catch (error) {
-      console.error('Error adding book:', error)
-      alert(error.message || 'Failed to add book')
+      // Show error toast and keep modal open
+      toast.error(error.message || 'Failed to add book', {
+        ...toastConfig,
+        autoClose: 3000 // Slightly longer for error messages
+      })
     } finally {
       setIsLoading(false)
     }
@@ -221,15 +230,15 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
                   className="select-field"
                   disabled={status.length === 0}
                 >
+                  <option value="" disabled>
+                    Select status
+                  </option>
                   {status.length > 0 &&
-                    status.map(
-                      ({ value, label }) =>
-                        value !== 'available' && (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        )
-                    )}
+                    status.map(({ value, label }) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
@@ -262,7 +271,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
             <button type="button" onClick={onClose} className="cancel-btn" disabled={isLoading}>
               Cancel
             </button>
-            <button type="submit" className="submit-btn" disabled={isLoading}>
+            <button type="submit" className="submit-btn" disabled={isLoading || !formData.status}>
               {isLoading ? (
                 <span className="spinner-wrapper">
                   <div className="spinner"></div>

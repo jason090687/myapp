@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import { useSelector } from 'react-redux'
-import { borrowBook, fetchBorrowedBooks, returnBook } from '../Features/api'
+import { fetchBorrowedBooks, returnBook, updateBook } from '../Features/api'
 import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
@@ -121,14 +121,17 @@ function Borrowed() {
     }
   }
 
-  const handleReturnBook = async (borrowId) => {
+  const handleReturnBook = async (borrowId, bookId) => {
     try {
       const returnData = {
         returned_date: new Date().toISOString().split('T')[0]
       }
 
       // Call the API to return the book
-      const response = await returnBook(token, borrowId, returnData)
+      await returnBook(token, borrowId, returnData)
+
+      // Update the book status to available
+      await updateBook(token, bookId, { status: 'available' })
 
       // Update the UI with the response data
       setBorrowedBooks((prevBooks) =>
@@ -221,7 +224,7 @@ function Borrowed() {
                               <button
                                 className={`action-btn return ${item.is_returned ? 'returned-btn' : ''}`}
                                 disabled={item.is_returned}
-                                onClick={() => handleReturnBook(item.id)}
+                                onClick={() => handleReturnBook(item.id, item.book)}
                               >
                                 {item.is_returned ? 'Returned' : 'Return'}
                               </button>

@@ -37,11 +37,11 @@ function Books() {
   const [sortConfig, setSortConfig] = useState({
     column: null,
     direction: null
-  }); // Add this new state
+  }) // Add this new state
 
-  const [allBooks, setAllBooks] = useState([]);
-  const [isFetchingAll, setIsFetchingAll] = useState(false);
-  const [sortedBooks, setSortedBooks] = useState(null); // Add this new state
+  const [allBooks, setAllBooks] = useState([])
+  const [isFetchingAll, setIsFetchingAll] = useState(false)
+  const [sortedBooks, setSortedBooks] = useState(null) // Add this new state
   const notifySuccess = () =>
     toast.success({
       position: 'top-right',
