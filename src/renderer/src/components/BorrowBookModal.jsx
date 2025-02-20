@@ -12,7 +12,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     student: '',
     book: '',
     due_date: '',
-    status: ''
+    status: 'Borrowed'
   }
   const [formData, setFormData] = useState(initialFormData)
   const [books, setBooks] = useState([])
@@ -97,7 +97,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         student: formData.student,
         book: formData.book,
         due_date: formData.due_date,
-        status: formData.status
+        status: 'Borrowed'
       }
 
       await borrowBook(token, borrowData)
