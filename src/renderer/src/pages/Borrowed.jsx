@@ -81,11 +81,8 @@ function Borrowed() {
 
   const handleCloseModal = () => setIsModalOpen(false)
 
-  const handleSubmitBorrow = async (borrowData) => {
-    console.log('Parent Borrowed.jsx - handleSubmitBorrow called with:', borrowData)
+  const handleSubmitBorrow = async () => {
     try {
-      // Remove the borrowBook call since it's already done in the modal
-      // await borrowBook(token, borrowData) - Remove this line
       setIsModalOpen(false)
       await fetchBorrowedData(pagination.currentPage)
       // Move alert to modal only
