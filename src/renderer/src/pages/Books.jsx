@@ -29,7 +29,7 @@ function Books() {
   const [sortConfig, setSortConfig] = useState({
     column: null,
     direction: null
-  });
+  }); // Add this new state
 
   const [allBooks, setAllBooks] = useState([]);
   const [isFetchingAll, setIsFetchingAll] = useState(false);
