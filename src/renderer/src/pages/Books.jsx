@@ -58,7 +58,7 @@ function Books() {
           dateReceived: book.date_received,
           subject: book.subject,
           dateProcessed: book.date_processed,
-          processedBy: book.processed_by,
+          processedBy: book.name,
           status: book.status
         }))
         setBooks(booksData)
