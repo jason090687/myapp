@@ -12,9 +12,7 @@ function Borrowed() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [isLoading, setLoading] = useState(false)
   const [borrowedBooks, setBorrowedBooks] = useState([])
-  // const [students, setStudents] = useState({})
-  // const [books, setBooks] = useState({})
-  const { token } = useSelector((state) => state.auth)
+  const { token } = useSelector((state) => state.auth) // Ensure token exists
   const [pagination, setPagination] = useState({
     count: 0,
     next: null,
@@ -23,7 +21,7 @@ function Borrowed() {
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Add debounce effect for search
+  // Debounce effect for search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
@@ -31,47 +29,63 @@ function Borrowed() {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Update fetchBorrowedData to include search
-  const fetchBorrowedData = async () => {
+  // Fetch borrowed books data
+  const fetchBorrowedData = async (page = 1) => {
+    if (!token) {
+      console.error('Token missing: Skipping API call')
+      return
+    }
+
     setLoading(true)
     try {
-      const response = await fetchBorrowedBooks(token, debouncedSearchTerm)
-      if (response && response.results) {
-        setBorrowedBooks(response.results)
+      const response = await fetchBorrowedBooks(token, page)
+      if (response) {
+        setBorrowedBooks(response.results || [])
+        setPagination({
+          count: response.count || 0,
+          next: response.next,
+          previous: response.previous,
+          currentPage: page
+        })
       }
     } catch (error) {
-      console.error('Error fetching borrowed books:', error)
+      console.error('Error fetching borrowed books:', error.message)
     } finally {
       setLoading(false)
     }
   }
 
-  // Add effect for search updates
+  // Fetch data only when token is available
+  useEffect(() => {
+    if (token) {
+      fetchBorrowedData()
+    }
+  }, [token])
+
+  // Update list when search term changes
   useEffect(() => {
     fetchBorrowedData()
-  }, [debouncedSearchTerm, token])
+  }, [debouncedSearchTerm])
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
 
   const handleSidebarToggle = () => setIsCollapsed(!isCollapsed)
 
   const handlePageChange = (newPage) => {
-    fetchBorrowedData(newPage)
+    if (newPage > 0) {
+      fetchBorrowedData(newPage)
+    }
   }
 
-  const handleBorrowBook = () => {
-    setIsModalOpen(true) // Ensure this is being called when clicking the button
-  }
+  const handleBorrowBook = () => setIsModalOpen(true)
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
-  }
+  const handleCloseModal = () => setIsModalOpen(false)
 
   const handleSubmitBorrow = async (borrowData) => {
     try {
-      await borrowBook(token, borrowData) // Make sure you're using the correct API call
+      await borrowBook(token, borrowData)
       setIsModalOpen(false)
-      await fetchBorrowedData() // Refresh the list
+      await fetchBorrowedData()
       alert('Book borrowed successfully!')
     } catch (error) {
       console.error('Error borrowing book:', error)
@@ -81,21 +95,16 @@ function Borrowed() {
 
   const handleReturnBook = async (borrowId) => {
     try {
-      const returnData = {
+      await returnBook(token, {
         borrow: borrowId,
         returned_date: new Date().toISOString().split('T')[0]
-      }
-      await returnBook(token, returnData)
-      await fetchBorrowedData() // Refresh the list
+      })
+      await fetchBorrowedData()
       alert('Book returned successfully!')
     } catch (error) {
       console.error('Error returning book:', error)
       alert(error.message || 'Failed to return book')
     }
-  }
-
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value)
   }
 
   const totalPages = Math.ceil(pagination.count / 10)
@@ -112,7 +121,7 @@ function Borrowed() {
                 type="text"
                 placeholder="Search by student or book..."
                 value={searchTerm}
-                onChange={handleSearch}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
               />
             </div>
@@ -167,22 +176,12 @@ function Borrowed() {
                               className="action-btn return"
                               disabled={item.is_returned}
                               onClick={() => handleReturnBook(item.id)}
-                              title={
-                                item.is_returned ? 'Book already returned' : 'Click to return book'
-                              }
                             >
                               {item.is_returned ? 'Returned' : 'Return'}
                             </button>
                             <button
                               className="action-btn renew"
                               disabled={item.is_returned || item.renewed_count >= 3}
-                              title={
-                                item.is_returned
-                                  ? 'Cannot renew returned book'
-                                  : item.renewed_count >= 3
-                                    ? 'Maximum renewals reached'
-                                    : 'Click to renew book'
-                              }
                             >
                               Renew
                             </button>
@@ -204,7 +203,6 @@ function Borrowed() {
               </button>
               <span className="pagination-info">
                 Page {pagination.currentPage} of {totalPages}
-                <span className="pagination-total">(Total: {pagination.count})</span>
               </span>
               <button
                 className="pagination-btn"

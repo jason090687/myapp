@@ -31,13 +31,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     const fetchUserData = async () => {
       try {
         const response = await fetchUserDetails(token)
-        setUserDetails(response)
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          processed_by: response.id || currentUser.id
-        }))
-        console.log('User details:', setFormData)
+        setUserDetails(response) // Store user details in state
       } catch (error) {
         console.error('Error fetching user details:', error)
       } finally {

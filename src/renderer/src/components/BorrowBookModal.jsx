@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { FaUser, FaBook, FaCalendar } from 'react-icons/fa'
-import { fetchBooks, borrowBook, fetchAllBooks } from '../Features/api'
+import { fetchAllBooks, borrowBook } from '../Features/api'
 import InputField from './InputField'
 import './BorrowBookModal.css'
 import { useSelector } from 'react-redux'
@@ -10,12 +10,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
     student: '',
     book: '',
-    due_date: '',
-    returned_date: null,
-    is_returned: false,
-    renewed_count: 0
+    due_date: ''
   }
-
   const [formData, setFormData] = useState(initialFormData)
   const [books, setBooks] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -24,12 +20,15 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const [showBookDropdown, setShowBookDropdown] = useState(false)
   const { token } = useSelector((state) => state.auth)
   const bookInputRef = useRef(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
   }, [books, bookSearch])
 
   useEffect(() => {
+    if (!isOpen) return
+
     const fetchData = async () => {
       setIsLoading(true)
       try {
@@ -45,9 +44,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         setIsLoading(false)
       }
     }
-    if (isOpen) {
-      fetchData()
-    }
+
+    fetchData()
   }, [isOpen, token, bookSearch])
 
   useEffect(() => {
@@ -62,16 +60,24 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (isLoading) return // Prevent duplicate submissions
+
+    // Prevent multiple submissions
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
     setIsLoading(true)
+
     try {
       const borrowData = {
         student: formData.student,
         book: formData.book,
         due_date: formData.due_date
       }
-      const response = await borrowBook(token, borrowData)
-      onSubmit(response)
+
+      await borrowBook(token, borrowData) // API Call
+      onSubmit(borrowData) // Update UI
+
+      // Reset form
       setFormData(initialFormData)
       setBookSearch('')
       setSelectedBook(null)
@@ -81,6 +87,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       alert(error.message || 'Failed to borrow book')
     } finally {
       setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -176,16 +183,15 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
             </div>
           </div>
           <div className="borrow-modal-footer">
-            <button
-              type="button"
-              onClick={onClose}
-              className="borrow-cancel-btn"
-              disabled={isLoading}
-            >
+            <button type="button" onClick={onClose} className="borrow-cancel-btn">
               Cancel
             </button>
-            <button type="submit" className="borrow-submit-btn" disabled={isLoading}>
-              {isLoading ? <div className="borrow-spinner"></div> : 'Borrow Book'}
+            <button
+              type="submit"
+              className="borrow-submit-btn"
+              disabled={isLoading || isSubmitting}
+            >
+              {isSubmitting ? 'Processing...' : 'Borrow Book'}
             </button>
           </div>
         </form>

@@ -220,11 +220,19 @@ export const fetchStatus = async (token) => {
 }
 
 export const fetchBorrowedBooks = async (token, page = 1) => {
+  if (!token) {
+    console.error('Error: Missing authentication token')
+    throw new Error('Unauthorized: No token provided')
+  }
+
   try {
-    const response = await axios.get(`${API_URL}/borrow/list/?page=${page}`, getAuthHeaders(token))
+    const response = await axios.get(
+      `${API_URL}/borrow/list/?page=${page}`,
+      getAuthHeaders(token) // Ensure headers are passed correctly
+    )
     return response.data
   } catch (error) {
-    console.error('Error fetching borrowed books:', error)
+    console.error('Error fetching borrowed books:', error.response?.data || error.message)
     throw new Error(error.response?.data?.message || 'Failed to fetch borrowed books')
   }
 }
@@ -251,10 +259,10 @@ export const borrowBook = async (token, borrowData) => {
 }
 
 // Update the return book function to use the simple endpoint
-export const returnBook = async (token, returnData) => {
+export const returnBook = async (token, returnData, bookId) => {
   try {
     const response = await axios.patch(
-      `${API_URL}/borrow/return/`,
+      `${API_URL}/borrow/${bookId}/`,
       returnData,
       getAuthHeaders(token)
     )
