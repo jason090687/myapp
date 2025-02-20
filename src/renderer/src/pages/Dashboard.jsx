@@ -29,7 +29,7 @@ function Dashboard() {
         const data = await response.json()
         setTotalBooks(data.count)
       } catch (error) {
-        console.error('Error fetching total books count:', error)
+        console.error('Error fetching total books count: ', error)
         setTotalBooks('Error')
       }
     }
