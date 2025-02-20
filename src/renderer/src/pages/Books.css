@@ -494,3 +494,41 @@
   background-color: #e0f2fe;
   color: #0284c7;
 }
+
+/* Sortable column styles */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.sortable:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sortable svg {
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* Header sorting styles */
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.sort-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sort-icon svg {
+  margin: 0;
+  font-size: 14px;
+}
+
+.sortable .header-content:hover {
+  color: #1e293b;
+}
