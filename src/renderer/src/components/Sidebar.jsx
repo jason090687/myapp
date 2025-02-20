@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {
   FaHome,
@@ -7,47 +7,68 @@ import {
   FaBookmark,
   FaHistory,
   FaCog,
-  FaQuestionCircle,
   FaSignOutAlt,
   FaBars,
   FaSearch,
   FaBell,
-  FaUserCircle // Add this import
+  FaUserCircle
 } from 'react-icons/fa'
+import { ToastContainer, toast, Bounce } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import logo from '../assets/logo.png'
 import './Sidebar.css'
 import { fetchUserDetails } from '../Features/api'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { logout, reset } from '../Features/authSlice'
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
-  const [userDetails, setUserDetails] = useState([])
+  const [userDetails, setUserDetails] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const location = useLocation()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
+    if (!token) return
+
     setIsLoading(true)
     const fetchUserData = async () => {
       try {
         const response = await fetchUserDetails(token)
-        setUserDetails(response) // Store user details in state
+        setUserDetails(response)
       } catch (error) {
         console.error('Error fetching user details:', error)
       } finally {
         setIsLoading(false)
       }
     }
-    if (token) fetchUserData()
+
+    fetchUserData()
   }, [token])
 
   const menuItems = [
     { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
     { path: '/books', icon: FaBook, label: 'Books' },
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
-    { path: '/history', icon: FaHistory, label: 'History' }, // Ensure this exists
+    { path: '/history', icon: FaHistory, label: 'History' },
     { path: '/settings', icon: FaCog, label: 'Settings' }
   ]
+
+  const handleLogout = async () => {
+    setIsLoading(true)
+    try {
+      dispatch(logout())
+      dispatch(reset())
+      toast.success('Logged out successfully!')
+      navigate('/')
+    } catch (error) {
+      toast.error('Logout failed! Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <>
@@ -71,25 +92,16 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             ))}
           </ul>
 
-          <div className="sidebar-help">
-            <h3>Quick Help</h3>
-            <ul className="help-topics">
-              <li>Getting Started</li>
-              <li>Using the Library</li>
-              <li>Managing Books</li>
-              <li>Borrowing Process</li>
-              <li>FAQ</li>
-            </ul>
-            <div className="help-content">
-              <p>Need help? Contact support.</p>
-            </div>
-          </div>
-
           <div className="logout-container">
-            <Link to="/" className="logout-btn" data-tooltip="Logout">
+            <button
+              onClick={handleLogout}
+              className="logout-btn"
+              data-tooltip="Logout"
+              disabled={isLoading}
+            >
               <FaSignOutAlt className="logout-icon" />
-              <span className="logout-text">Logout</span>
-            </Link>
+              <span className="logout-text">{isLoading ? 'Logging out...' : 'Logout'}</span>
+            </button>
           </div>
         </nav>
       </aside>
@@ -111,10 +123,25 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
           </div>
           <div className="nav-item user-profile">
             <FaUserCircle className="user-avatar" />
-            <span>{userDetails.first_name}</span>
+            <span>{isLoading ? 'Loading...' : userDetails.first_name || 'User'}</span>
           </div>
         </div>
       </nav>
+
+      {/* Toast notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </>
   )
 }

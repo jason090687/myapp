@@ -5,6 +5,7 @@ import { fetchAllBooks, borrowBook } from '../Features/api'
 import InputField from './InputField'
 import './BorrowBookModal.css'
 import { useSelector } from 'react-redux'
+import { Bounce, toast } from 'react-toastify'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
@@ -26,6 +27,32 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
   }, [books, bookSearch])
 
+  const notifySuccess = () =>
+    toast.success('Book borrowed successfully!', {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
+
+  const notifyError = () =>
+    toast.error('Failed to borrow book!', {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
+
   useEffect(() => {
     if (!isOpen) return
 
@@ -37,9 +64,10 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
           id: book.id,
           title: book.title
         }))
-        setBooks(booksWithTitles)
+        const availableBooks = booksWithTitles.filter((book) => book.status !== 'Borrowed')
+        setBooks(availableBooks)
       } catch (error) {
-        console.error('Error fetching books:', error)
+        toast.error('Failed to fetch books')
       } finally {
         setIsLoading(false)
       }
@@ -60,16 +88,10 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
-    // Prevent multiple submissions
-    if (isSubmitting) {
-      console.log('Preventing duplicate submission - already submitting')
-      return
-    }
+    if (isSubmitting) return
 
     setIsSubmitting(true)
     setIsLoading(true)
-    console.log('Modal handleSubmit - Starting submission process')
 
     try {
       const borrowData = {
@@ -78,22 +100,16 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         due_date: formData.due_date
       }
 
-      console.log('Modal handleSubmit - Calling borrowBook API with:', borrowData)
-      const response = await borrowBook(token, borrowData)
-      console.log('Modal handleSubmit - API response:', response)
-
-      // Call parent's onSubmit
+      await borrowBook(token, borrowData)
       onSubmit(borrowData)
 
-      // Reset form
       setFormData(initialFormData)
       setBookSearch('')
       setSelectedBook(null)
       onClose()
-      alert('Book borrowed successfully!')
+      notifySuccess()
     } catch (error) {
-      console.error('Error in modal handleSubmit:', error)
-      alert(error.message || 'Failed to borrow book')
+      notifyError()
     } finally {
       setIsSubmitting(false)
       setIsLoading(false)
@@ -167,7 +183,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                           className="borrow-search-item"
                           onClick={() => handleBookSelect(book)}
                         >
-                          {book.title}
+                          {book.title} {book.author ? `- ${book.author}` : ''}
+                          {book.isbn ? `(ISBN: ${book.isbn})` : ''}
                         </div>
                       ))
                     ) : (
@@ -200,7 +217,13 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
               className="borrow-submit-btn"
               disabled={isLoading || isSubmitting}
             >
-              {isSubmitting ? 'Processing...' : 'Borrow Book'}
+              {isSubmitting ? (
+                <div className="button-spinner">
+                  <div className="spinner"></div>
+                </div>
+              ) : (
+                'Borrow Book'
+              )}
             </button>
           </div>
         </form>

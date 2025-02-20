@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux'
 import { borrowBook, fetchBorrowedBooks, returnBook } from '../Features/api'
 import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
+import { Bounce, toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function Borrowed() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -20,6 +22,32 @@ function Borrowed() {
     currentPage: 1
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const notifySuccess = (message) =>
+    toast.success(message, {
+      position: 'top-right',
+      autoClose: 3000, // Reduce to 3 seconds
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false, // Disable pause on hover
+      draggable: false, // Disable dragging
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
+
+  const notifyError = (message) =>
+    toast.error(message, {
+      position: 'top-right',
+      autoClose: 3000, // Reduce to 3 seconds
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false, // Disable pause on hover
+      draggable: false, // Disable dragging
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
 
   // Debounce effect for search input
   useEffect(() => {
@@ -89,7 +117,7 @@ function Borrowed() {
       // alert('Book borrowed successfully!') - Remove this line
     } catch (error) {
       console.error('Error in parent handleSubmitBorrow:', error)
-      alert(error.message || 'Failed to borrow book')
+      notifyError(error.message || 'Failed to borrow book')
     }
   }
 
@@ -117,127 +145,130 @@ function Borrowed() {
         })
       )
 
-      alert('Book returned successfully!')
+      notifySuccess('Book returned successfully!')
     } catch (error) {
       console.error('Error returning book:', error)
-      alert(error.message || 'Failed to return book')
+      notifyError(error.message || 'Failed to return book')
     }
   }
 
   const totalPages = Math.ceil(pagination.count / 10)
 
   return (
-    <div className="app-wrapper">
-      <Sidebar isCollapsed={isCollapsed} onToggle={handleSidebarToggle} />
-      <div className={`borrowed-container ${isCollapsed ? 'collapsed' : ''}`}>
-        <div className="borrowed-content">
-          <div className="borrowed-header">
-            <div className="search-bar">
-              <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search by student or book..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
+    <>
+      <div className="app-wrapper">
+        <Sidebar isCollapsed={isCollapsed} onToggle={handleSidebarToggle} />
+        <div className={`borrowed-container ${isCollapsed ? 'collapsed' : ''}`}>
+          <div className="borrowed-content">
+            <div className="borrowed-header">
+              <div className="search-bar">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by student or book..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <button className="borrow-book-btn" onClick={handleBorrowBook}>
+                <FaPlus /> Borrow Book
+              </button>
             </div>
-            <button className="borrow-book-btn" onClick={handleBorrowBook}>
-              <FaPlus /> Borrow Book
-            </button>
-          </div>
-          <div className="table-container">
-            <div className="borrowed-table-wrapper">
-              <table className="borrowed-table">
-                <thead>
-                  <tr>
-                    <th>Student</th>
-                    <th>Book</th>
-                    <th>Borrow Date</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
+            <div className="table-container">
+              <div className="borrowed-table-wrapper">
+                <table className="borrowed-table">
+                  <thead>
                     <tr>
-                      <td colSpan="6" className="loading-cell">
-                        <div className="borrowed-spinner"></div>
-                        <span className="borrowed-loading-text">Loading borrowed books...</span>
-                      </td>
+                      <th>Student</th>
+                      <th>Book</th>
+                      <th>Borrow Date</th>
+                      <th>Due Date</th>
+                      <th>Status</th>
+                      <th>Action</th>
                     </tr>
-                  ) : borrowedBooks.length === 0 ? (
-                    <tr>
-                      <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
-                        No borrowed books found
-                      </td>
-                    </tr>
-                  ) : (
-                    borrowedBooks.map((item) => (
-                      <tr key={item.id} className={item.is_returned ? 'returned-row' : ''}>
-                        <td>{item.student}</td>
-                        <td>{item.book_title}</td>
-                        <td>{formatDate(item.borrowed_date)}</td>
-                        <td>{formatDate(item.due_date)}</td>
-                        <td>
-                          <span
-                            className={`status-badge ${item.is_returned ? 'returned' : 'borrowed'}`}
-                          >
-                            {item.is_returned ? 'Returned' : 'Borrowed'}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="action-buttons-container">
-                            <button
-                              className={`action-btn return ${item.is_returned ? 'returned-btn' : ''}`}
-                              disabled={item.is_returned}
-                              onClick={() => handleReturnBook(item.id)}
-                            >
-                              {item.is_returned ? 'Returned' : 'Return'}
-                            </button>
-                            <button
-                              className="action-btn renew"
-                              disabled={item.is_returned || item.renewed_count >= 3}
-                            >
-                              Renew
-                            </button>
-                          </div>
+                  </thead>
+                  <tbody>
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan="6" className="loading-cell">
+                          <div className="borrowed-spinner"></div>
+                          <span className="borrowed-loading-text">Loading borrowed books...</span>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div className="pagination">
-              <button
-                className="pagination-btn"
-                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                disabled={!pagination.previous}
-              >
-                <FaChevronLeft />
-              </button>
-              <span className="pagination-info">
-                Page {pagination.currentPage} of {totalPages}
-              </span>
-              <button
-                className="pagination-btn"
-                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                disabled={!pagination.next}
-              >
-                <FaChevronRight />
-              </button>
+                    ) : borrowedBooks.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                          No borrowed books found
+                        </td>
+                      </tr>
+                    ) : (
+                      borrowedBooks.map((item) => (
+                        <tr key={item.id} className={item.is_returned ? 'returned-row' : ''}>
+                          <td>{item.student_name}</td>
+                          <td>{item.book_title}</td>
+                          <td>{formatDate(item.borrowed_date)}</td>
+                          <td>{formatDate(item.due_date)}</td>
+                          <td>
+                            <span
+                              className={`status-badge ${item.is_returned ? 'returned' : 'borrowed'}`}
+                            >
+                              {item.is_returned ? 'Returned' : 'Borrowed'}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="action-buttons-container">
+                              <button
+                                className={`action-btn return ${item.is_returned ? 'returned-btn' : ''}`}
+                                disabled={item.is_returned}
+                                onClick={() => handleReturnBook(item.id)}
+                              >
+                                {item.is_returned ? 'Returned' : 'Return'}
+                              </button>
+                              <button
+                                className="action-btn renew"
+                                disabled={item.is_returned || item.renewed_count >= 3}
+                              >
+                                Renew
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="pagination">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.previous}
+                >
+                  <FaChevronLeft />
+                </button>
+                <span className="pagination-info">
+                  Page {pagination.currentPage} of {totalPages}
+                </span>
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.next}
+                >
+                  <FaChevronRight />
+                </button>
+              </div>
             </div>
           </div>
+          <BorrowBookModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onSubmit={handleSubmitBorrow}
+          />
         </div>
-        <BorrowBookModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSubmit={handleSubmitBorrow}
-        />
       </div>
-    </div>
+      <ToastContainer />
+    </>
   )
 }
 

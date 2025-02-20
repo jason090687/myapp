@@ -6,6 +6,7 @@ import { fetchBooks, addNewBook, deleteBook } from '../Features/api'
 import { useSelector } from 'react-redux'
 import AddBookModal from '../components/AddBookModal'
 import EditBookModal from '../components/EditBookModal'
+import { Bounce, toast } from 'react-toastify'
 
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -25,6 +26,32 @@ function Books() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBook, setEditingBook] = useState(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  const notifySuccess = () =>
+    toast.success({
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
+
+  const notifyError = () =>
+    toast.error('Failed to borrow book!', {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
 
   // Add debounce effect for search
   useEffect(() => {
@@ -98,7 +125,7 @@ function Books() {
       setIsModalOpen(false)
       setEditingBook(null)
       await fetchBooksData(pagination.currentPage)
-      alert(editingBook ? 'Book updated successfully!' : 'Book added successfully!')
+      notifySuccess(editingBook ? 'Book updated successfully!' : 'Book added successfully!')
     } catch (error) {
       console.error('Error saving book:', error)
     }
