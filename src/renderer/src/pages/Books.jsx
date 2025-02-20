@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react'
-import { FaSearch, FaPlus, FaChevronLeft, FaChevronRight, FaSortUp, FaSortDown } from 'react-icons/fa'
+import {
+  FaSearch,
+  FaPlus,
+  FaChevronLeft,
+  FaChevronRight,
+  FaSortUp,
+  FaSortDown
+} from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import './Books.css'
 import { fetchBooks, addNewBook, deleteBook } from '../Features/api'
 import { useSelector } from 'react-redux'
 import AddBookModal from '../components/AddBookModal'
 import EditBookModal from '../components/EditBookModal'
+import { Bounce, toast } from 'react-toastify'
 
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -34,6 +42,31 @@ function Books() {
   const [allBooks, setAllBooks] = useState([]);
   const [isFetchingAll, setIsFetchingAll] = useState(false);
   const [sortedBooks, setSortedBooks] = useState(null); // Add this new state
+  const notifySuccess = () =>
+    toast.success({
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
+
+  const notifyError = () =>
+    toast.error('Failed to borrow book!', {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'light',
+      transition: Bounce
+    })
 
   // Add debounce effect for search
   useEffect(() => {
@@ -87,14 +120,14 @@ function Books() {
 
   // Add function to fetch all pages
   const fetchAllBooks = async () => {
-    setIsFetchingAll(true);
+    setIsFetchingAll(true)
     try {
-      let allData = [];
-      let currentPage = 1;
-      let hasMore = true;
+      let allData = []
+      let currentPage = 1
+      let hasMore = true
 
       while (hasMore) {
-        const response = await fetchBooks(token, currentPage, debouncedSearchTerm);
+        const response = await fetchBooks(token, currentPage, debouncedSearchTerm)
         if (response && response.results) {
           const booksData = response.results.map((book) => ({
             id: book.id,
@@ -115,33 +148,33 @@ function Books() {
             dateProcessed: book.date_processed,
             processedBy: book.name,
             status: book.status
-          }));
-          allData = [...allData, ...booksData];
-          
-          hasMore = response.next !== null;
-          currentPage++;
+          }))
+          allData = [...allData, ...booksData]
+
+          hasMore = response.next !== null
+          currentPage++
         } else {
-          hasMore = false;
+          hasMore = false
         }
       }
 
-      setAllBooks(allData);
-      setSortedBooks(null); // Reset sorted data
-      setSortConfig({ column: null, direction: null }); // Reset sort config
-      
+      setAllBooks(allData)
+      setSortedBooks(null) // Reset sorted data
+      setSortConfig({ column: null, direction: null }) // Reset sort config
+
       // Set initial page view
-      setBooks(allData.slice(0, 10));
-      setPagination(prev => ({
+      setBooks(allData.slice(0, 10))
+      setPagination((prev) => ({
         ...prev,
         count: allData.length,
         currentPage: 1
-      }));
+      }))
     } catch (error) {
-      console.error('Error fetching all books', error);
+      console.error('Error fetching all books', error)
     } finally {
-      setIsFetchingAll(false);
+      setIsFetchingAll(false)
     }
-  };
+  }
 
   // Update the edit button handler
   const handleEditBook = (book) => {
@@ -165,19 +198,19 @@ function Books() {
       setIsModalOpen(false)
       setEditingBook(null)
       await fetchBooksData(pagination.currentPage)
-      alert(editingBook ? 'Book updated successfully!' : 'Book added successfully!')
+      notifySuccess(editingBook ? 'Book updated successfully!' : 'Book added successfully!')
     } catch (error) {
       console.error('Error saving book:', error)
     }
   }
 
   useEffect(() => {
-    fetchAllBooks();
+    fetchAllBooks()
   }, [token])
 
   // Update search effect
   useEffect(() => {
-    fetchAllBooks(); // Reset to first page when search term changes
+    fetchAllBooks() // Reset to first page when search term changes
   }, [debouncedSearchTerm])
 
   const handleSidebarToggle = () => {
@@ -205,67 +238,67 @@ function Books() {
 
   const sortData = (data, column, direction) => {
     return [...data].sort((a, b) => {
-      let aValue = a[column];
-      let bValue = b[column];
-      
+      let aValue = a[column]
+      let bValue = b[column]
+
       // Convert to lowercase for string comparison
       if (typeof aValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
+        aValue = aValue.toLowerCase()
+        bValue = bValue.toLowerCase()
       }
-      
+
       // Handle numeric sorting for year
       if (column === 'year') {
-        aValue = Number(aValue) || 0;
-        bValue = Number(bValue) || 0;
+        aValue = Number(aValue) || 0
+        bValue = Number(bValue) || 0
       }
 
       if (aValue < bValue) {
-        return direction === 'asc' ? -1 : 1;
+        return direction === 'asc' ? -1 : 1
       }
       if (aValue > bValue) {
-        return direction === 'asc' ? 1 : -1;
+        return direction === 'asc' ? 1 : -1
       }
-      return 0;
-    });
-  };
+      return 0
+    })
+  }
 
   // Modify handleSort to use separate sorted state
   const handleSort = (columnName) => {
-    let direction = 'asc';
+    let direction = 'asc'
     if (sortConfig.column === columnName && sortConfig.direction === 'asc') {
-      direction = 'desc';
+      direction = 'desc'
     }
-    setSortConfig({ column: columnName, direction });
-    
+    setSortConfig({ column: columnName, direction })
+
     // Sort all books
-    const sorted = sortData(allBooks, columnName, direction);
-    setSortedBooks(sorted);
-    
+    const sorted = sortData(allBooks, columnName, direction)
+    setSortedBooks(sorted)
+
     // Update current page view with sorted data
-    const startIndex = (pagination.currentPage - 1) * 10;
-    const endIndex = startIndex + 10;
-    setBooks(sorted.slice(startIndex, endIndex));
-  };
+    const startIndex = (pagination.currentPage - 1) * 10
+    const endIndex = startIndex + 10
+    setBooks(sorted.slice(startIndex, endIndex))
+  }
 
   // Modify handlePageChange to use either sorted or unsorted data
   const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    
-    const startIndex = (newPage - 1) * 10;
-    const endIndex = startIndex + 10;
-    const dataToUse = sortedBooks || allBooks;
-    setBooks(dataToUse.slice(startIndex, endIndex));
-    setPagination(prev => ({
+    if (newPage < 1 || newPage > totalPages) return
+
+    const startIndex = (newPage - 1) * 10
+    const endIndex = startIndex + 10
+    const dataToUse = sortedBooks || allBooks
+    setBooks(dataToUse.slice(startIndex, endIndex))
+    setPagination((prev) => ({
       ...prev,
       currentPage: newPage,
       previous: newPage > 1,
       next: newPage < totalPages
-    }));
-  };
+    }))
+  }
 
   // Update totalPages calculation
-  const totalPages = Math.ceil((sortedBooks || allBooks).length / 10);
+  const totalPages = Math.ceil((sortedBooks || allBooks).length / 10)
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false)
@@ -334,10 +367,7 @@ function Books() {
               <table className="books-table">
                 <thead>
                   <tr>
-                    <th 
-                      className="col-title sortable" 
-                      onClick={() => handleSort('title')}
-                    >
+                    <th className="col-title sortable" onClick={() => handleSort('title')}>
                       <div className="header-content">
                         TITLE
                         {sortConfig.column === 'title' && (
@@ -347,10 +377,7 @@ function Books() {
                         )}
                       </div>
                     </th>
-                    <th 
-                      className="col-author sortable" 
-                      onClick={() => handleSort('author')}
-                    >
+                    <th className="col-author sortable" onClick={() => handleSort('author')}>
                       <div className="header-content">
                         AUTHOR
                         {sortConfig.column === 'author' && (
@@ -361,10 +388,7 @@ function Books() {
                       </div>
                     </th>
                     <th className="col-series">SERIES TITLE</th>
-                    <th 
-                      className="col-publisher sortable" 
-                      onClick={() => handleSort('publisher')}
-                    >
+                    <th className="col-publisher sortable" onClick={() => handleSort('publisher')}>
                       <div className="header-content">
                         PUBLISHER
                         {sortConfig.column === 'publisher' && (
@@ -375,10 +399,7 @@ function Books() {
                       </div>
                     </th>
                     <th className="col-place">PLACE OF PUBLICATION</th>
-                    <th 
-                      className="col-year sortable" 
-                      onClick={() => handleSort('year')}
-                    >
+                    <th className="col-year sortable" onClick={() => handleSort('year')}>
                       <div className="header-content">
                         YEAR
                         {sortConfig.column === 'year' && (
