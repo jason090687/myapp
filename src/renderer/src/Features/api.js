@@ -277,3 +277,20 @@ export const returnBook = async (token, bookId, returnData) => {
     throw new Error(error.response?.data?.message || 'Failed to return book')
   }
 }
+
+export const renewBook = async (token, borrowId, renewData) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/borrow/renew/${borrowId}/`,
+      {
+        due_date: renewData.due_date,
+        renewed_count: renewData.renewed_count
+      },
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error renewing book:', error)
+    throw new Error(error.response?.data?.message || 'Failed to renew book')
+  }
+}

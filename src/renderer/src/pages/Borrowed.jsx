@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import { useSelector } from 'react-redux'
-import { fetchBorrowedBooks, returnBook, updateBook } from '../Features/api'
+import { fetchBorrowedBooks, returnBook, updateBook, renewBook } from '../Features/api'
 import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import RenewModal from '../components/RenewModal'
 
 function Borrowed() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -22,6 +23,8 @@ function Borrowed() {
     currentPage: 1
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isRenewModalOpen, setIsRenewModalOpen] = useState(false)
+  const [selectedBorrow, setSelectedBorrow] = useState(null)
 
   const notifySuccess = (message) =>
     toast.success(message, {
@@ -155,6 +158,43 @@ function Borrowed() {
     }
   }
 
+  const handleRenewClick = (borrowItem) => {
+    setSelectedBorrow(borrowItem)
+    setIsRenewModalOpen(true)
+  }
+
+  const handleRenewSubmit = async (renewData) => {
+    try {
+      await renewBook(token, renewData.id, {
+        due_date: renewData.due_date,
+        renewed_count: renewData.renewed_count + 1
+      })
+
+      // Update the local state with the new due date
+      setBorrowedBooks((prevBooks) =>
+        prevBooks.map((book) =>
+          book.id === renewData.id
+            ? {
+                ...book,
+                due_date: renewData.due_date,
+                renewed_count: book.renewed_count + 1
+              }
+            : book
+        )
+      )
+
+      setIsRenewModalOpen(false)
+      setSelectedBorrow(null)
+      notifySuccess('Book renewed successfully!')
+
+      // Refresh the borrowed books list
+      await fetchBorrowedData(pagination.currentPage)
+    } catch (error) {
+      console.error('Error renewing book:', error)
+      notifyError(error.message || 'Failed to renew book')
+    }
+  }
+
   const totalPages = Math.ceil(pagination.count / 10)
 
   return (
@@ -231,6 +271,7 @@ function Borrowed() {
                               <button
                                 className="action-btn renew"
                                 disabled={item.is_returned || item.renewed_count >= 3}
+                                onClick={() => handleRenewClick(item)}
                               >
                                 Renew
                               </button>
@@ -267,6 +308,15 @@ function Borrowed() {
             isOpen={isModalOpen}
             onClose={handleCloseModal}
             onSubmit={handleSubmitBorrow}
+          />
+          <RenewModal
+            isOpen={isRenewModalOpen}
+            onClose={() => {
+              setIsRenewModalOpen(false)
+              setSelectedBorrow(null)
+            }}
+            onSubmit={handleRenewSubmit}
+            borrowData={selectedBorrow}
           />
         </div>
       </div>
