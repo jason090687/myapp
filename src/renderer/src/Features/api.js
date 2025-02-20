@@ -259,11 +259,15 @@ export const borrowBook = async (token, borrowData) => {
 }
 
 // Update the return book function to use the simple endpoint
-export const returnBook = async (token, returnData, bookId) => {
+export const returnBook = async (token, bookId, returnData) => {
   try {
     const response = await axios.patch(
-      `${API_URL}/borrow/${bookId}/`,
-      returnData,
+      `${API_URL}/borrow/return/${bookId}/`,
+      {
+        ...returnData,
+        is_returned: true, // Add this line to ensure is_returned is set to true
+        returned_date: returnData.returned_date
+      },
       getAuthHeaders(token)
     )
     return response.data

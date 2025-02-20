@@ -62,10 +62,14 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     e.preventDefault()
 
     // Prevent multiple submissions
-    if (isSubmitting) return
+    if (isSubmitting) {
+      console.log('Preventing duplicate submission - already submitting')
+      return
+    }
 
     setIsSubmitting(true)
     setIsLoading(true)
+    console.log('Modal handleSubmit - Starting submission process')
 
     try {
       const borrowData = {
@@ -74,20 +78,25 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         due_date: formData.due_date
       }
 
-      await borrowBook(token, borrowData) // API Call
-      onSubmit(borrowData) // Update UI
+      console.log('Modal handleSubmit - Calling borrowBook API with:', borrowData)
+      const response = await borrowBook(token, borrowData)
+      console.log('Modal handleSubmit - API response:', response)
+
+      // Call parent's onSubmit
+      onSubmit(borrowData)
 
       // Reset form
       setFormData(initialFormData)
       setBookSearch('')
       setSelectedBook(null)
       onClose()
+      alert('Book borrowed successfully!')
     } catch (error) {
-      console.error('Error submitting borrow:', error)
+      console.error('Error in modal handleSubmit:', error)
       alert(error.message || 'Failed to borrow book')
     } finally {
-      setIsLoading(false)
       setIsSubmitting(false)
+      setIsLoading(false)
     }
   }
 

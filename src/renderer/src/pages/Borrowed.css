@@ -234,11 +234,21 @@
 }
 
 .status-badge.borrowed {
-  background-color: #fef3c7;
-  color: #b45309;
+  background-color: #007bff;
+  color: white;
 }
 
 .status-badge.returned {
-  background-color: #dcfce7;
-  color: #16a34a;
+  background-color: #28a745;
+  color: white;
+}
+
+.returned-row {
+  background-color: #f8f9fa;
+}
+
+.returned-btn {
+  background-color: #e9ecef !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
 }

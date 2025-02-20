@@ -82,24 +82,44 @@ function Borrowed() {
   const handleCloseModal = () => setIsModalOpen(false)
 
   const handleSubmitBorrow = async (borrowData) => {
+    console.log('Parent Borrowed.jsx - handleSubmitBorrow called with:', borrowData)
     try {
-      await borrowBook(token, borrowData)
+      // Remove the borrowBook call since it's already done in the modal
+      // await borrowBook(token, borrowData) - Remove this line
       setIsModalOpen(false)
-      await fetchBorrowedData()
-      alert('Book borrowed successfully!')
+      await fetchBorrowedData(pagination.currentPage)
+      // Move alert to modal only
+      // alert('Book borrowed successfully!') - Remove this line
     } catch (error) {
-      console.error('Error borrowing book:', error)
+      console.error('Error in parent handleSubmitBorrow:', error)
       alert(error.message || 'Failed to borrow book')
     }
   }
 
   const handleReturnBook = async (borrowId) => {
     try {
-      await returnBook(token, {
-        borrow: borrowId,
+      const returnData = {
         returned_date: new Date().toISOString().split('T')[0]
-      })
-      await fetchBorrowedData()
+      }
+
+      // Call the API to return the book
+      const response = await returnBook(token, borrowId, returnData)
+
+      // Update the UI with the response data
+      setBorrowedBooks((prevBooks) =>
+        prevBooks.map((book) => {
+          if (book.id === borrowId) {
+            return {
+              ...book,
+              is_returned: true,
+              returned_date: returnData.returned_date,
+              status: 'Returned'
+            }
+          }
+          return book
+        })
+      )
+
       alert('Book returned successfully!')
     } catch (error) {
       console.error('Error returning book:', error)
@@ -158,7 +178,7 @@ function Borrowed() {
                     </tr>
                   ) : (
                     borrowedBooks.map((item) => (
-                      <tr key={item.id}>
+                      <tr key={item.id} className={item.is_returned ? 'returned-row' : ''}>
                         <td>{item.student}</td>
                         <td>{item.book_title}</td>
                         <td>{formatDate(item.borrowed_date)}</td>
@@ -173,7 +193,7 @@ function Borrowed() {
                         <td>
                           <div className="action-buttons-container">
                             <button
-                              className="action-btn return"
+                              className={`action-btn return ${item.is_returned ? 'returned-btn' : ''}`}
                               disabled={item.is_returned}
                               onClick={() => handleReturnBook(item.id)}
                             >
