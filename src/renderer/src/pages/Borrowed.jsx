@@ -81,9 +81,8 @@ function Borrowed() {
 
   const handleCloseModal = () => setIsModalOpen(false)
 
-  const handleSubmitBorrow = async (borrowData) => {
+  const handleSubmitBorrow = async () => {
     try {
-      await borrowBook(token, borrowData)
       setIsModalOpen(false)
       await fetchBorrowedData()
       alert('Book borrowed successfully!')
