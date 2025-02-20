@@ -16,7 +16,6 @@ function Dashboard() {
   const [yearSelect, setYearSelect] = useState('2023')
   const [totalBooks, setTotalBooks] = useState('Loading...')
   const [borrowedBooks, setBorrowedBooks] = useState('Loading...')
-  const [topBorrowers, setTopBorrowers] = useState([])
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -38,58 +37,12 @@ function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const fetchBorrowedBooksCount = async () => {
-      try {
-        const response = await fetch('https://countmein.pythonanywhere.com/api/v1/borrow/list/')
-        const data = await response.json()
-        setBorrowedBooks(data.count)
-      } catch (error) {
-        console.error('Error fetching borrowed books count:', error)
-        setBorrowedBooks('Error')
-      }
-    }
-
-    fetchBorrowedBooksCount()
-  }, [])
-
-  useEffect(() => {
-    const fetchAllStudents = async () => {
-      try {
-        // Fetch first page to get total count
-        const firstResponse = await fetch('https://countmein.pythonanywhere.com/api/v1/students/')
-        const firstData = await firstResponse.json()
-        
-        const totalPages = Math.ceil(firstData.count / 10) // Assuming 10 items per page
-        
-        // Create array of promises for all pages
-        const pagePromises = Array.from({ length: totalPages }, (_, i) => 
-          fetch(`https://countmein.pythonanywhere.com/api/v1/students/?page=${i + 1}`)
-            .then(res => res.json())
-        )
-        
-        // Fetch all pages in parallel
-        const pages = await Promise.all(pagePromises)
-        
-        // Combine all results
-        const allStudents = pages.flatMap(page => page.results)
-        
-        // Filter and sort students
-        const activeBorrowers = allStudents
-          .filter(student => student.borrowed_books_count >= 1)
-          .sort((a, b) => b.borrowed_books_count - a.borrowed_books_count)
-        
-        setTopBorrowers(activeBorrowers)
-      } catch (error) {
-        console.error('Error fetching all students:', error)
-      }
-    }
-
-    fetchAllStudents()
+    // Add your API fetch logic here later
   }, [])
 
   const cards = [
     { title: 'Total Books', value: totalBooks, icon: FaBook },
-    { title: 'Borrowed Books', value: borrowedBooks, icon: FaBookReader },
+    { title: 'Borrowed Books', value: '232', icon: FaBookReader },
     { title: 'Returned Books', value: '10', icon: FaUndo },
     { title: 'Overdue Books', value: '20', icon: FaClock },
     { title: 'Missing Books', value: '290', icon: FaExclamationTriangle },
@@ -129,25 +82,38 @@ function Dashboard() {
               </div>
               <div className="chart-container">{/* Add your chart component here */}</div>
             </div>
-            
+
             <div className="overdue">
-              <h3>Top Borrowers</h3>
+              <h3>Overdue History</h3>
               <table>
                 <thead>
                   <tr>
-                    <th>Student</th>
-                    <th>Books Borrowed</th>
+                    <th>Member ID</th>
+                    <th>Title</th>
+                    <th>ISBN</th>
+                    <th>Due Date</th>
+                    <th>Fine</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {topBorrowers.map((borrower, index) => (
-                    <tr key={borrower.id_number}>
-                      <td>{borrower.name}</td>
-                      <td>
-                        <strong>{borrower.borrowed_books_count}</strong>
-                      </td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <td>#27362</td>
+                    <td>The Quantum Paradox</td>
+                    <td>0-123456-47-9</td>
+                    <td>5</td>
+                    <td>
+                      <strong>₱5</strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#32223</td>
+                    <td>Beneath the Crimson Sky</td>
+                    <td>0-76452641-3</td>
+                    <td>5</td>
+                    <td>
+                      <strong>₱6</strong>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -159,20 +125,22 @@ function Dashboard() {
               <table>
                 <thead>
                   <tr>
-                    <th>Student</th>
+                    <th>ID</th>
+                    <th>ISBN</th>
                     <th>Title</th>
-                    <th>Call #</th>
-                    <th>Acc. #</th>
-                    <th>Date Borrowed</th>
-                    <th>Due Date</th>
+                    <th>Author</th>
+                    <th>Member</th>
+                    <th>Issued Date</th>
+                    <th>Return Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Virella Duskbane</td>
+                    <td>#27362</td>
+                    <td>33837</td>
                     <td>Echoes of the Forgotten</td>
-                    <td>808.8 1991</td>
-                    <td>889</td>
+                    <td>James Holloway</td>
+                    <td>Virella Duskbane</td>
                     <td>2025-01-09</td>
                     <td>2025-01-20</td>
                   </tr>
