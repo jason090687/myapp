@@ -11,7 +11,8 @@ import {
   FaBars,
   FaSearch,
   FaBell,
-  FaUserCircle
+  FaUserCircle,
+  FaQuestion
 } from 'react-icons/fa'
 import { ToastContainer, toast, Bounce } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -20,10 +21,12 @@ import './Sidebar.css'
 import { fetchUserDetails } from '../Features/api'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, reset } from '../Features/authSlice'
+import HelpGuideModal from './HelpGuideModal'
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
   const [userDetails, setUserDetails] = useState({})
   const [isLoading, setIsLoading] = useState(false)
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const location = useLocation()
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -53,7 +56,13 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/books', icon: FaBook, label: 'Books' },
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
     { path: '/history', icon: FaHistory, label: 'History' },
-    { path: '/settings', icon: FaCog, label: 'Settings' }
+    { path: '/settings', icon: FaCog, label: 'Settings' },
+    {
+      icon: FaQuestion,
+      label: 'Help Guide',
+      onClick: () => setIsHelpModalOpen(true),
+      isAction: true
+    }
   ]
 
   const handleLogout = async () => {
@@ -82,12 +91,26 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
         <nav className="sidebar-nav">
           <ul>
-            {menuItems.map((item) => (
-              <li key={item.path} className={location.pathname === item.path ? 'active' : ''}>
-                <Link to={item.path} data-tooltip={item.label}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
+            {menuItems.map((item, index) => (
+              <li
+                key={item.path || index}
+                className={location.pathname === item.path ? 'active' : ''}
+              >
+                {item.isAction ? (
+                  <button
+                    onClick={item.onClick}
+                    className="nav-action-btn"
+                    data-tooltip={item.label}
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </button>
+                ) : (
+                  <Link to={item.path} data-tooltip={item.label}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -128,7 +151,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
         </div>
       </nav>
 
-      {/* Toast notifications */}
+      <HelpGuideModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
+
       <ToastContainer
         position="top-right"
         autoClose={5000}
