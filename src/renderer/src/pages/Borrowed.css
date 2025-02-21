@@ -96,6 +96,21 @@
   text-align: center; /* Added this line */
 }
 
+.borrowed-table tr.disabled-row {
+  opacity: 0.6;
+  background-color: #f5f5f5;
+  pointer-events: none;
+}
+
+.borrowed-table tr.disabled-row td {
+  color: #666;
+}
+
+.borrowed-table tr.disabled-row .action-buttons-container button {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .loading-cell {
   height: 60vh;
   text-align: center;
