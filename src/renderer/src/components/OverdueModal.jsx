@@ -57,6 +57,7 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData, onSuccess }) => {
         const newDueDate = calculateNewDueDate(borrowData.due_date)
         paymentData.due_date = newDueDate
         paymentData.renewed = true
+        paymentData.renewed_count = (borrowData.renewed_count || 0) + 1
       }
 
       await processOverduePayment(token, borrowData.id, paymentData)
