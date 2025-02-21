@@ -23,6 +23,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const { token } = useSelector((state) => state.auth)
   const bookInputRef = useRef(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const dropdownRef = useRef(null)
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
@@ -85,6 +87,18 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    if (highlightedIndex >= 0 && dropdownRef.current) {
+      const highlightedElement = dropdownRef.current.children[highlightedIndex]
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({
+          block: 'nearest',
+          behavior: 'smooth'
+        })
+      }
+    }
+  }, [highlightedIndex])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (isSubmitting) return
@@ -131,6 +145,49 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     setShowBookDropdown(false)
   }
 
+  const handleKeyDown = (e) => {
+    if (!showBookDropdown || filteredBooks.length === 0) return
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setHighlightedIndex((prevIndex) => {
+          const nextIndex = prevIndex < filteredBooks.length - 1 ? prevIndex + 1 : prevIndex
+          return nextIndex
+        })
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setHighlightedIndex((prevIndex) => {
+          const nextIndex = prevIndex > 0 ? prevIndex - 1 : 0
+          return nextIndex
+        })
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (highlightedIndex >= 0) {
+          handleBookSelect(filteredBooks[highlightedIndex])
+        }
+        break
+      case 'Escape':
+        setShowBookDropdown(false)
+        setHighlightedIndex(-1)
+        break
+      default:
+        break
+    }
+  }
+
+  useEffect(() => {
+    setHighlightedIndex(-1)
+  }, [bookSearch])
+
+  useEffect(() => {
+    if (!showBookDropdown) {
+      setHighlightedIndex(-1)
+    }
+  }, [showBookDropdown])
+
   return isOpen ? (
     <div className="borrow-modal-overlay">
       <div className="borrow-modal-content">
@@ -169,19 +226,21 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                   value={bookSearch}
                   onChange={(e) => setBookSearch(e.target.value)}
                   onClick={() => setShowBookDropdown(true)}
+                  onKeyDown={handleKeyDown}
                   className="borrow-search-input"
                   required
                 />
                 {showBookDropdown && (
-                  <div className="borrow-search-results">
+                  <div className="borrow-search-results" ref={dropdownRef}>
                     {isLoading ? (
                       <div className="borrow-search-item">Loading books...</div>
                     ) : filteredBooks.length > 0 ? (
-                      filteredBooks.map((book) => (
+                      filteredBooks.map((book, index) => (
                         <div
                           key={book.id}
-                          className="borrow-search-item"
+                          className={`borrow-search-item ${index === highlightedIndex ? 'highlighted' : ''}`}
                           onClick={() => handleBookSelect(book)}
+                          onMouseEnter={() => setHighlightedIndex(index)}
                         >
                           {book.title} {book.author ? `- ${book.author}` : ''}
                           {book.isbn ? `(ISBN: ${book.isbn})` : ''}
