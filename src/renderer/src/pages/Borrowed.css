@@ -96,6 +96,13 @@
   text-align: center; /* Added this line */
 }
 
+.borrowed-table th:last-child,
+.borrowed-table td:last-child {
+  width: 400px;
+  min-width: 400px;
+  max-width: 400px;
+}
+
 .borrowed-table tr.disabled-row {
   opacity: 0.6;
   background-color: #f5f5f5;
@@ -173,6 +180,18 @@
   gap: 0.5rem;
   justify-content: center;
   align-items: center;
+  padding: 0 0.5rem;
+}
+
+.action-btn {
+  min-width: 90px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .action-btn.renew {
@@ -195,6 +214,21 @@
 
 .action-btn.renew:not(:disabled):hover {
   opacity: 0.9;
+}
+
+.action-btn.overdue {
+  background-color: #ef4444;
+  color: white;
+}
+
+.action-btn.overdue:hover {
+  background-color: #dc2626;
+}
+
+.action-btn.overdue:disabled {
+  background-color: #fca5a5;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .pagination {
@@ -258,6 +292,11 @@
   color: white;
 }
 
+.status-badge.paid-overdue {
+  background-color: #22c55e;
+  color: white;
+}
+
 .returned-row {
   background-color: #f8f9fa;
 }
@@ -266,4 +305,32 @@
   background-color: #e9ecef !important;
   color: #6c757d !important;
   cursor: not-allowed !important;
+}
+
+.disabled-row {
+  opacity: 0.7;
+  background-color: #f8fafc;
+}
+
+.disabled-row .action-btn {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1200px) {
+  .borrowed-table th:last-child,
+  .borrowed-table td:last-child {
+    width: 420px;
+    min-width: 420px;
+  }
+
+  .action-buttons-container {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .action-btn {
+    flex: 1;
+    min-width: 80px;
+  }
 }

@@ -55,7 +55,6 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
     { path: '/books', icon: FaBook, label: 'Books' },
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
-    { path: '/history', icon: FaHistory, label: 'History' },
     { path: '/settings', icon: FaCog, label: 'Settings' },
     {
       icon: FaQuestion,

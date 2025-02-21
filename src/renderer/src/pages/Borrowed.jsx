@@ -2,10 +2,16 @@ import { useEffect, useState } from 'react'
 import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import { useSelector } from 'react-redux'
-import { borrowBook, fetchBorrowedBooks, returnBook, renewBook } from '../Features/api'
+import {
+  fetchBorrowedBooks,
+  returnBook,
+  renewBook,
+  processOverduePayment // Add this import
+} from '../Features/api'
 import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
 import RenewModal from '../components/RenewModal'
+import OverdueModal from '../components/OverdueModal'
 import { Bounce, toast } from 'react-toastify'
 
 function Borrowed() {
@@ -24,6 +30,37 @@ function Borrowed() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false)
   const [selectedBorrow, setSelectedBorrow] = useState(null)
+  const [isOverdueModalOpen, setIsOverdueModalOpen] = useState(false)
+  const [selectedOverdue, setSelectedOverdue] = useState(null)
+
+  // Add function to check if book is overdue
+  const isOverdue = (dueDate) => {
+    const today = new Date()
+    const due = new Date(dueDate)
+    return due < today
+  }
+
+  // Add a class to overdue rows
+  const getRowClassName = (item) => {
+    let className = item.is_returned ? 'disabled-row' : ''
+    if (!item.is_returned && isOverdue(item.due_date)) {
+      className += ' overdue'
+    }
+    return className
+  }
+
+  // Add overdue status to status badge
+  const getStatusBadgeClass = (item) => {
+    if (item.is_returned) return 'returned'
+    if (item.paid && isOverdue(item.due_date)) return 'paid-overdue'
+    return isOverdue(item.due_date) ? 'overdue' : 'borrowed'
+  }
+
+  const getStatusText = (item) => {
+    if (item.is_returned) return 'Returned'
+    if (item.paid && isOverdue(item.due_date)) return 'Overdue Paid'
+    return isOverdue(item.due_date) ? 'Overdue' : 'Borrowed'
+  }
 
   // Debounce effect for search input
   useEffect(() => {
@@ -145,6 +182,84 @@ function Borrowed() {
     }
   }
 
+  const handleOverdueClick = (borrowItem) => {
+    setSelectedOverdue({
+      id: borrowItem.id,
+      student_name: borrowItem.student,
+      book_title: borrowItem.book_title,
+      due_date: borrowItem.due_date
+    })
+    setIsOverdueModalOpen(true)
+  }
+
+  const handleOverdueSubmit = async (paymentData) => {
+    try {
+      await processOverduePayment(token, paymentData.id, paymentData)
+
+      // Update local state immediately
+      setBorrowedBooks((prevBooks) =>
+        prevBooks.map((book) => {
+          if (book.id === paymentData.id) {
+            return {
+              ...book,
+              paid: true,
+              paid_at: paymentData.paid_at,
+              is_returned: paymentData.is_returned || book.is_returned,
+              returned_date: paymentData.is_returned
+                ? paymentData.returned_date
+                : book.returned_date
+            }
+          }
+          return book
+        })
+      )
+
+      // Refresh the data from server
+      await fetchBorrowedData(pagination.currentPage)
+
+      toast.success('Action completed successfully!')
+    } catch (error) {
+      toast.error(error.message || 'Failed to process action')
+      throw error
+    }
+  }
+
+  // Ensure refreshTable is not wrapped in useCallback to avoid stale closure
+  const refreshTable = async () => {
+    try {
+      await fetchBorrowedData(pagination.currentPage)
+    } catch (error) {
+      console.error('Failed to refresh table:', error)
+    }
+  }
+
+  // Add refresh function
+
+  // Update the table row rendering to hide overdue button when paid or renewed
+  const renderActionButtons = (item) => (
+    <div className="action-buttons-container">
+      <button
+        className="action-btn return"
+        disabled={item.is_returned || item.paid}
+        onClick={() => handleReturnBook(item.id)}
+      >
+        {item.is_returned ? 'Returned' : 'Return'}
+      </button>
+      <button
+        className="action-btn renew"
+        disabled={item.is_returned || item.paid || item.renewed_count >= 3}
+        onClick={() => handleRenewClick(item)}
+      >
+        Renew
+      </button>
+      {!item.is_returned && !item.paid && isOverdue(item.due_date) && (
+        <button className="action-btn overdue" onClick={() => handleOverdueClick(item)}>
+          Pay Overdue
+        </button>
+      )}
+    </div>
+  )
+
   const totalPages = Math.ceil(pagination.count / 10)
 
   return (
@@ -196,36 +311,17 @@ function Borrowed() {
                     </tr>
                   ) : (
                     borrowedBooks.map((item) => (
-                      <tr key={item.id} className={item.is_returned ? 'disabled-row' : ''}>
+                      <tr key={item.id} className={getRowClassName(item)}>
                         <td>{item.student_name}</td>
                         <td>{item.book_title}</td>
                         <td>{formatDate(item.borrowed_date)}</td>
                         <td>{formatDate(item.due_date)}</td>
                         <td>
-                          <span
-                            className={`status-badge ${item.is_returned ? 'returned' : 'borrowed'}`}
-                          >
-                            {item.is_returned ? 'Returned' : 'Borrowed'}
+                          <span className={`status-badge ${getStatusBadgeClass(item)}`}>
+                            {getStatusText(item)}
                           </span>
                         </td>
-                        <td>
-                          <div className="action-buttons-container">
-                            <button
-                              className="action-btn return"
-                              disabled={item.is_returned}
-                              onClick={() => handleReturnBook(item.id)}
-                            >
-                              {item.is_returned ? 'Returned' : 'Return'}
-                            </button>
-                            <button
-                              className="action-btn renew"
-                              disabled={item.is_returned || item.renewed_count >= 3}
-                              onClick={() => handleRenewClick(item)}
-                            >
-                              Renew
-                            </button>
-                          </div>
-                        </td>
+                        <td>{renderActionButtons(item)}</td>
                       </tr>
                     ))
                   )}
@@ -263,6 +359,13 @@ function Borrowed() {
           onClose={() => setIsRenewModalOpen(false)}
           onSubmit={handleRenewSubmit}
           borrowData={selectedBorrow || {}}
+        />
+        <OverdueModal
+          isOpen={isOverdueModalOpen}
+          onClose={() => setIsOverdueModalOpen(false)}
+          onSubmit={handleOverdueSubmit}
+          onSuccess={refreshTable} // Add this line
+          borrowData={selectedOverdue || {}}
         />
       </div>
     </div>

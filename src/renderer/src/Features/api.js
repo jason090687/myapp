@@ -294,3 +294,26 @@ export const renewBook = async (token, borrowId, renewData) => {
     throw new Error(error.response?.data?.message || 'Failed to renew book')
   }
 }
+
+export const processOverduePayment = async (token, borrowId, paymentData) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/borrow/fines/${borrowId}/`,
+      {
+        ...paymentData,
+        paid: true,
+        paid_at: paymentData.paid_at,
+        is_returned: paymentData.is_returned || false,
+        returned_date: paymentData.is_returned ? new Date().toISOString().split('T')[0] : null
+      },
+      getAuthHeaders(token)
+    )
+
+    return response.data
+  } catch (error) {
+    console.error('Payment processing error:', error)
+    throw new Error(
+      error.response?.data?.message || error.response?.data?.detail || 'Failed to process payment'
+    )
+  }
+}
