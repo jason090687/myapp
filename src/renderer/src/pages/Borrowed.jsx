@@ -240,19 +240,19 @@ function Borrowed() {
     <div className="action-buttons-container">
       <button
         className="action-btn return"
-        disabled={item.is_returned || item.paid}
+        disabled={item.is_returned}
         onClick={() => handleReturnBook(item.id)}
       >
         {item.is_returned ? 'Returned' : 'Return'}
       </button>
       <button
         className="action-btn renew"
-        disabled={item.is_returned || item.paid || item.renewed_count >= 3}
+        disabled={item.is_returned || item.renewed_count >= 3}
         onClick={() => handleRenewClick(item)}
       >
         Renew
       </button>
-      {!item.is_returned && !item.paid && isOverdue(item.due_date) && (
+      {!item.is_returned && isOverdue(item.due_date) && !item.paid && (
         <button className="action-btn overdue" onClick={() => handleOverdueClick(item)}>
           Pay Overdue
         </button>
