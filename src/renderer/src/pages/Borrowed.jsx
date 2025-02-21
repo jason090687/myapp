@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import { useSelector } from 'react-redux'
-import { borrowBook, fetchBorrowedBooks, returnBook } from '../Features/api'
+import { borrowBook, fetchBorrowedBooks, returnBook, renewBook } from '../Features/api'
 import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
+import RenewModal from '../components/RenewModal'
+import { Bounce, toast } from 'react-toastify'
 
 function Borrowed() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -20,6 +22,8 @@ function Borrowed() {
     currentPage: 1
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isRenewModalOpen, setIsRenewModalOpen] = useState(false)
+  const [selectedBorrow, setSelectedBorrow] = useState(null)
 
   // Debounce effect for search input
   useEffect(() => {
@@ -86,10 +90,8 @@ function Borrowed() {
       // await borrowBook(token, borrowData)
       setIsModalOpen(false)
       await fetchBorrowedData(pagination.currentPage) // Refresh the borrowed books list
-      alert('Book borrowed successfully!')
     } catch (error) {
       console.error('Error borrowing book:', error)
-      alert(error.message || 'Failed to borrow book')
     }
   }
 
@@ -98,11 +100,48 @@ function Borrowed() {
       await returnBook(token, borrowId, {
         returned_date: new Date().toISOString().split('T')[0]
       })
-      await fetchBorrowedData(pagination.currentPage) // Refresh the borrowed books list
-      alert('Book returned successfully!')
+      await fetchBorrowedData(pagination.currentPage)
+      toast.success('Book returned successfully!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: 'light',
+        transition: Bounce
+      })
     } catch (error) {
       console.error('Error returning book:', error)
-      alert(error.message || 'Failed to return book')
+      toast.error(error.message || 'Failed to return book', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: 'light',
+        transition: Bounce
+      })
+    }
+  }
+
+  const handleRenewClick = (borrowItem) => {
+    setSelectedBorrow({
+      id: borrowItem.id,
+      student_name: borrowItem.student,
+      book_title: borrowItem.book_title,
+      due_date: borrowItem.due_date
+    })
+    setIsRenewModalOpen(true)
+  }
+
+  const handleRenewSubmit = async (renewData) => {
+    try {
+      await renewBook(token, renewData.id, { due_date: renewData.due_date })
+      await fetchBorrowedData(pagination.currentPage)
+    } catch (error) {
+      throw error
     }
   }
 
@@ -157,8 +196,8 @@ function Borrowed() {
                     </tr>
                   ) : (
                     borrowedBooks.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.student}</td>
+                      <tr key={item.id} className={item.is_returned ? 'disabled-row' : ''}>
+                        <td>{item.student_name}</td>
                         <td>{item.book_title}</td>
                         <td>{formatDate(item.borrowed_date)}</td>
                         <td>{formatDate(item.due_date)}</td>
@@ -181,6 +220,7 @@ function Borrowed() {
                             <button
                               className="action-btn renew"
                               disabled={item.is_returned || item.renewed_count >= 3}
+                              onClick={() => handleRenewClick(item)}
                             >
                               Renew
                             </button>
@@ -217,6 +257,12 @@ function Borrowed() {
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onSubmit={handleSubmitBorrow}
+        />
+        <RenewModal
+          isOpen={isRenewModalOpen}
+          onClose={() => setIsRenewModalOpen(false)}
+          onSubmit={handleRenewSubmit}
+          borrowData={selectedBorrow || {}}
         />
       </div>
     </div>

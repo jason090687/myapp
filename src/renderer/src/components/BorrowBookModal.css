@@ -20,8 +20,9 @@
   max-width: 900px;
   max-height: 500px;
   min-height: 400px;
-  overflow-y: auto;
+  overflow-y: visible; /* Change from hidden to visible */
   position: relative;
+  z-index: 1001; /* Ensure modal is above overlay */
 }
 
 .borrow-modal-header {
@@ -93,8 +94,9 @@
   max-width: 900px; /* Smaller for BorrowBookModal's 2 columns */
   max-height: 500px; /* Set specific height instead of 90vh */
   min-height: 400px; /* Add minimum height */
-  overflow-y: hidden; /* Change from auto to hidden */
+  overflow-y: visible; /* Change from hidden to visible */
   position: relative; /* Add this */
+  z-index: 1001; /* Ensure modal is above overlay */
 }
 
 .borrow-modal-overlay.active .modal-content {
@@ -122,9 +124,10 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 columns for BorrowBookModal */
   max-height: 350px; /* Adjust to fit within modal */
-  overflow-y: auto;
+  overflow-y: visible; /* Change from auto to visible */
   gap: 1rem; /* Reduce gap between form elements */
   padding: 1rem 1.5rem; /* Adjust padding */
+  position: relative; /* Add this */
 }
 
 .borrow-form-group {
@@ -162,8 +165,9 @@
   padding: 1rem 1.5rem; /* Add consistent padding */
   border-top: 1px solid #e5e7eb;
   margin-top: 0; /* Remove top margin */
-  z-index: 1; /* Add lower z-index */
+  z-index: 1001; /* Same as modal content */
   position: relative; /* Add position relative */
+  background: white; /* Ensure background is solid */
 }
 
 /* Add scrollbar styling */
@@ -291,6 +295,7 @@
   height: 40px;
   display: flex;
   align-items: center;
+  z-index: 1002; /* Higher than modal content */
 }
 
 .borrow-search-wrapper:focus-within {
@@ -330,8 +335,10 @@
   border-radius: 0.375rem;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1050;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 1003; /* Higher than search wrapper */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .borrow-search-wrapper .select-icon {
@@ -371,8 +378,10 @@
   margin-top: 4px;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1050; /* Increase z-index to be higher than modal-footer */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 1003; /* Higher than search wrapper */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   /* width: calc(100% - 2rem); /* Account for padding */
 }
 
