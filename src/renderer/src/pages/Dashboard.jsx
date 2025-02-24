@@ -21,7 +21,7 @@ import {
   Legend
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
   CardSkeleton,
@@ -43,6 +43,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 function Dashboard() {
+  const navigate = useNavigate()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [totalBooks, setTotalBooks] = useState('Loading...')
   const [topBorrowers, setTopBorrowers] = useState([])
@@ -209,9 +210,25 @@ function Dashboard() {
     }
   }
 
+  const handleCardClick = (route) => {
+    navigate(route)
+  }
+
   const cards = [
-    { title: 'Total Books', value: totalBooks, icon: FaBook },
-    { title: 'Borrowed Books', value: bookStats.borrowed || '0', icon: FaBookReader },
+    {
+      title: 'Total Books',
+      value: totalBooks,
+      icon: FaBook,
+      route: '/books',
+      clickable: true
+    },
+    {
+      title: 'Borrowed Books',
+      value: bookStats.borrowed || '0',
+      icon: FaBookReader,
+      route: '/borrowed',
+      clickable: true
+    },
     { title: 'Returned Books', value: bookStats.returned || '0', icon: FaUndo },
     { title: 'Overdue Books', value: bookStats.overdue || '0', icon: FaClock },
     { title: 'Pending Books', value: bookStats.pending || '0', icon: FaExclamationTriangle },
@@ -237,7 +254,12 @@ function Dashboard() {
                   .fill(null)
                   .map((_, index) => <CardSkeleton key={index} />)
               : cards.map((card, index) => (
-                  <div className="card" key={index}>
+                  <div
+                    className={`card ${card.clickable ? 'clickable' : ''}`}
+                    key={index}
+                    onClick={() => card.clickable && handleCardClick(card.route)}
+                    style={{ cursor: card.clickable ? 'pointer' : 'default' }}
+                  >
                     <div className="card-icon">
                       <card.icon />
                     </div>
