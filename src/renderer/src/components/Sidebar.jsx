@@ -22,6 +22,7 @@ import { fetchUserDetails } from '../Features/api'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, reset } from '../Features/authSlice'
 import HelpGuideModal from './HelpGuideModal'
+import Navbar from './Navbar' // Make sure Navbar is imported
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
   const [userDetails, setUserDetails] = useState({})
@@ -57,11 +58,10 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
     { path: '/settings', icon: FaCog, label: 'Settings' },
     {
-      path: '#help',
       icon: FaQuestion,
       label: 'Help Guide',
-      isAction: true,
-      onClick: () => setIsHelpModalOpen(true)
+      onClick: () => setIsHelpModalOpen(true),
+      isAction: true
     }
   ]
 
@@ -129,27 +129,12 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
         </nav>
       </aside>
 
-      <nav className={`navbar ${isCollapsed ? 'collapsed' : ''}`}>
-        <div className="navbar-left">
-          <button onClick={onToggle} className="sidebar-toggle">
-            <FaBars />
-          </button>
-          <div className="search-box">
-            <FaSearch />
-            <input type="text" placeholder="Search..." />
-          </div>
-        </div>
-
-        <div className="navbar-right">
-          <div className="nav-item">
-            <FaBell />
-          </div>
-          <div className="nav-item user-profile">
-            <FaUserCircle className="user-avatar" />
-            <span>{isLoading ? 'Loading...' : userDetails.first_name || 'User'}</span>
-          </div>
-        </div>
-      </nav>
+      <Navbar
+        isCollapsed={isCollapsed}
+        onToggle={onToggle}
+        userDetails={userDetails}
+        isLoading={isLoading}
+      />
 
       <HelpGuideModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
 

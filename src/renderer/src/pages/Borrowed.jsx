@@ -13,6 +13,7 @@ import BorrowBookModal from '../components/BorrowBookModal'
 import RenewModal from '../components/RenewModal'
 import OverdueModal from '../components/OverdueModal'
 import { Bounce, toast } from 'react-toastify'
+import { useSearchParams } from 'react-router-dom'
 
 function Borrowed() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -32,6 +33,9 @@ function Borrowed() {
   const [selectedBorrow, setSelectedBorrow] = useState(null)
   const [isOverdueModalOpen, setIsOverdueModalOpen] = useState(false)
   const [selectedOverdue, setSelectedOverdue] = useState(null)
+  const [searchParams] = useSearchParams()
+  const highlightedId = searchParams.get('id')
+  const shouldHighlight = searchParams.get('highlight') === 'true'
 
   // Add function to check if book is overdue
   const isOverdue = (dueDate) => {
@@ -262,6 +266,21 @@ function Borrowed() {
 
   const totalPages = Math.ceil(pagination.count / 10)
 
+  // Add this effect to scroll to the highlighted item
+  useEffect(() => {
+    if (highlightedId && shouldHighlight) {
+      const element = document.getElementById(`borrowed-item-${highlightedId}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        element.classList.add('highlighted')
+        // Remove highlight after animation
+        setTimeout(() => {
+          element.classList.remove('highlighted')
+        }, 3000)
+      }
+    }
+  }, [highlightedId, shouldHighlight])
+
   return (
     <div className="app-wrapper">
       <Sidebar isCollapsed={isCollapsed} onToggle={handleSidebarToggle} />
@@ -311,7 +330,15 @@ function Borrowed() {
                     </tr>
                   ) : (
                     borrowedBooks.map((item) => (
-                      <tr key={item.id} className={getRowClassName(item)}>
+                      <tr
+                        key={item.id}
+                        id={`borrowed-item-${item.id}`}
+                        className={
+                          highlightedId === item.id.toString()
+                            ? 'highlighted'
+                            : getRowClassName(item)
+                        }
+                      >
                         <td>{item.student_name}</td>
                         <td>{item.book_title}</td>
                         <td>{formatDate(item.borrowed_date)}</td>
