@@ -1,0 +1,30 @@
+.search-container {
+  position: relative;
+  flex: 1;
+  max-width: 600px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  gap: 10px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.search-box .searching {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

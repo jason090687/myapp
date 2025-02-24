@@ -18,15 +18,15 @@ import {
   FaPen
 } from 'react-icons/fa'
 import './AddBookModal.css'
-import { fetchStatus, fetchUserDetails } from '../Features/api'
+import { fetchUserDetails } from '../Features/api'
 import { useSelector } from 'react-redux'
 import { Bounce, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { statusOptions } from '../constants/statusOptions'
 
 const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState([])
-  const [status, setStatus] = useState([])
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -43,7 +43,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     date_received: '',
     subject: '',
     additional_author: '',
-    status: '',
+    status: 'available', // Set default value
     date_processed: new Date().toISOString().split('T')[0],
     processed_by: currentUser.id // Ensure it's set correctly
   })
@@ -64,26 +64,6 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     }
     if (token) fetchUserData()
   }, [token, currentUser.id])
-
-  useEffect(() => {
-    setIsLoading(true)
-    const fetchStatusData = async () => {
-      try {
-        const response = await fetchStatus(token)
-        const statusArray = Object.entries(response).map(([key, value]) => ({
-          value: key,
-          label: value
-        }))
-        setStatus(statusArray)
-      } catch (error) {
-        console.error('Error fetching status:', error)
-        setStatus([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchStatusData()
-  }, [token])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -111,10 +91,24 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
 
     try {
       const bookData = {
-        ...formData,
+        title: formData.title || null,
+        author: formData.author || null,
+        series_title: formData.series_title || null,
+        publisher: formData.publisher || null,
+        place_of_publication: formData.place_of_publication || null,
         year: formData.year ? parseInt(formData.year) : null,
-        processed_by: formData.processed_by,
-        status: formData.status
+        edition: formData.edition || null,
+        volume: formData.volume || null,
+        physical_description: formData.physical_description || null,
+        isbn: formData.isbn || null,
+        accession_number: formData.accession_number || null,
+        barcode: formData.barcode || null,
+        date_received: formData.date_received || null,
+        subject: formData.subject || null,
+        additional_author: formData.additional_author || null,
+        status: formData.status, // Don't modify status case or set to null
+        date_processed: formData.date_processed || null,
+        processed_by: formData.processed_by
       }
 
       await onSubmit(bookData)
@@ -143,7 +137,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
             date_received: '',
             subject: '',
             additional_author: '',
-            status: '',
+            status: 'available', // Set default value
             date_processed: new Date().toISOString().split('T')[0],
             processed_by: userDetails.id || currentUser.id // Ensure correct user
           })
@@ -220,25 +214,21 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="status">Status</label>
+              <label htmlFor="status">Status*</label>
               <div className="select-wrapper">
                 <select
                   id="status"
                   name="status"
-                  value={formData.status}
+                  value={formData.status || 'available'} // Add fallback
                   onChange={handleChange}
                   className="select-field"
-                  disabled={status.length === 0}
+                  required
                 >
-                  <option value="" disabled>
-                    Select status
-                  </option>
-                  {status.length > 0 &&
-                    status.map(({ value, label }) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

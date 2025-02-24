@@ -17,14 +17,14 @@ import {
   FaTag,
   FaPen
 } from 'react-icons/fa'
-import { fetchStatus, fetchUserDetails, updateBook } from '../Features/api'
+import { fetchUserDetails, updateBook } from '../Features/api'
 import { useSelector } from 'react-redux'
 import './AddBookModal.css' // Use the same modal styles
+import { statusOptions } from '../constants/statusOptions'
 
 const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState([])
-  const [status, setStatus] = useState([])
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -41,29 +41,12 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     date_received: '',
     subject: '',
     additional_author: '',
-    status: 'available',
+    status: 'available', // Set default value
     date_processed: new Date().toISOString().split('T')[0],
     processed_by: currentUser.id
   })
 
   const { token } = useSelector((state) => state.auth)
-
-  // Load status options
-  useEffect(() => {
-    const fetchStatusData = async () => {
-      try {
-        const response = await fetchStatus(token)
-        const statusArray = Object.entries(response).map(([key, value]) => ({
-          value: key,
-          label: value
-        }))
-        setStatus(statusArray)
-      } catch (error) {
-        console.error('Error fetching status:', error)
-      }
-    }
-    fetchStatusData()
-  }, [token])
 
   // Load user details
   useEffect(() => {
@@ -98,7 +81,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
         date_received: bookData.dateReceived || '',
         subject: bookData.subject || '',
         additional_author: bookData.additionalAuthor || '',
-        status: bookData.status || 'available',
+        status: bookData.status || 'available', // Add fallback
         date_processed: bookData.dateProcessed || new Date().toISOString().split('T')[0],
         processed_by: bookData.processedBy || currentUser.id
       })
@@ -151,24 +134,24 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     try {
       // Format the data according to your API requirements
       const updatedData = {
-        id: formData.id, // Make sure ID is included in the update data
-        title: formData.title,
-        author: formData.author,
-        series_title: formData.series_title,
-        publisher: formData.publisher,
-        place_of_publication: formData.place_of_publication,
+        id: formData.id,
+        title: formData.title || null,
+        author: formData.author || null,
+        series_title: formData.series_title || null,
+        publisher: formData.publisher || null,
+        place_of_publication: formData.place_of_publication || null,
         year: formData.year ? parseInt(formData.year) : null,
-        edition: formData.edition,
-        volume: formData.volume,
-        physical_description: formData.physical_description,
-        isbn: formData.isbn,
-        accession_number: formData.accession_number,
-        barcode: formData.barcode,
+        edition: formData.edition || null,
+        volume: formData.volume || null,
+        physical_description: formData.physical_description || null,
+        isbn: formData.isbn || null,
+        accession_number: formData.accession_number || null,
+        barcode: formData.barcode || null,
         date_received: formData.date_received || null,
-        subject: formData.subject,
-        additional_author: formData.additional_author,
-        status: formData.status,
-        date_processed: formData.date_processed,
+        subject: formData.subject || null,
+        additional_author: formData.additional_author || null,
+        status: formData.status, // Don't modify status case or set to null
+        date_processed: formData.date_processed || null,
         processed_by: currentUser.id
       }
 
@@ -250,11 +233,12 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
                 <select
                   id="status"
                   name="status"
-                  value={formData.status}
+                  value={formData.status || 'available'} // Add fallback
                   onChange={handleChange}
                   className="select-field"
+                  required
                 >
-                  {status.map(({ value, label }) => (
+                  {statusOptions.map(({ value, label }) => (
                     <option key={value} value={value}>
                       {label}
                     </option>

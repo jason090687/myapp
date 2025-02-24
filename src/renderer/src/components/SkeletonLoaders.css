@@ -1,0 +1,207 @@
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes wave {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-base {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+  background-size: 200% 100%;
+  animation: wave 3s infinite ease-in-out; /* Increased duration and smoother easing */
+  border-radius: 4px;
+}
+
+/* Card Skeleton */
+.skeleton-card {
+  background: linear-gradient(145deg, rgba(10, 11, 100, 0.8) 0%, rgba(30, 58, 138, 0.8) 100%);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  display: flex;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: wave 2.5s infinite ease-in-out; /* Slower card wave */
+}
+
+.skeleton-icon {
+  width: 4rem;
+  height: 4rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+}
+
+.skeleton-content {
+  flex: 1;
+}
+
+.skeleton-title {
+  height: 1.25rem;
+  width: 60%;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 1rem;
+}
+
+.skeleton-value {
+  height: 2.5rem;
+  width: 80%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Chart Skeleton */
+.skeleton-chart {
+  padding: 2rem;
+  background: white;
+  border-radius: 1.5rem;
+}
+
+.skeleton-chart-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-title-lg {
+  width: 200px;
+  height: 1.5rem;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+  background-size: 200% 100%;
+  animation: wave 3s infinite ease-in-out;
+  border-radius: 4px;
+}
+
+.skeleton-select {
+  width: 100px;
+  height: 1.5rem;
+  @extend .skeleton-base;
+}
+
+.skeleton-chart-body {
+  height: 400px;
+  @extend .skeleton-base;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Table Skeleton */
+.skeleton-table {
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.skeleton-header {
+  display: flex;
+  padding: 1rem;
+  background: #f8fafc;
+  gap: 1rem;
+}
+
+.skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.skeleton-cell {
+  height: 1.25rem;
+  @extend .skeleton-base;
+}
+
+/* Book Card Skeleton */
+.skeleton-book {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-book::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  animation: wave 2.8s infinite ease-in-out; /* Slower book wave */
+}
+
+.skeleton-book-title {
+  height: 1.5rem;
+  width: 80%;
+  @extend .skeleton-base;
+  margin-bottom: 1rem;
+}
+
+.skeleton-book-author {
+  height: 1.25rem;
+  width: 60%;
+  @extend .skeleton-base;
+  margin-bottom: 1rem;
+}
+
+.skeleton-book-status {
+  height: 2rem;
+  width: 40%;
+  @extend .skeleton-base;
+}
+
+/* Loading Wave Effect */
+.wave-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  animation: wave 3.2s infinite ease-in-out; /* Slower general wave */
+  transform: translateX(-100%);
+  transition: all 0.5s ease-in-out; /* Smoother transition */
+}

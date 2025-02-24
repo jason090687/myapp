@@ -4,7 +4,7 @@ import { FaLock } from 'react-icons/fa'
 import InputField from '../components/InputField'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
-import background from '../assets/background.png'
+import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './SignUpPage.css'
 import { useDispatch, useSelector } from 'react-redux'
@@ -13,7 +13,7 @@ import { register, reset } from '../Features/authSlice'
 function SignUpPage() {
   const dispatch = useDispatch()
   const { isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
-  
+
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: '',

@@ -10,14 +10,21 @@ const RenewModal = ({ isOpen, onClose, onSubmit, borrowData }) => {
   const { token } = useSelector((state) => state.auth)
 
   const calculateNewDueDate = (currentDueDate) => {
+    // Start with the next day
     let newDate = new Date(currentDueDate)
+    newDate.setDate(newDate.getDate() + 1)
+
     let daysAdded = 0
 
     while (daysAdded < 5) {
-      newDate.setDate(newDate.getDate() + 1)
-      // Check if it's not weekend (0 is Sunday, 6 is Saturday)
+      // Changed from >= to <
+      // Skip weekends (0 is Sunday, 6 is Saturday)
       if (newDate.getDay() !== 0 && newDate.getDay() !== 6) {
         daysAdded++
+      }
+      // If we haven't reached 5 working days, add another day
+      if (daysAdded < 5) {
+        newDate.setDate(newDate.getDate() + 1)
       }
     }
 
