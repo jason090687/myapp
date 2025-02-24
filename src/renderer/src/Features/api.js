@@ -209,17 +209,6 @@ export const deleteBook = async (token, bookId) => {
   }
 }
 
-export const fetchStatus = async (token) => {
-  try {
-    const response = await axios.get(`${API_URL}/marc/status/`, getAuthHeaders(token))
-    // The API returns status list as an array of strings
-    return response.data
-  } catch (error) {
-    console.error('Error fetching status:', error)
-    return ['Available', 'Borrowed', 'Lost'] // Fallback default values
-  }
-}
-
 export const fetchBorrowedBooks = async (token, page = 1) => {
   if (!token) {
     console.error('Error: Missing authentication token')
@@ -315,5 +304,118 @@ export const processOverduePayment = async (token, borrowId, paymentData) => {
     throw new Error(
       error.response?.data?.message || error.response?.data?.detail || 'Failed to process payment'
     )
+  }
+}
+
+export const fetchTopBooks = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/most-borrowed/`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch top books')
+  }
+}
+
+export const fetchNewBooks = async (token) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/marc/search/?ordering=-date_added`,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch new books')
+  }
+}
+
+export const fetchTotalBooksCount = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/marc/search/`)
+    return response.data.count
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch total books count')
+  }
+}
+
+export const fetchDashboardStats = async () => {
+  try {
+    const [booksRes, borrowedRes, returnedRes, overdueRes] = await Promise.all([
+      axios.get(`${API_URL}/marc/search/`),
+      axios.get(`${API_URL}/borrow/list/`),
+      axios.get(`${API_URL}/borrow/list/?is_returned=true`),
+      axios.get(`${API_URL}/borrow/list/?is_overdue=true`)
+    ])
+
+    return {
+      totalBooks: booksRes.data.count,
+      borrowed: borrowedRes.data.count,
+      returned: returnedRes.data.count,
+      overdue: overdueRes.data.count
+    }
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch dashboard stats')
+  }
+}
+
+export const fetchAllStudentsWithBorrowCount = async () => {
+  try {
+    const firstResponse = await axios.get(`${API_URL}/students/`)
+    const totalPages = Math.ceil(firstResponse.data.count / 10)
+
+    const pagePromises = Array.from({ length: totalPages }, (_, i) =>
+      axios.get(`${API_URL}/students/?page=${i + 1}`)
+    )
+
+    const pages = await Promise.all(pagePromises)
+    const allStudents = pages.flatMap((response) => response.data.results)
+
+    return allStudents
+      .filter((student) => student.borrowed_books_count >= 1)
+      .sort((a, b) => b.borrowed_books_count - a.borrowed_books_count)
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch students')
+  }
+}
+
+export const fetchRecentCheckouts = async (limit = 5) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/list/`)
+    return response.data.results.slice(0, limit)
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch recent checkouts')
+  }
+}
+
+export const fetchBorrowedBooksStats = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/list/?page_size=1000`)
+    const books = response.data.results
+
+    // Count books by status
+    const stats = books.reduce(
+      (acc, book) => {
+        const status = book.status.toLowerCase()
+        acc[status] = (acc[status] || 0) + 1
+        return acc
+      },
+      {
+        borrowed: 0,
+        returned: 0,
+        overdue: 0,
+        pending: 0
+      }
+    )
+
+    // Calculate total pending fees
+    const totalFees = books
+      .filter((book) => book.status.toLowerCase() === 'overdue')
+      .reduce((total, book) => total + (book.amount || 0), 0)
+
+    return {
+      ...stats,
+      pendingFees: totalFees
+    }
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrowed books stats')
   }
 }

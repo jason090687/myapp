@@ -24,14 +24,21 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData, onSuccess }) => {
   }, [borrowData.due_date])
 
   const calculateNewDueDate = (currentDueDate) => {
+    // Start with the next day
     let newDate = new Date(currentDueDate)
+    newDate.setDate(newDate.getDate() + 1)
+
     let daysAdded = 0
 
     while (daysAdded < 5) {
-      newDate.setDate(newDate.getDate() + 1)
+      // Changed from >= to <
       // Skip weekends (0 is Sunday, 6 is Saturday)
       if (newDate.getDay() !== 0 && newDate.getDay() !== 6) {
         daysAdded++
+      }
+      // If we haven't reached 5 working days, add another day
+      if (daysAdded < 5) {
+        newDate.setDate(newDate.getDate() + 1)
       }
     }
 
