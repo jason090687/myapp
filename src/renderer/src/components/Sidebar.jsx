@@ -57,10 +57,11 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
     { path: '/settings', icon: FaCog, label: 'Settings' },
     {
+      path: '#help',
       icon: FaQuestion,
       label: 'Help Guide',
-      onClick: () => setIsHelpModalOpen(true),
-      isAction: true
+      isAction: true,
+      onClick: () => setIsHelpModalOpen(true)
     }
   ]
 

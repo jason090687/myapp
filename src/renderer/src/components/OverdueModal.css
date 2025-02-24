@@ -9,22 +9,33 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(8px);
 }
 
 .overdue-modal-content {
   background: white;
-  padding: 2rem;
-  border-radius: 0.75rem;
+  padding: 2.5rem;
+  border-radius: 1rem;
   width: 95%;
   max-width: 500px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   position: relative;
+  animation: modalSlideUp 0.3s ease-out;
 }
 
 .overdue-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.overdue-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .overdue-modal-close {
@@ -40,18 +51,27 @@
 }
 
 .overdue-info-group {
-  margin-bottom: 1rem;
+  background: #f8fafc;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1.25rem;
 }
 
 .overdue-info-group label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: #64748b;
   margin-bottom: 0.25rem;
 }
 
 .overdue-info-group p {
+  margin-top: 0.5rem;
   font-size: 1rem;
+  font-weight: 500;
   color: #1e293b;
   display: flex;
   align-items: center;
@@ -60,6 +80,7 @@
 
 .overdue-info-group .amount {
   color: #ef4444;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
@@ -72,26 +93,31 @@
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding-top: 1rem;
+  padding-top: 1.5rem;
+  margin-top: 1rem;
   border-top: 1px solid #e2e8f0;
 }
 
 .overdue-submit-btn,
 .overdue-cancel-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
+  padding: 0.875rem 1.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .overdue-submit-btn {
-  background-color: #ef4444;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   border: none;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
 }
 
-.overdue-submit-btn:hover {
-  background-color: #dc2626;
+.overdue-submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.3);
 }
 
 .overdue-cancel-btn {
@@ -122,14 +148,16 @@
 
 .action-select {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.875rem;
+  border-radius: 0.75rem;
   border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  background-color: #f8fafc;
   font-size: 0.875rem;
-  color: #1e293b;
-  background-color: white;
+  font-weight: 500;
+  color: #0f172a;
   cursor: pointer;
   margin-top: 0.5rem;
+  transition: all 0.2s;
 }
 
 .action-select:focus {
@@ -187,4 +215,15 @@
 
 .overdue-submit-btn:hover {
   background-color: #dc2626;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

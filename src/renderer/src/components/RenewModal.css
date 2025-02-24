@@ -9,20 +9,18 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
 }
 
 .renew-modal-content {
   background: white;
-  padding: 2rem;
+  padding: 2.5rem;
   border-radius: 1rem;
   width: 95%;
   max-width: 500px;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   position: relative;
-  animation: modalSlideIn 0.3s ease-out;
+  animation: modalSlideUp 0.3s ease-out;
 }
 
 .renew-modal-header {
@@ -30,14 +28,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .renew-modal-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -62,35 +60,38 @@
 }
 
 .renew-info-group {
-  margin-bottom: 1.5rem;
-  background-color: #f8fafc;
-  padding: 1rem;
-  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  background: #f8fafc;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
   border: 1px solid #e2e8f0;
 }
 
 .renew-info-group:last-child {
+  background: #f0f9ff;
+  border-color: #bae6fd;
   margin-bottom: 0;
 }
 
 .renew-info-group label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #64748b;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.05em;
 }
 
 .renew-info-group p {
   font-size: 1rem;
-  color: #1f2937;
+  color: #1e293b;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
+  margin-top: 0.5rem;
 }
 
 .calendar-icon {
@@ -102,14 +103,15 @@
   justify-content: flex-end;
   gap: 1rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 1rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 .renew-submit-btn,
 .renew-cancel-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
+  padding: 0.875rem 1.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
   font-size: 0.875rem;
   transition: all 0.2s;
   display: flex;
@@ -118,14 +120,15 @@
 }
 
 .renew-submit-btn {
-  background-color: #4f46e5;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
   color: white;
   border: none;
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
 }
 
 .renew-submit-btn:hover:not(:disabled) {
-  background-color: #4338ca;
   transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(14, 165, 233, 0.3);
 }
 
 .renew-submit-btn:disabled {
@@ -165,14 +168,14 @@
   }
 }
 
-@keyframes modalSlideIn {
+@keyframes modalSlideUp {
   from {
-    transform: translateY(-10px);
     opacity: 0;
+    transform: translateY(10px);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateY(0);
   }
 }
 

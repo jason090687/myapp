@@ -252,9 +252,9 @@ function Borrowed() {
       >
         Renew
       </button>
-      {!item.is_returned && isOverdue(item.due_date) && !item.paid && (
+      {isOverdue(item.due_date) && !item.is_returned && !item.paid && (
         <button className="action-btn overdue" onClick={() => handleOverdueClick(item)}>
-          Pay Overdue
+          Pay
         </button>
       )}
     </div>
