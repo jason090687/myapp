@@ -4,7 +4,7 @@ import { FaLock } from 'react-icons/fa'
 import InputField from '../components/InputField'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
-import background from '../assets/background.png'
+import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './SignInPage.css'
 import { useDispatch, useSelector } from 'react-redux'
@@ -101,8 +101,15 @@ function SignInPage() {
               </a>
 
               <div className="login-button">
-                <Button type="submit" isLoading={isLoading}>
-                  Log In
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <div className="spinner-wrapper">
+                      <div className="spinner" />
+                      <span>Signing in...</span>
+                    </div>
+                  ) : (
+                    'Log In'
+                  )}
                 </Button>
               </div>
             </form>

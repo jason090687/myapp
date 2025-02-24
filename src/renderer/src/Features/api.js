@@ -385,3 +385,37 @@ export const fetchRecentCheckouts = async (limit = 5) => {
     throw new Error(error.response?.data?.message || 'Failed to fetch recent checkouts')
   }
 }
+
+export const fetchBorrowedBooksStats = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/list/?page_size=1000`)
+    const books = response.data.results
+
+    // Count books by status
+    const stats = books.reduce(
+      (acc, book) => {
+        const status = book.status.toLowerCase()
+        acc[status] = (acc[status] || 0) + 1
+        return acc
+      },
+      {
+        borrowed: 0,
+        returned: 0,
+        overdue: 0,
+        pending: 0
+      }
+    )
+
+    // Calculate total pending fees
+    const totalFees = books
+      .filter((book) => book.status.toLowerCase() === 'overdue')
+      .reduce((total, book) => total + (book.amount || 0), 0)
+
+    return {
+      ...stats,
+      pendingFees: totalFees
+    }
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrowed books stats')
+  }
+}

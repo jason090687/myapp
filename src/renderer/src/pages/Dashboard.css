@@ -4,7 +4,12 @@
   margin-left: var(--sidebar-width);
   padding-top: var(--navbar-height);
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background:
+    linear-gradient(rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9)),
+    url('../assets/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   transition: margin-left var(--transition-speed) ease;
 }
 
@@ -36,7 +41,7 @@
   padding: 2rem;
   border-radius: 1.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .card:hover {

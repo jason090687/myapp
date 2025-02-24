@@ -35,7 +35,8 @@ import {
   fetchAllStudentsWithBorrowCount,
   fetchRecentCheckouts,
   fetchTopBooks,
-  fetchNewBooks
+  fetchNewBooks,
+  fetchBorrowedBooksStats
 } from '../Features/api'
 
 // Register ChartJS components
@@ -43,9 +44,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 function Dashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [yearSelect, setYearSelect] = useState('2023')
   const [totalBooks, setTotalBooks] = useState('Loading...')
-  const [borrowedBooks, setBorrowedBooks] = useState('Loading...')
   const [topBorrowers, setTopBorrowers] = useState([])
   const [chartData, setChartData] = useState({
     labels: [],
@@ -58,20 +57,39 @@ function Dashboard() {
   const [newBooks, setNewBooks] = useState([]) // Add this
   const [isLoadingBooks, setIsLoadingBooks] = useState(true) // Add this
   const { token } = useSelector((state) => state.auth) // Add this line
+  const [bookStats, setBookStats] = useState({
+    borrowed: 0,
+    returned: 0,
+    overdue: 0,
+    pending: 0,
+    pendingFees: 0
+  })
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
   }
 
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
+
   useEffect(() => {
     const fetchStats = async () => {
+      setIsLoading(true)
       try {
-        const stats = await fetchDashboardStats()
+        const [dashStats, borrowStats] = await Promise.all([
+          fetchDashboardStats(),
+          fetchBorrowedBooksStats()
+        ])
+
         setChartData({
           labels: ['Total Books', 'Borrowed', 'Returned', 'Overdue'],
           datasets: [
             {
-              data: [stats.totalBooks, stats.borrowed, stats.returned, stats.overdue],
+              data: [
+                dashStats.totalBooks,
+                borrowStats.borrowed,
+                borrowStats.returned,
+                borrowStats.overdue
+              ],
               borderColor: 'rgb(53, 162, 235)',
               backgroundColor: 'rgba(53, 162, 235, 0.5)',
               tension: 0.4,
@@ -82,10 +100,13 @@ function Dashboard() {
             }
           ]
         })
-        setTotalBooks(stats.totalBooks)
-        setBorrowedBooks(stats.borrowed)
+
+        setTotalBooks(dashStats.totalBooks)
+        setBookStats(borrowStats)
       } catch (error) {
-        console.error('Error fetching dashboard stats:', error)
+        console.error('Error fetching stats:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
     fetchStats()
@@ -190,12 +211,18 @@ function Dashboard() {
 
   const cards = [
     { title: 'Total Books', value: totalBooks, icon: FaBook },
-    { title: 'Borrowed Books', value: borrowedBooks, icon: FaBookReader },
-    { title: 'Returned Books', value: '10', icon: FaUndo },
-    { title: 'Overdue Books', value: '20', icon: FaClock },
-    { title: 'Missing Books', value: '290', icon: FaExclamationTriangle },
-    { title: 'Visitors', value: '100', icon: FaUsers },
-    { title: 'Pending Fees', value: '₱339', icon: FaMoneyBill }
+    { title: 'Borrowed Books', value: bookStats.borrowed || '0', icon: FaBookReader },
+    { title: 'Returned Books', value: bookStats.returned || '0', icon: FaUndo },
+    { title: 'Overdue Books', value: bookStats.overdue || '0', icon: FaClock },
+    { title: 'Pending Books', value: bookStats.pending || '0', icon: FaExclamationTriangle },
+    { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
+    {
+      title: 'Pending Fees',
+      value: `₱${(bookStats.pendingFees || 0).toLocaleString()}`,
+      icon: FaMoneyBill
+    },
+    // Add an empty card if needed to maintain grid layout
+    { title: 'Available Books', value: totalBooks - bookStats.borrowed || '0', icon: FaBook }
   ]
 
   return (
@@ -290,8 +317,8 @@ function Dashboard() {
                       <tr key={checkout.id}>
                         <td>{checkout.student_name}</td>
                         <td>{checkout.book_title}</td>
-                        <td>{new Date(checkout.date_borrowed).toLocaleDateString()}</td>
-                        <td>{new Date(checkout.due_date).toLocaleDateString()}</td>
+                        <td>{formatDate(checkout.borrowed_date)}</td>
+                        <td>{formatDate(checkout.due_date)}</td>
                         <td>
                           <span className={`status-badge ${checkout.status.toLowerCase()}`}>
                             {checkout.status}

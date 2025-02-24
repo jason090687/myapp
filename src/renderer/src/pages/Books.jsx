@@ -5,7 +5,8 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaSortUp,
-  FaSortDown
+  FaSortDown,
+  FaExclamationTriangle
 } from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import './Books.css'
@@ -320,22 +321,85 @@ function Books() {
   }
 
   const handleDeleteBook = async (bookId) => {
-    if (window.confirm('Are you sure you want to delete this book?')) {
-      try {
-        const result = await deleteBook(token, bookId)
-        if (result) {
-          // Remove book from local state
-          setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
-          // Update pagination count
-          setPagination((prev) => ({
-            ...prev,
-            count: Math.max(0, prev.count - 1)
-          }))
-          alert('Book deleted successfully!')
+    const userChoice = await new Promise((resolve) => {
+      const toastId = toast.warning(
+        <div className="confirm-dialog">
+          <div className="confirm-header">
+            <FaExclamationTriangle className="confirm-icon" />
+            <div className="confirm-content">
+              <h4>Delete Book</h4>
+              <p>Are you sure you want to delete this book? This action cannot be undone.</p>
+            </div>
+          </div>
+          <div className="confirm-actions">
+            <button
+              className="cancel-btn"
+              onClick={() => {
+                toast.dismiss(toastId)
+                resolve(false)
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="confirm-btn"
+              onClick={() => {
+                toast.dismiss(toastId)
+                resolve(true)
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>,
+        {
+          position: 'top-center',
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+          closeButton: false,
+          className: 'confirm-toast',
+          icon: false
         }
+      )
+    })
+
+    if (userChoice) {
+      try {
+        await deleteBook(token, bookId)
+        // Remove book from local state
+        setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
+        // Update all books list too
+        setAllBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
+        // Update pagination count
+        setPagination((prev) => ({
+          ...prev,
+          count: Math.max(0, prev.count - 1)
+        }))
+
+        toast.success('Book deleted successfully', {
+          position: 'top-right',
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          transition: Bounce,
+          icon: false // Add this line
+        })
       } catch (error) {
-        console.error('Error deleting book:', error)
-        alert(error.message || 'Failed to delete book')
+        toast.error(error.message || 'Failed to delete book', {
+          position: 'bottom-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          transition: Bounce,
+          icon: false // Add this line
+        })
       }
     }
   }

@@ -90,7 +90,10 @@
 .skeleton-title-lg {
   width: 200px;
   height: 1.5rem;
-  @extend .skeleton-base;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+  background-size: 200% 100%;
+  animation: wave 3s infinite ease-in-out;
+  border-radius: 4px;
 }
 
 .skeleton-select {
