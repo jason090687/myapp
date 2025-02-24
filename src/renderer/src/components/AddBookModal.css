@@ -180,6 +180,26 @@
   font-size: 0.875rem;
 }
 
+.select-field option[value='Available'] {
+  color: #22c55e; /* green */
+}
+
+.select-field option[value='Borrowed'] {
+  color: #3b82f6; /* blue */
+}
+
+.select-field option[value='Overdue'] {
+  color: #f59e0b; /* amber */
+}
+
+.select-field option[value='Damaged'] {
+  color: #ef4444; /* red */
+}
+
+.select-field option[value='Lost'] {
+  color: #64748b; /* gray */
+}
+
 /* Update form-group for InputField compatibility */
 .form-group .input-container {
   margin: 0;
