@@ -115,22 +115,60 @@
   flex: 1.5;
   position: relative;
   overflow: hidden;
+  display: flex; /* Added for centering */
+  justify-content: center; /* Added for centering */
+  align-items: center; /* Added for centering */
 }
 
 .right-side img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.8);
+  filter: brightness(0.7) blur(2px); /* Added blur and adjusted brightness */
+  transition: filter 0.3s ease;
+}
+
+.right-side::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(10, 11, 100, 0.2), rgba(30, 58, 138, 0.3));
+  pointer-events: none;
 }
 
 .logo {
   position: absolute;
-  top: 2rem;
-  right: 2rem;
-  width: 50px;
-  height: auto;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3))
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+  z-index: 2;
+  animation: logoGlow 2s ease-out forwards;
+}
+
+@keyframes logoGlow {
+  0% {
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1))
+      drop-shadow(0 0 2px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+    transform: scale(0.9); /* Slightly smaller initial scale */
+    opacity: 0.5;
+  }
+  50% {
+    filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.5))
+      drop-shadow(0 0 3px rgba(255, 255, 255, 1)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3))
+      drop-shadow(0 0 2px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    transform: scale(0.95); /* Slightly smaller final scale */
+    opacity: 1;
+  }
 }
 
 .login-form {
