@@ -431,23 +431,36 @@ export const fetchBorrowedBooksStats = async () => {
 
 export const fetchMarcBooks = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/marc/search/?ordering=-date_processed`, 
+    const response = await axios.get(
+      `${API_URL}/marc/search/?ordering=-date_processed`,
       getAuthHeaders(token)
     );
-    
-    // Get only the 10 most recent processed books
+
+    // Calculate date from 5 days ago
+    const fiveDaysAgo = new Date();
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+
+    // Filter and process the results
     const recentBooks = response.data.results
+      .filter(book => {
+        if (!book.date_processed) return false;
+        const processedDate = new Date(book.date_processed);
+        return processedDate >= fiveDaysAgo;
+      })
       .sort((a, b) => new Date(b.date_processed) - new Date(a.date_processed))
-      .slice(0, 10)
+      .slice(0, 5) // Limit to 5 books
       .map(book => ({
         id: book.id,
         title: book.title,
-        date_processed: book.date_processed
+        date_processed: book.date_processed,
+        author: book.author || 'Unknown Author',
+        callNumber: book.call_number,
+        daysAgo: Math.floor((new Date() - new Date(book.date_processed)) / (1000 * 60 * 60 * 24))
       }));
-      
+
     return { ...response.data, results: recentBooks };
   } catch (error) {
-    console.error('Error fetching MARC books:', error);
-    throw error;
+    console.error('Error fetching recent books:', error);
+    return { results: [] };
   }
 };

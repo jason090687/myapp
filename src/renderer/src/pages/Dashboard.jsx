@@ -149,7 +149,6 @@ function Dashboard() {
           fetchMarcBooks(token)
         ])
 
-        // Handle potentially empty top books data
         const formattedTopBooks = topData.results
           ? topData.results.slice(0, 3).map((book) => ({
               id: book.id,
@@ -160,14 +159,11 @@ function Dashboard() {
             }))
           : []
 
-        // Simplified new books format
-        const formattedNewBooks = marcData.results || []
-
+        // Use the processed recent books directly from the API
         setTopBooks(formattedTopBooks)
-        setNewBooks(formattedNewBooks)
+        setNewBooks(marcData.results)
       } catch (error) {
         console.error('Error loading books:', error)
-        // Set empty arrays in case of error
         setTopBooks([])
         setNewBooks([])
       } finally {
@@ -227,6 +223,13 @@ function Dashboard() {
     // Add an empty card if needed to maintain grid layout
     { title: 'Available Books', value: totalBooks - bookStats.borrowed || '0', icon: FaBook }
   ]
+
+  // Add this helper function inside the Dashboard component
+  const getDaysAgoText = (daysAgo) => {
+    if (daysAgo === 0) return 'Added today'
+    if (daysAgo === 1) return 'Added yesterday'
+    return `Added ${daysAgo} days ago`
+  }
 
   return (
     <div className="app-wrapper">
@@ -356,19 +359,23 @@ function Dashboard() {
               ) : (
                 <div className="books-list">
                   {activeBookFilter === 'new' ? (
-                    newBooks.map((book) => (
-                      <div className="book-title-card" key={book.id}>
-                        <span className="new-badge">NEW</span>
-                        <h4>{book.title}</h4>
-                        <small>
-                          {new Date(book.date_processed).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </small>
-                      </div>
-                    ))
+                    newBooks.length > 0 ? (
+                      newBooks.map((book) => (
+                        <div className="book-title-card" key={book.id}>
+                          <span className="new-badge">NEW</span>
+                          <h4>{book.title}</h4>
+                          <p className="book-author">{book.author}</p>
+                          {book.callNumber && (
+                            <small className="call-number">Call Number: {book.callNumber}</small>
+                          )}
+                          <small className="days-ago">
+                            {getDaysAgoText(book.daysAgo)}
+                          </small>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-books">No new books in the last 5 days</div>
+                    )
                   ) : (
                     topBooks.map((book) => (
                       <div className="book" key={book.id}>
