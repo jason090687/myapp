@@ -36,7 +36,8 @@ import {
   fetchRecentCheckouts,
   fetchTopBooks,
   fetchNewBooks,
-  fetchBorrowedBooksStats
+  fetchBorrowedBooksStats,
+  fetchMarcBooks
 } from '../Features/api'
 
 // Register ChartJS components
@@ -143,30 +144,32 @@ function Dashboard() {
     const loadBooks = async () => {
       setIsLoadingBooks(true)
       try {
-        const [topData, newData] = await Promise.all([fetchTopBooks(token), fetchNewBooks(token)])
+        const [topData, marcData] = await Promise.all([
+          fetchTopBooks(token),
+          fetchMarcBooks(token)
+        ])
 
-        const formattedTopBooks =
-          topData.results?.slice(0, 3).map((book) => ({
-            id: book.id,
-            title: book.title,
-            author: book.author,
-            borrow_count: book.borrow_count || 0,
-            status: 'top'
-          })) || []
+        // Handle potentially empty top books data
+        const formattedTopBooks = topData.results
+          ? topData.results.slice(0, 3).map((book) => ({
+              id: book.id,
+              title: book.title,
+              author: book.author || 'Unknown Author',
+              borrow_count: book.borrow_count || 0,
+              status: 'top'
+            }))
+          : []
 
-        const formattedNewBooks =
-          newData.results?.slice(0, 3).map((book) => ({
-            id: book.id,
-            title: book.title,
-            author: book.author,
-            date_added: book.date_added,
-            status: 'new'
-          })) || []
+        // Simplified new books format
+        const formattedNewBooks = marcData.results || []
 
         setTopBooks(formattedTopBooks)
         setNewBooks(formattedNewBooks)
       } catch (error) {
-        console.error('Error fetching books:', error)
+        console.error('Error loading books:', error)
+        // Set empty arrays in case of error
+        setTopBooks([])
+        setNewBooks([])
       } finally {
         setIsLoadingBooks(false)
       }
@@ -347,26 +350,36 @@ function Dashboard() {
                 </button>
               </div>
               {isLoadingBooks ? (
-                Array(3)
+                Array(activeBookFilter === 'top' ? 3 : 10)
                   .fill(null)
                   .map((_, index) => <BookCardSkeleton key={index} />)
               ) : (
                 <div className="books-list">
-                  {(activeBookFilter === 'top' ? topBooks : newBooks).map((book) => (
-                    <div className="book" key={book.id}>
-                      <h4>{book.title}</h4>
-                      <p>{book.author}</p>
-                      {activeBookFilter === 'top' ? (
+                  {activeBookFilter === 'new' ? (
+                    newBooks.map((book) => (
+                      <div className="book-title-card" key={book.id}>
+                        <span className="new-badge">NEW</span>
+                        <h4>{book.title}</h4>
+                        <small>
+                          {new Date(book.date_processed).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </small>
+                      </div>
+                    ))
+                  ) : (
+                    topBooks.map((book) => (
+                      <div className="book" key={book.id}>
+                        <h4>{book.title}</h4>
+                        <p>{book.author}</p>
                         <span className="status-badge borrowed">
                           {book.borrow_count} times borrowed
                         </span>
-                      ) : (
-                        <span className="status-badge new">
-                          Added {new Date(book.date_added).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ))
+                  )}
                   {(activeBookFilter === 'top' ? topBooks : newBooks).length === 0 && (
                     <div className="no-books">No books found</div>
                   )}

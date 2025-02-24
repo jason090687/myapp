@@ -197,10 +197,11 @@ tr:hover td {
 /* Book cards */
 .book {
   background: white;
-  padding: 1.5rem;
+  padding: 15px;
   border-radius: 1rem;
   border: 1px solid rgba(226, 232, 240, 0.7);
   transition: all 0.3s ease;
+  margin-bottom: 10px;
 }
 
 .book:hover {
@@ -433,4 +434,86 @@ h3 {
 .view-all a:hover {
   background: rgba(10, 11, 100, 0.15);
   transform: translateY(-1px);
+}
+
+.marc-number {
+  display: block;
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 4px;
+}
+
+.book-details {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.8em;
+  color: #666;
+}
+
+.book-details span {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: #f3f4f6;
+}
+
+.status-indicator {
+  font-weight: 600;
+}
+
+.status-indicator.available {
+  color: #059669;
+  background-color: #d1fae5;
+}
+
+.status-indicator.borrowed {
+  color: #d97706;
+  background-color: #fef3c7;
+}
+
+.isbn, .accession {
+  font-family: monospace;
+}
+
+.book-title-card {
+  position: relative;
+  background: white;
+  padding: 1.5rem;
+  padding-right: 3rem; /* Add space for the badge */
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.book-title-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.new-badge {
+  position: absolute;
+  top: 1rem;
+  right: -0.5rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+  z-index: 1;
+}
+
+.new-badge::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  right: 0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #991b1b;
+  transform: rotate(45deg);
+  z-index: -1;
 }
