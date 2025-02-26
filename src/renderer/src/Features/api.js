@@ -309,12 +309,21 @@ export const processOverduePayment = async (token, borrowId, paymentData) => {
 
 export const fetchTopBooks = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/most-borrowed/`, getAuthHeaders(token))
-    return response.data
+    const response = await axios.get(`${API_URL}/borrow/most-borrowed/`, getAuthHeaders(token));
+    // Return empty results if no data
+    return {
+      results: response.data?.results || [],
+      count: response.data?.count || 0
+    };
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to fetch top books')
+    console.error('Top books fetch error:', error);
+    // Return empty results instead of throwing error
+    return {
+      results: [],
+      count: 0
+    };
   }
-}
+};
 
 export const fetchNewBooks = async (token) => {
   try {
@@ -419,3 +428,39 @@ export const fetchBorrowedBooksStats = async () => {
     throw new Error(error.response?.data?.message || 'Failed to fetch borrowed books stats')
   }
 }
+
+export const fetchMarcBooks = async (token) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/marc/search/?ordering=-date_processed`,
+      getAuthHeaders(token)
+    );
+
+    // Calculate date from 5 days ago
+    const fiveDaysAgo = new Date();
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+
+    // Filter and process the results
+    const recentBooks = response.data.results
+      .filter(book => {
+        if (!book.date_processed) return false;
+        const processedDate = new Date(book.date_processed);
+        return processedDate >= fiveDaysAgo;
+      })
+      .sort((a, b) => new Date(b.date_processed) - new Date(a.date_processed))
+      .slice(0, 5) // Limit to 5 books
+      .map(book => ({
+        id: book.id,
+        title: book.title,
+        date_processed: book.date_processed,
+        author: book.author || 'Unknown Author',
+        callNumber: book.call_number,
+        daysAgo: Math.floor((new Date() - new Date(book.date_processed)) / (1000 * 60 * 60 * 24))
+      }));
+
+    return { ...response.data, results: recentBooks };
+  } catch (error) {
+    console.error('Error fetching recent books:', error);
+    return { results: [] };
+  }
+};
