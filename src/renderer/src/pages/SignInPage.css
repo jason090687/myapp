@@ -68,6 +68,7 @@
   font-size: 0.875rem;
   text-decoration: none;
   transition: color 0.2s ease;
+  margin-left: auto;
 }
 
 .forgot-password:hover {
@@ -234,6 +235,33 @@
 .login-button button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(10, 11, 100, 0.2);
+}
+
+.form-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+}
+
+.remember-me input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #0a0b64;
+  cursor: pointer;
+}
+
+.remember-me label {
+  font-size: 0.875rem;
+  cursor: pointer;
+  user-select: none;
 }
 
 @media (max-width: 768px) {

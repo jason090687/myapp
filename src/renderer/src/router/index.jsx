@@ -13,6 +13,8 @@ import NotificationsSettings from '../components/settings/NotificationsSettings.
 import SecuritySettings from '../components/settings/SecuritySettings.jsx'
 import BackupSettings from '../components/settings/BackupSettings.jsx'
 import Help from '../pages/Help'
+import CreateNewPassword from '../pages/CreateNewPassword.jsx'
+import AccountActivation from '../pages/AccountActivation.jsx'
 
 const router = createHashRouter([
   {
@@ -26,6 +28,14 @@ const router = createHashRouter([
   {
     path: '/forgot-password',
     element: <ForgotPassword />
+  },
+  {
+    path: '/activate',
+    element: <AccountActivation />
+  },
+  {
+    path: '/create-new-password/',
+    element: <CreateNewPassword />
   },
   {
     path: '/dashboard',

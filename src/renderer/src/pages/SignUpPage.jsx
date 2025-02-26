@@ -9,6 +9,8 @@ import logo from '../assets/logo.png'
 import './SignUpPage.css'
 import { useDispatch, useSelector } from 'react-redux'
 import { register, reset } from '../Features/authSlice'
+import { Bounce, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function SignUpPage() {
   const dispatch = useDispatch()
@@ -30,6 +32,17 @@ function SignUpPage() {
     match: false
   })
 
+  const toastConfig = {
+    position: 'top-right',
+    autoClose: 3000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: false,
+    theme: 'light',
+    transition: Bounce
+  }
+
   const resetForm = () => {
     setFormData({
       firstName: '',
@@ -49,13 +62,16 @@ function SignUpPage() {
 
   useEffect(() => {
     if (isError) {
-      // Handle error - you might want to show this in your UI
-      console.error(message)
+      toast.error(message || 'Registration failed. Please try again.', toastConfig)
     }
 
     if (isSuccess) {
+      toast.success('Registration successful! Please check your email to verify your account.', {
+        ...toastConfig,
+        autoClose: 5000
+      })
       resetForm()
-      navigate('/')
+      navigate('/activate')
     }
 
     dispatch(reset())
@@ -97,6 +113,11 @@ function SignUpPage() {
   }
 
   const handleRegister = async () => {
+    if (!isFormValid()) {
+      toast.error('Please complete all required fields correctly.', toastConfig)
+      return
+    }
+
     const userData = {
       first_name: formData.firstName,
       last_name: formData.lastName,
