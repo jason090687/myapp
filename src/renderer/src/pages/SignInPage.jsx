@@ -72,14 +72,6 @@ function SignInPage() {
     return () => dispatch(reset())
   }, [isError, isSuccess, user, message, navigate, dispatch])
 
-  useEffect(() => {
-    return () => {
-      if (!formData.rememberMe) {
-        window.electron.store.delete('savedCredentials')
-      }
-    }
-  }, [formData.rememberMe])
-
   const handleSignUp = () => {
     navigate('/signup')
   }
