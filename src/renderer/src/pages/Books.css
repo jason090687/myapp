@@ -757,8 +757,17 @@
 }
 
 /* Adjust barcode cell to show copy info */
-.col-barcode {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.books-table .col-barcode {
+  width: 150px;
+  min-width: 150px;
+  text-align: center;
+  vertical-align: middle;
+  display: table-cell; /* Change from flex to table-cell */
+  padding: 1.25rem 1rem;
+}
+
+.books-table td.col-barcode {
+  display: table-cell;
+  flex-direction: unset;
+  gap: unset;
 }
