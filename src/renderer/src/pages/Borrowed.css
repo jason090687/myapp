@@ -49,7 +49,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 4px 12px rgba(10, 11, 100, 0.15);
 }
 
 .borrow-book-btn:hover {
@@ -126,6 +126,11 @@
   width: 140px;
   min-width: 140px;
   max-width: 140px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .borrowed-table tr.disabled-row {
@@ -185,7 +190,7 @@
 }
 
 .action-btn.return {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   padding: 0.625rem 1rem;
   border: none;
@@ -194,7 +199,7 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
 .action-btn.return:disabled {
@@ -204,9 +209,9 @@
 }
 
 .action-btn.return:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0ea5e9 10%, #0369a1 90%);
+  background: linear-gradient(135deg, #ef4444 10%, #dc2626 90%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .action-buttons-container {
@@ -234,7 +239,7 @@
 }
 
 .action-btn.renew {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
   color: white;
   padding: 0.625rem 1rem;
   border: none;
@@ -243,6 +248,7 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(10, 11, 100, 0.15);
 }
 
 .action-btn.renew:disabled {
@@ -252,9 +258,9 @@
 }
 
 .action-btn.renew:hover:not(:disabled) {
-  background: linear-gradient(135deg, #8b5cf6 10%, #6d28d9 90%);
+  background: linear-gradient(135deg, #0a0b64 10%, #1e3a8a 90%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
 .action-btn.overdue {
@@ -334,36 +340,50 @@
 .status-badge {
   padding: 0.5rem 1rem;
   border-radius: 9999px;
-  font-size: 0.75rem; /* Increased from 0.6875rem */
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.025em;
   text-transform: uppercase;
-  display: inline-block;
-  min-width: 100px; /* Increased from 85px */
-  max-width: 120px; /* Increased from 100px */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white; /* Make all status text white */
+  min-width: 80px; /* Reduced from 100px */
+  max-width: 100px; /* Reduced from 120px */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Update status badge color schemes */
 .status-badge.borrowed {
-  background-color: #dbeafe;
-  color: #1d4ed8;
+  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(10, 11, 100, 0.15);
 }
 
 .status-badge.returned {
-  background-color: #dcfce7;
-  color: #15803d;
+  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
+  color: white;
+  opacity: 0.8;
+  box-shadow: 0 2px 4px rgba(10, 11, 100, 0.15);
 }
 
 .status-badge.paid-overdue {
-  background-color: #f0fdf4;
-  color: #166534;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  opacity: 0.8;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
 }
 
 .status-badge.overdue {
-  background-color: #fee2e2;
-  color: #b91c1c;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  padding: 0.5rem 1rem;
 }
 
 .returned-row {

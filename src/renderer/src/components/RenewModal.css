@@ -120,15 +120,15 @@
 }
 
 .renew-submit-btn {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
   color: white;
-  border: none;
-  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
+  box-shadow: 0 4px 12px rgba(10, 11, 100, 0.15);
 }
 
 .renew-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0a0b64 10%, #1e3a8a 90%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 8px -1px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
 .renew-submit-btn:disabled {
