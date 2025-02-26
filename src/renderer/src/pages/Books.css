@@ -732,3 +732,33 @@
   width: 100% !important;
   border-radius: 1rem !important;
 }
+
+/* Copy number column styles */
+.col-copy {
+  width: 100px;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.col-copy[data-content] {
+  cursor: help;
+}
+
+.copy-tag {
+  display: block;
+  font-size: 0.8em;
+  color: #666;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+/* Adjust barcode cell to show copy info */
+.col-barcode {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

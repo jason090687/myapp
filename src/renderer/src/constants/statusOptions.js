@@ -1,3 +1,4 @@
+// Fallback options in case API fails
 export const statusOptions = [
   { value: 'available', label: 'Available' },
   { value: 'borrowed', label: 'Borrowed' },
