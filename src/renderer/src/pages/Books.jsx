@@ -102,7 +102,9 @@ function Books() {
           subject: book.subject,
           dateProcessed: book.date_processed,
           processedBy: book.name,
-          status: book.status
+          status: book.status,
+          copies: book.copies || 1, // Add copies mapping
+          copy_number: book.copy_number || '1 of ' + (book.copies || 1) // Format copy number as "X of Y"
         }))
         setBooks(booksData)
         setPagination({
@@ -148,9 +150,12 @@ function Books() {
             subject: book.subject,
             dateProcessed: book.date_processed,
             processedBy: book.name,
-            status: book.status
+            status: book.status,
+            copies: book.copies || 1, // Add copies mapping
+            copy_number: book.copy_number || 1 // Add copy number mapping
           }))
           allData = [...allData, ...booksData]
+          console.log(allData)
 
           hasMore = response.next !== null
           currentPage++
@@ -390,7 +395,7 @@ function Books() {
         })
       } catch (error) {
         toast.error(error.message || 'Failed to delete book', {
-          position: 'bottom-right',
+          position: 'top-right',
           autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -402,6 +407,16 @@ function Books() {
         })
       }
     }
+  }
+
+  // Simplify date formatting to only show date for all columns
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 
   return (
@@ -478,6 +493,16 @@ function Books() {
                     <th className="col-physical">PHYSICAL DESCRIPTION</th>
                     <th className="col-isbn">ISBN</th>
                     <th className="col-accession">ACCESSION NUMBER</th>
+                    <th className="col-copy sortable" onClick={() => handleSort('copy_number')}>
+                      <div className="header-content">
+                        COPY NO.
+                        {sortConfig.column === 'copy_number' && (
+                          <span className="sort-icon">
+                            {sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />}
+                          </span>
+                        )}
+                      </div>
+                    </th>
                     <th className="col-barcode">BARCODE</th>
                     <th className="col-date">DATE RECEIVED</th>
                     <th className="col-subject">SUBJECT</th>
@@ -544,17 +569,26 @@ function Books() {
                         <td className="col-accession" data-content={book.accessionNo}>
                           {book.accessionNo}
                         </td>
+                        <td
+                          className="col-copy"
+                          data-content={`Copy ${book.copy_number} of ${book.copies}`}
+                        >
+                          {book.copy_number} of {book.copies}
+                        </td>
                         <td className="col-barcode" data-content={book.barcode}>
                           {book.barcode}
                         </td>
-                        <td className="col-date" data-content={book.dateReceived}>
-                          {book.dateReceived}
+                        <td className="col-date" data-content={formatDate(book.dateReceived)}>
+                          {formatDate(book.dateReceived)}
                         </td>
                         <td className="col-subject" data-content={book.subject}>
                           {book.subject}
                         </td>
-                        <td className="col-processed-date" data-content={book.dateProcessed}>
-                          {book.dateProcessed}
+                        <td
+                          className="col-processed-date"
+                          data-content={formatDate(book.dateProcessed)}
+                        >
+                          {formatDate(book.dateProcessed)}
                         </td>
                         <td className="col-processor" data-content={book.processedBy}>
                           {book.processedBy}
@@ -564,6 +598,7 @@ function Books() {
                             {book.status}
                           </span>
                         </td>
+
                         <td className="col-action">
                           <div className="action-buttons-container">
                             <button

@@ -36,7 +36,8 @@ import {
   fetchRecentCheckouts,
   fetchTopBooks,
   fetchNewBooks,
-  fetchBorrowedBooksStats
+  fetchBorrowedBooksStats,
+  fetchMarcBooks
 } from '../Features/api'
 
 // Register ChartJS components
@@ -144,30 +145,28 @@ function Dashboard() {
     const loadBooks = async () => {
       setIsLoadingBooks(true)
       try {
-        const [topData, newData] = await Promise.all([fetchTopBooks(token), fetchNewBooks(token)])
+        const [topData, marcData] = await Promise.all([
+          fetchTopBooks(token),
+          fetchMarcBooks(token)
+        ])
 
-        const formattedTopBooks =
-          topData.results?.slice(0, 3).map((book) => ({
-            id: book.id,
-            title: book.title,
-            author: book.author,
-            borrow_count: book.borrow_count || 0,
-            status: 'top'
-          })) || []
+        const formattedTopBooks = topData.results
+          ? topData.results.slice(0, 3).map((book) => ({
+              id: book.id,
+              title: book.title,
+              author: book.author || 'Unknown Author',
+              borrow_count: book.borrow_count || 0,
+              status: 'top'
+            }))
+          : []
 
-        const formattedNewBooks =
-          newData.results?.slice(0, 3).map((book) => ({
-            id: book.id,
-            title: book.title,
-            author: book.author,
-            date_added: book.date_added,
-            status: 'new'
-          })) || []
-
+        // Use the processed recent books directly from the API
         setTopBooks(formattedTopBooks)
-        setNewBooks(formattedNewBooks)
+        setNewBooks(marcData.results)
       } catch (error) {
-        console.error('Error fetching books:', error)
+        console.error('Error loading books:', error)
+        setTopBooks([])
+        setNewBooks([])
       } finally {
         setIsLoadingBooks(false)
       }
@@ -241,6 +240,13 @@ function Dashboard() {
     // Add an empty card if needed to maintain grid layout
     { title: 'Available Books', value: totalBooks - bookStats.borrowed || '0', icon: FaBook }
   ]
+
+  // Add this helper function inside the Dashboard component
+  const getDaysAgoText = (daysAgo) => {
+    if (daysAgo === 0) return 'Added today'
+    if (daysAgo === 1) return 'Added yesterday'
+    return `Added ${daysAgo} days ago`
+  }
 
   return (
     <div className="app-wrapper">
@@ -369,26 +375,40 @@ function Dashboard() {
                 </button>
               </div>
               {isLoadingBooks ? (
-                Array(3)
+                Array(activeBookFilter === 'top' ? 3 : 10)
                   .fill(null)
                   .map((_, index) => <BookCardSkeleton key={index} />)
               ) : (
                 <div className="books-list">
-                  {(activeBookFilter === 'top' ? topBooks : newBooks).map((book) => (
-                    <div className="book" key={book.id}>
-                      <h4>{book.title}</h4>
-                      <p>{book.author}</p>
-                      {activeBookFilter === 'top' ? (
+                  {activeBookFilter === 'new' ? (
+                    newBooks.length > 0 ? (
+                      newBooks.map((book) => (
+                        <div className="book-title-card" key={book.id}>
+                          <span className="new-badge">NEW</span>
+                          <h4>{book.title}</h4>
+                          <p className="book-author">{book.author}</p>
+                          {book.callNumber && (
+                            <small className="call-number">Call Number: {book.callNumber}</small>
+                          )}
+                          <small className="days-ago">
+                            {getDaysAgoText(book.daysAgo)}
+                          </small>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-books">No new books in the last 5 days</div>
+                    )
+                  ) : (
+                    topBooks.map((book) => (
+                      <div className="book" key={book.id}>
+                        <h4>{book.title}</h4>
+                        <p>{book.author}</p>
                         <span className="status-badge borrowed">
                           {book.borrow_count} times borrowed
                         </span>
-                      ) : (
-                        <span className="status-badge new">
-                          Added {new Date(book.date_added).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ))
+                  )}
                   {(activeBookFilter === 'top' ? topBooks : newBooks).length === 0 && (
                     <div className="no-books">No books found</div>
                   )}

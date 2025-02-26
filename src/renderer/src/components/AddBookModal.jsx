@@ -18,13 +18,12 @@ import {
   FaPen
 } from 'react-icons/fa'
 import './AddBookModal.css'
-import { fetchUserDetails } from '../Features/api'
+import { fetchUserDetails, fetchBookStatuses } from '../Features/api'
 import { useSelector } from 'react-redux'
 import { Bounce, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { statusOptions } from '../constants/statusOptions'
 
-const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
+const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState([])
   const [formData, setFormData] = useState({
@@ -43,10 +42,12 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     date_received: '',
     subject: '',
     additional_author: '',
-    status: 'available', // Set default value
-    date_processed: new Date().toISOString().split('T')[0],
-    processed_by: currentUser.id // Ensure it's set correctly
+    copies: '',
+    status: 'Available', // Update to match API case
+    date_processed: new Date().toISOString().slice(0, 16), // Format: "YYYY-MM-DDThh:mm"
+    processed_by: currentUser.id
   })
+  const [statusOptions, setStatusOptions] = useState([])
 
   const { token } = useSelector((state) => state.auth)
 
@@ -65,6 +66,23 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     if (token) fetchUserData()
   }, [token, currentUser.id])
 
+  useEffect(() => {
+    const fetchStatuses = async () => {
+      const statuses = await fetchBookStatuses()
+      setStatusOptions(statuses)
+    }
+    fetchStatuses()
+  }, [])
+
+  useEffect(() => {
+    if (userDetails?.id) {
+      setFormData((prev) => ({
+        ...prev,
+        processed_by: userDetails.id
+      }))
+    }
+  }, [userDetails])
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -75,79 +93,162 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
 
   const toastConfig = {
     position: 'top-right',
-    autoClose: 2000, // Shorter duration
+    autoClose: 2000,
     hideProgressBar: true,
     closeOnClick: true,
     pauseOnHover: false,
     draggable: false,
     theme: 'light',
     transition: Bounce,
-    closeButton: true // Enable close button
+    closeButton: true
+  }
+
+  const isFormValid = () => {
+    const copiesNum = parseInt(formData.copies)
+    return (
+      formData.title?.trim() &&
+      formData.author?.trim() &&
+      formData.barcode?.trim() &&
+      formData.status &&
+      formData.copies &&
+      copiesNum > 0 &&
+      Number.isInteger(copiesNum) // Ensure it's a valid integer
+    )
+  }
+
+  const resetFormData = () => {
+    setFormData({
+      title: '',
+      author: '',
+      series_title: '',
+      publisher: '',
+      place_of_publication: '',
+      year: '',
+      edition: '',
+      volume: '',
+      physical_description: '',
+      isbn: '',
+      accession_number: '',
+      barcode: '',
+      date_received: '',
+      subject: '',
+      additional_author: '',
+      copies: '',
+      status: 'Available', // Update to match API case
+      date_processed: new Date().toISOString().slice(0, 16), // Format: "YYYY-MM-DDThh:mm"
+      processed_by: currentUser.id // Ensure we use the ID
+    })
+  }
+
+  const generateSequentialIdentifiers = (totalCopies) => {
+    const identifiers = []
+    for (let i = 1; i <= totalCopies; i++) {
+      identifiers.push({
+        copyNumber: i,
+        barcode: formData.barcode, // Same barcode for all copies
+        accession: formData.accession_number // Keep original accession number
+      })
+    }
+    return identifiers
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!isFormValid()) {
+      toast.error('Please fill in all required fields', { ...toastConfig })
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const bookData = {
-        title: formData.title || null,
-        author: formData.author || null,
-        series_title: formData.series_title || null,
-        publisher: formData.publisher || null,
-        place_of_publication: formData.place_of_publication || null,
-        year: formData.year ? parseInt(formData.year) : null,
-        edition: formData.edition || null,
-        volume: formData.volume || null,
-        physical_description: formData.physical_description || null,
-        isbn: formData.isbn || null,
-        accession_number: formData.accession_number || null,
-        barcode: formData.barcode || null,
-        date_received: formData.date_received || null,
-        subject: formData.subject || null,
-        additional_author: formData.additional_author || null,
-        status: formData.status, // Don't modify status case or set to null
-        date_processed: formData.date_processed || null,
-        processed_by: formData.processed_by
-      }
+      const totalCopies = Math.max(1, parseInt(formData.copies) || 1)
+      let successCount = 0
+      const failedCopies = []
 
-      await onSubmit(bookData)
+      // Process books sequentially with incrementing copies
+      for (let currentCopy = 1; currentCopy <= totalCopies; currentCopy++) {
+        const bookData = {
+          ...formData,
+          copies: currentCopy, // Set current copy number
+          copy_number: currentCopy,
+          processed_by: userDetails.id || currentUser.id
+        }
 
-      // Close modal first
-      onClose()
+        try {
+          await onSubmit(bookData)
+          successCount++
 
-      // Show success toast after modal closes
-      toast.success('Book added successfully!', {
-        ...toastConfig,
-        onClose: () => {
-          // Additional cleanup after toast closes if needed
-          setFormData({
-            title: '',
-            author: '',
-            series_title: '',
-            publisher: '',
-            place_of_publication: '',
-            year: '',
-            edition: '',
-            volume: '',
-            physical_description: '',
-            isbn: '',
-            accession_number: '',
-            barcode: '',
-            date_received: '',
-            subject: '',
-            additional_author: '',
-            status: 'available', // Set default value
-            date_processed: new Date().toISOString().split('T')[0],
-            processed_by: userDetails.id || currentUser.id // Ensure correct user
+          toast.info(
+            <div>
+              <strong>Adding Book</strong>
+              <p>
+                Processing Copy {currentCopy}/{totalCopies}
+                <br />
+                Title: {formData.title}
+                <br />
+                Copy Number: {currentCopy}
+              </p>
+            </div>,
+            {
+              ...toastConfig,
+              autoClose: 1000,
+              toastId: `copy-${currentCopy}`
+            }
+          )
+
+          // Small delay between submissions
+          await new Promise((resolve) => setTimeout(resolve, 300))
+        } catch (error) {
+          failedCopies.push({
+            copyNumber: currentCopy,
+            error: error.message
           })
         }
-      })
+      }
+
+      // Success handling
+      if (successCount === totalCopies) {
+        toast.success(
+          <div>
+            <strong>Success!</strong>
+            <p>
+              Added {totalCopies} copies of "{formData.title}"
+            </p>
+            <small>
+              Copies created: 1 through {totalCopies}
+              <br />
+              Each copy with incrementing number
+            </small>
+          </div>,
+          { ...toastConfig, autoClose: 4000 }
+        )
+        onRefresh && onRefresh()
+        resetFormData()
+        onClose()
+      } else {
+        // Show failed copies
+        toast.error(
+          <div>
+            <strong>Some copies failed</strong>
+            <p>
+              Successfully added {successCount} out of {totalCopies} copies
+            </p>
+            <ul>
+              {failedCopies.map((fail) => (
+                <li key={fail.copyNumber}>
+                  Copy {fail.copyNumber} failed: {fail.error}
+                </li>
+              ))}
+            </ul>
+          </div>,
+          { ...toastConfig, autoClose: 5000 }
+        )
+      }
     } catch (error) {
-      // Show error toast and keep modal open
-      toast.error(error.message || 'Failed to add book', {
+      toast.error('Failed to add books: ' + (error.message || 'Unknown error'), {
         ...toastConfig,
-        autoClose: 3000 // Slightly longer for error messages
+        autoClose: 5000
       })
     } finally {
       setIsLoading(false)
@@ -168,9 +269,10 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
     { name: 'physical_description', label: 'Physical Description', icon: FaBox },
     { name: 'isbn', label: 'ISBN', icon: FaBarcode },
     { name: 'accession_number', label: 'Accession Number', icon: FaHashtag },
-    { name: 'barcode', label: 'Barcode', icon: FaQrcode },
+    { name: 'barcode', label: 'Barcode*', icon: FaQrcode, required: true },
     { name: 'subject', label: 'Subject', icon: FaTag },
-    { name: 'additional_author', label: 'Additional Author', icon: FaPen }
+    { name: 'copies', label: 'Number of Copies*', icon: FaHashtag, type: 'number', required: true },
+    { name: 'additional_author', label: 'Additional Author (Optional)', icon: FaPen }
   ]
 
   return (
@@ -200,7 +302,6 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
               </div>
             ))}
 
-            {/* Special fields that need different handling */}
             <div className="form-group">
               <label htmlFor="date_received">Date Received</label>
               <InputField
@@ -219,16 +320,22 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
                 <select
                   id="status"
                   name="status"
-                  value={formData.status || 'available'} // Add fallback
+                  value={formData.status}
                   onChange={handleChange}
                   className="select-field"
                   required
                 >
-                  {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
+                  {statusOptions.length > 0 ? (
+                    statusOptions.map((option) => (
+                      <option key={option.value} value={option.label}>
+                        {' '}
+                        {/* Use label as value */}
+                        {option.label}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="Available">Available</option> // Fallback option
+                  )}
                 </select>
               </div>
             </div>
@@ -236,7 +343,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
             <div className="form-group">
               <label htmlFor="date_processed">Date Processed</label>
               <InputField
-                type="date"
+                type="datetime-local" // Change to datetime-local
                 id="date_processed"
                 name="date_processed"
                 value={formData.date_processed}
@@ -250,10 +357,13 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
               <label htmlFor="processed_by">Processed By</label>
               <InputField
                 type="text"
-                value={userDetails.first_name || currentUser.name}
+                value={userDetails.first_name || currentUser.name || ''} // Display name
                 icon={FaUser}
                 disabled
+                id="processed_by_display" // Changed ID to avoid confusion
               />
+              {/* Add hidden input to store the ID */}
+              <input type="hidden" name="processed_by" value={userDetails.id || currentUser.id} />
             </div>
           </div>
 
@@ -261,7 +371,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser }) => {
             <button type="button" onClick={onClose} className="cancel-btn" disabled={isLoading}>
               Cancel
             </button>
-            <button type="submit" className="submit-btn" disabled={isLoading || !formData.status}>
+            <button type="submit" className="submit-btn" disabled={isLoading || !isFormValid()}>
               {isLoading ? (
                 <span className="spinner-wrapper">
                   <div className="spinner"></div>
@@ -282,7 +392,8 @@ AddBookModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  currentUser: PropTypes.object.isRequired
+  currentUser: PropTypes.object.isRequired,
+  onRefresh: PropTypes.func // Add new prop type
 }
 
 export default AddBookModal

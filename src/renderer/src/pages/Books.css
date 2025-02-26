@@ -236,9 +236,17 @@
 }
 
 .action-btn.edit {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
+  border: none;
+  box-shadow: 0 2px 4px rgba(10, 11, 100, 0.1);
+  transition: all 0.3s ease;
+}
+
+.action-btn.edit:hover {
+  background: linear-gradient(135deg, #0a0b64 10%, #1e3a8a 90%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
 .action-btn.delete {
@@ -723,4 +731,43 @@
   max-width: 400px !important;
   width: 100% !important;
   border-radius: 1rem !important;
+}
+
+/* Copy number column styles */
+.col-copy {
+  width: 100px;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.col-copy[data-content] {
+  cursor: help;
+}
+
+.copy-tag {
+  display: block;
+  font-size: 0.8em;
+  color: #666;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+/* Adjust barcode cell to show copy info */
+.books-table .col-barcode {
+  width: 150px;
+  min-width: 150px;
+  text-align: center;
+  vertical-align: middle;
+  display: table-cell; /* Change from flex to table-cell */
+  padding: 1.25rem 1rem;
+}
+
+.books-table td.col-barcode {
+  display: table-cell;
+  flex-direction: unset;
+  gap: unset;
 }

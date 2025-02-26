@@ -61,9 +61,9 @@ function Borrowed() {
   }
 
   const getStatusText = (item) => {
-    if (item.is_returned) return 'Returned'
-    if (item.paid && isOverdue(item.due_date)) return 'Overdue Paid'
-    return isOverdue(item.due_date) ? 'Overdue' : 'Borrowed'
+    if (item.is_returned) return 'Return'
+    if (item.paid && isOverdue(item.due_date)) return 'Paid'
+    return isOverdue(item.due_date) ? 'DUE' : 'BORROWED' // Changed to uppercase for emphasis
   }
 
   // Debounce effect for search input
