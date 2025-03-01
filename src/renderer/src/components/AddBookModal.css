@@ -19,11 +19,13 @@
   border-radius: 1.5rem;
   width: 95%;
   max-width: 1200px;
-  max-height: 90vh;
+  max-height: 95vh; /* Increased from 90vh */
   overflow-y: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(226, 232, 240, 0.8);
   animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
@@ -73,6 +75,8 @@
   background: rgba(255, 255, 255, 0.5);
   border-radius: 1rem;
   backdrop-filter: blur(10px);
+  overflow-y: auto;
+  max-height: calc(95vh - 200px); /* Adjust to account for header and footer */
 }
 
 .form-group {
@@ -128,12 +132,23 @@
   transform: scale(1.1);
 }
 
+.add-book-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1.5rem;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding-top: 2rem;
-  margin-top: 2rem;
+  padding-top: 1.5rem;
+  background: linear-gradient(to top, #ffffff 80%, transparent);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  margin-top: auto; /* Push footer to bottom */
   border-top: 2px solid #f1f5f9;
 }
 
@@ -186,8 +201,8 @@
 }
 
 .spinner {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: white;

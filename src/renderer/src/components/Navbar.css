@@ -28,3 +28,19 @@
     transform: rotate(360deg);
   }
 }
+
+.user-profile {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+}
+
+.user-profile:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.user-profile:active {
+  transform: translateY(0);
+}
