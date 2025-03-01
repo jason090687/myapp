@@ -6,6 +6,7 @@ import { globalSearch } from '../services/searchService'
 import SearchResults from './SearchResults'
 import './Sidebar.css' // Change from Sidebar.css to Navbar.css
 import './SkeletonLoader.css'
+import { useNavigate } from 'react-router-dom' // Add this import
 
 const Navbar = ({ isCollapsed, onToggle, userDetails, isLoading }) => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -13,6 +14,7 @@ const Navbar = ({ isCollapsed, onToggle, userDetails, isLoading }) => {
   const [isSearching, setIsSearching] = useState(false)
   const searchRef = useRef(null)
   const { token } = useSelector((state) => state.auth)
+  const navigate = useNavigate() // Add navigation hook
 
   // Handle click outside search results
   useEffect(() => {
@@ -46,6 +48,10 @@ const Navbar = ({ isCollapsed, onToggle, userDetails, isLoading }) => {
     return () => clearTimeout(timer)
   }, [searchTerm, token])
 
+  const handleProfileClick = () => {
+    navigate('/profile') // Navigate to profile page
+  }
+
   const renderUserProfile = () => {
     if (isLoading) {
       return (
@@ -57,7 +63,12 @@ const Navbar = ({ isCollapsed, onToggle, userDetails, isLoading }) => {
     }
 
     return (
-      <div className="nav-item user-profile">
+      <div
+        className="nav-item user-profile"
+        onClick={handleProfileClick}
+        role="button"
+        tabIndex={0}
+      >
         <FaUserCircle className="user-avatar" />
         <span>{userDetails?.first_name || 'User'}</span>
       </div>

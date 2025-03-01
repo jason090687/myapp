@@ -74,6 +74,24 @@ function Borrowed() {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
+  // Add sorting function
+  const sortBorrowedBooks = (books) => {
+    return [...books].sort((a, b) => {
+      // First sort by return status
+      if (a.is_returned !== b.is_returned) {
+        return a.is_returned ? 1 : -1 // Non-returned books come first
+      }
+
+      // For non-returned books, sort by due date (most urgent first)
+      if (!a.is_returned && !b.is_returned) {
+        return new Date(a.due_date) - new Date(b.due_date)
+      }
+
+      // For returned books, sort by return date (most recent first)
+      return new Date(b.returned_date) - new Date(a.returned_date)
+    })
+  }
+
   // Fetch borrowed books data
   const fetchBorrowedData = async (page = 1) => {
     if (!token) {
@@ -85,7 +103,8 @@ function Borrowed() {
     try {
       const response = await fetchBorrowedBooks(token, page)
       if (response) {
-        setBorrowedBooks(response.results || [])
+        const sortedBooks = sortBorrowedBooks(response.results || [])
+        setBorrowedBooks(sortedBooks)
         setPagination({
           count: response.count || 0,
           next: response.next,
@@ -344,9 +363,11 @@ function Borrowed() {
                         <td>{formatDate(item.borrowed_date)}</td>
                         <td>{formatDate(item.due_date)}</td>
                         <td>
-                          <span className={`status-badge ${getStatusBadgeClass(item)}`}>
-                            {getStatusText(item)}
-                          </span>
+                          <div className="status-badge-container">
+                            <span className={`status-badge ${getStatusBadgeClass(item)}`}>
+                              {getStatusText(item)}
+                            </span>
+                          </div>
                         </td>
                         <td>{renderActionButtons(item)}</td>
                       </tr>

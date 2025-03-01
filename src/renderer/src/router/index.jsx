@@ -15,6 +15,7 @@ import BackupSettings from '../components/settings/BackupSettings.jsx'
 import Help from '../pages/Help'
 import CreateNewPassword from '../pages/CreateNewPassword.jsx'
 import AccountActivation from '../pages/AccountActivation.jsx'
+import ProfilePage from '../pages/ProfilePage.jsx'
 
 const router = createHashRouter([
   {
@@ -36,6 +37,10 @@ const router = createHashRouter([
   {
     path: '/create-new-password/',
     element: <CreateNewPassword />
+  },
+  {
+    path: 'profile',
+    element: <ProfilePage />
   },
   {
     path: '/dashboard',

@@ -97,6 +97,7 @@ body {
     opacity calc(var(--transition-duration) * 0.5) var(--transition-timing),
     visibility calc(var(--transition-duration) * 0.5) var(--transition-timing);
   will-change: opacity, visibility;
+  margin-bottom: 0;
 }
 
 .sidebar.collapsed .brand-text {
