@@ -30,12 +30,10 @@ import {
   BookCardSkeleton
 } from '../components/SkeletonLoaders'
 import {
-  fetchTotalBooksCount,
   fetchDashboardStats,
   fetchAllStudentsWithBorrowCount,
   fetchRecentCheckouts,
   fetchTopBooks,
-  fetchNewBooks,
   fetchBorrowedBooksStats,
   fetchMarcBooks
 } from '../Features/api'
@@ -131,7 +129,11 @@ function Dashboard() {
       setIsLoading(true)
       try {
         const checkouts = await fetchRecentCheckouts(5)
-        setRecentCheckouts(checkouts)
+        // Sort checkouts by borrowed_date in descending order (newest first)
+        const sortedCheckouts = checkouts.sort(
+          (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
+        )
+        setRecentCheckouts(sortedCheckouts)
       } catch (error) {
         console.error('Error fetching recent checkouts:', error)
       } finally {

@@ -1,5 +1,5 @@
 import React from 'react'
-import './SkeletonLoaders.css'
+import './SkeletonLoader.css'
 
 export const CardSkeleton = () => (
   <div className="skeleton-card">
@@ -23,7 +23,7 @@ export const ChartSkeleton = () => (
 
 export const TableSkeleton = ({ rows = 5 }) => (
   <div className="skeleton-table">
-    <div className="skeleton-row">
+    <div className="skeleton-row header">
       {Array(5)
         .fill(null)
         .map((_, i) => (
@@ -49,5 +49,44 @@ export const BookCardSkeleton = () => (
     <div className="skeleton-book-title"></div>
     <div className="skeleton-book-author"></div>
     <div className="skeleton-book-status"></div>
+  </div>
+)
+
+export const ProfileHeaderSkeleton = () => (
+  <div className="profile-header skeleton-loading">
+    <div className="profile-avatar-skeleton"></div>
+    <div className="profile-title-skeleton"></div>
+    <div className="profile-role-skeleton"></div>
+  </div>
+)
+
+export const ProfileInfoSkeleton = () => (
+  <div className="profile-section skeleton-loading">
+    <div className="section-header-skeleton">
+      <div className="title-skeleton"></div>
+      <div className="button-skeleton"></div>
+    </div>
+    <div className="info-grid-skeleton">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="info-item-skeleton">
+          <div className="icon-skeleton"></div>
+          <div className="content-skeleton">
+            <div className="label-skeleton"></div>
+            <div className="value-skeleton"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
+export const SecuritySkeleton = () => (
+  <div className="profile-section skeleton-loading">
+    <div className="section-header-skeleton">
+      <div className="title-skeleton"></div>
+    </div>
+    <div className="security-options-skeleton">
+      <div className="security-button-skeleton"></div>
+    </div>
   </div>
 )

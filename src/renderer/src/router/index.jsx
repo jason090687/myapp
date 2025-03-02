@@ -39,10 +39,6 @@ const router = createHashRouter([
     element: <CreateNewPassword />
   },
   {
-    path: 'profile',
-    element: <ProfilePage />
-  },
-  {
     path: '/dashboard',
     element: <Dashboard />
   },
@@ -57,6 +53,10 @@ const router = createHashRouter([
   {
     path: '/history',
     element: <History />
+  },
+  {
+    path: '/profile',
+    element: <ProfilePage />
   },
   {
     path: '/settings',

@@ -15,7 +15,7 @@ import OverdueModal from '../components/OverdueModal'
 import { Bounce, toast } from 'react-toastify'
 import { useSearchParams } from 'react-router-dom'
 
-function Borrowed() {
+const Borrowed = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
@@ -77,18 +77,13 @@ function Borrowed() {
   // Add sorting function
   const sortBorrowedBooks = (books) => {
     return [...books].sort((a, b) => {
-      // First sort by return status
+      // First prioritize non-returned books
       if (a.is_returned !== b.is_returned) {
-        return a.is_returned ? 1 : -1 // Non-returned books come first
+        return a.is_returned ? 1 : -1
       }
 
-      // For non-returned books, sort by due date (most urgent first)
-      if (!a.is_returned && !b.is_returned) {
-        return new Date(a.due_date) - new Date(b.due_date)
-      }
-
-      // For returned books, sort by return date (most recent first)
-      return new Date(b.returned_date) - new Date(a.returned_date)
+      // Then sort by borrow date (newest first)
+      return new Date(b.borrowed_date) - new Date(a.borrowed_date)
     })
   }
 
