@@ -66,6 +66,7 @@ function Dashboard() {
     pending: 0,
     pendingFees: 0
   })
+  const [returnedBooks, setReturnedBooks] = useState('Loading...')
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -77,9 +78,12 @@ function Dashboard() {
     const fetchStats = async () => {
       setIsLoading(true)
       try {
-        const [dashStats, borrowStats] = await Promise.all([
+        const [dashStats, borrowStats, returnedResponse] = await Promise.all([
           fetchDashboardStats(),
-          fetchBorrowedBooksStats()
+          fetchBorrowedBooksStats(),
+          fetch('https://countmein.pythonanywhere.com/api/v1/borrow/returned-books/').then((res) =>
+            res.json()
+          )
         ])
 
         setChartData({
@@ -89,7 +93,7 @@ function Dashboard() {
               data: [
                 dashStats.totalBooks,
                 borrowStats.borrowed,
-                borrowStats.returned,
+                returnedResponse.returned_books_count,
                 borrowStats.overdue
               ],
               borderColor: 'rgb(53, 162, 235)',
@@ -105,6 +109,7 @@ function Dashboard() {
 
         setTotalBooks(dashStats.totalBooks)
         setBookStats(borrowStats)
+        setReturnedBooks(returnedResponse.returned_books_count)
       } catch (error) {
         console.error('Error fetching stats:', error)
       } finally {
@@ -225,7 +230,7 @@ function Dashboard() {
       route: '/borrowed',
       clickable: true
     },
-    { title: 'Returned Books', value: bookStats.returned || '0', icon: FaUndo },
+    { title: 'Returned Books', value: returnedBooks, icon: FaUndo },
     { title: 'Overdue Books', value: bookStats.overdue || '0', icon: FaClock },
     { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
     {
