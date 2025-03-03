@@ -111,16 +111,16 @@
 .borrow-spinner-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px; /* Reduced from 8px */
 }
 
 .borrow-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #ffffff;
+  width: 14px; /* Reduced from 16px */
+  height: 14px; /* Reduced from 16px */
+  border: 1.5px solid #ffffff; /* Reduced from 2px */
   border-radius: 50%;
   border-top-color: transparent;
-  animation: borrowSpin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes borrowSpin {
@@ -462,12 +462,12 @@
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #ffffff;
+  width: 14px; /* Reduced from 16px */
+  height: 14px; /* Reduced from 16px */
+  border: 1.5px solid #ffffff; /* Reduced from 2px */
   border-radius: 50%;
   border-top-color: transparent;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite; /* Slightly faster animation */
 }
 
 @keyframes spin {

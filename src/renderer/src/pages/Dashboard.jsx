@@ -30,12 +30,10 @@ import {
   BookCardSkeleton
 } from '../components/SkeletonLoaders'
 import {
-  fetchTotalBooksCount,
   fetchDashboardStats,
   fetchAllStudentsWithBorrowCount,
   fetchRecentCheckouts,
   fetchTopBooks,
-  fetchNewBooks,
   fetchBorrowedBooksStats,
   fetchMarcBooks
 } from '../Features/api'
@@ -131,7 +129,11 @@ function Dashboard() {
       setIsLoading(true)
       try {
         const checkouts = await fetchRecentCheckouts(5)
-        setRecentCheckouts(checkouts)
+        // Sort checkouts by borrowed_date in descending order (newest first)
+        const sortedCheckouts = checkouts.sort(
+          (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
+        )
+        setRecentCheckouts(sortedCheckouts)
       } catch (error) {
         console.error('Error fetching recent checkouts:', error)
       } finally {
@@ -145,10 +147,7 @@ function Dashboard() {
     const loadBooks = async () => {
       setIsLoadingBooks(true)
       try {
-        const [topData, marcData] = await Promise.all([
-          fetchTopBooks(token),
-          fetchMarcBooks(token)
-        ])
+        const [topData, marcData] = await Promise.all([fetchTopBooks(token), fetchMarcBooks(token)])
 
         const formattedTopBooks = topData.results
           ? topData.results.slice(0, 3).map((book) => ({
@@ -230,7 +229,6 @@ function Dashboard() {
     },
     { title: 'Returned Books', value: bookStats.returned || '0', icon: FaUndo },
     { title: 'Overdue Books', value: bookStats.overdue || '0', icon: FaClock },
-    { title: 'Pending Books', value: bookStats.pending || '0', icon: FaExclamationTriangle },
     { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
     {
       title: 'Pending Fees',
@@ -390,9 +388,7 @@ function Dashboard() {
                           {book.callNumber && (
                             <small className="call-number">Call Number: {book.callNumber}</small>
                           )}
-                          <small className="days-ago">
-                            {getDaysAgoText(book.daysAgo)}
-                          </small>
+                          <small className="days-ago">{getDaysAgoText(book.daysAgo)}</small>
                         </div>
                       ))
                     ) : (
