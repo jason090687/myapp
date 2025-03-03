@@ -1,0 +1,282 @@
+/* ...existing styles... */
+
+/* Base skeleton animation */
+.skeleton-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 37%, #f0f0f0 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* Card Skeletons */
+.cards-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.skeleton-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  height: 120px; /* Fixed height */
+  width: 100%; /* Full width */
+}
+
+.skeleton-card:hover {
+  transform: translateY(-2px);
+}
+
+.skeleton-card:nth-child(1) {
+  animation-delay: 0s;
+}
+.skeleton-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.skeleton-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.skeleton-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.skeleton-card:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.skeleton-card:nth-child(6) {
+  animation-delay: 0.5s;
+}
+.skeleton-card:nth-child(7) {
+  animation-delay: 0.6s;
+}
+
+.skeleton-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; /* Make it circular */
+  background: #f0f0f0;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.skeleton-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-card-title {
+  height: 20px;
+  width: 70%;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+
+.skeleton-card-value {
+  height: 28px;
+  width: 45%;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+
+/* Update animation for all skeleton elements */
+.skeleton-card-icon,
+.skeleton-card-title,
+.skeleton-card-value,
+.chart-skeleton-header,
+.chart-skeleton-body,
+.table-skeleton-cell,
+.book-skeleton-title,
+.book-skeleton-author,
+.book-skeleton-status {
+  animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* Chart Skeleton */
+.chart-skeleton {
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 24px;
+  height: 400px;
+}
+
+.chart-skeleton-header {
+  height: 32px;
+  width: 180px;
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+
+.chart-skeleton-body {
+  height: calc(100% - 56px);
+  border-radius: 8px;
+}
+
+/* Table Skeleton */
+.table-skeleton {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.table-skeleton-header {
+  height: 24px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+
+.table-skeleton-cell {
+  height: 20px;
+  border-radius: 6px;
+}
+
+.table-skeleton-row {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Books Skeleton */
+.books-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.book-skeleton-card {
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.book-skeleton-title {
+  height: 24px;
+  width: 85%;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.book-skeleton-author {
+  height: 20px;
+  width: 60%;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.book-skeleton-status {
+  height: 28px;
+  width: 40%;
+  border-radius: 20px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* Top Borrowers Section */
+.top-borrowers-skeleton {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.top-borrowers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.top-borrowers-title {
+  height: 28px;
+  width: 180px;
+}
+
+/* Recent Checkouts Section */
+.recent-checkouts-skeleton {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.checkouts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.checkout-title {
+  height: 28px;
+  width: 200px;
+}
+
+.view-all-link {
+  height: 24px;
+  width: 80px;
+}
+
+/* Top Books Section */
+.top-books-skeleton {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.books-filter-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filter-button {
+  height: 36px;
+  width: 120px;
+  border-radius: 18px;
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.book-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.no-books-skeleton {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+}

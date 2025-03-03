@@ -24,12 +24,6 @@ import { Line } from 'react-chartjs-2'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
-  CardSkeleton,
-  ChartSkeleton,
-  TableSkeleton,
-  BookCardSkeleton
-} from '../components/SkeletonLoaders'
-import {
   fetchDashboardStats,
   fetchAllStudentsWithBorrowCount,
   fetchRecentCheckouts,
@@ -39,6 +33,12 @@ import {
   fetchTotalPenalties,
   fetchReturnedBooksCount
 } from '../Features/api'
+import {
+  CardsSkeleton,
+  ChartSkeleton,
+  TableSkeleton,
+  BooksSkeleton
+} from '../components/Dashboard/DashboardSkeletons'
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -73,6 +73,16 @@ function Dashboard() {
   const [returnedStats, setReturnedStats] = useState({
     returnedCount: 0
   })
+  const [loadingStates, setLoadingStates] = useState({
+    cards: true,
+    chart: true,
+    borrowers: true,
+    checkouts: true,
+    books: true
+  })
+
+  // Helper to check if any section is still loading
+  const isAnyLoading = Object.values(loadingStates).some((state) => state)
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -82,7 +92,6 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      setIsLoading(true)
       try {
         const [dashStats, borrowStats, returnedData] = await Promise.all([
           fetchDashboardStats(),
@@ -117,30 +126,22 @@ function Dashboard() {
       } catch (error) {
         console.error('Error fetching stats:', error)
       } finally {
-        setIsLoading(false)
+        setLoadingStates((prev) => ({ ...prev, cards: false, chart: false }))
       }
     }
 
-    if (token) {
-      fetchStats()
-    }
-  }, [token, penalties.overdueCount]) // Add penalties.overdueCount as dependency
-
-  useEffect(() => {
     const fetchStudents = async () => {
       try {
         const students = await fetchAllStudentsWithBorrowCount()
         setTopBorrowers(students)
       } catch (error) {
         console.error('Error fetching students:', error)
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, borrowers: false }))
       }
     }
-    fetchStudents()
-  }, [])
 
-  useEffect(() => {
     const loadRecentCheckouts = async () => {
-      setIsLoading(true)
       try {
         const checkouts = await fetchRecentCheckouts(5)
         // Sort checkouts by borrowed_date in descending order (newest first)
@@ -151,15 +152,11 @@ function Dashboard() {
       } catch (error) {
         console.error('Error fetching recent checkouts:', error)
       } finally {
-        setIsLoading(false)
+        setLoadingStates((prev) => ({ ...prev, checkouts: false }))
       }
     }
-    loadRecentCheckouts()
-  }, [])
 
-  useEffect(() => {
     const loadBooks = async () => {
-      setIsLoadingBooks(true)
       try {
         const [topData, marcData] = await Promise.all([fetchTopBooks(token), fetchMarcBooks(token)])
 
@@ -181,12 +178,17 @@ function Dashboard() {
         setTopBooks([])
         setNewBooks([])
       } finally {
-        setIsLoadingBooks(false)
+        setLoadingStates((prev) => ({ ...prev, books: false }))
       }
     }
 
-    if (token) loadBooks()
-  }, [token])
+    if (token) {
+      fetchStats()
+      fetchStudents()
+      loadRecentCheckouts()
+      loadBooks()
+    }
+  }, [token, penalties.overdueCount]) // Add penalties.overdueCount as dependency
 
   // Add new useEffect for fetching penalties
   useEffect(() => {
@@ -305,33 +307,33 @@ function Dashboard() {
       <div className={`dashboard-container ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="dashboard-content">
           {/* Cards Section */}
-          <div className="cards-grid">
-            {isLoading
-              ? Array(7)
-                  .fill(null)
-                  .map((_, index) => <CardSkeleton key={index} />)
-              : cards.map((card, index) => (
-                  <div
-                    className={`card ${card.clickable ? 'clickable' : ''}`}
-                    key={index}
-                    onClick={() => card.clickable && handleCardClick(card.route)}
-                    style={{ cursor: card.clickable ? 'pointer' : 'default' }}
-                  >
-                    <div className="card-icon">
-                      <card.icon />
-                    </div>
-                    <div className="card-content">
-                      <h3>{card.title}</h3>
-                      <p>{card.value}</p>
-                    </div>
+          {loadingStates.cards ? (
+            <CardsSkeleton />
+          ) : (
+            <div className="cards-grid">
+              {cards.map((card, index) => (
+                <div
+                  className={`card ${card.clickable ? 'clickable' : ''}`}
+                  key={index}
+                  onClick={() => card.clickable && handleCardClick(card.route)}
+                  style={{ cursor: card.clickable ? 'pointer' : 'default' }}
+                >
+                  <div className="card-icon">
+                    <card.icon />
                   </div>
-                ))}
-          </div>
+                  <div className="card-content">
+                    <h3>{card.title}</h3>
+                    <p>{card.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Stats Container */}
           <div className="stats-container">
             <div className="chart">
-              {isLoading ? (
+              {loadingStates.chart ? (
                 <ChartSkeleton />
               ) : (
                 <div className="chart-container" style={{ height: '400px' }}>
@@ -341,8 +343,8 @@ function Dashboard() {
             </div>
 
             <div className="overdue">
-              {isLoading ? (
-                <TableSkeleton rows={5} />
+              {loadingStates.borrowers ? (
+                <TableSkeleton rows={5} columns={4} />
               ) : (
                 <div>
                   <h3>Top Borrowers</h3>
@@ -378,8 +380,8 @@ function Dashboard() {
                   <Link to="/borrowed">View all</Link>
                 </div>
               </div>
-              {isLoading ? (
-                <TableSkeleton rows={5} />
+              {loadingStates.checkouts ? (
+                <TableSkeleton rows={5} columns={4} />
               ) : (
                 <table>
                   <thead>
@@ -425,10 +427,8 @@ function Dashboard() {
                   New Arrivals
                 </button>
               </div>
-              {isLoadingBooks ? (
-                Array(activeBookFilter === 'top' ? 3 : 10)
-                  .fill(null)
-                  .map((_, index) => <BookCardSkeleton key={index} />)
+              {loadingStates.books ? (
+                <BooksSkeleton count={3} />
               ) : (
                 <div className="books-list">
                   {activeBookFilter === 'new' ? (
