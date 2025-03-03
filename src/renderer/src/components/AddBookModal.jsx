@@ -43,7 +43,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     subject: '',
     additional_author: '',
     copies: '',
-    status: 'Available', // Update to match API case
+    status: 'available', // Change to lowercase to match API
     date_processed: new Date().toISOString().slice(0, 16), // Format: "YYYY-MM-DDThh:mm"
     processed_by: currentUser.id
   })
@@ -67,12 +67,21 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
   }, [token, currentUser.id])
 
   useEffect(() => {
-    const fetchStatuses = async () => {
-      const statuses = await fetchBookStatuses()
-      setStatusOptions(statuses)
+    const getStatuses = async () => {
+      if (!token) {
+        console.error('Token is missing.')
+        return
+      }
+      try {
+        const statuses = await fetchBookStatuses(token)
+        setStatusOptions(statuses)
+      } catch (error) {
+        console.error('Error loading status options:', error)
+      }
     }
-    fetchStatuses()
-  }, [])
+
+    getStatuses()
+  }, [token])
 
   useEffect(() => {
     if (userDetails?.id) {
@@ -325,17 +334,11 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
                   className="select-field"
                   required
                 >
-                  {statusOptions.length > 0 ? (
-                    statusOptions.map((option) => (
-                      <option key={option.value} value={option.label}>
-                        {' '}
-                        {/* Use label as value */}
-                        {option.label}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="Available">Available</option> // Fallback option
-                  )}
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

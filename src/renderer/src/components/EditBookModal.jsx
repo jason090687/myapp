@@ -44,7 +44,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     subject: '',
     additional_author: '',
     copies: '',
-    status: 'available', // Set default value
+    status: 'available', // Change to lowercase to match API
     date_processed: new Date().toISOString().split('T')[0],
     processed_by: currentUser.id
   })
@@ -66,12 +66,21 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
 
   // Add status options fetching
   useEffect(() => {
-    const fetchStatuses = async () => {
-      const statuses = await fetchBookStatuses()
-      setStatusOptions(statuses)
+    const getStatuses = async () => {
+      if (!token) {
+        console.error('Token is missing.')
+        return
+      }
+      try {
+        const statuses = await fetchBookStatuses(token)
+        setStatusOptions(statuses)
+      } catch (error) {
+        console.error('Error loading status options:', error)
+      }
     }
-    fetchStatuses()
-  }, [])
+
+    getStatuses()
+  }, [token])
 
   // Update date formatting helper
   const formatDatetime = (dateString) => {
@@ -280,15 +289,11 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
                   className="select-field"
                   required
                 >
-                  {statusOptions.length > 0 ? (
-                    statusOptions.map((option) => (
-                      <option key={option.value} value={option.label}>
-                        {option.label}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="Available">Available</option>
-                  )}
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

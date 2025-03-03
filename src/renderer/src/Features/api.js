@@ -472,15 +472,19 @@ export const fetchMarcBooks = async (token) => {
   }
 }
 
-export const fetchBookStatuses = async () => {
+export const fetchBookStatuses = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/status/`)
+    const response = await axios.get(`${API_URL}/borrow/status/`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
     return Object.entries(response.data).map(([value, label]) => ({
-      value: value.toLowerCase(),
+      value,
       label
     }))
   } catch (error) {
     console.error('Error fetching book statuses:', error)
-    return [] // Return empty array as fallback
+    throw error
   }
 }
