@@ -315,6 +315,16 @@ export const processOverduePayment = async (token, borrowId, paymentData) => {
   }
 }
 
+export const fetchOverdueBorrowedBooks = async (token, borrowedId) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/fines/${borrowedId}`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error fetching overdue borrowed books:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch overdue borrowed books')
+  }
+}
+
 export const fetchTopBooks = async (token) => {
   try {
     const response = await axios.get(`${API_URL}/borrow/most-borrowed/`, getAuthHeaders(token))
@@ -472,15 +482,51 @@ export const fetchMarcBooks = async (token) => {
   }
 }
 
-export const fetchBookStatuses = async () => {
+export const fetchBookStatuses = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/status/`)
+    const response = await axios.get(`${API_URL}/borrow/status/`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
     return Object.entries(response.data).map(([value, label]) => ({
-      value: value.toLowerCase(),
+      value,
       label
     }))
   } catch (error) {
     console.error('Error fetching book statuses:', error)
-    return [] // Return empty array as fallback
+    throw error
+  }
+}
+
+export const fetchTotalPenalties = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/fines/`, getAuthHeaders(token))
+    return {
+      totalPenalties: response.data.total_penalties || 0,
+      overdueCount: response.data.overdue_count || 0,
+      overdueBooks: response.data.overdue_books || []
+    }
+  } catch (error) {
+    console.error('Error fetching total penalties:', error)
+    return {
+      totalPenalties: 0,
+      overdueCount: 0,
+      overdueBooks: []
+    }
+  }
+}
+
+export const fetchReturnedBooksCount = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/returned-books/`, getAuthHeaders(token))
+    return {
+      returnedCount: response.data.returned_books_count || 0
+    }
+  } catch (error) {
+    console.error('Error fetching returned books count:', error)
+    return {
+      returnedCount: 0
+    }
   }
 }

@@ -98,6 +98,7 @@ body {
     visibility calc(var(--transition-duration) * 0.5) var(--transition-timing);
   will-change: opacity, visibility;
   margin-bottom: 0;
+  cursor: pointer;
 }
 
 .sidebar.collapsed .brand-text {

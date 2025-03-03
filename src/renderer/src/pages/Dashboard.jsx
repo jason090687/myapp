@@ -24,21 +24,21 @@ import { Line } from 'react-chartjs-2'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
-  CardSkeleton,
-  ChartSkeleton,
-  TableSkeleton,
-  BookCardSkeleton
-} from '../components/SkeletonLoaders'
-import {
-  fetchTotalBooksCount,
   fetchDashboardStats,
   fetchAllStudentsWithBorrowCount,
   fetchRecentCheckouts,
   fetchTopBooks,
-  fetchNewBooks,
   fetchBorrowedBooksStats,
-  fetchMarcBooks
+  fetchMarcBooks,
+  fetchTotalPenalties,
+  fetchReturnedBooksCount
 } from '../Features/api'
+import {
+  CardsSkeleton,
+  ChartSkeleton,
+  TableSkeleton,
+  BooksSkeleton
+} from '../components/Dashboard/DashboardSkeletons'
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -66,7 +66,23 @@ function Dashboard() {
     pending: 0,
     pendingFees: 0
   })
-  const [returnedBooks, setReturnedBooks] = useState('Loading...')
+  const [penalties, setPenalties] = useState({
+    totalPenalties: 0,
+    overdueCount: 0
+  })
+  const [returnedStats, setReturnedStats] = useState({
+    returnedCount: 0
+  })
+  const [loadingStates, setLoadingStates] = useState({
+    cards: true,
+    chart: true,
+    borrowers: true,
+    checkouts: true,
+    books: true
+  })
+
+  // Helper to check if any section is still loading
+  const isAnyLoading = Object.values(loadingStates).some((state) => state)
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -76,25 +92,23 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      setIsLoading(true)
       try {
-        const [dashStats, borrowStats, returnedResponse] = await Promise.all([
+        const [dashStats, borrowStats, returnedData] = await Promise.all([
           fetchDashboardStats(),
           fetchBorrowedBooksStats(),
-          fetch('https://countmein.pythonanywhere.com/api/v1/borrow/returned-books/').then((res) =>
-            res.json()
-          )
+          fetchReturnedBooksCount(token)
         ])
 
         setChartData({
           labels: ['Total Books', 'Borrowed', 'Returned', 'Overdue'],
           datasets: [
             {
+              label: 'Library Statistics',
               data: [
-                dashStats.totalBooks,
-                borrowStats.borrowed,
-                returnedResponse.returned_books_count,
-                borrowStats.overdue
+                dashStats.totalBooks || 0,
+                borrowStats.borrowed || 0,
+                returnedData.returnedCount || 0,
+                penalties.overdueCount || 0
               ],
               borderColor: 'rgb(53, 162, 235)',
               backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -113,42 +127,37 @@ function Dashboard() {
       } catch (error) {
         console.error('Error fetching stats:', error)
       } finally {
-        setIsLoading(false)
+        setLoadingStates((prev) => ({ ...prev, cards: false, chart: false }))
       }
     }
-    fetchStats()
-  }, [])
 
-  useEffect(() => {
     const fetchStudents = async () => {
       try {
         const students = await fetchAllStudentsWithBorrowCount()
         setTopBorrowers(students)
       } catch (error) {
         console.error('Error fetching students:', error)
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, borrowers: false }))
       }
     }
-    fetchStudents()
-  }, [])
 
-  useEffect(() => {
     const loadRecentCheckouts = async () => {
-      setIsLoading(true)
       try {
         const checkouts = await fetchRecentCheckouts(5)
-        setRecentCheckouts(checkouts)
+        // Sort checkouts by borrowed_date in descending order (newest first)
+        const sortedCheckouts = checkouts.sort(
+          (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
+        )
+        setRecentCheckouts(sortedCheckouts)
       } catch (error) {
         console.error('Error fetching recent checkouts:', error)
       } finally {
-        setIsLoading(false)
+        setLoadingStates((prev) => ({ ...prev, checkouts: false }))
       }
     }
-    loadRecentCheckouts()
-  }, [])
 
-  useEffect(() => {
     const loadBooks = async () => {
-      setIsLoadingBooks(true)
       try {
         const [topData, marcData] = await Promise.all([fetchTopBooks(token), fetchMarcBooks(token)])
 
@@ -170,11 +179,47 @@ function Dashboard() {
         setTopBooks([])
         setNewBooks([])
       } finally {
-        setIsLoadingBooks(false)
+        setLoadingStates((prev) => ({ ...prev, books: false }))
       }
     }
 
-    if (token) loadBooks()
+    if (token) {
+      fetchStats()
+      fetchStudents()
+      loadRecentCheckouts()
+      loadBooks()
+    }
+  }, [token, penalties.overdueCount]) // Add penalties.overdueCount as dependency
+
+  // Add new useEffect for fetching penalties
+  useEffect(() => {
+    const fetchPenalties = async () => {
+      if (!token) return
+      try {
+        const penaltiesData = await fetchTotalPenalties(token)
+        setPenalties({
+          totalPenalties: penaltiesData.totalPenalties,
+          overdueCount: penaltiesData.overdueCount
+        })
+      } catch (error) {
+        console.error('Error fetching penalties:', error)
+      }
+    }
+    fetchPenalties()
+  }, [token])
+
+  // Add new useEffect for fetching returned books count
+  useEffect(() => {
+    const fetchReturnedCount = async () => {
+      if (!token) return
+      try {
+        const returnedData = await fetchReturnedBooksCount(token)
+        setReturnedStats(returnedData)
+      } catch (error) {
+        console.error('Error fetching returned books count:', error)
+      }
+    }
+    fetchReturnedCount()
   }, [token])
 
   // Add toggle handler
@@ -230,12 +275,20 @@ function Dashboard() {
       route: '/borrowed',
       clickable: true
     },
-    { title: 'Returned Books', value: returnedBooks, icon: FaUndo },
-    { title: 'Overdue Books', value: bookStats.overdue || '0', icon: FaClock },
+    {
+      title: 'Returned Books',
+      value: returnedStats.returnedCount || '0',
+      icon: FaUndo
+    },
+    {
+      title: 'Overdue Books',
+      value: penalties.overdueCount || '0', // Updated to use API count
+      icon: FaClock
+    },
     { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
     {
       title: 'Pending Fees',
-      value: `₱${(bookStats.pendingFees || 0).toLocaleString()}`,
+      value: `₱${Math.round(penalties.totalPenalties || 0).toLocaleString()}`,
       icon: FaMoneyBill
     },
     // Add an empty card if needed to maintain grid layout
@@ -255,33 +308,33 @@ function Dashboard() {
       <div className={`dashboard-container ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="dashboard-content">
           {/* Cards Section */}
-          <div className="cards-grid">
-            {isLoading
-              ? Array(7)
-                  .fill(null)
-                  .map((_, index) => <CardSkeleton key={index} />)
-              : cards.map((card, index) => (
-                  <div
-                    className={`card ${card.clickable ? 'clickable' : ''}`}
-                    key={index}
-                    onClick={() => card.clickable && handleCardClick(card.route)}
-                    style={{ cursor: card.clickable ? 'pointer' : 'default' }}
-                  >
-                    <div className="card-icon">
-                      <card.icon />
-                    </div>
-                    <div className="card-content">
-                      <h3>{card.title}</h3>
-                      <p>{card.value}</p>
-                    </div>
+          {loadingStates.cards ? (
+            <CardsSkeleton />
+          ) : (
+            <div className="cards-grid">
+              {cards.map((card, index) => (
+                <div
+                  className={`card ${card.clickable ? 'clickable' : ''}`}
+                  key={index}
+                  onClick={() => card.clickable && handleCardClick(card.route)}
+                  style={{ cursor: card.clickable ? 'pointer' : 'default' }}
+                >
+                  <div className="card-icon">
+                    <card.icon />
                   </div>
-                ))}
-          </div>
+                  <div className="card-content">
+                    <h3>{card.title}</h3>
+                    <p>{card.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Stats Container */}
           <div className="stats-container">
             <div className="chart">
-              {isLoading ? (
+              {loadingStates.chart ? (
                 <ChartSkeleton />
               ) : (
                 <div className="chart-container" style={{ height: '400px' }}>
@@ -291,8 +344,8 @@ function Dashboard() {
             </div>
 
             <div className="overdue">
-              {isLoading ? (
-                <TableSkeleton rows={5} />
+              {loadingStates.borrowers ? (
+                <TableSkeleton rows={5} columns={4} />
               ) : (
                 <div>
                   <h3>Top Borrowers</h3>
@@ -328,8 +381,8 @@ function Dashboard() {
                   <Link to="/borrowed">View all</Link>
                 </div>
               </div>
-              {isLoading ? (
-                <TableSkeleton rows={5} />
+              {loadingStates.checkouts ? (
+                <TableSkeleton rows={5} columns={4} />
               ) : (
                 <table>
                   <thead>
@@ -375,10 +428,8 @@ function Dashboard() {
                   New Arrivals
                 </button>
               </div>
-              {isLoadingBooks ? (
-                Array(activeBookFilter === 'top' ? 3 : 10)
-                  .fill(null)
-                  .map((_, index) => <BookCardSkeleton key={index} />)
+              {loadingStates.books ? (
+                <BooksSkeleton count={3} />
               ) : (
                 <div className="books-list">
                   {activeBookFilter === 'new' ? (

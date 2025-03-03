@@ -25,6 +25,7 @@
     "@tanstack/react-table": "^8.21.2",
     "axios": "^1.7.9",
     "chart.js": "^4.4.8",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "electron-devtools-installer": "^4.0.0",
     "electron-store": "^10.0.1",
