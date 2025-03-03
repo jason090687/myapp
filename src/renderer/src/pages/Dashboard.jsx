@@ -285,10 +285,7 @@ function Dashboard() {
     { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
     {
       title: 'Pending Fees',
-      value: `₱${penalties.totalPenalties.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`,
+      value: `₱${Math.round(penalties.totalPenalties || 0).toLocaleString()}`,
       icon: FaMoneyBill
     },
     // Add an empty card if needed to maintain grid layout
