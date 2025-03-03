@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FaBars, FaSearch, FaBell, FaUserCircle } from 'react-icons/fa'
+import { FaBars, FaSearch, FaUserCircle } from 'react-icons/fa'
 import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
 import { globalSearch } from '../services/searchService'
@@ -104,9 +104,7 @@ const Navbar = ({ isCollapsed, onToggle, userDetails, isLoading }) => {
       </div>
 
       <div className="navbar-right">
-        <div className="nav-item">
-          <FaBell />
-        </div>
+        <div className="nav-item"></div>
         {renderUserProfile()}
       </div>
     </nav>
