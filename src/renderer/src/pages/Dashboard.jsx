@@ -232,7 +232,7 @@ function Dashboard() {
     { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
     {
       title: 'Pending Fees',
-      value: `₱${(bookStats.pendingFees || 0).toLocaleString()}`,
+      value: `₱${Math.round(bookStats.pendingFees || 0).toLocaleString()}`,
       icon: FaMoneyBill
     },
     // Add an empty card if needed to maintain grid layout
