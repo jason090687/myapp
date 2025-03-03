@@ -4,13 +4,13 @@ import { Bounce, toast } from 'react-toastify'
 import Sidebar from '../components/Sidebar'
 import BooksHeader from '../components/Books/components/BooksHeader'
 import BooksTable from '../components/Books/components/BooksTable'
-import BooksTablePagination from '../components/Books/components/BooksTablePagination'
 import AddBookModal from '../components/AddBookModal'
 import EditBookModal from '../components/EditBookModal'
 import { useBooks } from '../components/Books/hooks/useBooks'
 import { useBookModals } from '../components/Books/hooks/useBookModals'
 import { useBookSearch } from '../components/Books/hooks/useBookSearch'
 import './Books.css'
+import Pagination from '../components/Pagination'
 
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -67,7 +67,7 @@ function Books() {
           />
 
           {!isLoading && !isFetchingAll && books.length > 0 && (
-            <BooksTablePagination
+            <Pagination
               currentPage={pagination.currentPage}
               totalPages={Math.ceil((sortedBooks || allBooks).length / 10)}
               totalItems={(sortedBooks || allBooks).length}

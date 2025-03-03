@@ -1,6 +1,6 @@
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
-function BooksTablePagination({ currentPage, totalPages, totalItems, onPageChange }) {
+function Pagination({ currentPage, totalPages, totalItems, onPageChange }) {
   return (
     <div className="pagination">
       <button
@@ -27,4 +27,4 @@ function BooksTablePagination({ currentPage, totalPages, totalItems, onPageChang
   )
 }
 
-export default BooksTablePagination
+export default Pagination

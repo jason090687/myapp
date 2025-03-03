@@ -4,24 +4,36 @@ import { FaCalendar, FaMoneyBill } from 'react-icons/fa'
 import './OverdueModal.css'
 import { Bounce, toast } from 'react-toastify'
 import { useSelector } from 'react-redux'
-import { processOverduePayment, returnBook, renewBook } from '../Features/api'
+import { processOverduePayment, fetchOverdueBorrowedBooks } from '../Features/api'
 
-const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData, onSuccess }) => {
+const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [overdueAmount, setOverdueAmount] = useState(0)
+  const [isLoadingAmount, setIsLoadingAmount] = useState(false)
   const [selectedAction, setSelectedAction] = useState('pay')
   const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
-    if (borrowData.due_date) {
-      const dueDate = new Date(borrowData.due_date)
-      const today = new Date()
-      const diffTime = Math.abs(today - dueDate)
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      const amount = diffDays * 2 // 2 pesos per day
-      setOverdueAmount(amount)
+    const fetchAmountData = async () => {
+      if (!borrowData.id || !token) return
+
+      setIsLoadingAmount(true)
+      try {
+        const response = await fetchOverdueBorrowedBooks(token, borrowData.id)
+        setOverdueAmount(Number(response.amount) || 0)
+      } catch (error) {
+        console.error('Error fetching amount data:', error)
+        toast.error('Failed to fetch overdue amount')
+        setOverdueAmount(0)
+      } finally {
+        setIsLoadingAmount(false)
+      }
     }
-  }, [borrowData.due_date])
+
+    if (isOpen && borrowData.id) {
+      fetchAmountData()
+    }
+  }, [borrowData.id, token, isOpen])
 
   const calculateNewDueDate = (currentDueDate) => {
     // Start with the next day
@@ -121,9 +133,14 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData, onSuccess }) => {
           </div>
           <div className="overdue-info-group">
             <label>Amount Due</label>
-            <p className="amount">
-              <FaMoneyBill className="money-icon" />₱{overdueAmount.toFixed(2)}
-            </p>
+            {isLoadingAmount ? (
+              <div className="amount-loading">Loading amount...</div>
+            ) : (
+              <p className="amount">
+                <FaMoneyBill className="money-icon" />₱
+                {typeof overdueAmount === 'number' ? overdueAmount.toFixed(2) : '0.00'}
+              </p>
+            )}
           </div>
           <div className="overdue-info-group">
             <label>Payment Date</label>

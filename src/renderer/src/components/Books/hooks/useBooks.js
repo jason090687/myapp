@@ -105,10 +105,7 @@ export const useBooks = (token) => {
         previous: false,
         currentPage: 1
       })
-      toast.success('Successfully loaded all books', {
-        position: 'top-right',
-        autoClose: 2000
-      })
+      // Removed success toast notification
     } catch (error) {
       console.error('Error fetching all books:', error)
       toast.error('Failed to load all books. Please try again.', {

@@ -35,7 +35,8 @@ import {
   fetchRecentCheckouts,
   fetchTopBooks,
   fetchBorrowedBooksStats,
-  fetchMarcBooks
+  fetchMarcBooks,
+  fetchTotalPenalties
 } from '../Features/api'
 
 // Register ChartJS components
@@ -63,6 +64,10 @@ function Dashboard() {
     overdue: 0,
     pending: 0,
     pendingFees: 0
+  })
+  const [penalties, setPenalties] = useState({
+    totalPenalties: 0,
+    overdueCount: 0
   })
 
   const handleSidebarToggle = () => {
@@ -174,6 +179,23 @@ function Dashboard() {
     if (token) loadBooks()
   }, [token])
 
+  // Add new useEffect for fetching penalties
+  useEffect(() => {
+    const fetchPenalties = async () => {
+      if (!token) return
+      try {
+        const penaltiesData = await fetchTotalPenalties(token)
+        setPenalties({
+          totalPenalties: penaltiesData.totalPenalties,
+          overdueCount: penaltiesData.overdueCount
+        })
+      } catch (error) {
+        console.error('Error fetching penalties:', error)
+      }
+    }
+    fetchPenalties()
+  }, [token])
+
   // Add toggle handler
   const handleBookFilterToggle = (filter) => {
     setActiveBookFilter(filter)
@@ -228,11 +250,18 @@ function Dashboard() {
       clickable: true
     },
     { title: 'Returned Books', value: bookStats.returned || '0', icon: FaUndo },
-    { title: 'Overdue Books', value: bookStats.overdue || '0', icon: FaClock },
+    {
+      title: 'Overdue Books',
+      value: penalties.overdueCount || '0', // Updated to use API count
+      icon: FaClock
+    },
     { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
     {
       title: 'Pending Fees',
-      value: `₱${Math.round(bookStats.pendingFees || 0).toLocaleString()}`,
+      value: `₱${penalties.totalPenalties.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`,
       icon: FaMoneyBill
     },
     // Add an empty card if needed to maintain grid layout
