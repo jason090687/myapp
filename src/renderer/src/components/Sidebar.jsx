@@ -65,6 +65,10 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     }
   ]
 
+  const handleLogo = () => {
+    navigate('/dashboard')
+  }
+
   const handleLogout = async () => {
     setIsLoading(true)
     try {
@@ -85,7 +89,9 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
         <div className="sidebar-header">
           <div className="logo-container">
             <img src={logo} alt="logo" style={{ width: '30px', height: '30px' }} />
-            <h2 className="brand-text">E-Library</h2>
+            <h2 className="brand-text" onClick={handleLogo}>
+              E-Library
+            </h2>
           </div>
         </div>
 
