@@ -121,37 +121,6 @@ export const useBooks = (token) => {
   }
 
   const handleDeleteBook = async (bookId) => {
-    // Create a custom toast for confirmation
-    const confirmToastId = toast(
-      <div className="delete-confirmation">
-        <p>Are you sure you want to delete this book?</p>
-        <div className="delete-actions">
-          <button
-            onClick={() => {
-              executeDelete(bookId)
-              toast.dismiss(confirmToastId)
-            }}
-            className="confirm-delete"
-          >
-            Delete
-          </button>
-          <button onClick={() => toast.dismiss(confirmToastId)} className="cancel-delete">
-            Cancel
-          </button>
-        </div>
-      </div>,
-      {
-        position: 'top-center',
-        autoClose: false,
-        closeOnClick: false,
-        draggable: false,
-        closeButton: false,
-        className: 'delete-toast'
-      }
-    )
-  }
-
-  const executeDelete = async (bookId) => {
     try {
       await deleteBook(token, bookId)
       setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
