@@ -516,3 +516,17 @@ export const fetchTotalPenalties = async (token) => {
     }
   }
 }
+
+export const fetchReturnedBooksCount = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/returned-books/`, getAuthHeaders(token))
+    return {
+      returnedCount: response.data.returned_books_count || 0
+    }
+  } catch (error) {
+    console.error('Error fetching returned books count:', error)
+    return {
+      returnedCount: 0
+    }
+  }
+}

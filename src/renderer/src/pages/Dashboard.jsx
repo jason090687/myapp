@@ -36,7 +36,8 @@ import {
   fetchTopBooks,
   fetchBorrowedBooksStats,
   fetchMarcBooks,
-  fetchTotalPenalties
+  fetchTotalPenalties,
+  fetchReturnedBooksCount
 } from '../Features/api'
 
 // Register ChartJS components
@@ -69,6 +70,9 @@ function Dashboard() {
     totalPenalties: 0,
     overdueCount: 0
   })
+  const [returnedStats, setReturnedStats] = useState({
+    returnedCount: 0
+  })
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -80,20 +84,22 @@ function Dashboard() {
     const fetchStats = async () => {
       setIsLoading(true)
       try {
-        const [dashStats, borrowStats] = await Promise.all([
+        const [dashStats, borrowStats, returnedData] = await Promise.all([
           fetchDashboardStats(),
-          fetchBorrowedBooksStats()
+          fetchBorrowedBooksStats(),
+          fetchReturnedBooksCount(token)
         ])
 
         setChartData({
           labels: ['Total Books', 'Borrowed', 'Returned', 'Overdue'],
           datasets: [
             {
+              label: 'Library Statistics',
               data: [
-                dashStats.totalBooks,
-                borrowStats.borrowed,
-                borrowStats.returned,
-                borrowStats.overdue
+                dashStats.totalBooks || 0,
+                borrowStats.borrowed || 0,
+                returnedData.returnedCount || 0,
+                penalties.overdueCount || 0
               ],
               borderColor: 'rgb(53, 162, 235)',
               backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -114,8 +120,11 @@ function Dashboard() {
         setIsLoading(false)
       }
     }
-    fetchStats()
-  }, [])
+
+    if (token) {
+      fetchStats()
+    }
+  }, [token, penalties.overdueCount]) // Add penalties.overdueCount as dependency
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -196,6 +205,20 @@ function Dashboard() {
     fetchPenalties()
   }, [token])
 
+  // Add new useEffect for fetching returned books count
+  useEffect(() => {
+    const fetchReturnedCount = async () => {
+      if (!token) return
+      try {
+        const returnedData = await fetchReturnedBooksCount(token)
+        setReturnedStats(returnedData)
+      } catch (error) {
+        console.error('Error fetching returned books count:', error)
+      }
+    }
+    fetchReturnedCount()
+  }, [token])
+
   // Add toggle handler
   const handleBookFilterToggle = (filter) => {
     setActiveBookFilter(filter)
@@ -249,7 +272,11 @@ function Dashboard() {
       route: '/borrowed',
       clickable: true
     },
-    { title: 'Returned Books', value: bookStats.returned || '0', icon: FaUndo },
+    {
+      title: 'Returned Books',
+      value: returnedStats.returnedCount || '0',
+      icon: FaUndo
+    },
     {
       title: 'Overdue Books',
       value: penalties.overdueCount || '0', // Updated to use API count
