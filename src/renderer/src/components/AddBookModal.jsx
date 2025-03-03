@@ -378,7 +378,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
               {isLoading ? (
                 <span className="spinner-wrapper">
                   <div className="spinner"></div>
-                  <span>Adding...</span>
+                  <span>Processing...</span>
                 </span>
               ) : (
                 'Add Book'
