@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import authService from './authService'
 
+// const user = JSON.parse(localStorage.getItem("user"));
+
 const initialState = {
   user: {
     first_name: '',
@@ -31,7 +33,7 @@ export const register = createAsyncThunk('auth/register', async (userData, thunk
   try {
     const response = await authService.register(userData)
     return response // Assuming { user, token } in response
-  } catch {
+  } catch (error) {
     return thunkAPI.rejectWithValue('Your account is already existed!')
   }
 })
@@ -41,7 +43,7 @@ export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) =
   try {
     const response = await authService.login(userData)
     return response // Assuming { user, token } in response
-  } catch {
+  } catch (error) {
     return thunkAPI.rejectWithValue('Invalid email or password. Please try again.')
   }
 })
@@ -57,7 +59,7 @@ export const activate = createAsyncThunk('auth/activate', async (userData, thunk
   try {
     const response = await authService.activate(userData)
     return response
-  } catch {
+  } catch (error) {
     return thunkAPI.rejectWithValue('Failed to activate')
   }
 })
@@ -67,7 +69,7 @@ export const resetPassword = createAsyncThunk('auth/resetPassword', async (userD
   try {
     const response = await authService.requestResetPassword(userData)
     return response
-  } catch {
+  } catch (error) {
     return thunkAPI.rejectWithValue('Failed to reset password')
   }
 })
@@ -79,7 +81,7 @@ export const resetPasswordConfirm = createAsyncThunk(
     try {
       const response = await authService.confirmResetPassword(userData)
       return response
-    } catch {
+    } catch (error) {
       return thunkAPI.rejectWithValue('Failed to reset the new password')
     }
   }
@@ -91,7 +93,7 @@ export const userDetails = createAsyncThunk('auth/userDetails', async (_, thunkA
     const token = thunkAPI.getState().auth.token
     const response = await authService.userDetails(token)
     return response
-  } catch {
+  } catch (error) {
     return thunkAPI.rejectWithValue('User is not found!')
   }
 })

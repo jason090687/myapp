@@ -1,26 +1,18 @@
 import { isOverdue } from './dateUtils'
 
 export const sortBorrowedBooks = (books) => {
-  if (!Array.isArray(books)) return []
+  return books.sort((a, b) => {
+    // First, sort by return status (not returned first)
+    if (a.return_status === 'Not Returned' && b.return_status !== 'Not Returned') return -1
+    if (a.return_status !== 'Not Returned' && b.return_status === 'Not Returned') return 1
 
-  return [...books].sort((a, b) => {
-    // First sort by return status
-    if (a.is_returned !== b.is_returned) {
-      return a.is_returned ? 1 : -1 // Unreturned books come first
+    // Then sort by due date for not returned books
+    if (a.return_status === 'Not Returned' && b.return_status === 'Not Returned') {
+      return new Date(a.due_date) - new Date(b.due_date)
     }
 
-    // For unreturned books, sort by borrowed date (newest first)
-    if (!a.is_returned && !b.is_returned) {
-      // Convert dates to timestamps for comparison
-      const dateA = new Date(a.borrowed_date).getTime()
-      const dateB = new Date(b.borrowed_date).getTime()
-      return dateB - dateA
-    }
-
-    // For returned books, sort by return date (newest first)
-    return (
-      new Date(b.returned_date || b.borrowed_date) - new Date(a.returned_date || a.borrowed_date)
-    )
+    // For returned books, sort by return date (most recent last)
+    return new Date(b.returned_date || 0) - new Date(a.returned_date || 0)
   })
 }
 

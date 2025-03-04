@@ -5,7 +5,6 @@ import ForgotPassword from '../pages/ForgotPassword'
 import Dashboard from '../pages/Dashboard'
 import Books from '../pages/Books'
 import Borrowed from '../pages/Borrowed'
-import History from '../pages/History'
 import Settings from '../pages/Settings'
 import GeneralSettings from '../components/settings/GeneralSettings.jsx'
 import BookManagement from '../components/settings/BookManagement.jsx'
@@ -49,10 +48,6 @@ const router = createHashRouter([
   {
     path: '/borrowed',
     element: <Borrowed />
-  },
-  {
-    path: '/history',
-    element: <History />
   },
   {
     path: '/profile',

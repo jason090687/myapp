@@ -17,14 +17,12 @@ import { ToastContainer } from 'react-toastify'
 function SignInPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { savedCredentials } = useSelector((state) => state.auth)
 
   const [formData, setFormData] = useState({
-    email: savedCredentials?.email || '',
-    password: savedCredentials?.password || '',
-    rememberMe: !!savedCredentials?.email
+    email: '',
+    password: '',
+    rememberMe: false
   })
-
   const { email, password, rememberMe } = formData
 
   const { user, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
@@ -56,7 +54,13 @@ function SignInPage() {
       return
     }
 
-    dispatch(login({ email, password, rememberMe })) // Add rememberMe to login dispatch
+    dispatch(login({ email, password }))
+
+    if (rememberMe) {
+      localStorage.setItem('rememberedEmail', email)
+    } else {
+      localStorage.removeItem('rememberedEmail')
+    }
   }
 
   useEffect(() => {
@@ -71,6 +75,17 @@ function SignInPage() {
 
     return () => dispatch(reset())
   }, [isError, isSuccess, user, message, navigate, dispatch])
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail')
+    if (savedEmail) {
+      setFormData((prev) => ({
+        ...prev,
+        email: savedEmail,
+        rememberMe: true
+      }))
+    }
+  }, [])
 
   const handleSignUp = () => {
     navigate('/signup')

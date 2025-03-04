@@ -251,7 +251,27 @@ const Borrowed = () => {
     }
   }
 
-  // Add refresh function
+  // Add filteredBooks computed value
+  const getFilteredBooks = () => {
+    if (!searchTerm) return borrowedBooks
+
+    return borrowedBooks.filter(
+      (book) =>
+        book.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.book_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        formatDate(book.borrowed_date).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        formatDate(book.due_date).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }
+
+  // Update the search handler
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value)
+    // Reset to first page when searching
+    if (pagination.currentPage !== 1) {
+      handlePageChange(1)
+    }
+  }
 
   // Update the table row rendering to hide overdue button when paid or renewed
   const renderActionButtons = (item) => (
@@ -305,9 +325,9 @@ const Borrowed = () => {
               <FaSearch className="search-icon" />
               <input
                 type="text"
-                placeholder="Search by student or book..."
+                placeholder="Search by student, book, or date..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearch}
                 className="search-input"
               />
             </div>
@@ -336,14 +356,14 @@ const Borrowed = () => {
                         <span className="borrowed-loading-text">Loading borrowed books...</span>
                       </td>
                     </tr>
-                  ) : borrowedBooks.length === 0 ? (
+                  ) : getFilteredBooks().length === 0 ? (
                     <tr>
                       <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
-                        No borrowed books found
+                        {searchTerm ? 'No matches found' : 'No borrowed books found'}
                       </td>
                     </tr>
                   ) : (
-                    borrowedBooks.map((item) => (
+                    getFilteredBooks().map((item) => (
                       <tr
                         key={item.id}
                         id={`borrowed-item-${item.id}`}
