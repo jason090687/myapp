@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "M&J",
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
@@ -58,28 +58,17 @@
     "vite": "^6.1.0"
   },
   "build": {
+    "appId": "com.countmein.myapp",
+    "productName": "eLibrary",
+    "asar": false,
     "files": [
-      "dist/",
-      "src/main/**/*",
+      "out/**/*",
       "node_modules/**/*",
-      ".env"
+      "package.json"
     ],
-    "extraResources": [
-      {
-        "from": ".env",
-        "to": ".env"
-      }
-    ],
-    "makers": [
-      {
-        "name": "@electron-forge/maker-squirrel",
-        "platforms": [
-          "win32"
-        ],
-        "config": {
-          "includeSubNodeModules": true
-        }
-      }
-    ]
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    }
   }
 }

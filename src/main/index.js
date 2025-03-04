@@ -1,5 +1,5 @@
-import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
@@ -16,9 +16,11 @@ function createWindow() {
   const windowSize = calculateWindowSize()
 
   const mainWindow = new BrowserWindow({
-    width: windowSize.width,
-    height: windowSize.height,
-    fullscreen: false,
+    width: 900,
+    height: 670,
+    title: 'SHJMS eLibrary',
+    icon: path.join(__dirname, '../../resources/icon.png'),
+    fullscreen: true,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -31,6 +33,10 @@ function createWindow() {
   mainWindow.on('ready-to-show', () => {
     mainWindow.maximize()
     mainWindow.show()
+  })
+
+  mainWindow.webContents.once('did-finish-load', () => {
+    mainWindow.setTitle('SHJMS eLibrary')
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
