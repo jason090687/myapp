@@ -162,18 +162,22 @@ function SignUpPage() {
             value={formData.password}
             onChange={handleChange('password')}
           />
-          <div className="password-requirements">
-            <p className={passwordValidation.length ? 'valid' : 'invalid'}>
-              ✓ At least 8 characters
-            </p>
-            <p className={passwordValidation.uppercase ? 'valid' : 'invalid'}>
-              ✓ At least one uppercase letter
-            </p>
-            <p className={passwordValidation.number ? 'valid' : 'invalid'}>✓ At least one number</p>
-            <p className={passwordValidation.special ? 'valid' : 'invalid'}>
-              ✓ At least one special character
-            </p>
-          </div>
+          {formData.password && (
+            <div className="password-requirements">
+              <p className={passwordValidation.length ? 'valid' : 'invalid'}>
+                ✓ At least 8 characters
+              </p>
+              <p className={passwordValidation.uppercase ? 'valid' : 'invalid'}>
+                ✓ At least one uppercase letter
+              </p>
+              <p className={passwordValidation.number ? 'valid' : 'invalid'}>
+                ✓ At least one number
+              </p>
+              <p className={passwordValidation.special ? 'valid' : 'invalid'}>
+                ✓ At least one special character
+              </p>
+            </div>
+          )}
           <InputField
             type="password"
             placeholder="Confirm Password"
