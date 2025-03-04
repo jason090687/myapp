@@ -1,7 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 
 function calculateWindowSize() {
   const primaryDisplay = screen.getPrimaryDisplay()
@@ -19,11 +18,10 @@ function createWindow() {
     width: 1366,
     height: 768,
     title: 'SHJMS eLibrary',
-    icon: path.join(__dirname, '../../build/icon.png'),
+    icon: path.join(__dirname, '../../src/renderer/src/assets/icon.ico'),
     fullscreen: false,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
