@@ -1,5 +1,5 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
@@ -8,6 +8,8 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    title: "SHJMS eLibrary",
+    icon: path.join(__dirname, "../../resources/icon.png"),
     fullscreen: true,
     show: false,
     autoHideMenuBar: true,
@@ -21,6 +23,10 @@ function createWindow() {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
+
+  mainWindow.webContents.once("did-finish-load", () => {
+    mainWindow.setTitle("SHJMS eLibrary");
+  });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
