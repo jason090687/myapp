@@ -19,7 +19,7 @@ function createWindow() {
     width: 1366,
     height: 768,
     title: 'SHJMS eLibrary',
-    icon: path.join(__dirname, '../../resources/icon.png'),
+    icon: path.join(__dirname, '../../build/icon.png'),
     fullscreen: false,
     show: false,
     autoHideMenuBar: true,
