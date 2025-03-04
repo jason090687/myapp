@@ -43,7 +43,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     subject: '',
     additional_author: '',
     copies: '',
-    status: 'available', // Change to lowercase to match API
+    status: '', // Change to lowercase to match API
     date_processed: new Date().toISOString().slice(0, 16), // Format: "YYYY-MM-DDThh:mm"
     processed_by: currentUser.id
   })
@@ -75,6 +75,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
       try {
         const statuses = await fetchBookStatuses(token)
         setStatusOptions(statuses)
+        console.log('Status options:', statuses)
       } catch (error) {
         console.error('Error loading status options:', error)
       }
