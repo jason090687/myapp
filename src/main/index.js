@@ -16,11 +16,11 @@ function createWindow() {
   const windowSize = calculateWindowSize()
 
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1366,
+    height: 768,
     title: 'SHJMS eLibrary',
     icon: path.join(__dirname, '../../resources/icon.png'),
-    fullscreen: true,
+    fullscreen: false,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
