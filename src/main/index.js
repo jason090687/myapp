@@ -1,14 +1,24 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+function calculateWindowSize() {
+  const primaryDisplay = screen.getPrimaryDisplay()
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize
+  return {
+    width: Math.floor(screenWidth * 0.8),
+    height: Math.floor(screenHeight * 0.8)
+  }
+}
+
 function createWindow() {
-  // Create the browser window.
+  const windowSize = calculateWindowSize()
+
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    fullscreen: true,
+    width: windowSize.width,
+    height: windowSize.height,
+    fullscreen: false,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -19,12 +29,35 @@ function createWindow() {
   })
 
   mainWindow.on('ready-to-show', () => {
+    mainWindow.maximize()
     mainWindow.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
+  })
+
+  // Add screen change listener
+  screen.on('display-metrics-changed', () => {
+    if (!mainWindow.isFullScreen()) {
+      const newSize = calculateWindowSize()
+      mainWindow.setSize(newSize.width, newSize.height)
+      mainWindow.center()
+    }
+  })
+
+  // Handle display addition/removal
+  screen.on('display-added', () => {
+    if (!mainWindow.isFullScreen()) {
+      mainWindow.center()
+    }
+  })
+
+  screen.on('display-removed', () => {
+    if (!mainWindow.isFullScreen()) {
+      mainWindow.center()
+    }
   })
 
   // HMR for renderer base on electron-vite cli.

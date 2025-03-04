@@ -1,0 +1,90 @@
+.required-indicator {
+  color: #ff4444;
+  margin-left: 4px;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+}
+
+.books-table-wrapper {
+  min-width: 100%;
+}
+
+.books-table {
+  width: 100%;
+  table-layout: auto;
+}
+
+/* Responsive breakpoints */
+@media screen and (max-width: 1200px) {
+  .col-physicalDescription,
+  .col-placeOfPublication,
+  .col-subject,
+  .col-processedBy {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .col-edition,
+  .col-volume,
+  .col-isbn,
+  .col-dateProcessed {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .col-publisher,
+  .col-seriesTitle,
+  .col-barcode {
+    display: none;
+  }
+
+  .books-table td,
+  .books-table th {
+    padding: 8px 4px;
+    font-size: 0.9rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .col-year {
+    display: none;
+  }
+
+  .action-buttons-container {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .books-table td,
+  .books-table th {
+    padding: 6px 2px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Base table styles */
+.books-table td,
+.books-table th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.col-title {
+  min-width: 150px;
+}
+
+.col-author {
+  min-width: 120px;
+}
+
+.col-action {
+  min-width: 100px;
+}

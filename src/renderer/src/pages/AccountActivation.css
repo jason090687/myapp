@@ -171,3 +171,59 @@
     font-size: 20px;
   }
 }
+
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column-reverse;
+  }
+
+  .right-side {
+    display: none;
+  }
+
+  .left-side {
+    width: 100%;
+    padding: 1.5rem;
+  }
+
+  .input-field-wrapper {
+    width: 90%;
+    max-width: 100%;
+  }
+
+  .activation-status {
+    margin: 1rem 0;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .left-side h2 {
+    font-size: 1.8rem;
+  }
+
+  .code-inputs {
+    gap: 0.5rem;
+  }
+
+  .code-inputs input {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+
+  .status-message p {
+    font-size: 0.85rem;
+  }
+
+  .button-group {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .code-inputs input {
+    width: 40px;
+    height: 40px;
+  }
+}

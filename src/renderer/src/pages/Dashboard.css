@@ -3,14 +3,32 @@
   flex: 1;
   margin-left: var(--sidebar-width);
   padding-top: var(--navbar-height);
-  min-height: 100vh;
-  background:
-    linear-gradient(rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9)),
-    url('../assets/images/background.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9));
   transition: margin-left var(--transition-speed) ease;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.dashboard-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-container::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+.dashboard-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+  border: 2px solid #f8fafc;
+}
+
+.dashboard-container::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
 }
 
 .dashboard-container.collapsed {
@@ -20,7 +38,8 @@
 .dashboard-content {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 2.5rem;
+  padding: 2rem;
+  min-height: calc(100vh - var(--navbar-height));
 }
 
 /* Cards Section */
@@ -114,6 +133,37 @@
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 1280px) {
+  .stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .chart {
+    order: 1; /* Put chart first */
+  }
+
+  .overdue {
+    order: 2; /* Put top borrowers second */
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .stats-container {
+    gap: 1rem;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  .overdue {
+    margin-top: 0.75rem;
+  }
 }
 
 .chart,
@@ -329,12 +379,38 @@ tr:hover td {
 
 @media (max-width: 1280px) {
   .dashboard-content {
-    padding: 2rem;
+    padding: 1.5rem;
   }
 
   .stats-container,
   .top-books_and_Checkout {
     grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    height: 350px;
+  }
+}
+
+@media (max-width: 1024px) and (max-height: 600px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .stats-container {
+    gap: 1rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .cards-grid {
+    margin-bottom: 1.5rem;
   }
 }
 
@@ -373,6 +449,32 @@ tr:hover td {
 
   .card-content p {
     font-size: 2rem;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  .cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-content {
+    padding: 0.75rem;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 1rem;
   }
 }
 

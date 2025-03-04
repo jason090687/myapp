@@ -13,7 +13,7 @@ import './Books.css'
 import Pagination from '../components/Pagination'
 
 function Books() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
   const { token, user } = useSelector((state) => state.auth)
 
   const {
@@ -48,6 +48,17 @@ function Books() {
   useEffect(() => {
     fetchAllBooks(debouncedSearchTerm)
   }, [debouncedSearchTerm])
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setIsCollapsed(true)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <div className="app-wrapper">

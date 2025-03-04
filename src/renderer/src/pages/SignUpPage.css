@@ -65,3 +65,38 @@
   font-size: 0.875rem;
   margin-top: -0.5rem;
 }
+
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column-reverse;
+  }
+
+  .right-side {
+    display: none;
+  }
+
+  .left-side {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .input-field-wrapper {
+    width: 90%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .left-side h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .password-requirements {
+    font-size: 0.8rem;
+  }
+
+  .password-match {
+    font-size: 0.8rem;
+  }
+}

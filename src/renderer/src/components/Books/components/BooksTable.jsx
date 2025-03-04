@@ -1,9 +1,11 @@
 import { FaSortUp, FaSortDown } from 'react-icons/fa'
 import { formatDate } from '../utils/bookUtils'
+import BookDetailsModal from './BookDetailsModal'
+import { useState } from 'react'
 
 const TABLE_COLUMNS = [
-  { key: 'title', label: 'TITLE', sortable: true },
-  { key: 'author', label: 'AUTHOR', sortable: true },
+  { key: 'title', label: 'TITLE', sortable: true, required: true },
+  { key: 'author', label: 'AUTHOR', sortable: true, required: true },
   { key: 'seriesTitle', label: 'SERIES TITLE', sortable: false },
   { key: 'publisher', label: 'PUBLISHER', sortable: true },
   { key: 'placeOfPublication', label: 'PLACE OF PUBLICATION', sortable: false },
@@ -13,9 +15,9 @@ const TABLE_COLUMNS = [
   { key: 'physicalDescription', label: 'PHYSICAL DESCRIPTION', sortable: false },
   { key: 'isbn', label: 'ISBN', sortable: false },
   { key: 'accessionNo', label: 'ACCESSION NUMBER', sortable: true },
-  { key: 'copy_number', label: 'COPY NO.', sortable: true },
+  { key: 'copy_number', label: 'COPY NO.', sortable: true, required: true },
   { key: 'barcode', label: 'BARCODE', sortable: false },
-  { key: 'dateReceived', label: 'DATE RECEIVED', sortable: true, type: 'date' },
+  { key: 'dateReceived', label: 'DATE RECEIVED', sortable: true, type: 'date', required: true },
   { key: 'subject', label: 'SUBJECT', sortable: false },
   { key: 'dateProcessed', label: 'DATE PROCESSED', sortable: true, type: 'date' },
   { key: 'processedBy', label: 'PROCESSED BY', sortable: true },
@@ -31,6 +33,15 @@ function BooksTable({
   onEditBook,
   onDeleteBook
 }) {
+  const [selectedBook, setSelectedBook] = useState(null)
+  const isMobile = window.innerWidth <= 1024
+
+  const handleRowClick = (book) => {
+    if (isMobile) {
+      setSelectedBook(book)
+    }
+  }
+
   const renderCellContent = (column, value, book) => {
     if (!value && value !== 0) return '-'
 
@@ -44,7 +55,10 @@ function BooksTable({
           return <span className={`status-badge ${value.toLowerCase()}`}>{value}</span>
         }
         if (column.key === 'copy_number') {
-          return `${book.copy_number} of ${book.copies}`
+          // Remove any existing "of" format and extract just the number
+          const copyNum = value.toString().split(' of ')[0]
+          const totalCopies = parseInt(book.copies)
+          return totalCopies ? `${copyNum} of ${totalCopies}` : copyNum
         }
         return value
     }
@@ -58,9 +72,11 @@ function BooksTable({
             key={column.key}
             className={`col-${column.key} ${column.sortable ? 'sortable' : ''}`}
             onClick={() => column.sortable && onSort(column.key)}
+            data-column={column.key}
           >
             <div className="header-content">
               {column.label}
+              {column.required && <span className="required-indicator">*</span>}
               {column.sortable && sortConfig.column === column.key && (
                 <span className="sort-icon">
                   {sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />}
@@ -69,7 +85,9 @@ function BooksTable({
             </div>
           </th>
         ))}
-        <th className="col-action">ACTION</th>
+        <th className="col-action" data-column="action">
+          ACTION
+        </th>
       </tr>
     </thead>
   )
@@ -100,7 +118,7 @@ function BooksTable({
   const renderTableBody = () => (
     <tbody>
       {books.map((book, index) => (
-        <tr key={book.id || index}>
+        <tr key={book.id || index} onClick={() => handleRowClick(book)}>
           {TABLE_COLUMNS.map((column) => (
             <td key={column.key} className={`col-${column.key}`} data-content={book[column.key]}>
               {renderCellContent(column, book[column.key], book)}
@@ -122,18 +140,28 @@ function BooksTable({
   )
 
   return (
-    <div className="table-container">
-      <div className="books-table-wrapper">
-        <table className="books-table">
-          {renderTableHeader()}
-          {isLoading || isFetchingAll
-            ? renderLoadingState()
-            : !books.length
-              ? renderEmptyState()
-              : renderTableBody()}
-        </table>
+    <>
+      <div className="table-container">
+        <div className="books-table-wrapper">
+          <table className="books-table" role="grid">
+            {renderTableHeader()}
+            {isLoading || isFetchingAll
+              ? renderLoadingState()
+              : !books.length
+                ? renderEmptyState()
+                : renderTableBody()}
+          </table>
+        </div>
       </div>
-    </div>
+
+      <BookDetailsModal
+        book={selectedBook}
+        isOpen={!!selectedBook}
+        onClose={() => setSelectedBook(null)}
+        onEdit={onEditBook}
+        onDelete={onDeleteBook}
+      />
+    </>
   )
 }
 

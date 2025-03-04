@@ -862,3 +862,113 @@ checkout-header a {
 .sidebar.collapsed .sidebar-nav svg {
   margin: 0;
 }
+
+/* Add these responsive styles */
+@media screen and (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .sidebar.collapsed {
+    width: 60px;
+  }
+
+  .sidebar-nav a,
+  .sidebar-nav button {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  .logo-container {
+    padding: 0.5rem;
+  }
+
+  .brand-text {
+    font-size: 1.125rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 220px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.collapsed {
+    width: 0;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .logo-container {
+    padding: 0.5rem;
+    justify-content: center;
+  }
+
+  .sidebar-nav {
+    padding-top: 1rem;
+  }
+
+  .sidebar-nav a,
+  .sidebar-nav button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .logout-container {
+    bottom: 1rem;
+  }
+
+  .logout-btn {
+    width: 180px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .brand-text {
+    font-size: 1rem;
+  }
+
+  .sidebar-nav svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sidebar-nav span {
+    font-size: 0.75rem;
+  }
+
+  .logout-btn {
+    width: 160px;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Add these height-based responsive styles */
+@media screen and (max-height: 700px) {
+  .sidebar-nav {
+    padding-top: 0.5rem;
+  }
+
+  .sidebar-nav li {
+    margin: 4px 0;
+  }
+
+  .sidebar-nav a,
+  .sidebar-nav button {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .logout-container {
+    bottom: 0.5rem;
+  }
+}

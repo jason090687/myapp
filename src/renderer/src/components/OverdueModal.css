@@ -8,8 +8,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000; /* Higher z-index to appear above other modals */
   backdrop-filter: blur(8px);
+  padding: 1rem;
 }
 
 .overdue-modal-content {
@@ -17,7 +18,7 @@
   padding: 2.5rem;
   border-radius: 1rem;
   width: 95%;
-  max-width: 500px;
+  max-width: 600px; /* Increased from 500px */
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   position: relative;
   animation: modalSlideUp 0.3s ease-out;
@@ -48,6 +49,9 @@
 
 .overdue-modal-body {
   margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
 .overdue-info-group {
@@ -56,6 +60,8 @@
   border-radius: 0.75rem;
   border: 1px solid #e2e8f0;
   margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .overdue-info-group label {
@@ -225,5 +231,156 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Make certain items span full width */
+.overdue-info-group:nth-child(1),  /* Student Name */
+.overdue-info-group:nth-child(2),  /* Book Title */
+.overdue-info-group:last-child {
+  /* Action Select */
+  grid-column: 1 / -1;
+}
+
+/* Add responsive styles */
+@media screen and (max-width: 768px) {
+  .overdue-modal-content {
+    padding: 1.5rem;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .overdue-modal-overlay {
+    padding: 0;
+  }
+
+  .overdue-info-group {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    grid-column: 1 / -1 !important;
+  }
+
+  .overdue-modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1rem;
+    margin-top: auto;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .overdue-submit-btn,
+  .overdue-cancel-btn {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  .action-select {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .overdue-modal-body {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .overdue-modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .overdue-info-group {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .overdue-info-group label {
+    font-size: 0.7rem;
+  }
+
+  .overdue-info-group p {
+    font-size: 0.875rem;
+  }
+
+  .overdue-info-group .amount {
+    font-size: 1.125rem;
+  }
+}
+
+/* Add scrolling for content */
+@media screen and (max-height: 700px) {
+  .overdue-modal-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .overdue-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .overdue-modal-body::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .overdue-modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+}
+
+@media screen and (max-width: 1024px), (max-height: 800px) {
+  .overdue-modal-overlay {
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .overdue-modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .overdue-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    margin: 1rem 0;
+    padding-right: 0.5rem;
+  }
+
+  .overdue-modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+  }
+
+  .overdue-modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 10;
+    margin-top: auto;
+  }
+
+  /* Scrollbar styling */
+  .overdue-modal-content::-webkit-scrollbar,
+  .overdue-modal-body::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .overdue-modal-content::-webkit-scrollbar-thumb,
+  .overdue-modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
   }
 }

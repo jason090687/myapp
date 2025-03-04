@@ -180,6 +180,6 @@ const mapBookData = (book) => ({
   dateProcessed: book.date_processed,
   processedBy: book.name,
   status: book.status,
-  copies: book.copies || 1,
+  copies: book.copies,
   copy_number: book.copy_number || '1 of ' + (book.copies || 1)
 })

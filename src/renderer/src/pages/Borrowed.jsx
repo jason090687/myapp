@@ -14,6 +14,7 @@ import RenewModal from '../components/RenewModal'
 import OverdueModal from '../components/OverdueModal'
 import { Bounce, toast } from 'react-toastify'
 import { useSearchParams } from 'react-router-dom'
+import BorrowDetailsModal from '../components/BorrowDetails/BorrowDetailsModal'
 
 const Borrowed = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -36,6 +37,8 @@ const Borrowed = () => {
   const [searchParams] = useSearchParams()
   const highlightedId = searchParams.get('id')
   const shouldHighlight = searchParams.get('highlight') === 'true'
+  const [selectedBorrowDetails, setSelectedBorrowDetails] = useState(null)
+  const isMobile = window.innerWidth <= 1024
 
   // Add function to check if book is overdue
   const isOverdue = (dueDate) => {
@@ -315,6 +318,12 @@ const Borrowed = () => {
     }
   }, [highlightedId, shouldHighlight])
 
+  const handleRowClick = (borrowItem) => {
+    if (isMobile) {
+      setSelectedBorrowDetails(borrowItem)
+    }
+  }
+
   return (
     <div className="app-wrapper">
       <Sidebar isCollapsed={isCollapsed} onToggle={handleSidebarToggle} />
@@ -367,6 +376,7 @@ const Borrowed = () => {
                       <tr
                         key={item.id}
                         id={`borrowed-item-${item.id}`}
+                        onClick={() => handleRowClick(item)}
                         className={
                           highlightedId === item.id.toString()
                             ? 'highlighted'
@@ -429,6 +439,14 @@ const Borrowed = () => {
           onSubmit={handleOverdueSubmit}
           onSuccess={refreshTable} // Add this line
           borrowData={selectedOverdue || {}}
+        />
+        <BorrowDetailsModal
+          isOpen={!!selectedBorrowDetails}
+          onClose={() => setSelectedBorrowDetails(null)}
+          borrowData={selectedBorrowDetails}
+          onReturn={handleReturnBook}
+          onRenew={handleRenewClick}
+          onPay={handleOverdueClick}
         />
       </div>
     </div>
