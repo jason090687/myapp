@@ -22,6 +22,7 @@
   max-width: 100%;
   margin: 0;
   width: 100%;
+  flex: 1;
 }
 
 .borrowed-header {
@@ -70,6 +71,7 @@
     0 1px 2px -1px rgb(0 0 0 / 0.1);
   width: 100%;
   overflow: hidden;
+  height: calc(100vh - 200px); /* Adjust value based on your header height */
 }
 
 .borrowed-table-wrapper {
@@ -79,15 +81,17 @@
   border-radius: 1rem;
   position: relative;
   width: 100%;
-  max-height: calc(100vh - 250px); /* Adjust based on your header/footer heights */
+  height: 100%; /* Changed from max-height to height */
 }
 
+/* Update table styles for 100% width */
 .borrowed-table {
   width: 100%;
+  height: 100%;
+  table-layout: auto; /* Changed from fixed to auto */
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.9375rem;
-  table-layout: fixed;
   background: white;
   position: relative;
 }
@@ -132,24 +136,34 @@
 
 .borrowed-table th:last-child,
 .borrowed-table td:last-child {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
+  width: 10%;
   text-align: center;
   /* Remove flex display */
   display: table-cell;
   vertical-align: middle;
 }
 
-.borrowed-table th:nth-child(5),
+/* Adjust column widths for better distribution */
+.borrowed-table th:nth-child(1), /* Student column */
+.borrowed-table td:nth-child(1) {
+  width: 25%;
+}
+
+.borrowed-table th:nth-child(2), /* Book column */
+.borrowed-table td:nth-child(2) {
+  width: 35%;
+}
+
+.borrowed-table th:nth-child(3), /* Borrow Date */
+.borrowed-table td:nth-child(3),
+.borrowed-table th:nth-child(4), /* Due Date */
+.borrowed-table td:nth-child(4) {
+  width: 15%;
+}
+
+.borrowed-table th:nth-child(5), /* Status */
 .borrowed-table td:nth-child(5) {
-  width: 140px;
-  min-width: 140px;
-  max-width: 140px;
-  text-align: center;
-  /* Remove flex display */
-  display: table-cell;
-  vertical-align: middle;
+  width: 10%;
 }
 
 .borrowed-table tr.disabled-row {
@@ -519,7 +533,7 @@
   }
 }
 
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 1500px) {
   .borrowed-header {
     flex-direction: row;
     gap: 1rem;
@@ -589,6 +603,29 @@
   .borrowed-table tr:hover .action-buttons-container {
     display: none !important;
   }
+
+  /* Show clickable row styles */
+  .borrowed-table tbody tr.clickable-row::after {
+    display: block;
+    opacity: 0;
+  }
+
+  .borrowed-table tbody tr.clickable-row:hover::after {
+    opacity: 1;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  /* Maintain same styles as 1336px breakpoint */
+  .borrowed-table tbody tr.clickable-row {
+    cursor: pointer;
+  }
+
+  .borrowed-table tbody tr.clickable-row::after {
+    display: block;
+  }
+
+  /* ...rest of existing code... */
 }
 
 @media screen and (max-width: 768px) {
@@ -678,4 +715,23 @@
   flex-direction: column;
   gap: 1rem;
   overflow: hidden;
+}
+
+/* Add these styles for clickable rows */
+.borrowed-table tbody tr.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.borrowed-table tbody tr.clickable-row:hover {
+  background: rgba(248, 250, 252, 0.95);
+}
+
+/* Remove the chevron indicator styles */
+.borrowed-table tbody tr::after {
+  display: none !important;
+}
+
+.borrowed-table tbody tr.clickable-row::after {
+  display: none !important;
 }

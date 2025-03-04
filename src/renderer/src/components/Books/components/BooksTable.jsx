@@ -31,7 +31,8 @@ function BooksTable({
   sortConfig,
   onSort,
   onEditBook,
-  onDeleteBook
+  onDeleteBook,
+  onRowClick
 }) {
   const [selectedBook, setSelectedBook] = useState(null)
   const isMobile = window.innerWidth <= 1024
@@ -40,6 +41,7 @@ function BooksTable({
     if (isMobile) {
       setSelectedBook(book)
     }
+    onRowClick(book)
   }
 
   const renderCellContent = (column, value, book) => {
@@ -118,7 +120,11 @@ function BooksTable({
   const renderTableBody = () => (
     <tbody>
       {books.map((book, index) => (
-        <tr key={book.id || index} onClick={() => handleRowClick(book)}>
+        <tr
+          key={book.id || index}
+          onClick={() => handleRowClick(book)}
+          style={{ cursor: 'pointer' }}
+        >
           {TABLE_COLUMNS.map((column) => (
             <td key={column.key} className={`col-${column.key}`} data-content={book[column.key]}>
               {renderCellContent(column, book[column.key], book)}
