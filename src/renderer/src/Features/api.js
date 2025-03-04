@@ -217,16 +217,11 @@ export const deleteBook = async (token, bookId) => {
   }
 }
 
-export const fetchBorrowedBooks = async (token, page = 1) => {
-  if (!token) {
-    console.error('Error: Missing authentication token')
-    throw new Error('Unauthorized: No token provided')
-  }
-
+export const fetchBorrowedBooks = async (token, page = 1, searchTerm = '') => {
   try {
     const response = await axios.get(
-      `${API_URL}/borrow/list/?page=${page}`,
-      getAuthHeaders(token) // Ensure headers are passed correctly
+      `${API_URL}/borrow/list/?page=${page}&search=${searchTerm}&ordering=return_status,-returned_date`,
+      getAuthHeaders(token)
     )
     return response.data
   } catch (error) {
