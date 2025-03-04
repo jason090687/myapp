@@ -58,7 +58,16 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
         <div className="borrow-details-footer">
           {shouldShowButtons && (
             <>
-              {/* Show Renew button first if available */}
+              <button className="action-button return" onClick={() => onReturn(borrowData.id)}>
+                <FaUndo /> Return Book
+              </button>
+
+              {isDue && !borrowData.paid && (
+                <button className="action-button pay" onClick={() => onPay(borrowData)}>
+                  <FaMoneyBill /> Pay Overdue
+                </button>
+              )}
+
               {canRenew && (
                 <button
                   className="action-button renew"
@@ -68,18 +77,6 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
                   <FaUndo /> Renew
                 </button>
               )}
-
-              {/* Show Pay Overdue button second if due */}
-              {isDue && !borrowData.paid && (
-                <button className="action-button pay" onClick={() => onPay(borrowData)}>
-                  <FaMoneyBill /> Pay Overdue
-                </button>
-              )}
-
-              {/* Show Return button last */}
-              <button className="action-button return" onClick={() => onReturn(borrowData.id)}>
-                <FaUndo /> Return Book
-              </button>
             </>
           )}
         </div>

@@ -23,8 +23,8 @@
   gap: 1.5rem;
   max-width: 1920px;
   margin: 0 auto;
-  padding: 2rem;
   height: calc(100vh - var(--navbar-height));
+  overflow: auto;
 }
 
 .books-header {
@@ -97,7 +97,6 @@
 
 .table-container {
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 0.95);
@@ -106,22 +105,25 @@
   border-radius: 1.25rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  margin-bottom: 1rem; /* Add space for pagination */
+  height: auto; /* Changed from fixed height */
 }
 
 .books-table-wrapper {
   flex: 1;
   overflow-x: auto;
-  overflow-y: auto;
+  overflow-y: visible; /* Changed from auto to visible */
   border-radius: 1rem;
   position: relative;
+  margin-bottom: 0; /* Remove bottom margin */
 }
 
 .books-table {
   width: 100%;
+  table-layout: auto;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.9375rem;
+  margin-bottom: 0; /* Remove bottom margin */
 }
 
 .books-table thead {
@@ -208,6 +210,25 @@
   font-size: 0.875rem;
   line-height: 1.5;
   text-align: left;
+  height: 500px;
+}
+
+.books-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.books-table tbody tr:hover {
+  background: rgba(248, 250, 252, 0.95);
+}
+
+/* Add visual indicator for clickable rows */
+.books-table tbody tr::after {
+  display: none !important;
+}
+
+.books-table tbody tr.clickable-row::after {
+  display: none !important;
 }
 
 .books-table tbody tr:hover {
@@ -271,16 +292,17 @@
 } */
 
 .pagination {
-  position: relative; /* Change from sticky to relative */
+  position: sticky;
+  bottom: 0;
   background: rgba(248, 250, 252, 0.95);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 1rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
   padding: 1rem;
+  z-index: 10;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 0;
+  backdrop-filter: blur(8px);
 }
 
 .pagination-btn {
@@ -921,6 +943,87 @@
 
   .books-content {
     padding: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 1500px) {
+  .books-table tbody tr {
+    cursor: pointer;
+    position: relative;
+  }
+
+  .books-table tbody tr:hover {
+    background: rgba(248, 250, 252, 0.95);
+  }
+
+  .books-table tbody tr:hover::after {
+    content: '›';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 1.5rem;
+  }
+
+  .books-table .col-action {
+    display: none;
+  }
+
+  /* Adjust other column widths for better fit */
+  .books-table .col-title {
+    width: 200px;
+  }
+
+  .books-table .col-author,
+  .books-table .col-series,
+  .books-table .col-publisher,
+  .books-table .col-subject {
+    width: 150px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  /* Keep the same styles as 1336px breakpoint */
+  .books-table tbody tr {
+    cursor: pointer;
+    position: relative;
+  }
+
+  .books-table tbody tr:hover {
+    background: rgba(248, 250, 252, 0.95);
+  }
+
+  .books-table tbody tr:hover::after {
+    content: '›';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 1.5rem;
+  }
+
+  .books-table .col-action {
+    display: none;
+  }
+
+  /* Additional adjustments for smaller screen */
+  .books-table th {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .books-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Reduce font sizes */
+  .books-table th {
+    font-size: 0.75rem;
+  }
+
+  .books-table td {
+    font-size: 0.8125rem;
   }
 }
 

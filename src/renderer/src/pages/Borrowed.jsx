@@ -38,7 +38,6 @@ const Borrowed = () => {
   const highlightedId = searchParams.get('id')
   const shouldHighlight = searchParams.get('highlight') === 'true'
   const [selectedBorrowDetails, setSelectedBorrowDetails] = useState(null)
-  const isMobile = window.innerWidth <= 1024
 
   // Add function to check if book is overdue
   const isOverdue = (dueDate) => {
@@ -319,9 +318,7 @@ const Borrowed = () => {
   }, [highlightedId, shouldHighlight])
 
   const handleRowClick = (borrowItem) => {
-    if (isMobile) {
-      setSelectedBorrowDetails(borrowItem)
-    }
+    setSelectedBorrowDetails(borrowItem)
   }
 
   return (
@@ -377,11 +374,12 @@ const Borrowed = () => {
                         key={item.id}
                         id={`borrowed-item-${item.id}`}
                         onClick={() => handleRowClick(item)}
-                        className={
+                        style={{ cursor: 'pointer' }}
+                        className={`${
                           highlightedId === item.id.toString()
                             ? 'highlighted'
                             : getRowClassName(item)
-                        }
+                        } clickable-row`}
                       >
                         <td>{item.student_name}</td>
                         <td>{item.book_title}</td>

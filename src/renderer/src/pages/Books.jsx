@@ -11,6 +11,7 @@ import { useBookModals } from '../components/Books/hooks/useBookModals'
 import { useBookSearch } from '../components/Books/hooks/useBookSearch'
 import './Books.css'
 import Pagination from '../components/Pagination'
+import BookDetailsModal from '../components/Books/components/BookDetailsModal'
 
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
@@ -45,6 +46,19 @@ function Books() {
     handleEditSubmit
   } = useBookModals(token, fetchBooksData, pagination.currentPage)
 
+  const [selectedBook, setSelectedBook] = useState(null)
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+
+  const handleRowClick = (book) => {
+    setSelectedBook(book)
+    setIsDetailsModalOpen(true)
+  }
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false)
+    setSelectedBook(null)
+  }
+
   useEffect(() => {
     fetchAllBooks(debouncedSearchTerm)
   }, [debouncedSearchTerm])
@@ -75,6 +89,7 @@ function Books() {
             onSort={handleSort}
             onEditBook={handleEditBook}
             onDeleteBook={handleDeleteBook}
+            onRowClick={handleRowClick}
           />
 
           {!isLoading && !isFetchingAll && books.length > 0 && (
@@ -101,6 +116,14 @@ function Books() {
         onSubmit={handleEditSubmit}
         bookData={editingBook}
         currentUser={user}
+      />
+
+      <BookDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={handleCloseDetailsModal}
+        book={selectedBook}
+        onEdit={handleEditBook}
+        onDelete={handleDeleteBook}
       />
     </div>
   )
