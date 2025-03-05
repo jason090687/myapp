@@ -26,7 +26,8 @@ import 'react-toastify/dist/ReactToastify.css'
 const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState([])
-  const [formData, setFormData] = useState({
+
+  const initialFormState = {
     title: '',
     author: '',
     series_title: '',
@@ -43,10 +44,12 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     subject: '',
     additional_author: '',
     copies: '',
-    status: '', // Change to lowercase to match API
-    date_processed: new Date().toISOString().slice(0, 16), // Format: "YYYY-MM-DDThh:mm"
-    processed_by: currentUser.id
-  })
+    status: 'Available',
+    date_processed: new Date().toISOString().slice(0, 16),
+    processed_by: currentUser?.id || ''
+  }
+
+  const [formData, setFormData] = useState(initialFormState)
   const [statusOptions, setStatusOptions] = useState([])
 
   const { token } = useSelector((state) => state.auth)
@@ -97,7 +100,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value || '' // Ensure value is never undefined
     }))
   }
 
@@ -118,36 +121,21 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     return (
       formData.title?.trim() &&
       formData.author?.trim() &&
-      formData.barcode?.trim() &&
-      formData.status &&
+      formData.publisher?.trim() &&
+      formData.place_of_publication?.trim() &&
+      formData.year?.trim() &&
+      formData.isbn?.trim() &&
       formData.copies &&
+      formData.date_received?.trim() &&
+      formData.status &&
+      formData.date_processed &&
       copiesNum > 0 &&
-      Number.isInteger(copiesNum) // Ensure it's a valid integer
+      Number.isInteger(copiesNum)
     )
   }
 
   const resetFormData = () => {
-    setFormData({
-      title: '',
-      author: '',
-      series_title: '',
-      publisher: '',
-      place_of_publication: '',
-      year: '',
-      edition: '',
-      volume: '',
-      physical_description: '',
-      isbn: '',
-      accession_number: '',
-      barcode: '',
-      date_received: '',
-      subject: '',
-      additional_author: '',
-      copies: '',
-      status: 'Available', // Update to match API case
-      date_processed: new Date().toISOString().slice(0, 16), // Format: "YYYY-MM-DDThh:mm"
-      processed_by: currentUser.id // Ensure we use the ID
-    })
+    setFormData(initialFormState)
   }
 
   const generateSequentialIdentifiers = (totalCopies) => {
@@ -217,7 +205,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
         }
       }
 
-      // Success handling
+      // Only close modal and reset form if all copies were successful
       if (successCount === totalCopies) {
         toast.success(
           <div>
@@ -235,9 +223,9 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
         )
         onRefresh && onRefresh()
         resetFormData()
-        onClose()
+        onClose() // Only close modal on complete success
       } else {
-        // Show failed copies
+        // Keep modal open if there were any failures
         toast.error(
           <div>
             <strong>Some copies failed</strong>
@@ -260,6 +248,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
         ...toastConfig,
         autoClose: 5000
       })
+      // Do not close modal or reset form on error
     } finally {
       setIsLoading(false)
     }
@@ -271,18 +260,23 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     { name: 'title', label: 'Title*', icon: FaBook, required: true },
     { name: 'author', label: 'Author*', icon: FaUser, required: true },
     { name: 'series_title', label: 'Series Title', icon: FaBookOpen },
-    { name: 'publisher', label: 'Publisher', icon: FaBuilding, required: true },
-    { name: 'place_of_publication', label: 'Place of Publication', icon: FaMapMarker },
-    { name: 'year', label: 'Year', icon: FaCalendar, type: 'number', required: true },
-    { name: 'edition', label: 'Edition', icon: FaBookmark, required: true },
+    { name: 'publisher', label: 'Publisher*', icon: FaBuilding, required: true },
+    {
+      name: 'place_of_publication',
+      label: 'Place of Publication*',
+      icon: FaMapMarker,
+      required: true
+    },
+    { name: 'year', label: 'Year*', icon: FaCalendar, type: 'number', required: true },
+    { name: 'edition', label: 'Edition', icon: FaBookmark },
     { name: 'volume', label: 'Volume', icon: FaVolumeUp },
     { name: 'physical_description', label: 'Physical Description', icon: FaBox },
-    { name: 'isbn', label: 'ISBN', icon: FaBarcode, required: true },
+    { name: 'isbn', label: 'ISBN*', icon: FaBarcode, required: true },
     { name: 'accession_number', label: 'Accession Number', icon: FaHashtag },
-    { name: 'barcode', label: 'Barcode*', icon: FaQrcode },
+    { name: 'barcode', label: 'Barcode', icon: FaQrcode },
     { name: 'subject', label: 'Subject', icon: FaTag },
     { name: 'copies', label: 'Number of Copies*', icon: FaHashtag, type: 'number', required: true },
-    { name: 'additional_author', label: 'Additional Author (Optional)', icon: FaPen }
+    { name: 'additional_author', label: 'Additional Author', icon: FaPen }
   ]
 
   return (
@@ -313,7 +307,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
             ))}
 
             <div className="form-group">
-              <label htmlFor="date_received">Date Received</label>
+              <label htmlFor="date_received">Date Received*</label>
               <InputField
                 type="date"
                 id="date_received"
@@ -321,6 +315,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
                 value={formData.date_received}
                 onChange={handleChange}
                 icon={FaCalendar}
+                required
               />
             </div>
 
@@ -335,11 +330,14 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
                   className="select-field"
                   required
                 >
-                  {statusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
+                  <option value="Available">Available</option>
+                  {statusOptions
+                    .filter((option) => option.value !== 'Available')
+                    .map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
@@ -361,13 +359,17 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
               <label htmlFor="processed_by">Processed By</label>
               <InputField
                 type="text"
-                value={userDetails.first_name || currentUser.name || ''} // Display name
+                value={userDetails?.first_name || currentUser?.name || ''} // Ensure value is never undefined
                 icon={FaUser}
                 disabled
                 id="processed_by_display" // Changed ID to avoid confusion
               />
               {/* Add hidden input to store the ID */}
-              <input type="hidden" name="processed_by" value={userDetails.id || currentUser.id} />
+              <input
+                type="hidden"
+                name="processed_by"
+                value={userDetails?.id || currentUser?.id || ''}
+              />
             </div>
           </div>
 
