@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FaTimes, FaUndo, FaMoneyBill } from 'react-icons/fa'
 import './BorrowDetailsModal.css'
 
 const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, onPay }) => {
+  const [processingAction, setProcessingAction] = useState(null) // Track which action is processing
+
   if (!isOpen || !borrowData) return null
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
@@ -27,6 +29,45 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
     { label: 'Status', value: borrowData.status },
     { label: 'Times Renewed', value: `${borrowData.renewed_count || 0} of 3` }
   ]
+
+  const handleReturn = async (id) => {
+    setProcessingAction('return')
+    try {
+      await onReturn(id)
+      // Don't close the modal here, let the parent component handle it
+    } catch (error) {
+      console.error('Error returning book:', error)
+      toast.error('Failed to return book')
+    } finally {
+      setProcessingAction(null)
+    }
+  }
+
+  const handleRenew = async (data) => {
+    setProcessingAction('renew')
+    try {
+      await onRenew(data)
+      // Don't close the modal here
+    } catch (error) {
+      console.error('Error renewing book:', error)
+      toast.error('Failed to renew book')
+    } finally {
+      setProcessingAction(null)
+    }
+  }
+
+  const handlePay = async (data) => {
+    setProcessingAction('pay')
+    try {
+      await onPay(data)
+      // Don't close the modal here
+    } catch (error) {
+      console.error('Error processing payment:', error)
+      toast.error('Failed to process payment')
+    } finally {
+      setProcessingAction(null)
+    }
+  }
 
   return (
     <div className="borrow-details-overlay" onClick={onClose}>
@@ -58,23 +99,55 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
         <div className="borrow-details-footer">
           {shouldShowButtons && (
             <>
-              <button className="action-button return" onClick={() => onReturn(borrowData.id)}>
-                <FaUndo /> Return Book
+              <button
+                className="action-button return"
+                onClick={() => handleReturn(borrowData.id)}
+                disabled={processingAction !== null}
+              >
+                {processingAction === 'return' ? (
+                  <div className="button-spinner">
+                    <div className="spinner"></div>
+                  </div>
+                ) : (
+                  <>
+                    <FaUndo /> Return Book
+                  </>
+                )}
               </button>
 
               {isDue && !borrowData.paid && (
-                <button className="action-button pay" onClick={() => onPay(borrowData)}>
-                  <FaMoneyBill /> Pay Overdue
+                <button
+                  className="action-button pay"
+                  onClick={() => handlePay(borrowData)}
+                  disabled={processingAction !== null}
+                >
+                  {processingAction === 'pay' ? (
+                    <div className="button-spinner">
+                      <div className="spinner"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <FaMoneyBill /> Pay Overdue
+                    </>
+                  )}
                 </button>
               )}
 
               {canRenew && (
                 <button
                   className="action-button renew"
-                  onClick={() => onRenew(borrowData)}
-                  disabled={borrowData.paid}
+                  onClick={() => handleRenew(borrowData)}
+                  disabled={borrowData.paid || processingAction !== null}
                 >
-                  <FaUndo /> Renew
+                  {processingAction === 'renew' ? (
+                    <div className="button-spinner">
+                      <div className="spinner"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <FaUndo /> Renew
+                    </>
+                  )}
                 </button>
               )}
             </>

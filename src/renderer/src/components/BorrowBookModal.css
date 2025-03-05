@@ -10,29 +10,33 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(8px);
+  padding-top: calc(var(--navbar-height) + 2rem);
 }
 
 .borrow-modal-content {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  padding: 2.5rem;
-  border-radius: 1.5rem;
+  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  padding: 1.5rem;
+  border-radius: 1.2rem;
   width: 95%;
-  max-width: 900px;
-  max-height: 600px;
+  max-width: 700px; /* Reduced from 900px */
+  max-height: 550px; /* Reduced from 600px */
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.1),
+    0 20px 40px -12px rgba(0, 0, 0, 0.12),
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   position: relative;
   z-index: 1001; /* Ensure modal is above overlay */
+  animation: modalEnter 0.3s ease-out;
 }
 
 .borrow-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  padding: 0 0.5rem 1rem 0.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .borrow-modal-header h2 {
@@ -151,10 +155,10 @@
 .borrow-form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 columns for BorrowBookModal */
-  max-height: 350px; /* Adjust to fit within modal */
+  max-height: 300px; /* Reduced height */
   overflow-y: visible; /* Change from auto to visible */
-  gap: 1.5rem;
-  padding: 1rem 1.5rem; /* Adjust padding */
+  gap: 1rem;
+  padding: 0.5rem;
   position: relative; /* Add this */
   margin-bottom: 2rem;
 }
@@ -165,13 +169,27 @@
   gap: 0.75rem;
   position: relative; /* Add this */
   margin-bottom: 0.5rem; /* Add space between form groups */
+  background: #f8fafc;
+  padding: 0.875rem;
+  border-radius: 0.875rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.borrow-form-group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
 }
 
 .borrow-form-group label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #1e293b;
-  letter-spacing: 0.025em;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
 .borrow-form-group input,
@@ -192,9 +210,9 @@
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid #e2e8f0;
-  margin-top: 0; /* Remove top margin */
+  margin-top: 1rem;
   z-index: 1001; /* Same as modal content */
   position: relative; /* Add position relative */
   background: white; /* Ensure background is solid */
@@ -322,10 +340,11 @@
   border-radius: 1rem;
   background-color: #f8fafc;
   transition: border-color 0.2s;
-  height: 40px;
+  height: 42px;
   display: flex;
   align-items: center;
   z-index: 1002; /* Higher than modal content */
+  background: white;
 }
 
 .borrow-search-wrapper:focus-within {
@@ -364,14 +383,14 @@
   background: white;
   border: none;
   border-radius: 1rem;
-  max-height: 200px;
+  max-height: 180px; /* Reduced height */
   overflow-y: auto;
   z-index: 1003; /* Higher than search wrapper */
   box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(0, 0, 0, 0.05);
-  padding: 0.5rem;
-  margin-top: 0.5rem;
+  padding: 0.25rem;
+  margin-top: 0.25rem;
 }
 
 .borrow-search-wrapper .select-icon {
@@ -409,22 +428,22 @@
   border: none;
   border-radius: 1rem;
   margin-top: 4px;
-  max-height: 200px;
+  max-height: 180px; /* Reduced height */
   overflow-y: auto;
   z-index: 1003; /* Higher than search wrapper */
   box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(0, 0, 0, 0.05);
-  padding: 0.5rem;
-  margin-top: 0.5rem;
+  padding: 0.25rem;
+  margin-top: 0.25rem;
 }
 
 .borrow-search-item {
-  padding: 0.875rem 1rem;
+  padding: 0.625rem 0.875rem;
   cursor: pointer;
   transition: background-color 0.2s;
-  font-size: 14px;
-  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.625rem;
   transition: all 0.2s ease;
   color: #334155;
 }
@@ -477,6 +496,39 @@
 }
 
 /* Responsive Modal Styles */
+@media screen and (max-width: 1500px) {
+  .borrow-modal-content {
+    max-width: 600px;
+    padding: 1.25rem;
+  }
+
+  .borrow-form-grid {
+    gap: 0.75rem;
+  }
+
+  .borrow-form-group {
+    padding: 0.75rem;
+  }
+
+  .borrow-search-wrapper {
+    height: 38px;
+  }
+
+  .borrow-search-input {
+    font-size: 0.875rem;
+  }
+
+  .borrow-modal-footer {
+    padding-top: 0.875rem;
+  }
+
+  .borrow-submit-btn,
+  .borrow-cancel-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
+  }
+}
+
 @media screen and (max-width: 1024px) {
   .borrow-modal-content {
     width: 90%;
@@ -583,4 +635,31 @@
 
 .borrow-modal-content::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Add animation */
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Custom scrollbar */
+.borrow-search-results::-webkit-scrollbar {
+  width: 4px;
+}
+
+.borrow-search-results::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.borrow-search-results::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
 }

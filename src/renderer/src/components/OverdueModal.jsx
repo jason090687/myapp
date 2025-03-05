@@ -22,7 +22,6 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess })
         const response = await fetchOverdueBorrowedBooks(token, borrowData.id)
         setOverdueAmount(Number(response.amount) || 0)
       } catch (error) {
-        console.error('Error fetching amount data:', error)
         toast.error('Failed to fetch overdue amount')
         setOverdueAmount(0)
       } finally {
@@ -80,9 +79,11 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess })
       }
 
       await processOverduePayment(token, borrowData.id, paymentData)
+
+      // First update the data
       await onSubmit(paymentData)
 
-      // Ensure table refresh happens after successful payment
+      // Then trigger success callback if provided
       if (onSuccess) {
         await onSuccess()
       }
@@ -95,6 +96,7 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess })
             : 'Payment processed successfully!'
       )
 
+      // Only close after all operations are successful
       onClose()
     } catch (error) {
       console.error(error)
