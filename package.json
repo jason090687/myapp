@@ -67,8 +67,8 @@
       "package.json"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "build/icon.ico",
+      "target": "nsis"
     }
   }
 }
