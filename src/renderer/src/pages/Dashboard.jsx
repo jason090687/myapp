@@ -39,6 +39,7 @@ import {
   TableSkeleton,
   BooksSkeleton
 } from '../components/Dashboard/DashboardSkeletons'
+import ReportGenerator from '../components/Dashboard/ReportGenerator'
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -330,6 +331,12 @@ function Dashboard() {
               ))}
             </div>
           )}
+          {/* Add ReportGenerator at the top of the dashboard */}
+          <ReportGenerator
+            borrowData={recentCheckouts}
+            returnData={returnedStats}
+            overdueData={penalties}
+          />
 
           {/* Stats Container */}
           <div className="stats-container">

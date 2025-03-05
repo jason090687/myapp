@@ -322,15 +322,22 @@ export const fetchOverdueBorrowedBooks = async (token, borrowedId) => {
 
 export const fetchTopBooks = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/most-borrowed/`, getAuthHeaders(token))
-    // Return empty results if no data
-    return {
-      results: response.data?.results || [],
-      count: response.data?.count || 0
+    const response = await axios.get(`${API_URL}/borrow/top-books/`, getAuthHeaders(token))
+
+    // Transform the data structure to match the expected format
+    const transformedData = {
+      results:
+        response.data?.book_borrowing_frequencies?.map((book) => ({
+          id: book.book_id,
+          title: book.title,
+          borrow_count: book.times_borrowed
+        })) || [],
+      count: response.data?.book_borrowing_frequencies?.length || 0
     }
+
+    return transformedData
   } catch (error) {
     console.error('Top books fetch error:', error)
-    // Return empty results instead of throwing error
     return {
       results: [],
       count: 0
@@ -523,5 +530,95 @@ export const fetchReturnedBooksCount = async (token) => {
     return {
       returnedCount: 0
     }
+  }
+}
+
+export const fetchAllBorrowedRecords = async (token) => {
+  try {
+    let allRecords = []
+    let nextPage = `${API_URL}/borrow/list/`
+
+    while (nextPage) {
+      const response = await axios.get(nextPage, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      allRecords = [...allRecords, ...response.data.results]
+      nextPage = response.data.next
+    }
+
+    // Process the records
+    const processedData = {
+      borrowed: allRecords.filter((record) => !record.is_returned),
+      returned: allRecords.filter((record) => record.is_returned),
+      total: allRecords.length
+    }
+
+    return processedData
+  } catch (error) {
+    console.error('Error fetching all borrowed records:', error)
+    throw error
+  }
+}
+
+export const fetchAllBorrowRecords = async (token) => {
+  try {
+    let allRecords = []
+    let nextPage = `${API_URL}/borrow/list/`
+
+    while (nextPage) {
+      const response = await axios.get(nextPage, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      allRecords = [...allRecords, ...response.data.results]
+      nextPage = response.data.next
+    }
+
+    // Process the records into categories
+    const processedRecords = {
+      borrowed: allRecords.filter((record) => !record.is_returned),
+      returned: allRecords.filter((record) => record.is_returned),
+      overdue: allRecords.filter((record) => record.status === 'Overdue'),
+      all: allRecords,
+      totalCount: allRecords.length,
+      totalAmount: allRecords.reduce((sum, record) => {
+        return sum + (record.amount ? parseFloat(record.amount) : 0)
+      }, 0)
+    }
+
+    return processedRecords
+  } catch (error) {
+    console.error('Error fetching all borrow records:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrow records')
+  }
+}
+
+// Function to fetch a single page of borrow records
+export const fetchBorrowPage = async (token, page = 1, pageSize = 1000) => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/list/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      params: {
+        page,
+        page_size: pageSize
+      }
+    })
+
+    return {
+      results: response.data.results,
+      count: response.data.count,
+      next: response.data.next,
+      previous: response.data.previous
+    }
+  } catch (error) {
+    console.error('Error fetching borrow page:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrow page')
   }
 }

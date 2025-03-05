@@ -1,6 +1,8 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import fs from 'fs'
+import { dialog } from 'electron'
 
 // Define icon path properly for different platforms
 const iconPath =
@@ -91,6 +93,24 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // Add this with your other IPC handlers
+  ipcMain.on('save-pdf', async (event, { buffer, fileName }) => {
+    try {
+      const { filePath } = await dialog.showSaveDialog({
+        defaultPath: path.join(app.getPath('documents'), fileName),
+        filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+      })
+
+      if (filePath) {
+        // Convert array back to Buffer
+        const pdfBuffer = Buffer.from(buffer)
+        fs.writeFileSync(filePath, pdfBuffer)
+      }
+    } catch (error) {
+      console.error('Error saving PDF:', error)
+    }
+  })
 
   createWindow()
 
