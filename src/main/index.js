@@ -1,34 +1,34 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-const iconPath = path.join(__dirname, '../../build/icon.ico');
 
-function calculateWindowSize() {
-  const primaryDisplay = screen.getPrimaryDisplay()
-  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize
-  return {
-    width: Math.floor(screenWidth * 0.8),
-    height: Math.floor(screenHeight * 0.8)
-  }
-}
+// Define icon path properly for different platforms
+const iconPath =
+  process.platform === 'win32'
+    ? path.join(__dirname, '../../build/icon.ico')
+    : path.join(__dirname, '../../build/icon.png')
 
 function createWindow() {
-  const windowSize = calculateWindowSize()
+  // Define fixed dimensions
+  const WINDOW_WIDTH = 1366
+  const WINDOW_HEIGHT = 768
 
   const mainWindow = new BrowserWindow({
-    width: 1366,
-    height: 768,
+    width: WINDOW_WIDTH,
+    height: WINDOW_HEIGHT,
     title: 'SHJMS eLibrary',
     icon: iconPath,
     fullscreen: false,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
   })
+
+  // Center the window
+  mainWindow.center()
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.maximize()
