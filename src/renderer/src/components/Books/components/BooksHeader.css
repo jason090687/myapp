@@ -1,4 +1,4 @@
-.books-header {
+/* .books-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,7 +8,7 @@
 }
 
 .search-bar {
-  flex: 0 0 60%; /* Set width to 60% */
+  flex: 0 0 40%; 
   display: flex;
   align-items: center;
   background: rgba(241, 245, 249, 0.8);
@@ -19,7 +19,7 @@
 }
 
 .add-book-btn {
-  flex: 0 0 30%; /* Set width to 30% */
+  flex: 0 0 30%; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,10 +27,9 @@
 
 .add-book-btn svg {
   font-size: 14px;
-}
+} */
 
-/* Responsive Styles */
-@media screen and (max-width: 768px) {
+/* @media screen and (max-width: 768px) {
   .books-header {
     display: flex;
     flex-direction: column;
@@ -48,9 +47,9 @@
     width: 50%;
     flex: none;
   }
-}
+} */
 
-@media screen and (max-width: 576px) {
+/* @media screen and (max-width: 576px) {
   .books-header {
     padding: 8px;
     gap: 12px;
@@ -70,4 +69,4 @@
     justify-content: center;
     font-size: 0.9rem;
   }
-}
+} */

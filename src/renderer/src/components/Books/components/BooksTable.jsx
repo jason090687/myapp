@@ -1,7 +1,7 @@
-import { FaSortUp, FaSortDown } from 'react-icons/fa'
+import { FaSortUp, FaSortDown, FaEdit, FaTrash } from 'react-icons/fa'
 import { formatDate } from '../utils/bookUtils'
 import BookDetailsModal from './BookDetailsModal'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const TABLE_COLUMNS = [
   { key: 'title', label: 'TITLE', sortable: true, required: true },
@@ -35,13 +35,20 @@ function BooksTable({
   onRowClick
 }) {
   const [selectedBook, setSelectedBook] = useState(null)
-  const isMobile = window.innerWidth <= 1024
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+
+  // Add window resize listener
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleRowClick = (book) => {
-    if (isMobile) {
+    if (windowWidth <= 1500) {
       setSelectedBook(book)
+      onRowClick && onRowClick(book) // Add null check for onRowClick
     }
-    onRowClick(book)
   }
 
   const renderCellContent = (column, value, book) => {
@@ -73,7 +80,12 @@ function BooksTable({
           <th
             key={column.key}
             className={`col-${column.key} ${column.sortable ? 'sortable' : ''}`}
-            onClick={() => column.sortable && onSort(column.key)}
+            onClick={(e) => {
+              e.stopPropagation() // Stop event propagation
+              if (column.sortable) {
+                onSort(column.key)
+              }
+            }}
             data-column={column.key}
           >
             <div className="header-content">
@@ -119,11 +131,11 @@ function BooksTable({
 
   const renderTableBody = () => (
     <tbody>
-      {books.map((book, index) => (
+      {books.slice(0, 10).map((book, index) => (
         <tr
           key={book.id || index}
           onClick={() => handleRowClick(book)}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: windowWidth <= 1500 ? 'pointer' : 'default' }}
         >
           {TABLE_COLUMNS.map((column) => (
             <td key={column.key} className={`col-${column.key}`} data-content={book[column.key]}>
@@ -132,16 +144,30 @@ function BooksTable({
           ))}
           <td className="col-action">
             <div className="action-buttons-container">
-              <button className="action-btn edit" onClick={() => onEditBook(book)}>
-                Edit
+              <button className="action-btn edit" onClick={() => onEditBook(book)} title="Edit">
+                <FaEdit />
               </button>
-              <button className="action-btn delete" onClick={() => onDeleteBook(book.id)}>
-                Delete
+              <button
+                className="action-btn delete"
+                onClick={() => onDeleteBook(book.id)}
+                title="Delete"
+              >
+                <FaTrash />
               </button>
             </div>
           </td>
         </tr>
       ))}
+      {books.length < 10 &&
+        [...Array(10 - books.length)].map((_, index) => (
+          // Add empty rows to maintain consistent height
+          <tr key={`empty-${index}`} style={{ height: '61px' }}>
+            {TABLE_COLUMNS.map((column) => (
+              <td key={column.key} className={`col-${column.key}`}></td>
+            ))}
+            <td className="col-action"></td>
+          </tr>
+        ))}
     </tbody>
   )
 
@@ -160,13 +186,15 @@ function BooksTable({
         </div>
       </div>
 
-      <BookDetailsModal
-        book={selectedBook}
-        isOpen={!!selectedBook}
-        onClose={() => setSelectedBook(null)}
-        onEdit={onEditBook}
-        onDelete={onDeleteBook}
-      />
+      {windowWidth <= 1500 && (
+        <BookDetailsModal
+          book={selectedBook}
+          isOpen={!!selectedBook}
+          onClose={() => setSelectedBook(null)}
+          onEdit={onEditBook}
+          onDelete={onDeleteBook}
+        />
+      )}
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { fetchBooks, deleteBook } from '../../../Features/api'
 import { toast } from 'react-toastify'
+import { sortData } from '../utils/bookUtils'
 
 export const useBooks = (token) => {
   const [books, setBooks] = useState([])
@@ -141,6 +142,34 @@ export const useBooks = (token) => {
     }
   }
 
+  const handleSort = (column) => {
+    setLoading(true)
+    try {
+      const direction =
+        sortConfig.column === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+      const sorted = sortData(allBooks, column, direction)
+      setSortedBooks(sorted)
+      setSortConfig({ column, direction })
+
+      // Update current page view with sorted data
+      const startIndex = (pagination.currentPage - 1) * 10
+      const endIndex = startIndex + 10
+      setBooks(sorted.slice(startIndex, endIndex))
+
+      setPagination((prev) => ({
+        ...prev,
+        count: sorted.length,
+        next: endIndex < sorted.length,
+        previous: startIndex > 0
+      }))
+    } catch (error) {
+      console.error('Error sorting books:', error)
+      toast.error('Failed to sort books')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return {
     books,
     allBooks,
@@ -157,6 +186,7 @@ export const useBooks = (token) => {
     setPagination,
     setSortConfig,
     handlePageChange,
+    handleSort,
     totalPages: Math.ceil((sortedBooks || allBooks).length / 10)
   }
 }

@@ -23,8 +23,9 @@
   gap: 1.5rem;
   max-width: 1920px;
   margin: 0 auto;
-  height: calc(100vh - var(--navbar-height));
-  overflow: auto;
+  min-height: 100%;
+  height: auto;
+  overflow: visible;
 }
 
 .books-header {
@@ -104,17 +105,19 @@
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 1.25rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  height: auto; /* Changed from fixed height */
+  overflow: visible; /* Changed from hidden */
+  min-height: 600px;
+  height: auto;
 }
 
 .books-table-wrapper {
   flex: 1;
   overflow-x: auto;
-  overflow-y: visible; /* Changed from auto to visible */
+  overflow-y: visible;
   border-radius: 1rem;
   position: relative;
   margin-bottom: 0; /* Remove bottom margin */
+  height: auto;
 }
 
 .books-table {
@@ -124,6 +127,7 @@
   border-spacing: 0;
   font-size: 0.9375rem;
   margin-bottom: 0; /* Remove bottom margin */
+  height: auto;
 }
 
 .books-table thead {
@@ -260,6 +264,7 @@
   min-width: 60px;
   position: relative;
   z-index: 1;
+  width: 40%;
 }
 
 .action-btn.edit {
@@ -268,6 +273,9 @@
   border: none;
   box-shadow: 0 2px 4px rgba(10, 11, 100, 0.1);
   transition: all 0.3s ease;
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .action-btn.edit:hover {
@@ -280,6 +288,9 @@
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .action-btn:hover {
@@ -292,17 +303,21 @@
 } */
 
 .pagination {
-  position: sticky;
-  bottom: 0;
+  position: relative; /* Changed from sticky */
   background: rgba(248, 250, 252, 0.95);
   border-top: 1px solid rgba(226, 232, 240, 0.8);
   padding: 1rem;
-  z-index: 10;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 0;
-  backdrop-filter: blur(8px);
+  gap: 1rem;
+  margin-top: auto;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 1;
 }
 
 .pagination-btn {
@@ -429,10 +444,11 @@
 .books-table .col-action {
   position: sticky;
   right: 0;
-  width: 180px;
+  width: 80px; /* Reduced from previous width */
+  min-width: 80px;
   background: white;
   z-index: 2;
-  padding: 0.75rem;
+  padding: 0.5rem; /* Reduced padding */
   box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -455,7 +471,7 @@
 
 .action-buttons-container {
   display: flex;
-  gap: 0.5rem;
+  gap: 4px; /* Reduced gap */
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -468,9 +484,19 @@
 }
 
 .action-btn {
-  flex: 0 0 auto;
-  min-width: 60px;
-  z-index: 1;
+  padding: 6px; /* Reduced padding */
+  width: 28px; /* Fixed width */
+  height: 28px; /* Fixed height */
+  min-width: unset;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn svg {
+  width: 14px; /* Fixed icon size */
+  height: 14px;
 }
 
 /* Remove any sticky positioning or special hover effects */
@@ -820,133 +846,33 @@
   }
 }
 
-@media screen and (max-width: 1024px) {
-  .books-header {
-    padding: 1.25rem;
-    gap: 1rem;
-    display: flex;
-    flex-direction: row;
-  }
-
-  .books-table th {
-    font-size: 0.75rem;
-    padding: 1rem 0.75rem;
-  }
-
-  .books-table td {
-    font-size: 0.8125rem;
-    padding: 0.75rem;
-  }
-
-  .search-input {
-    font-size: 0.8125rem;
-  }
-
+@media screen and (max-width: 1500px) {
+  /* Update header and container styles */
   .books-content {
     padding: 1.25rem;
-    min-height: calc(100vh - var(--navbar-height));
-    height: auto;
+    overflow: visible;
   }
 
   .table-container {
     height: auto;
-    max-height: none;
+    min-height: 600px; /* Set minimum height for table container */
+    overflow: visible;
   }
 
   .books-table-wrapper {
-    max-height: calc(100vh - 300px);
+    height: auto;
+    min-height: 550px; /* Adjust for table wrapper */
     overflow-y: auto;
   }
 
-  .books-table {
-    height: 100%;
-    width: 100%;
+  .pagination {
+    position: relative; /* Change from sticky to relative */
+    margin-top: 1rem;
+    background: none;
+    border-top: none;
+    z-index: 1;
   }
 
-  .books-table .col-action {
-    display: none;
-  }
-
-  .books-table tbody tr {
-    cursor: pointer;
-    position: relative;
-    width: 100%;
-  }
-
-  .books-table tbody tr::after {
-    content: '›';
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #64748b;
-    font-size: 1.5rem;
-    display: none;
-  }
-
-  .books-table tbody tr:hover {
-    background: #f8fafc;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .books-container {
-    margin-left: 0;
-  }
-
-  .books-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-bar {
-    max-width: none;
-    width: 100%;
-  }
-
-  .add-book-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .books-table th,
-  .books-table td {
-    font-size: 0.75rem;
-    padding: 0.5rem;
-  }
-
-  .books-content {
-    padding: 1rem;
-  }
-}
-
-@media screen and (max-width: 576px) {
-  .books-header {
-    padding: 1rem;
-  }
-
-  .search-input,
-  .add-book-btn {
-    font-size: 0.75rem;
-  }
-
-  .books-table th,
-  .books-table td {
-    font-size: 0.7rem;
-    padding: 0.4rem;
-  }
-
-  .status-badge {
-    font-size: 0.65rem;
-    padding: 0.3rem 0.6rem;
-  }
-
-  .books-content {
-    padding: 0.75rem;
-  }
-}
-
-@media screen and (max-width: 1500px) {
   .books-table tbody tr {
     cursor: pointer;
     position: relative;
@@ -980,6 +906,47 @@
   .books-table .col-publisher,
   .books-table .col-subject {
     width: 150px;
+  }
+
+  /* Update header styles */
+  .books-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .search-bar {
+    width: 100px;
+    min-width: unset;
+    max-width: unset;
+    flex: 0 0 auto;
+  }
+
+  .add-book-btn {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+@media screen and (min-width: 1501px) {
+  .books-table tbody tr {
+    cursor: default;
+  }
+
+  .books-table tbody tr:hover {
+    background: none;
+  }
+
+  .books-table .col-action {
+    display: table-cell;
+  }
+
+  .action-buttons-container {
+    display: flex;
   }
 }
 

@@ -3,14 +3,14 @@ export const sortData = (data, column, direction) => {
     let aValue = a[column]
     let bValue = b[column]
 
+    // Handle null/undefined values
+    if (!aValue && aValue !== 0) aValue = ''
+    if (!bValue && bValue !== 0) bValue = ''
+
+    // Convert to lowercase for string comparison
     if (typeof aValue === 'string') {
       aValue = aValue.toLowerCase()
       bValue = bValue.toLowerCase()
-    }
-
-    if (column === 'year') {
-      aValue = Number(aValue) || 0
-      bValue = Number(bValue) || 0
     }
 
     if (aValue < bValue) return direction === 'asc' ? -1 : 1
