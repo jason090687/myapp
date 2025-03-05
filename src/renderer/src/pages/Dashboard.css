@@ -276,16 +276,43 @@ tr:hover td {
 /* Book cards */
 .book {
   background: white;
-  padding: 15px;
+  padding: 1.25rem;
   border-radius: 1rem;
   border: 1px solid rgba(226, 232, 240, 0.7);
   transition: all 0.3s ease;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .book:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.book h4 {
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.book .book-author {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+}
+
+.book .borrow-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3b82f6;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  width: fit-content;
 }
 
 .available {
@@ -296,6 +323,25 @@ tr:hover td {
   color: white;
   font-size: 0.75rem;
   margin-top: 0.5rem;
+}
+
+.book .book-author {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 5px 0;
+}
+
+.book .borrow-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #2196f3;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+.book .borrow-count .borrow-icon {
+  font-size: 1rem;
 }
 
 /* Status badge styles */

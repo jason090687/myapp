@@ -323,25 +323,11 @@ export const fetchOverdueBorrowedBooks = async (token, borrowedId) => {
 export const fetchTopBooks = async (token) => {
   try {
     const response = await axios.get(`${API_URL}/borrow/top-books/`, getAuthHeaders(token))
-
-    // Transform the data structure to match the expected format
-    const transformedData = {
-      results:
-        response.data?.book_borrowing_frequencies?.map((book) => ({
-          id: book.book_id,
-          title: book.title,
-          borrow_count: book.times_borrowed
-        })) || [],
-      count: response.data?.book_borrowing_frequencies?.length || 0
-    }
-
-    return transformedData
+    // Return the data directly since it's already in the correct format
+    return response.data.book_borrowing_frequencies || []
   } catch (error) {
     console.error('Top books fetch error:', error)
-    return {
-      results: [],
-      count: 0
-    }
+    return []
   }
 }
 

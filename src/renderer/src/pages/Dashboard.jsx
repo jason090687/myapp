@@ -161,18 +161,15 @@ function Dashboard() {
     const loadBooks = async () => {
       try {
         const [topData, marcData] = await Promise.all([fetchTopBooks(token), fetchMarcBooks(token)])
+        
+        // topData is now directly the array of top books
+        const formattedTopBooks = topData.map(book => ({
+          id: book.book_id,
+          title: book.title,
+          author: book.author,
+          borrow_count: book.times_borrowed
+        })).slice(0, 5);
 
-        const formattedTopBooks = topData.results
-          ? topData.results.slice(0, 3).map((book) => ({
-              id: book.id,
-              title: book.title,
-              author: book.author || 'Unknown Author',
-              borrow_count: book.borrow_count || 0,
-              status: 'top'
-            }))
-          : []
-
-        // Use the processed recent books directly from the API
         setTopBooks(formattedTopBooks)
         setNewBooks(marcData.results)
       } catch (error) {
@@ -459,10 +456,11 @@ function Dashboard() {
                     topBooks.map((book) => (
                       <div className="book" key={book.id}>
                         <h4>{book.title}</h4>
-                        <p>{book.author}</p>
-                        <span className="status-badge borrowed">
-                          {book.borrow_count} times borrowed
-                        </span>
+                        <p className="book-author">by {book.author || 'Unknown Author'}</p>
+                        <div className="borrow-count">
+                          <FaBookReader className="borrow-icon" />
+                          <span>{book.borrow_count} Borrows</span>
+                        </div>
                       </div>
                     ))
                   )}
