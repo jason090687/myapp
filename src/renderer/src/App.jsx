@@ -1,18 +1,16 @@
-import ProfilePage from './pages/ProfilePage'
+// import { RouterProvider } from 'react-router-dom'
+// import { Provider } from 'react-redux'
 
-// import SignInPage from './components/SignInPage'
+// import { store } from './app/store'
+// import router from './router'
 
 // function App() {
 //   return (
-//     <>
-//       <SignInPage />
-//       <Routes>
-//         {/* ...existing routes... */}
-//         <Route path="/profile" element={<ProfilePage />} />
-//       </Routes>
-//     </>
+//     <Provider store={store}>
+
+//       <RouterProvider router={router} />
+//     </Provider>
 //   )
 // }
 
 // export default App
-// //

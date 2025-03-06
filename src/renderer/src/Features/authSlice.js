@@ -98,6 +98,26 @@ export const userDetails = createAsyncThunk('auth/userDetails', async (_, thunkA
   }
 })
 
+// Verify OTP
+export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (otpData, thunkAPI) => {
+  try {
+    const response = await authService.verifyOtp(otpData)
+    return response
+  } catch (error) {
+    return thunkAPI.rejectWithValue('OTP verification failed')
+  }
+})
+
+// Resend OTP
+export const resendOtp = createAsyncThunk('auth/resendOtp', async (_, thunkAPI) => {
+  try {
+    const response = await authService.resendOtp()
+    return response
+  } catch (error) {
+    return thunkAPI.rejectWithValue('Failed to resend OTP')
+  }
+})
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -204,6 +224,34 @@ export const authSlice = createSlice({
         state.isSuccess = true
       })
       .addCase(resetPasswordConfirm.rejected, (state, action) => {
+        state.isLoading = false
+        state.isError = true
+        state.message = action.payload
+      })
+
+      // Verify OTP
+      .addCase(verifyOtp.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(verifyOtp.fulfilled, (state) => {
+        state.isLoading = false
+        state.isSuccess = true
+      })
+      .addCase(verifyOtp.rejected, (state, action) => {
+        state.isLoading = false
+        state.isError = true
+        state.message = action.payload
+      })
+
+      // Resend OTP
+      .addCase(resendOtp.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(resendOtp.fulfilled, (state) => {
+        state.isLoading = false
+        state.isSuccess = true
+      })
+      .addCase(resendOtp.rejected, (state, action) => {
         state.isLoading = false
         state.isError = true
         state.message = action.payload

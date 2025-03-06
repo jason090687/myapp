@@ -82,6 +82,24 @@ const userDetails = async (token) => {
   }
 }
 
+// Verify OTP
+const verifyOtp = async (otpData) => {
+  try {
+    return await api.verifyOtp(otpData)
+  } catch (error) {
+    handleError(error)
+  }
+}
+
+// Resend OTP
+const resendOtp = async () => {
+  try {
+    return await api.resendOtp()
+  } catch (error) {
+    handleError(error)
+  }
+}
+
 const authService = {
   register,
   login,
@@ -89,7 +107,9 @@ const authService = {
   activate,
   requestResetPassword,
   confirmResetPassword,
-  userDetails
+  userDetails,
+  verifyOtp,
+  resendOtp
 }
 
 export default authService

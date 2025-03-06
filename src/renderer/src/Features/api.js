@@ -608,3 +608,29 @@ export const fetchBorrowPage = async (token, page = 1, pageSize = 1000) => {
     throw new Error(error.response?.data?.message || 'Failed to fetch borrow page')
   }
 }
+
+export const verifyOtp = async (otpData) => {
+  try {
+    const response = await axios.post(`${API_URL}/accounts/verify-otp/`, otpData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'OTP verification failed')
+  }
+}
+
+export const resendOtp = async () => {
+  try {
+    const response = await axios.post(`${API_URL}/accounts/resend-otp/`, null, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to resend OTP')
+  }
+}

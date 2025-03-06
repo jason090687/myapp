@@ -12,6 +12,7 @@ import CreateNewPassword from '../pages/CreateNewPassword.jsx'
 import AccountActivation from '../pages/AccountActivation.jsx'
 import ProfilePage from '../pages/ProfilePage.jsx'
 import SoftwareUpdate from '../components/settings/SoftwareUpdate.jsx'
+import OtpVerification from '../pages/OtpVerification'
 
 const router = createHashRouter([
   {
@@ -71,6 +72,10 @@ const router = createHashRouter([
   {
     path: '/help',
     element: <Help />
+  },
+  {
+    path: '/otp-verification',
+    element: <OtpVerification />
   }
 ])
 

@@ -71,7 +71,7 @@ function SignUpPage() {
         autoClose: 5000
       })
       resetForm()
-      navigate('/activate')
+      navigate('/otp-verification')
     }
 
     dispatch(reset())
