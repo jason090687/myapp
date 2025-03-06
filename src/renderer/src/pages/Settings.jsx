@@ -1,30 +1,54 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
-import { FaUserCog, FaBook, FaBell, FaShieldAlt, FaDatabase } from 'react-icons/fa'
+import { FaUserCog, FaBook, FaBell, FaShieldAlt, FaDatabase, FaDownload } from 'react-icons/fa'
 import './Settings.css'
 
 function Settings() {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [hasUpdate, setHasUpdate] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Update path parsing
   const currentPath =
     location.pathname === '/settings' ? 'general' : location.pathname.split('/settings/')[1]
 
   const settingsTabs = [
-    { id: 'general', label: 'General Settings', icon: FaUserCog },
-    { id: 'books', label: 'Book Management', icon: FaBook },
-    { id: 'notifications', label: 'Notifications', icon: FaBell },
-    { id: 'security', label: 'Security', icon: FaShieldAlt },
-    { id: 'backup', label: 'Backup & Restore', icon: FaDatabase }
+    {
+      id: 'backup',
+      label: 'Backup & Restore',
+      icon: FaDatabase
+    },
+    {
+      id: 'software-update',
+      label: 'Software Update',
+      icon: FaDownload,
+      badge: hasUpdate ? 'New' : null
+    }
   ]
+
+  // Check for updates periodically
+  useEffect(() => {
+    const checkForUpdates = async () => {
+      try {
+        // Simulate update check
+        const hasNewUpdate = Math.random() > 0.5
+        setHasUpdate(hasNewUpdate)
+      } catch (error) {
+        console.error('Failed to check for updates:', error)
+      }
+    }
+
+    checkForUpdates()
+    const interval = setInterval(checkForUpdates, 3600000) // Check every hour
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Ensure we're on a valid tab
   useEffect(() => {
     if (!currentPath) {
-      navigate('/settings/general')
+      navigate('/settings/backup')
     }
   }, [currentPath, navigate])
 
@@ -51,6 +75,7 @@ function Settings() {
                 >
                   <tab.icon />
                   <span>{tab.label}</span>
+                  {tab.badge && <span className="update-badge">{tab.badge}</span>}
                 </button>
               ))}
             </div>

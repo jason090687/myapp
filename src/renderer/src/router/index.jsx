@@ -6,15 +6,12 @@ import Dashboard from '../pages/Dashboard'
 import Books from '../pages/Books'
 import Borrowed from '../pages/Borrowed'
 import Settings from '../pages/Settings'
-import GeneralSettings from '../components/settings/GeneralSettings.jsx'
-import BookManagement from '../components/settings/BookManagement.jsx'
-import NotificationsSettings from '../components/settings/NotificationsSettings.jsx'
-import SecuritySettings from '../components/settings/SecuritySettings.jsx'
 import BackupSettings from '../components/settings/BackupSettings.jsx'
 import Help from '../pages/Help'
 import CreateNewPassword from '../pages/CreateNewPassword.jsx'
 import AccountActivation from '../pages/AccountActivation.jsx'
 import ProfilePage from '../pages/ProfilePage.jsx'
+import SoftwareUpdate from '../components/settings/SoftwareUpdate.jsx'
 
 const router = createHashRouter([
   {
@@ -58,28 +55,12 @@ const router = createHashRouter([
     element: <Settings />,
     children: [
       {
-        index: true, // Add this
-        element: <GeneralSettings />
-      },
-      {
-        path: 'general',
-        element: <GeneralSettings />
-      },
-      {
-        path: 'books',
-        element: <BookManagement />
-      },
-      {
-        path: 'notifications',
-        element: <NotificationsSettings />
-      },
-      {
-        path: 'security',
-        element: <SecuritySettings />
-      },
-      {
-        path: 'backup',
+        index: true,
         element: <BackupSettings />
+      },
+      {
+        path: 'software-update',
+        element: <SoftwareUpdate />
       }
     ]
   },

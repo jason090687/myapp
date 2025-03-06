@@ -112,6 +112,38 @@ app.whenReady().then(() => {
     }
   })
 
+  // Add this to your existing ipcMain handlers
+  ipcMain.handle('install-update', async (event, updateData) => {
+    try {
+      const { app } = require('electron')
+      const fs = require('fs')
+      const path = require('path')
+
+      // Create updates directory if it doesn't exist
+      const updateDir = path.join(app.getPath('userData'), 'updates')
+      if (!fs.existsSync(updateDir)) {
+        fs.mkdirSync(updateDir)
+      }
+
+      // Save the update file
+      const updatePath = path.join(updateDir, 'update.zip')
+      fs.writeFileSync(updatePath, Buffer.from(updateData))
+
+      // Extract and apply update
+      const AdmZip = require('adm-zip')
+      const zip = new AdmZip(updatePath)
+      zip.extractAllTo(app.getAppPath(), true)
+
+      // Clean up
+      fs.unlinkSync(updatePath)
+
+      return true
+    } catch (error) {
+      console.error('Failed to install update:', error)
+      throw error
+    }
+  })
+
   createWindow()
 
   app.on('activate', function () {
