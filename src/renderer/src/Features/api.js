@@ -609,13 +609,20 @@ export const fetchBorrowPage = async (token, page = 1, pageSize = 1000) => {
   }
 }
 
-export const verifyOtp = async (otpData) => {
+export const verifyOtp = async (verifyData) => {
   try {
-    const response = await axios.post(`${API_URL}/accounts/verify-otp/`, otpData, {
-      headers: {
-        'Content-Type': 'application/json'
+    const response = await axios.post(
+      `${API_URL}/accounts/verify-otp/`,
+      {
+        email: verifyData.email,
+        otp: verifyData.otp
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
-    })
+    )
     return response.data
   } catch (error) {
     throw new Error(error.response?.data?.message || 'OTP verification failed')

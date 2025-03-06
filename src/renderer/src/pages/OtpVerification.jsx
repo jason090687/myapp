@@ -14,7 +14,13 @@ const OtpVerification = () => {
   const inputRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()]
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
+  const { user, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
+
+  // Add this to get email from stored user data
+  const userEmail = user?.email || localStorage.getItem('userEmail')
+
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const toastConfig = {
     position: 'top-right',
@@ -41,11 +47,21 @@ const OtpVerification = () => {
   }, [isError, isSuccess, message, navigate, dispatch])
 
   const handleChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return
+
     if (value.length > 1) return
     const newOtp = [...otp]
     newOtp[index] = value
     setOtp(newOtp)
-    if (value && index < 5) {
+
+    if (value && index === 5) {
+      const completeOtp = newOtp.join('')
+      if (completeOtp.length === 6) {
+        setTimeout(() => {
+          handleSubmit({ preventDefault: () => {} })
+        }, 300)
+      }
+    } else if (value && index < 5) {
       inputRefs[index + 1].current.focus()
     }
   }
@@ -56,19 +72,64 @@ const OtpVerification = () => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+
     const otpString = otp.join('')
-    if (otpString.length === 6) {
-      dispatch(verifyOtp({ otp: otpString }))
-    } else {
-      toast.warning('Please enter all 6 digits', toastConfig)
+
+    if (!userEmail) {
+      toast.error('Email not found. Please try logging in again.', toastConfig)
+      return
+    }
+
+    if (!/^\d{6}$/.test(otpString)) {
+      toast.error('Please enter a valid 6-digit code', toastConfig)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await dispatch(
+        verifyOtp({
+          email: userEmail,
+          otp: otpString
+        })
+      ).unwrap()
+    } catch (err) {
+      setError('Invalid OTP code. Please try again.')
+      toast.error('Invalid OTP code. Please try again.', toastConfig)
+      setOtp(['', '', '', '', '', ''])
+      inputRefs[0].current.focus()
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleResendOtp = () => {
     dispatch(resendOtp())
-    toast.success('OTP has been resent to your email', toastConfig)
+      .then(() => {
+        toast.success('OTP has been resent to your email', toastConfig)
+      })
+      .catch(() => {
+        toast.error('Failed to resend OTP', toastConfig)
+      })
+  }
+
+  const handlePaste = (e) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text').trim()
+
+    if (/^\d{6}$/.test(pastedData)) {
+      const digits = pastedData.split('')
+      setOtp(digits)
+      inputRefs[5].current.focus()
+
+      setTimeout(() => {
+        handleSubmit({ preventDefault: () => {} })
+      }, 300)
+    }
   }
 
   return (
@@ -86,7 +147,6 @@ const OtpVerification = () => {
         theme="light"
       />
       <div className="container">
-        {/* Left Side - OTP Form */}
         <div className="left-side">
           <h2>E-Library</h2>
           <div className="input-field-wrapper">
@@ -102,22 +162,29 @@ const OtpVerification = () => {
                     key={index}
                     ref={inputRefs[index]}
                     type="text"
+                    inputMode="numeric"
+                    pattern="\d*"
                     maxLength="1"
                     value={digit}
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="otp-input"
+                    onPaste={handlePaste}
+                    disabled={isSubmitting}
+                    className={`otp-input ${error ? 'error' : ''}`}
+                    autoFocus={index === 0}
                   />
                 ))}
               </div>
 
+              {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+
               <div className="login-button mb-6">
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isSubmitting || otp.join('').length !== 6}
                   className="w-full py-3.5 text-base font-medium"
                 >
-                  {isLoading ? (
+                  {isSubmitting ? (
                     <div className="spinner-wrapper">
                       <div className="spinner" />
                       <span>Verifying...</span>
@@ -151,7 +218,6 @@ const OtpVerification = () => {
           </div>
         </div>
 
-        {/* Right Side - Image Section */}
         <div className="right-side">
           <img src={background} alt="School" />
           <img src={logo} alt="School Logo" className="logo" width={40} />

@@ -99,12 +99,12 @@ export const userDetails = createAsyncThunk('auth/userDetails', async (_, thunkA
 })
 
 // Verify OTP
-export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (otpData, thunkAPI) => {
+export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (verifyData, thunkAPI) => {
   try {
-    const response = await authService.verifyOtp(otpData)
+    const response = await authService.verifyOtp(verifyData)
     return response
   } catch (error) {
-    return thunkAPI.rejectWithValue('OTP verification failed')
+    return thunkAPI.rejectWithValue(error.message || 'OTP verification failed')
   }
 })
 
