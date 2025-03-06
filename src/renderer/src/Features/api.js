@@ -611,33 +611,26 @@ export const fetchBorrowPage = async (token, page = 1, pageSize = 1000) => {
 
 export const verifyOtp = async (verifyData) => {
   try {
+    const response = await axios.post(`${API_URL}/accounts/verify-otp/`, verifyData, {
+      headers: { 'Content-Type': 'application/json' }
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.detail || 'OTP verification failed')
+  }
+}
+
+export const resendOtp = async (email) => {
+  try {
     const response = await axios.post(
-      `${API_URL}/accounts/verify-otp/`,
+      `${API_URL}/accounts/resend-otp/`,
+      { email },
       {
-        email: verifyData.email,
-        otp: verifyData.otp
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       }
     )
     return response.data
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'OTP verification failed')
-  }
-}
-
-export const resendOtp = async () => {
-  try {
-    const response = await axios.post(`${API_URL}/accounts/resend-otp/`, null, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to resend OTP')
+    throw new Error(error.response?.data?.detail || 'Failed to resend OTP')
   }
 }

@@ -4,7 +4,9 @@ import {
   activateUser,
   resetPassword,
   resetPasswordConfirm,
-  fetchUserDetails
+  fetchUserDetails,
+  verifyOtp as verifyOtpApi,
+  resendOtp as resendOtpApi
 } from '../Features/api'
 
 // Helper to handle API errors
@@ -85,16 +87,16 @@ const userDetails = async (token) => {
 // Verify OTP
 const verifyOtp = async (otpData) => {
   try {
-    return await api.verifyOtp(otpData)
+    return await verifyOtpApi(otpData)
   } catch (error) {
     handleError(error)
   }
 }
 
 // Resend OTP
-const resendOtp = async () => {
+const resendOtp = async (email) => {
   try {
-    return await api.resendOtp()
+    return await resendOtpApi(email)
   } catch (error) {
     handleError(error)
   }

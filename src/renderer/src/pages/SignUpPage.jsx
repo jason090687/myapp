@@ -63,10 +63,12 @@ function SignUpPage() {
   useEffect(() => {
     if (isError) {
       toast.error(message || 'Registration failed. Please try again.', toastConfig)
+      // Clean up stored email if registration fails
+      localStorage.removeItem('registrationEmail')
     }
 
     if (isSuccess) {
-      toast.success('Registration successful! Please check your email to verify your account.', {
+      toast.success('Registration successful! Please verify your account.', {
         ...toastConfig,
         autoClose: 5000
       })
@@ -74,7 +76,9 @@ function SignUpPage() {
       navigate('/otp-verification')
     }
 
-    dispatch(reset())
+    return () => {
+      dispatch(reset())
+    }
   }, [isError, isSuccess, message, navigate, dispatch])
 
   const validatePassword = (password) => {
@@ -126,6 +130,8 @@ function SignUpPage() {
       re_password: formData.confirmPassword
     }
 
+    // Store the registration email before dispatching register
+    localStorage.setItem('registrationEmail', formData.email)
     dispatch(register(userData))
   }
 

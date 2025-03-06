@@ -10,7 +10,7 @@ const initialState = {
     email: '',
     id_number: ''
   },
-  token: '',
+  token: localStorage.getItem('authToken') || '', // Add this to get token from localStorage
   isError: false,
   isSuccess: false,
   isLoading: false,
@@ -99,22 +99,22 @@ export const userDetails = createAsyncThunk('auth/userDetails', async (_, thunkA
 })
 
 // Verify OTP
-export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (verifyData, thunkAPI) => {
+export const verifyOtp = createAsyncThunk('auth/verifyOtp', async (otpData, thunkAPI) => {
   try {
-    const response = await authService.verifyOtp(verifyData)
+    const response = await authService.verifyOtp(otpData)
     return response
   } catch (error) {
-    return thunkAPI.rejectWithValue(error.message || 'OTP verification failed')
+    return thunkAPI.rejectWithValue(error.message)
   }
 })
 
 // Resend OTP
-export const resendOtp = createAsyncThunk('auth/resendOtp', async (_, thunkAPI) => {
+export const resendOtp = createAsyncThunk('auth/resendOtp', async (email, thunkAPI) => {
   try {
-    const response = await authService.resendOtp()
+    const response = await authService.resendOtp(email)
     return response
   } catch (error) {
-    return thunkAPI.rejectWithValue('Failed to resend OTP')
+    return thunkAPI.rejectWithValue(error.message)
   }
 })
 

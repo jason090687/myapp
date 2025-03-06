@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { verifyOtp, resendOtp, reset } from '../Features/authSlice'
+import axios from 'axios'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Button from '../components/Button'
@@ -9,18 +8,18 @@ import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './OtpVerification.css'
 
+const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
+
 const OtpVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const inputRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()]
-  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { user, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
-
-  // Add this to get email from stored user data
-  const userEmail = user?.email || localStorage.getItem('userEmail')
-
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [emailDisplay, setEmailDisplay] = useState('')
+
+  // Get registration email
+  const registrationEmail = localStorage.getItem('registrationEmail')
 
   const toastConfig = {
     position: 'top-right',
@@ -34,17 +33,114 @@ const OtpVerification = () => {
   }
 
   useEffect(() => {
-    if (isError) {
-      toast.error(message, toastConfig)
+    if (!registrationEmail) {
+      toast.error('Registration email not found. Please sign up again.', toastConfig)
+      navigate('/signup')
+      return
     }
 
-    if (isSuccess) {
+    // Set email display with masking
+    const maskedEmail = registrationEmail.replace(/(.{3})(.*)(@.*)/, '$1***$3')
+    setEmailDisplay(maskedEmail)
+
+    // Send initial OTP automatically
+    resendOtp(registrationEmail)
+      .then(() => {
+        toast.success(`OTP sent to ${maskedEmail}`, toastConfig)
+      })
+      .catch((error) => {
+        toast.error('Failed to send OTP. Please try again.', toastConfig)
+        console.error('OTP send error:', error)
+      })
+
+    // Cleanup function to remove registration email after successful verification
+    return () => {
+      if (registrationEmail) {
+        localStorage.removeItem('registrationEmail')
+      }
+    }
+  }, []) // Run only once when component mounts
+
+  const verifyOtp = async (verifyData) => {
+    try {
+      const response = await axios.post(`${API_URL}/accounts/verify-otp/`, verifyData, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'OTP verification failed')
+    }
+  }
+
+  const resendOtp = async (email) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/accounts/resend-otp/`,
+        { email: email }, // Make sure email is included in the request body
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to resend OTP')
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    const otpString = otp.join('')
+
+    if (!registrationEmail) {
+      toast.error('Registration email not found. Please sign up again.', toastConfig)
+      navigate('/signup')
+      return
+    }
+
+    if (!/^\d{6}$/.test(otpString)) {
+      toast.error('Please enter a valid 6-digit code', toastConfig)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await verifyOtp({
+        email: registrationEmail, // Use registration email only
+        otp: otpString
+      })
       toast.success('OTP verified successfully', toastConfig)
-      navigate('/dashboard')
+      console.log(verifyOtp)
+
+      // Clear registration email after successful verification
+      localStorage.removeItem('registrationEmail')
+      navigate('/')
+    } catch (err) {
+      setError('Invalid OTP code. Please try again.')
+      toast.error(err.message || 'Invalid OTP code. Please try again.', toastConfig)
+      setOtp(['', '', '', '', '', ''])
+      inputRefs[0].current.focus()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleResendOtp = async () => {
+    if (!registrationEmail) {
+      toast.error('Registration email not found. Please sign up again.', toastConfig)
+      navigate('/signup')
+      return
     }
 
-    dispatch(reset())
-  }, [isError, isSuccess, message, navigate, dispatch])
+    try {
+      await resendOtp(registrationEmail)
+      toast.success(`OTP has been resent to ${emailDisplay}`, toastConfig)
+    } catch (error) {
+      toast.error('Failed to resend OTP. Please try again.', toastConfig)
+    }
+  }
 
   const handleChange = (index, value) => {
     if (!/^\d*$/.test(value)) return
@@ -70,51 +166,6 @@ const OtpVerification = () => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs[index - 1].current.focus()
     }
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-
-    const otpString = otp.join('')
-
-    if (!userEmail) {
-      toast.error('Email not found. Please try logging in again.', toastConfig)
-      return
-    }
-
-    if (!/^\d{6}$/.test(otpString)) {
-      toast.error('Please enter a valid 6-digit code', toastConfig)
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      await dispatch(
-        verifyOtp({
-          email: userEmail,
-          otp: otpString
-        })
-      ).unwrap()
-    } catch (err) {
-      setError('Invalid OTP code. Please try again.')
-      toast.error('Invalid OTP code. Please try again.', toastConfig)
-      setOtp(['', '', '', '', '', ''])
-      inputRefs[0].current.focus()
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleResendOtp = () => {
-    dispatch(resendOtp())
-      .then(() => {
-        toast.success('OTP has been resent to your email', toastConfig)
-      })
-      .catch(() => {
-        toast.error('Failed to resend OTP', toastConfig)
-      })
   }
 
   const handlePaste = (e) => {
@@ -152,9 +203,10 @@ const OtpVerification = () => {
           <div className="input-field-wrapper">
             <form onSubmit={handleSubmit} className="login-form">
               <h3 className="text-2xl font-bold text-center mb-4">OTP Verification</h3>
-              <p className="text-center text-gray-600 mb-8">
-                Please enter the 6-digit code sent to your email
+              <p className="text-center text-gray-600 mb-2">
+                Please enter the 6-digit code sent to
               </p>
+              <p className="text-center text-blue-600 font-medium mb-8">{emailDisplay}</p>
 
               <div className="otp-input-group">
                 {otp.map((digit, index) => (
