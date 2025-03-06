@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, session } = require('electron')
 const path = require('path')
 const { installExtension, REDUX_DEVTOOLS } = require('electron-devtools-installer')
 
@@ -14,6 +14,23 @@ async function createWindow() {
       devTools: true,
       spellcheck: true
     }
+  })
+
+  // Add CORS headers handling
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    const { requestHeaders } = details
+    requestHeaders['Origin'] = 'https://github.com'
+    callback({ requestHeaders })
+  })
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Access-Control-Allow-Origin': ['*'],
+        'Access-Control-Allow-Headers': ['*']
+      }
+    })
   })
 
   // Configure CSP

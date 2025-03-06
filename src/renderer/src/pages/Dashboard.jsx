@@ -161,14 +161,16 @@ function Dashboard() {
     const loadBooks = async () => {
       try {
         const [topData, marcData] = await Promise.all([fetchTopBooks(token), fetchMarcBooks(token)])
-        
+
         // topData is now directly the array of top books
-        const formattedTopBooks = topData.map(book => ({
-          id: book.book_id,
-          title: book.title,
-          author: book.author,
-          borrow_count: book.times_borrowed
-        })).slice(0, 5);
+        const formattedTopBooks = topData
+          .map((book) => ({
+            id: book.book_id,
+            title: book.title,
+            author: book.author,
+            borrow_count: book.times_borrowed
+          }))
+          .slice(0, 5)
 
         setTopBooks(formattedTopBooks)
         setNewBooks(marcData.results)
