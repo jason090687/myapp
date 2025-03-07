@@ -23,7 +23,8 @@
   .col-physicalDescription,
   .col-placeOfPublication,
   .col-subject,
-  .col-processedBy {
+  .col-processedBy,
+  .col-callNumber {
     display: none;
   }
 }
