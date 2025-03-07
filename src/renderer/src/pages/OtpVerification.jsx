@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
+import { verifyOtpDirectly, resendOtpDirectly } from '../Features/api'
 import 'react-toastify/dist/ReactToastify.css'
 import Button from '../components/Button'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './OtpVerification.css'
-
-const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
 
 const OtpVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -39,21 +37,10 @@ const OtpVerification = () => {
       return
     }
 
-    // Set email display with masking
+    // Only set up the masked email display
     const maskedEmail = registrationEmail.replace(/(.{3})(.*)(@.*)/, '$1***$3')
     setEmailDisplay(maskedEmail)
 
-    // Send initial OTP automatically
-    resendOtp(registrationEmail)
-      .then(() => {
-        toast.success(`OTP sent to ${maskedEmail}`, toastConfig)
-      })
-      .catch((error) => {
-        toast.error('Failed to send OTP. Please try again.', toastConfig)
-        console.error('OTP send error:', error)
-      })
-
-    // Cleanup function to remove registration email after successful verification
     return () => {
       if (registrationEmail) {
         localStorage.removeItem('registrationEmail')
@@ -61,36 +48,11 @@ const OtpVerification = () => {
     }
   }, []) // Run only once when component mounts
 
-  const verifyOtp = async (verifyData) => {
-    try {
-      const response = await axios.post(`${API_URL}/accounts/verify-otp/`, verifyData, {
-        headers: { 'Content-Type': 'application/json' }
-      })
-      return response.data
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'OTP verification failed')
-    }
-  }
-
-  const resendOtp = async (email) => {
-    try {
-      const response = await axios.post(
-        `${API_URL}/accounts/resend-otp/`,
-        { email: email }, // Make sure email is included in the request body
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
-      )
-      return response.data
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to resend OTP')
-    }
-  }
-
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    if (e) e.preventDefault()
+    if (isSubmitting) return // Prevent multiple submissions
 
+    setError('')
     const otpString = otp.join('')
 
     if (!registrationEmail) {
@@ -107,16 +69,13 @@ const OtpVerification = () => {
     setIsSubmitting(true)
 
     try {
-      await verifyOtp({
-        email: registrationEmail, // Use registration email only
+      await verifyOtpDirectly({
+        email: registrationEmail,
         otp: otpString
       })
-      toast.success('OTP verified successfully', toastConfig)
-      console.log(verifyOtp)
-
-      // Clear registration email after successful verification
+      toast.success('Account verified successfully', toastConfig)
       localStorage.removeItem('registrationEmail')
-      navigate('/')
+      navigate('/activation-success') // Navigate to success page instead of login
     } catch (err) {
       setError('Invalid OTP code. Please try again.')
       toast.error(err.message || 'Invalid OTP code. Please try again.', toastConfig)
@@ -135,7 +94,7 @@ const OtpVerification = () => {
     }
 
     try {
-      await resendOtp(registrationEmail)
+      await resendOtpDirectly(registrationEmail)
       toast.success(`OTP has been resent to ${emailDisplay}`, toastConfig)
     } catch (error) {
       toast.error('Failed to resend OTP. Please try again.', toastConfig)
@@ -144,20 +103,14 @@ const OtpVerification = () => {
 
   const handleChange = (index, value) => {
     if (!/^\d*$/.test(value)) return
-
     if (value.length > 1) return
+
     const newOtp = [...otp]
     newOtp[index] = value
     setOtp(newOtp)
 
-    if (value && index === 5) {
-      const completeOtp = newOtp.join('')
-      if (completeOtp.length === 6) {
-        setTimeout(() => {
-          handleSubmit({ preventDefault: () => {} })
-        }, 300)
-      }
-    } else if (value && index < 5) {
+    // Only handle focus movement, remove auto-submit
+    if (value && index < 5) {
       inputRefs[index + 1].current.focus()
     }
   }
@@ -170,17 +123,20 @@ const OtpVerification = () => {
 
   const handlePaste = (e) => {
     e.preventDefault()
+    if (isSubmitting) return // Prevent paste while submitting
+
     const pastedData = e.clipboardData.getData('text').trim()
 
-    if (/^\d{6}$/.test(pastedData)) {
-      const digits = pastedData.split('')
-      setOtp(digits)
-      inputRefs[5].current.focus()
-
-      setTimeout(() => {
-        handleSubmit({ preventDefault: () => {} })
-      }, 300)
+    // Improved validation for pasted data
+    if (!/^\d{6}$/.test(pastedData)) {
+      toast.error('Please paste a valid 6-digit code', toastConfig)
+      return
     }
+
+    const digits = pastedData.split('')
+    setOtp(digits)
+    inputRefs[5].current.focus()
+    // Auto-submit removed
   }
 
   return (

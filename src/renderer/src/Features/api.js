@@ -634,3 +634,29 @@ export const resendOtp = async (email) => {
     throw new Error(error.response?.data?.detail || 'Failed to resend OTP')
   }
 }
+
+export const verifyOtpDirectly = async (verifyData) => {
+  try {
+    const response = await axios.post(`${API_URL}/accounts/verify-otp/`, verifyData, {
+      headers: { 'Content-Type': 'application/json' }
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'OTP verification failed')
+  }
+}
+
+export const resendOtpDirectly = async (email) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/accounts/resend-otp/`,
+      { email },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to resend OTP')
+  }
+}

@@ -130,9 +130,15 @@ function SignUpPage() {
       re_password: formData.confirmPassword
     }
 
-    // Store the registration email before dispatching register
-    localStorage.setItem('registrationEmail', formData.email)
-    dispatch(register(userData))
+    try {
+      // Dispatch register action
+      await dispatch(register(userData)).unwrap()
+      // Only store email after successful registration
+      localStorage.setItem('registrationEmail', formData.email)
+      navigate('/otp-verification')
+    } catch (error) {
+      toast.error(error || 'Registration failed. Please try again.', toastConfig)
+    }
   }
 
   return (

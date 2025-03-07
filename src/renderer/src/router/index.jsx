@@ -9,10 +9,10 @@ import Settings from '../pages/Settings'
 import BackupSettings from '../components/settings/BackupSettings.jsx'
 import Help from '../pages/Help'
 import CreateNewPassword from '../pages/CreateNewPassword.jsx'
-import AccountActivation from '../pages/AccountActivation.jsx'
 import ProfilePage from '../pages/ProfilePage.jsx'
 import SoftwareUpdate from '../components/settings/SoftwareUpdate.jsx'
 import OtpVerification from '../pages/OtpVerification'
+import ActivationSuccess from '../pages/ActivationSuccess.jsx'
 
 const router = createHashRouter([
   {
@@ -26,10 +26,6 @@ const router = createHashRouter([
   {
     path: '/forgot-password',
     element: <ForgotPassword />
-  },
-  {
-    path: '/activate',
-    element: <AccountActivation />
   },
   {
     path: '/create-new-password/',
@@ -76,6 +72,10 @@ const router = createHashRouter([
   {
     path: '/otp-verification',
     element: <OtpVerification />
+  },
+  {
+    path: '/activation-success',
+    element: <ActivationSuccess />
   }
 ])
 

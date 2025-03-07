@@ -32,7 +32,8 @@ const clearLocalStorage = () => {
 export const register = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
   try {
     const response = await authService.register(userData)
-    return response // Assuming { user, token } in response
+    // Don't trigger OTP send here - it will be handled by OTP page
+    return response
   } catch (error) {
     return thunkAPI.rejectWithValue('Your account is already existed!')
   }
