@@ -70,8 +70,10 @@
       "package.json"
     ],
     "win": {
-      "icon": "build/icon.ico",
-      "target": "nsis"
-    }
+      "icon": "./build/icon.ico",
+      "target": "nsis",
+      "sign": false
+    },
+    "forceCodeSigning": false
   }
 }
