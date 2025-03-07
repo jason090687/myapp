@@ -10,26 +10,16 @@ import { Bounce, toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useDispatch, useSelector } from 'react-redux'
 import { resetPassword, reset } from '../Features/authSlice'
+import { requestPasswordResetOtp } from '../Features/api'
 
 function ForgotPassword() {
   const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false) // Add this state
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
   const { isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
-
-  const handleFinish = (e) => {
-    e.preventDefault() // Add this to prevent form default submission
-
-    if (!email) {
-      toast.warning('Please enter your email address', toastConfig)
-      return
-    }
-
-    const userData = { email }
-    dispatch(resetPassword(userData))
-  }
 
   const toastConfig = {
     position: 'top-center',
@@ -44,7 +34,33 @@ function ForgotPassword() {
 
   const successToastConfig = {
     ...toastConfig,
-    position: 'top-right'
+    position: 'top-right',
+    autoClose: 2000,
+    icon: '📧'
+  }
+
+  const handleFinish = async (e) => {
+    e.preventDefault()
+
+    if (!email) {
+      toast.warning('Please enter your email address', toastConfig)
+      return
+    }
+
+    setIsSubmitting(true) // Set loading state
+
+    try {
+      await requestPasswordResetOtp(email)
+      toast.success('OTP has been sent to your email', successToastConfig)
+      // Add small delay before navigation to show the success toast
+      setTimeout(() => {
+        navigate('/reset-password-otp', { state: { email } })
+      }, 500)
+    } catch (error) {
+      toast.error(error.message || 'Failed to send reset OTP', toastConfig)
+    } finally {
+      setIsSubmitting(false) // Reset loading state
+    }
   }
 
   useEffect(() => {
@@ -103,15 +119,16 @@ function ForgotPassword() {
                   onChange={(e) => setEmail(e.target.value)}
                   name="email"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
-              <div className="submit-button">
-                <Button type="submit" disabled={isLoading || !email}>
-                  {isLoading ? (
+              <div className="login-button">
+                <Button type="submit" disabled={isSubmitting || !email}>
+                  {isSubmitting ? (
                     <div className="spinner-wrapper">
                       <div className="spinner" />
-                      <span isLoading={isLoading}>Sending...</span>
+                      <span>Sending...</span>
                     </div>
                   ) : (
                     'Send Reset Link'

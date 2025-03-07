@@ -660,3 +660,37 @@ export const resendOtpDirectly = async (email) => {
     throw new Error(error.response?.data?.message || 'Failed to resend OTP')
   }
 }
+
+export const requestPasswordResetOtp = async (email) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/accounts/request-password-reset/`,
+      { email },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.detail || 'Failed to request password reset')
+  }
+}
+
+export const resetPasswordWithOtp = async (email, otp, newPassword) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/accounts/reset-password/`,
+      {
+        email,
+        otp,
+        new_password: newPassword
+      },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.detail || 'Failed to reset password')
+  }
+}

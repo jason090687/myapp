@@ -13,6 +13,7 @@ import ProfilePage from '../pages/ProfilePage.jsx'
 import SoftwareUpdate from '../components/settings/SoftwareUpdate.jsx'
 import OtpVerification from '../pages/OtpVerification'
 import ActivationSuccess from '../pages/ActivationSuccess.jsx'
+import ResetPasswordOtp from '../pages/ResetPasswordOtp'
 
 const router = createHashRouter([
   {
@@ -76,6 +77,10 @@ const router = createHashRouter([
   {
     path: '/activation-success',
     element: <ActivationSuccess />
+  },
+  {
+    path: '/reset-password-otp',
+    element: <ResetPasswordOtp />
   }
 ])
 

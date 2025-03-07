@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { FaLock } from 'react-icons/fa'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import InputField from '../components/InputField'
 import Button from '../components/Button'
 import background from '../assets/background.jpg'
@@ -8,14 +8,22 @@ import logo from '../assets/logo.png'
 import './CreateNewPassword.css'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { resetPasswordWithOtp } from '../Features/api'
 
 function CreateNewPassword() {
   const navigate = useNavigate()
   const { token } = useParams()
+  const location = useLocation()
+  const userEmail = location.state?.email
+  const userOtp = location.state?.otp
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
+  })
+  const [passwordMatch, setPasswordMatch] = useState({
+    isValid: false,
+    message: ''
   })
 
   const { password, confirmPassword } = formData
@@ -31,12 +39,27 @@ function CreateNewPassword() {
     transition: Bounce
   }
 
+  useEffect(() => {
+    if (!userEmail || !userOtp) {
+      navigate('/forgot-password')
+    }
+  }, [userEmail, userOtp, navigate])
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prevState) => ({
       ...prevState,
       [name]: value
     }))
+
+    // Check password match when either password field changes
+    if (name === 'password' || name === 'confirmPassword') {
+      const otherValue = name === 'password' ? formData.confirmPassword : formData.password
+      setPasswordMatch({
+        isValid: value === otherValue && value !== '',
+        message: value === otherValue || value === '' ? '' : 'Passwords do not match'
+      })
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -52,19 +75,23 @@ function CreateNewPassword() {
       return
     }
 
-    if (password.length < 6) {
-      toast.warning('Password must be at least 6 characters', toastConfig)
+    if (password.length < 8) {
+      toast.warning('Password must be at least 8 characters', toastConfig)
       return
     }
 
+    setIsLoading(true)
+
     try {
-      setIsLoading(true)
-      // Add your password reset API call here
-      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API call
-      toast.success('Password successfully reset!', toastConfig)
-      setTimeout(() => navigate('/'), 2000)
+      await resetPasswordWithOtp(userEmail, userOtp, password)
+      toast.success('Password reset successful!', {
+        ...toastConfig,
+        position: 'top-right',
+        icon: '✅'
+      })
+      setTimeout(() => navigate('/'), 1500)
     } catch (error) {
-      toast.error('Failed to reset password. Please try again.', toastConfig)
+      toast.error(error.message || 'Failed to reset password. Please try again.', toastConfig)
     } finally {
       setIsLoading(false)
     }
@@ -111,7 +138,15 @@ function CreateNewPassword() {
                   onChange={handleChange}
                   name="confirmPassword"
                   required
+                  className={confirmPassword && !passwordMatch.isValid ? 'error' : ''}
                 />
+                {confirmPassword && (
+                  <p
+                    className={`password-match-message ${passwordMatch.isValid ? 'valid' : 'invalid'}`}
+                  >
+                    {passwordMatch.isValid ? '✓ Passwords match' : '✗ Passwords do not match'}
+                  </p>
+                )}
               </div>
 
               <div className="reset-button">
