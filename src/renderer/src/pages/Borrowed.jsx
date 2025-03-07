@@ -38,6 +38,7 @@ const Borrowed = () => {
   const highlightedId = searchParams.get('id')
   const shouldHighlight = searchParams.get('highlight') === 'true'
   const [selectedBorrowDetails, setSelectedBorrowDetails] = useState(null)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   // Add function to check if book is overdue
   const isOverdue = (dueDate) => {
@@ -317,8 +318,17 @@ const Borrowed = () => {
     }
   }, [highlightedId, shouldHighlight])
 
-  const handleRowClick = (borrowItem) => {
-    setSelectedBorrowDetails(borrowItem)
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const handleRowClick = (item) => {
+    if (windowWidth <= 1500) {
+      setSelectedBorrowDetails(item)
+    }
+    // Do nothing if screen is larger than 1500px
   }
 
   return (
@@ -379,7 +389,7 @@ const Borrowed = () => {
                           highlightedId === item.id.toString()
                             ? 'highlighted'
                             : getRowClassName(item)
-                        } clickable-row`}
+                        } ${windowWidth <= 1500 ? 'clickable-row' : ''}`}
                       >
                         <td>{item.student_name}</td>
                         <td>{item.book_title}</td>
@@ -438,14 +448,16 @@ const Borrowed = () => {
           onSuccess={refreshTable} // Add this line
           borrowData={selectedOverdue || {}}
         />
-        <BorrowDetailsModal
-          isOpen={!!selectedBorrowDetails}
-          onClose={() => setSelectedBorrowDetails(null)}
-          borrowData={selectedBorrowDetails}
-          onReturn={handleReturnBook}
-          onRenew={handleRenewClick}
-          onPay={handleOverdueClick}
-        />
+        {selectedBorrowDetails && windowWidth <= 1500 && (
+          <BorrowDetailsModal
+            isOpen={!!selectedBorrowDetails}
+            onClose={() => setSelectedBorrowDetails(null)}
+            borrowData={selectedBorrowDetails}
+            onReturn={handleReturnBook}
+            onRenew={handleRenewClick}
+            onPay={handleOverdueClick}
+          />
+        )}
       </div>
     </div>
   )

@@ -203,8 +203,15 @@ function SignUpPage() {
             </p>
           )}
 
-          <Button onClick={handleRegister} disabled={!isFormValid()} isLoading={isLoading}>
-            Sign Up
+          <Button onClick={handleRegister} disabled={!isFormValid() || isLoading}>
+            {isLoading ? (
+              <div className="spinner-wrapper">
+                <div className="spinner" />
+                <span>Signing up...</span>
+              </div>
+            ) : (
+              'Sign Up'
+            )}
           </Button>
 
           <div className="or-divider">

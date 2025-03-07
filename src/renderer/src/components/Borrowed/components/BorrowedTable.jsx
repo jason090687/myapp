@@ -4,7 +4,8 @@ import BorrowedTableActions from './BorrowedTableActions'
 import { formatDate } from '../utils/dateUtils'
 import { getRowClassName, sortBorrowedBooks } from '../utils/statusUtils'
 import Pagination from '../../Pagination'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+import BorrowedDetailsModal from '../../BorrowDetails/BorrowDetailsModal'
 
 const TABLE_COLUMNS = [
   { key: 'student', label: 'Student', render: (item) => item.student || 'N/A' },
@@ -53,6 +54,21 @@ const BorrowedTable = ({
   onRenew,
   onOverdue
 }) => {
+  const [selectedBook, setSelectedBook] = useState(null)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const handleRowClick = (item) => {
+    if (windowWidth <= 1500) {
+      setSelectedBook(item)
+    }
+  }
+
   // Sort books with unreturned items first
   const sortedBooks = useMemo(() => sortBorrowedBooks(books), [books])
 
@@ -95,7 +111,11 @@ const BorrowedTable = ({
           ) : (
             <tbody>
               {sortedBooks.map((item) => (
-                <tr key={item.id || Math.random()} className={getRowClassName(item)}>
+                <tr
+                  key={item.id || Math.random()}
+                  className={`${getRowClassName(item)} ${windowWidth <= 1500 ? 'clickable-row' : ''}`}
+                  onClick={() => handleRowClick(item)}
+                >
                   {TABLE_COLUMNS.map((column) => (
                     <td key={column.key}>
                       {column.render(item, { onReturn, onRenew, onOverdue })}
@@ -107,6 +127,18 @@ const BorrowedTable = ({
           )}
         </table>
       </div>
+
+      {selectedBook && windowWidth <= 1500 && (
+        <BorrowedDetailsModal
+          isOpen={true}
+          onClose={() => setSelectedBook(null)}
+          borrowData={selectedBook}
+          onReturn={onReturn}
+          onRenew={onRenew}
+          onPay={onOverdue}
+        />
+      )}
+
       {!isLoading && books && books.length > 0 && pagination && (
         <Pagination
           currentPage={pagination.currentPage}

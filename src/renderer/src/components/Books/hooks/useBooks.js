@@ -204,6 +204,7 @@ const mapBookData = (book) => ({
   physicalDescription: book.physical_description,
   isbn: book.isbn,
   accessionNo: book.accession_number,
+  call_number: book.call_number,
   barcode: book.barcode,
   dateReceived: book.date_received,
   subject: book.subject,

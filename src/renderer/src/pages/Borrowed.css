@@ -918,3 +918,35 @@
 .borrowed-table tbody tr.clickable-row::after {
   display: none !important;
 }
+
+/* Only show pointer cursor and hover effects on smaller screens */
+.borrowed-table tbody tr {
+  cursor: default;
+}
+
+@media screen and (max-width: 1500px) {
+  .borrowed-table tbody tr {
+    cursor: pointer;
+  }
+
+  .borrowed-table tbody tr:hover {
+    background-color: rgba(248, 250, 252, 0.95);
+  }
+
+  .clickable-row {
+    position: relative;
+  }
+
+  .clickable-row:after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.02);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .clickable-row:hover:after {
+    opacity: 1;
+  }
+}

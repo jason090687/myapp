@@ -15,7 +15,7 @@ const TABLE_COLUMNS = [
   { key: 'physicalDescription', label: 'PHYSICAL DESCRIPTION', sortable: false },
   { key: 'isbn', label: 'ISBN', sortable: false },
   { key: 'accessionNo', label: 'ACCESSION NUMBER', sortable: true },
-  { key: 'callNumber', label: 'CALL NUMBER', sortable: true }, // Add this line
+  { key: 'call_number', label: 'CALL NUMBER', sortable: true }, // Add this line
   { key: 'copy_number', label: 'COPY NO.', sortable: true, required: true },
   { key: 'barcode', label: 'BARCODE', sortable: false },
   { key: 'dateReceived', label: 'DATE RECEIVED', sortable: true, type: 'date', required: true },
