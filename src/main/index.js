@@ -7,7 +7,7 @@ import { dialog } from 'electron'
 // Define icon path properly for different platforms
 const iconPath =
   process.platform === 'win32'
-    ? path.join(__dirname, '../../build/icon.ico')
+    ? path.join(__dirname, '../../build/ico.ico')
     : path.join(__dirname, '../../build/icon.png')
 
 function createWindow() {
