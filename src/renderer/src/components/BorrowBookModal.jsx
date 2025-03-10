@@ -61,11 +61,14 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       setIsLoading(true)
       try {
         const booksResponse = await fetchAllBooks(token, bookSearch)
-        const booksWithTitles = booksResponse.results.map((book) => ({
-          id: book.id,
-          title: book.title
-        }))
-        const availableBooks = booksWithTitles.filter((book) => book.status !== 'Borrowed')
+        const availableBooks = booksResponse.results
+          .filter((book) => book.status !== 'Borrowed') // Only include books that are not borrowed
+          .map((book) => ({
+            id: book.id,
+            title: book.title
+            // author: book.author,
+            // isbn: book.isbn
+          }))
         setBooks(availableBooks)
       } catch (error) {
         toast.error('Failed to fetch books')
