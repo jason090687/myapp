@@ -63,8 +63,8 @@
 }
 
 .search-bar {
-  width: 400px; /* Set fixed width instead of flex */
-  min-width: 200px;
+  width: 200px; /* Set fixed width instead of flex */
+  min-width: 100px;
   position: relative;
 }
 
@@ -602,7 +602,7 @@
   }
 
   .search-bar {
-    width: 300px; /* Reduced width for medium screens */
+    width: 150px; /* Reduced width for medium screens */
     min-width: 150px;
   }
 
@@ -762,7 +762,6 @@
   }
 
   .search-bar {
-    flex: 2; /* Takes up 2/3 of the space */
     max-width: none;
     width: auto;
   }

@@ -34,7 +34,7 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
     setProcessingAction('return')
     try {
       await onReturn(id)
-      // Don't close the modal here, let the parent component handle it
+      onClose()
     } catch (error) {
       console.error('Error returning book:', error)
       toast.error('Failed to return book')
