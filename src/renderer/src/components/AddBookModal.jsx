@@ -15,7 +15,8 @@ import {
   FaHashtag,
   FaQrcode,
   FaTag,
-  FaPen
+  FaPen,
+  FaImage
 } from 'react-icons/fa'
 import './AddBookModal.css'
 import { fetchUserDetails, fetchBookStatuses } from '../Features/api'
@@ -47,7 +48,8 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     copies: '',
     status: 'Available',
     date_processed: new Date().toISOString().slice(0, 16),
-    processed_by: currentUser?.id || ''
+    processed_by: currentUser?.id || '',
+    book_cover: null // Add book_cover to initial form state
   }
 
   const [formData, setFormData] = useState(initialFormState)
@@ -98,11 +100,30 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
   }, [userDetails])
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, files } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: value || '' // Ensure value is never undefined
+      [name]: files ? files[0] : value || '' // Handle file input for book_cover
     }))
+  }
+
+  // Add image handling function
+  const handleCoverUrlClick = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.onchange = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        setFormData((prev) => ({
+          ...prev,
+          book_cover: file,
+          selectedFileName: file.name,
+          coverPreview: URL.createObjectURL(file)
+        }))
+      }
+    }
+    input.click()
   }
 
   const toastConfig = {
@@ -120,8 +141,8 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
   const isFormValid = () => {
     const copiesNum = parseInt(formData.copies)
     return (
-      formData.title?.trim() &&
-      formData.author?.trim() &&
+      formData.title?.trim() && // Ensure title is required
+      formData.author?.trim() && // Ensure author is required
       formData.publisher?.trim() &&
       formData.place_of_publication?.trim() &&
       formData.year?.trim() &&
@@ -167,11 +188,19 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
 
       // Process books sequentially with incrementing copies
       for (let currentCopy = 1; currentCopy <= totalCopies; currentCopy++) {
-        const bookData = {
-          ...formData,
-          copies: currentCopy, // Set current copy number
-          copy_number: currentCopy,
-          processed_by: userDetails.id || currentUser.id
+        const bookData = new FormData()
+        Object.keys(formData).forEach((key) => {
+          if (key !== 'book_cover') {
+            bookData.append(key, formData[key])
+          }
+        })
+        bookData.set('copies', currentCopy) // Set current copy number
+        bookData.set('copy_number', currentCopy)
+        bookData.set('processed_by', userDetails.id || currentUser.id)
+
+        // Add the book cover if it exists
+        if (formData.book_cover) {
+          bookData.append('book_cover', formData.book_cover)
         }
 
         try {
@@ -258,8 +287,8 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
   if (!isOpen) return null
 
   const inputFields = [
-    { name: 'title', label: 'Title*', icon: FaBook, required: true },
-    { name: 'author', label: 'Author*', icon: FaUser, required: true },
+    { name: 'title', label: 'Title*', icon: FaBook, required: true }, // Ensure title is required
+    { name: 'author', label: 'Author*', icon: FaUser, required: true }, // Ensure author is required
     { name: 'series_title', label: 'Series Title', icon: FaBookOpen },
     { name: 'publisher', label: 'Publisher*', icon: FaBuilding, required: true },
     {
@@ -372,6 +401,34 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
                 name="processed_by"
                 value={userDetails?.id || currentUser?.id || ''}
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="book_cover">Book Cover</label>
+              <div className="cover-url-wrapper" onClick={handleCoverUrlClick}>
+                <InputField
+                  type="text"
+                  id="book_cover"
+                  name="book_cover"
+                  value={formData.selectedFileName || 'Click to upload image...'}
+                  readOnly
+                  icon={FaImage}
+                  className="cover-url-input"
+                />
+              </div>
+              {formData.coverPreview && (
+                <div className="cover-preview-link">
+                  <img
+                    src={formData.coverPreview}
+                    alt="Cover preview"
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.style.display = 'none'
+                      toast.error('Invalid image file', toastConfig)
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

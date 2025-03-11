@@ -175,12 +175,13 @@ export const addNewBook = async (token, bookData) => {
   try {
     const response = await axios.post(
       `${API_URL}/marc/record/`,
+      bookData, // Use bookData directly as FormData
       {
-        ...bookData,
-        barcode: bookData.barcode, // Now includes copy number
-        copy_number: bookData.copy_number // New field
-      },
-      getAuthHeaders(token)
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data' // Ensure multipart content type for file upload
+        }
+      }
     )
     return response.data
   } catch (error) {

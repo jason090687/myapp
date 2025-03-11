@@ -351,3 +351,150 @@
   margin: 2px 0;
   font-size: 0.85em;
 }
+
+/* Replace the cover upload styles with these new styles */
+.cover-preview-link {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-info {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: center;
+  background: #f1f5f9;
+  border-radius: 0.375rem;
+  word-break: break-all;
+}
+
+.cover-preview-link img {
+  max-height: 200px;
+  width: auto;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.cover-url-wrapper {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cover-url-wrapper:hover {
+  opacity: 0.9;
+}
+
+.cover-url-input {
+  cursor: pointer !important;
+  background-color: #f8fafc !important;
+}
+
+.cover-url-input input {
+  cursor: pointer !important;
+  color: #64748b !important;
+  background: #f8fafc !important;
+  padding-right: 1rem !important;
+}
+
+.cover-url-input input:focus {
+  background: white !important;
+}
+
+.cover-url-input input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.image-upload-container {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.image-upload-container:hover {
+  border-color: #666;
+}
+
+.image-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.image-upload-label svg {
+  font-size: 24px;
+  color: #666;
+}
+
+.image-preview-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 4px;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.remove-image-btn:hover {
+  background: #cc0000;
+}
+
+.image-upload-group {
+  grid-column: span 2;
+}
+
+.image-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.image-preview {
+  width: 200px;
+  height: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-input {
+  padding: 0.5rem;
+}
