@@ -427,6 +427,20 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
                       toast.error('Invalid image file', toastConfig)
                     }}
                   />
+                  <button
+                    type="button"
+                    className="cancel-image-btn"
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        book_cover: null,
+                        selectedFileName: '',
+                        coverPreview: null
+                      }))
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
               )}
             </div>
