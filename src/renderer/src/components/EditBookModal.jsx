@@ -15,7 +15,8 @@ import {
   FaHashtag,
   FaQrcode,
   FaTag,
-  FaPen
+  FaPen,
+  FaImage
 } from 'react-icons/fa'
 import { fetchUserDetails, updateBook, fetchBookStatuses } from '../Features/api'
 import { useSelector } from 'react-redux'
@@ -47,7 +48,10 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     copies: '',
     status: 'available', // Change to lowercase to match API
     date_processed: new Date().toISOString().split('T')[0],
-    processed_by: currentUser.id
+    processed_by: currentUser.id,
+    book_cover: null,
+    selectedFileName: '',
+    coverPreview: null
   })
 
   const { token } = useSelector((state) => state.auth)
@@ -102,7 +106,8 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
   // Set initial form data when book data is provided
   useEffect(() => {
     if (bookData) {
-      setFormData({
+      setFormData((prev) => ({
+        ...prev,
         id: bookData.id,
         title: bookData.title || '',
         author: bookData.author || '',
@@ -122,10 +127,14 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
         additional_author: bookData.additionalAuthor || '',
         status: bookData.status || 'available', // Add fallback
         date_processed: formatDatetime(bookData.dateProcessed || new Date()),
-        processed_by: bookData.processedBy || currentUser.id
-      })
+        processed_by: userDetails?.id || currentUser?.id || bookData.processed_by,
+        processed_by_name: userDetails?.first_name || currentUser?.name || '', // Store name separately
+        book_cover: null,
+        selectedFileName: '',
+        coverPreview: null
+      }))
     }
-  }, [bookData]) // Ensure effect runs when `bookData` updates
+  }, [bookData, userDetails, currentUser]) // Ensure effect runs when `bookData` updates
 
   // Add a reset function
   const resetForm = () => {
@@ -148,7 +157,10 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
       additional_author: '',
       status: 'available',
       date_processed: new Date().toISOString().split('T')[0],
-      processed_by: currentUser.id
+      processed_by: currentUser.id,
+      book_cover: null,
+      selectedFileName: '',
+      coverPreview: null
     })
   }
 
@@ -167,6 +179,25 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     }))
   }
 
+  // Add image handling function
+  const handleCoverUrlClick = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.onchange = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        setFormData((prev) => ({
+          ...prev,
+          book_cover: file,
+          selectedFileName: file.name,
+          coverPreview: URL.createObjectURL(file)
+        }))
+      }
+    }
+    input.click()
+  }
+
   // Add toast configuration
   const toastConfig = {
     position: 'top-right',
@@ -180,39 +211,38 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     closeButton: true
   }
 
-  // Update handleSubmit to include toast notifications
+  // Update handleSubmit to include image upload
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // Format the data according to your API requirements
-      const updatedData = {
-        id: formData.id,
-        title: formData.title || null,
-        author: formData.author || null,
-        series_title: formData.series_title || null,
-        publisher: formData.publisher || null,
-        place_of_publication: formData.place_of_publication || null,
-        year: formData.year ? parseInt(formData.year) : null,
-        edition: formData.edition || null,
-        volume: formData.volume || null,
-        physical_description: formData.physical_description || null,
-        isbn: formData.isbn || null,
-        accession_number: formData.accession_number || null,
-        call_number: formData.call_number || null,
-        barcode: formData.barcode || null,
-        date_received: formData.date_received ? formatDatetime(formData.date_received) : null,
-        subject: formData.subject || null,
-        additional_author: formData.additional_author || null,
-        status: formData.status, // Don't modify status case or set to null
-        date_processed: formatDatetime(formData.date_processed || new Date()),
-        processed_by: currentUser.id
+      const formDataToSend = new FormData()
+
+      // Ensure processed_by is sent as ID/PK
+      const dataToSend = {
+        ...formData,
+        processed_by: userDetails?.id || currentUser?.id || formData.processed_by
       }
 
-      await updateBook(token, updatedData.id, updatedData)
+      // Remove the display name before sending
+      delete dataToSend.processed_by_name
+
+      // Add all form fields
+      Object.keys(dataToSend).forEach((key) => {
+        if (!['coverPreview', 'selectedFileName'].includes(key) && dataToSend[key] !== null) {
+          formDataToSend.append(key, dataToSend[key])
+        }
+      })
+
+      // Add the book cover if it exists
+      if (formData.book_cover) {
+        formDataToSend.append('book_cover', formData.book_cover)
+      }
+
+      await updateBook(token, formData.id, formDataToSend)
       toast.success('Book updated successfully!', toastConfig)
-      onSubmit(updatedData)
+      onSubmit(formDataToSend)
       onClose()
     } catch (error) {
       toast.error(error.message || 'Failed to update book', toastConfig)
@@ -320,10 +350,44 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
               <label htmlFor="processed_by">Processed By</label>
               <InputField
                 type="text"
-                value={userDetails.first_name || currentUser.name}
+                value={formData.processed_by_name} // Show name for display
                 icon={FaUser}
                 disabled
+                id="processed_by_display"
               />
+              <input
+                type="hidden"
+                name="processed_by"
+                value={formData.processed_by} // Store actual ID
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="book_cover">Book Cover</label>
+              <div className="cover-url-wrapper" onClick={handleCoverUrlClick}>
+                <InputField
+                  type="text"
+                  id="book_cover"
+                  name="book_cover"
+                  value={formData.selectedFileName || 'Click to upload image...'}
+                  readOnly
+                  icon={FaImage}
+                  className="cover-url-input"
+                />
+              </div>
+              {formData.coverPreview && (
+                <div className="cover-preview-link">
+                  <img
+                    src={formData.coverPreview}
+                    alt="Cover preview"
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.style.display = 'none'
+                      toast.error('Invalid image file', toastConfig)
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
