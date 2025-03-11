@@ -124,7 +124,6 @@ function Dashboard() {
 
         setTotalBooks(dashStats.totalBooks)
         setBookStats(borrowStats)
-        setReturnedBooks(returnedResponse.returned_books_count)
       } catch (error) {
         console.error('Error fetching stats:', error)
       } finally {
