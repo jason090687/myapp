@@ -163,9 +163,6 @@ function Dashboard() {
         })
 
         setTotalBooks(dashStats.totalBooks)
-<<<<<<< HEAD
-        setBookStats(borrowStats)
-=======
         setBookStats({
           ...borrowStats,
           borrowed: borrowStats.borrowed || 0,
@@ -175,7 +172,6 @@ function Dashboard() {
         setReturnedStats({
           returnedCount: returnedData.returnedCount || 0 // Keep original returned count
         })
->>>>>>> 7a71b81c436060473a70c2fc1b8971c2a2849629
       } catch (error) {
         console.error('Error fetching stats:', error)
       } finally {
