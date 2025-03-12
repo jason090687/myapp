@@ -15,9 +15,12 @@ export const paths = {
   preload: join(rootDir, 'src', 'preload'),
   renderer: join(rootDir, 'src', 'renderer'),
   build: join(rootDir, 'build'),
-  getIconPath: () =>
-    process.platform === 'win32'
-      ? join(rootDir, 'build', 'ico.ico')
-      : join(rootDir, 'build', 'icon.png'),
+  getIconPath: () => {
+    if (process.env.NODE_ENV === 'development') {
+      return join(rootDir, 'build', 'ico.ico')
+    }
+    // In production, use the path relative to the executable
+    return join(process.resourcesPath, 'build', 'ico.ico')
+  },
   getUserData: () => app.getPath('userData')
 }

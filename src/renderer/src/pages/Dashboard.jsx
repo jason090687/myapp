@@ -144,13 +144,20 @@ function Dashboard() {
                 currentMonthData.returned || 0,
                 currentMonthData.overdue || 0
               ],
-              borderColor: 'rgb(53, 162, 235)',
-              backgroundColor: 'rgba(53, 162, 235, 0.5)',
-              tension: 0.4,
-              fill: true,
-              pointStyle: 'circle',
-              pointRadius: 6,
-              pointHoverRadius: 8
+              backgroundColor: [
+                'rgba(53, 162, 235, 0.8)',   // Blue for Processed
+                'rgba(255, 159, 64, 0.8)',   // Orange for Borrowed
+                'rgba(75, 192, 192, 0.8)',   // Green for Returned
+                'rgba(255, 99, 132, 0.8)'    // Red for Overdue
+              ],
+              borderColor: [
+                'rgb(53, 162, 235)',         // Blue border
+                'rgb(255, 159, 64)',         // Orange border
+                'rgb(75, 192, 192)',         // Green border
+                'rgb(255, 99, 132)'          // Red border
+              ],
+              borderWidth: 1,
+              borderRadius: 6
             }
           ]
         })
@@ -288,24 +295,45 @@ function Dashboard() {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top'
+        position: 'top',
+        labels: {
+          font: {
+            size: 14,
+            weight: 'bold'
+          },
+          padding: 20
+        }
       },
       title: {
         display: true,
-        text: 'Library Statistics'
+        text: 'Library Statistics',
+        font: {
+          size: 20,
+          weight: 'bold'
+        },
+        padding: 20
       },
       tooltip: {
         enabled: true,
         mode: 'index',
-        intersect: false
+        intersect: false,
+        titleFont: {
+          size: 16
+        },
+        bodyFont: {
+          size: 14
+        },
+        padding: 12
       },
       datalabels: {
         anchor: 'end',
         align: 'top',
         formatter: (value) => value,
         font: {
+          size: 14,
           weight: 'bold'
         },
+        padding: 6,
         color: '#333'
       }
     },
@@ -315,11 +343,25 @@ function Dashboard() {
         grid: {
           drawBorder: false,
           color: 'rgba(0, 0, 0, 0.1)'
+        },
+        ticks: {
+          font: {
+            size: 14,
+            weight: 'bold'
+          },
+          padding: 8
         }
       },
       x: {
         grid: {
           display: false
+        },
+        ticks: {
+          font: {
+            size: 14,
+            weight: 'bold'
+          },
+          padding: 8
         }
       }
     }
@@ -339,34 +381,33 @@ function Dashboard() {
         return parseInt(dataMonth) === month + 1 && parseInt(dataYear) === year
       }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
 
-      // Create month string for label
       const monthString = new Date(year, month).toLocaleString('default', { month: 'long' })
 
       setChartData({
         labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
         datasets: [
           {
-            label: `Library Statistics - ${monthString} ${year}`, // Use direct month and year
+            label: `Library Statistics - ${monthString} ${year}`,
             data: [
               selectedMonthData.processed || 0,
               selectedMonthData.borrowed || 0,
               selectedMonthData.returned || 0,
               selectedMonthData.overdue || 0
             ],
-            borderRadius: 6,
             backgroundColor: [
-              'rgba(53, 162, 235, 0.8)',
-              'rgba(255, 159, 64, 0.8)',
-              'rgba(75, 192, 192, 0.8)',
-              'rgba(255, 99, 132, 0.8)'
+              'rgba(53, 162, 235, 0.8)',   // Blue for Processed
+              'rgba(255, 159, 64, 0.8)',   // Orange for Borrowed
+              'rgba(75, 192, 192, 0.8)',   // Green for Returned
+              'rgba(255, 99, 132, 0.8)'    // Red for Overdue
             ],
             borderColor: [
-              'rgb(53, 162, 235)',
-              'rgb(255, 159, 64)',
-              'rgb(75, 192, 192)',
-              'rgb(255, 99, 132)'
+              'rgb(53, 162, 235)',         // Blue border
+              'rgb(255, 159, 64)',         // Orange border
+              'rgb(75, 192, 192)',         // Green border
+              'rgb(255, 99, 132)'          // Red border
             ],
-            borderWidth: 1
+            borderWidth: 1,
+            borderRadius: 6
           }
         ]
       })
@@ -379,11 +420,15 @@ function Dashboard() {
 
   const generatePDF = async () => {
     try {
-      // Create canvas and chart image (existing code)
+      // Create high resolution canvas
       const canvas = document.createElement('canvas')
-      canvas.width = 400 // Reduced width for side-by-side layout
-      canvas.height = 400
+      const scale = 3 // Increase resolution by 3x
+      canvas.width = 1000 // Larger base width for better quality
+      canvas.height = 1000
       const ctx = canvas.getContext('2d')
+      
+      // Scale the context for higher resolution
+      ctx.scale(scale, scale)
 
       const pdfChart = new ChartJS(ctx, {
         type: 'bar',
@@ -391,11 +436,12 @@ function Dashboard() {
         options: {
           ...chartOptions,
           animation: false,
-          responsive: false
+          responsive: false,
+          devicePixelRatio: scale, // Ensure chart renders at high resolution
         }
       })
 
-      const chartImage = canvas.toDataURL('image/png')
+      const chartImage = canvas.toDataURL('image/png', 1.0) // Maximum quality
       pdfChart.destroy()
 
       // Create PDF with landscape orientation
