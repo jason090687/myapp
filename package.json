@@ -1,7 +1,8 @@
 {
+  "type": "module",
   "name": "myapp",
-  "version": "1.0.0",
-  "description": "An Electron application with React",
+  "version": "0.0.1",
+  "description": "An Electron application with Vite + React",
   "main": "./out/main/index.js",
   "author": "M&J",
   "homepage": "https://electron-vite.org",
@@ -13,9 +14,9 @@
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win",
-    "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:win": "npm run build && electron-builder --win --config",
+    "build:mac": "npm run build && electron-builder --mac --config",
+    "build:linux": "npm run build && electron-builder --linux --config"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -26,11 +27,13 @@
     "adm-zip": "^0.5.16",
     "axios": "^1.7.9",
     "chart.js": "^4.4.8",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "electron-devtools-installer": "^4.0.0",
     "electron-store": "^10.0.1",
     "electron-updater": "^6.3.9",
+    "html2canvas": "^1.4.1",
     "pdf-lib": "^1.17.1",
     "react-calendar": "^5.1.0",
     "react-chartjs-2": "^5.3.0",
@@ -60,20 +63,22 @@
     "tailwindcss": "^4.0.6",
     "vite": "^6.1.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jason090687/myapp.git"
+  },
   "build": {
     "appId": "com.countmein.myapp",
     "productName": "eLibrary",
     "asar": false,
     "files": [
       "out/**/*",
-      "node_modules/**/*",
-      "package.json"
+      "node_modules/**/*"
     ],
     "win": {
       "icon": "./build/icon.ico",
-      "target": "nsis",
-      "sign": false
-    },
-    "forceCodeSigning": false
+       "target": "nsis",
+       "sign": false
+     }
+    }
   }
-}

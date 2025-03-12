@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const GITHUB_API = 'https://api.github.com/repos/jason090687/myapp'
+const GITHUB_API_URL = 'https://api.github.com/repos/jason090687/myapp'
 const CURRENT_VERSION = '1.0.0'
 const MAX_RETRIES = 3
 const RETRY_DELAY = 1000
@@ -27,44 +27,84 @@ class UpdateService {
     }
   }
 
+  static async checkForDeployment() {
+    try {
+      const { data: deployments } = await axios.get(`${GITHUB_API_URL}/deployments`, {
+        headers: { Accept: 'application/vnd.github.v3+json' }
+      })
+      return deployments[0] || null
+    } catch (error) {
+      console.error('Failed to check deployment:', error)
+      throw error
+    }
+  }
+
+  static owner = 'jason090687'
+  static repo = 'myapp'
+
   static async checkForUpdates() {
     try {
-      // Remove cache-control headers and use simpler request
-      const commitResponse = await this.instance.get('/repos/jason090687/myapp/commits/main')
-      
-      const latestCommit = commitResponse.data
-      const currentCommit = localStorage.getItem('currentCommit')
-
-      // Get recent commits without cache headers
-      const commitsResponse = await this.instance.get('/repos/jason090687/myapp/commits', {
-        params: { 
-          sha: 'main',
-          per_page: 10
-        }
-      })
-
-      const recentCommits = commitsResponse.data.map(commit => ({
-        message: commit.commit.message,
-        date: commit.commit.author.date,
-        author: commit.commit.author.name,
-        sha: commit.sha.substring(0, 7)
-      }))
-
-      return {
-        hasUpdate: latestCommit.sha !== currentCommit,
-        latestCommit: latestCommit.sha,
-        currentCommit,
-        changes: recentCommits,
-        version: CURRENT_VERSION,
-        lastUpdated: latestCommit.commit.author.date
+      // Verify electron and updateChecker exist
+      if (!window?.electron?.updateChecker) {
+        console.error('Update service not available:', {
+          hasElectron: !!window.electron,
+          hasUpdateChecker: !!(window.electron && window.electron.updateChecker)
+        })
+        throw new Error('Update service not initialized')
       }
+      const result = await window.electron.updateChecker.checkForUpdates()
+      return result
     } catch (error) {
-      console.error('GitHub API Error:', error)
-      throw new Error(this.getErrorMessage(error))
+      console.error('Check for updates failed:', error)
+      throw error
+    }
+  }
+
+  static async downloadUpdate() {
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
+    }
+    return await window.electron.updateChecker.downloadUpdate()
+  }
+
+  static async applyUpdate(updateData) {
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
+    }
+    return await window.electron.updateChecker.applyUpdate(updateData)
+  }
+
+  static restart() {
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
+    }
+    window.electron.updateChecker.restart()
+  }
+
+  static onUpdateStatus(callback) {
+    if (window?.electron?.on) {
+      window.electron.on('update-status', callback)
+    }
+  }
+
+  static onUpdateProgress(callback) {
+    if (window?.electron?.on) {
+      window.electron.on('update-progress', callback)
+    }
+  }
+
+  static cleanupListeners() {
+    if (window?.electron?.removeAllListeners) {
+      window.electron.removeAllListeners('update-status')
+      window.electron.removeAllListeners('update-progress')
+      window.electron.removeAllListeners('update-complete')
     }
   }
 
   static getErrorMessage(error) {
+    if (error.message === 'Update service not initialized') {
+      return 'Update service is not available. Please restart the application.'
+    }
     if (error.response) {
       // Server responded with error
       if (error.response.status === 403) {
@@ -83,59 +123,46 @@ class UpdateService {
     return 'Failed to check for updates.'
   }
 
-  static async downloadUpdate() {
+  static async rebuildApplication() {
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
+    }
     try {
-      // Get the repository content
-      const response = await this.instance.get('/repos/jason090687/myapp/contents', {
-        params: { ref: 'main' }
-      })
+      // Save any necessary state to persist across rebuild
+      localStorage.setItem('rebuildInProgress', 'true')
 
-      const files = response.data.map((file) => ({
-        name: file.name,
-        path: file.path,
-        sha: file.sha,
-        downloadUrl: file.download_url
-      }))
+      const result = await window.electron.updateChecker.rebuildApplication()
 
-      // Download each file
-      const downloads = await Promise.all(
-        files.map(async (file) => {
-          if (file.downloadUrl) {
-            const fileResponse = await axios.get(file.downloadUrl)
-            return {
-              path: file.path,
-              content: fileResponse.data
-            }
-          }
-          return null
-        })
-      )
+      if (!result.success) {
+        throw new Error('Rebuild failed')
+      }
 
-      return downloads.filter(Boolean)
+      return result
     } catch (error) {
-      console.error('Download failed:', error)
-      throw new Error('Failed to download updates. Please try again.')
+      console.error('Rebuild failed:', error)
+      localStorage.removeItem('rebuildInProgress')
+      throw error
     }
   }
 
-  static async applyUpdate(updateData) {
+  static isRebuildInProgress() {
+    return localStorage.getItem('rebuildInProgress') === 'true'
+  }
+
+  static clearRebuildState() {
+    localStorage.removeItem('rebuildInProgress')
+  }
+
+  static async rebuildApplication() {
     try {
-      // Store the new commit hash
-      localStorage.setItem('currentCommit', updateData.latestCommit)
-      localStorage.setItem('lastUpdateCheck', new Date().toISOString())
-
-      // Here you would process the downloaded files
-      // This is a placeholder for the actual update logic
-      console.log('Applying updates...', updateData)
-
-      return {
-        success: true,
-        updated: new Date().toISOString()
-      }
+      await window.Electron.ipcRenderer.invoke('rebuild-application')
     } catch (error) {
-      console.error('Update application failed:', error)
-      throw new Error('Failed to apply updates. Please try again.')
+      throw new Error('Failed to rebuild application')
     }
+  }
+
+  static onUpdateComplete(callback) {
+    window.Electron.ipcRenderer.on('update-complete', callback)
   }
 
   static getUpdateHistory() {

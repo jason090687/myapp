@@ -2,16 +2,17 @@ import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs'
-import { dialog } from 'electron'
+import UpdateHandler from './update-handler.js'
+import { paths } from './utils/paths.js'
 
-// Define icon path properly for different platforms
-const iconPath =
+const iconPath = 
   process.platform === 'win32'
     ? path.join(__dirname, '../../build/ico.ico')
     : path.join(__dirname, '../../build/icon.png')
 
+let updateHandler = null // Single instance
+
 function createWindow() {
-  // Define fixed dimensions
   const WINDOW_WIDTH = 1366
   const WINDOW_HEIGHT = 768
 
@@ -19,13 +20,15 @@ function createWindow() {
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
     title: 'SHJMS eLibrary',
-    icon: iconPath,
+    icon: iconPath, // Updated icon path
     fullscreen: false,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      preload: join(paths.preload, 'index.js'),
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
     }
   })
 
@@ -68,12 +71,19 @@ function createWindow() {
     }
   })
 
+  // Only create update handler once
+  if (!updateHandler) {
+    updateHandler = new UpdateHandler(mainWindow)
+  } else {
+    updateHandler.mainWindow = mainWindow
+  }
+
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(paths.renderer, 'index.html'))
   }
 }
 
@@ -140,6 +150,19 @@ app.whenReady().then(() => {
       return true
     } catch (error) {
       console.error('Failed to install update:', error)
+      throw error
+    }
+  })
+
+  // Add rebuild handler
+  ipcMain.handle('rebuild-application', async () => {
+    try {
+      // Save any necessary state
+      await app.relaunch()
+      app.exit(0)
+      return { success: true }
+    } catch (error) {
+      console.error('Rebuild failed:', error)
       throw error
     }
   })

@@ -7,9 +7,8 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          index: resolve('src/main/index.js'),
-          'update-handler': resolve('src/main/update-handler.js'),
-          'utils/paths': resolve('src/main/utils/paths.js')
+          index: resolve(__dirname, 'src/main/index.js'),
+          'update-handler': resolve(__dirname, 'src/main/update-handler.js')
         }
       }
     }
@@ -18,7 +17,7 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          index: resolve('src/preload/index.js')
+          index: resolve(__dirname, 'src/preload/index.js')
         }
       }
     }
@@ -33,7 +32,7 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          main: resolve('src/renderer/index.html')
+          main: resolve(__dirname, 'src/renderer/index.html')
         }
       }
     }

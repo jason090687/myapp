@@ -128,9 +128,9 @@ const HelpGuideModal = ({ isOpen, onClose }) => {
           title: 'Account Settings',
           steps: [
             'Update profile information',
-            'Change password',
-            'Set notification preferences',
-            'Customize dashboard view'
+            'Change password'
+            // 'Set notification preferences',
+            // 'Customize dashboard view'
           ]
         }
       ]
