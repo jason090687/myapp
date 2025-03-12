@@ -42,7 +42,7 @@
 .input-field-wrapper {
   max-width: 400px;
   width: 100%;
-  margin: auto;
+  /* margin: auto; */
 }
 
 .otp-input-group {
