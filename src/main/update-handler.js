@@ -9,6 +9,7 @@ class UpdateHandler {
     this.mainWindow = mainWindow
     this.setupHandlers()
     this.repoUrl = 'https://api.github.com/repos/jason090687/myapp'
+    this.isWindows = process.platform === 'win32'
   }
 
   setupHandlers() {
@@ -54,18 +55,64 @@ class UpdateHandler {
 
   async applyUpdate(updateData) {
     try {
-      // Install new dependencies
+      if (this.isWindows) {
+        // Create a batch file for Windows update
+        const batchContent = `
+@echo off
+timeout /t 2 /nobreak > nul
+cd "${process.cwd()}"
+call npm install
+if %errorlevel% neq 0 exit /b %errorlevel%
+call npm run build
+if %errorlevel% neq 0 exit /b %errorlevel%
+exit /b 0
+        `.trim()
+
+        const batchPath = path.join(process.cwd(), 'update.bat')
+        fs.writeFileSync(batchPath, batchContent)
+
+        // Execute batch file with elevated privileges on Windows
+        const updateProcess = spawn(
+          'powershell.exe',
+          ['Start-Process', '-FilePath', batchPath, '-Verb', 'RunAs', '-Wait'],
+          {
+            windowsHide: true,
+            stdio: 'pipe'
+          }
+        )
+
+        return new Promise((resolve, reject) => {
+          updateProcess.on('close', (code) => {
+            fs.unlinkSync(batchPath) // Clean up batch file
+            if (code === 0) {
+              resolve({ success: true })
+            } else {
+              reject(new Error(`Update failed with code ${code}`))
+            }
+          })
+        })
+      } else {
+        // Original update process for non-Windows
+        return await this.standardUpdate()
+      }
+    } catch (error) {
+      console.error('Update application failed:', error)
+      throw error
+    }
+  }
+
+  async standardUpdate() {
+    try {
+      // Install dependencies
       execSync('npm install', {
         cwd: process.cwd(),
         stdio: 'inherit'
       })
 
-      // Rebuild the application
+      // Rebuild application
       await this.rebuildApplication()
-
       return { success: true }
     } catch (error) {
-      console.error('Update application failed:', error)
       throw error
     }
   }
@@ -122,22 +169,19 @@ class UpdateHandler {
   }
 
   getNpmPath(npmCmd) {
-    try {
-      // Try to get npm path from where Node is installed
-      const nodePath = process.execPath
-      const nodeDir = path.dirname(nodePath)
-
+    if (this.isWindows) {
       const possiblePaths = [
-        // Try node_modules/.bin first
-        path.join(process.cwd(), 'node_modules', '.bin', npmCmd),
-        // Then try npm next to node
-        path.join(nodeDir, npmCmd),
-        // Then try npm in standard locations
-        process.platform === 'win32'
-          ? path.join(process.env.APPDATA, 'npm', npmCmd)
-          : '/usr/local/bin/npm',
-        // Finally try global npm
-        execSync('which npm', { encoding: 'utf8' }).trim()
+        // npm in PATH
+        'npm.cmd',
+        // npm in AppData
+        path.join(process.env.APPDATA, 'npm', 'npm.cmd'),
+        // npm next to node
+        path.join(path.dirname(process.execPath), 'npm.cmd'),
+        // npm in Program Files
+        path.join(process.env['ProgramFiles'], 'nodejs', 'npm.cmd'),
+        path.join(process.env['ProgramFiles(x86)'], 'nodejs', 'npm.cmd'),
+        // Local project npm
+        path.join(process.cwd(), 'node_modules', '.bin', 'npm.cmd')
       ]
 
       for (const npmPath of possiblePaths) {
@@ -146,26 +190,30 @@ class UpdateHandler {
         }
       }
 
-      // If we can't find npm, try to use it from PATH
-      return npmCmd
-    } catch (error) {
-      console.error('Error finding npm path:', error)
-      return npmCmd
+      return 'npm.cmd' // fallback
     }
+
+    // Original logic for non-Windows
+    return super.getNpmPath(npmCmd)
   }
 
   getEnhancedPath() {
-    const paths = [
-      // Add node_modules/.bin to PATH
-      path.join(process.cwd(), 'node_modules', '.bin'),
-      // Add potential npm locations
-      path.join(process.execPath, '..'),
-      process.platform === 'win32' ? path.join(process.env.APPDATA, 'npm') : '/usr/local/bin',
-      // Keep existing PATH
-      process.env.PATH
-    ]
+    if (this.isWindows) {
+      const paths = [
+        // Windows-specific paths
+        path.join(process.cwd(), 'node_modules', '.bin'),
+        path.join(process.env.APPDATA, 'npm'),
+        path.join(process.env['ProgramFiles'], 'nodejs'),
+        path.join(process.env['ProgramFiles(x86)'], 'nodejs'),
+        // Keep existing PATH
+        process.env.PATH
+      ].filter(Boolean) // Remove any undefined paths
 
-    return paths.join(path.delimiter)
+      return paths.join(path.delimiter)
+    }
+
+    // Original logic for non-Windows
+    return super.getEnhancedPath()
   }
 
   getCurrentVersion() {
