@@ -1,20 +1,11 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
-import path, { join } from 'path'
+import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs'
-import { dialog } from 'electron'
-
-// Define icon path properly for different platforms
-const iconPath =
-  process.platform === 'win32'
-    ? path.join(__dirname, '../../build/ico.ico')
-    : path.join(__dirname, '../../build/icon.png')
-
-// Update the import path to use absolute path
-const UpdateHandler = require(path.join(__dirname, 'update-handler.js'))
+import UpdateHandler from './update-handler.js'
+import { paths } from './utils/paths.js'
 
 function createWindow() {
-  // Define fixed dimensions
   const WINDOW_WIDTH = 1366
   const WINDOW_HEIGHT = 768
 
@@ -22,12 +13,12 @@ function createWindow() {
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
     title: 'SHJMS eLibrary',
-    icon: iconPath,
+    icon: paths.getIconPath(),
     fullscreen: false,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(paths.preload, 'index.js'),
       sandbox: false
     }
   })
@@ -79,7 +70,7 @@ function createWindow() {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(paths.renderer, 'index.html'))
   }
 }
 

@@ -1,15 +1,29 @@
-const { ipcMain } = require('electron')
-const { execSync, spawn } = require('child_process')
-const path = require('path')
-const fs = require('fs')
-const https = require('https')
+import { ipcMain, app } from 'electron'
+import { execSync, spawn } from 'child_process'
+import { join, dirname } from 'path'
+import fs from 'fs'
+import https from 'https'
+import os from 'os'
+import { paths } from './utils/paths.js'
+import dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config()
 
 class UpdateHandler {
   constructor(mainWindow) {
     this.mainWindow = mainWindow
     this.setupHandlers()
-    this.repoUrl = 'https://api.github.com/repos/jason090687/myapp'
-    this.isWindows = process.platform === 'win32'
+    this.owner = 'jason090687'
+    this.repo = 'myapp'
+    this.repoUrl = `https://api.github.com/repos/${this.owner}/${this.repo}`
+    this.githubToken = process.env.GITHUB_TOKEN
+    if (!this.githubToken) {
+      console.warn('No GitHub token found. API rate limits will be restricted.')
+    }
+    this.isWindows = os.platform() === 'win32'
+    this.appPath = paths.root
+    this.userDataPath = app.getPath('userData')
   }
 
   setupHandlers() {
@@ -56,47 +70,107 @@ class UpdateHandler {
   async applyUpdate(updateData) {
     try {
       if (this.isWindows) {
-        // Create a batch file for Windows update
-        const batchContent = `
-@echo off
-timeout /t 2 /nobreak > nul
-cd "${process.cwd()}"
-call npm install
-if %errorlevel% neq 0 exit /b %errorlevel%
-call npm run build
-if %errorlevel% neq 0 exit /b %errorlevel%
-exit /b 0
-        `.trim()
-
-        const batchPath = path.join(process.cwd(), 'update.bat')
-        fs.writeFileSync(batchPath, batchContent)
-
-        // Execute batch file with elevated privileges on Windows
-        const updateProcess = spawn(
-          'powershell.exe',
-          ['Start-Process', '-FilePath', batchPath, '-Verb', 'RunAs', '-Wait'],
-          {
-            windowsHide: true,
-            stdio: 'pipe'
-          }
-        )
-
-        return new Promise((resolve, reject) => {
-          updateProcess.on('close', (code) => {
-            fs.unlinkSync(batchPath) // Clean up batch file
-            if (code === 0) {
-              resolve({ success: true })
-            } else {
-              reject(new Error(`Update failed with code ${code}`))
-            }
-          })
-        })
-      } else {
-        // Original update process for non-Windows
-        return await this.standardUpdate()
+        return await this.applyWindowsUpdate()
       }
+      return await this.standardUpdate()
     } catch (error) {
       console.error('Update application failed:', error)
+      throw error
+    }
+  }
+
+  async applyWindowsUpdate() {
+    const updateDir = join(this.userDataPath, 'updates')
+    const batchPath = join(updateDir, 'update.bat')
+
+    try {
+      // Ensure update directory exists
+      if (!fs.existsSync(updateDir)) {
+        fs.mkdirSync(updateDir, { recursive: true })
+      }
+
+      // Create batch file content with error handling
+      const batchContent = `
+@echo off
+echo Starting update process...
+cd /d "%~dp0"
+cd "${this.appPath.replace(/\\/g, '\\\\')}"
+
+echo Installing dependencies...
+call npm install
+if %errorlevel% neq 0 (
+    echo Failed to install dependencies
+    exit /b %errorlevel%
+)
+
+echo Building application...
+call npm run build
+if %errorlevel% neq 0 (
+    echo Failed to build application
+    exit /b %errorlevel%
+)
+
+echo Update completed successfully
+exit /b 0
+`.trim()
+
+      // Write batch file
+      fs.writeFileSync(batchPath, batchContent)
+
+      // Execute batch file with elevated privileges
+      const updateProcess = spawn(
+        'powershell.exe',
+        [
+          '-Command',
+          `Start-Process -FilePath '${batchPath}' -Verb RunAs -Wait -WindowStyle Hidden`
+        ],
+        {
+          windowsHide: true,
+          stdio: 'pipe',
+          shell: true
+        }
+      )
+
+      return new Promise((resolve, reject) => {
+        let output = ''
+
+        updateProcess.stdout?.on('data', (data) => {
+          output += data.toString()
+          console.log('Update output:', data.toString())
+        })
+
+        updateProcess.stderr?.on('data', (data) => {
+          output += data.toString()
+          console.error('Update error:', data.toString())
+        })
+
+        updateProcess.on('error', (error) => {
+          console.error('Failed to start update process:', error)
+          reject(error)
+        })
+
+        updateProcess.on('close', (code) => {
+          try {
+            // Clean up batch file
+            if (fs.existsSync(batchPath)) {
+              fs.unlinkSync(batchPath)
+            }
+
+            if (code === 0) {
+              resolve({ success: true, output })
+            } else {
+              reject(new Error(`Update failed with code ${code}\nOutput: ${output}`))
+            }
+          } catch (error) {
+            reject(error)
+          }
+        })
+      })
+    } catch (error) {
+      // Clean up on error
+      if (fs.existsSync(batchPath)) {
+        fs.unlinkSync(batchPath)
+      }
       throw error
     }
   }
@@ -168,52 +242,30 @@ exit /b 0
     })
   }
 
-  getNpmPath(npmCmd) {
+  getNpmPath() {
     if (this.isWindows) {
       const possiblePaths = [
-        // npm in PATH
-        'npm.cmd',
-        // npm in AppData
-        path.join(process.env.APPDATA, 'npm', 'npm.cmd'),
-        // npm next to node
-        path.join(path.dirname(process.execPath), 'npm.cmd'),
-        // npm in Program Files
-        path.join(process.env['ProgramFiles'], 'nodejs', 'npm.cmd'),
-        path.join(process.env['ProgramFiles(x86)'], 'nodejs', 'npm.cmd'),
-        // Local project npm
-        path.join(process.cwd(), 'node_modules', '.bin', 'npm.cmd')
+        join(this.appPath, 'node_modules', '.bin', 'npm.cmd'),
+        join(app.getPath('appData'), 'npm', 'npm.cmd'),
+        join(os.homedir(), 'AppData', 'Roaming', 'npm', 'npm.cmd'),
+        'npm.cmd' // fallback to PATH
       ]
 
-      for (const npmPath of possiblePaths) {
-        if (fs.existsSync(npmPath)) {
-          return npmPath
-        }
-      }
-
-      return 'npm.cmd' // fallback
+      return possiblePaths.find((npmPath) => fs.existsSync(npmPath)) || 'npm.cmd'
     }
 
-    // Original logic for non-Windows
-    return super.getNpmPath(npmCmd)
+    return 'npm'
   }
 
   getEnhancedPath() {
-    if (this.isWindows) {
-      const paths = [
-        // Windows-specific paths
-        path.join(process.cwd(), 'node_modules', '.bin'),
-        path.join(process.env.APPDATA, 'npm'),
-        path.join(process.env['ProgramFiles'], 'nodejs'),
-        path.join(process.env['ProgramFiles(x86)'], 'nodejs'),
-        // Keep existing PATH
-        process.env.PATH
-      ].filter(Boolean) // Remove any undefined paths
+    const paths = [
+      join(this.appPath, 'node_modules', '.bin'),
+      dirname(this.getNpmPath()),
+      this.isWindows ? join(app.getPath('appData'), 'npm') : '/usr/local/bin',
+      process.env.PATH
+    ].filter(Boolean)
 
-      return paths.join(path.delimiter)
-    }
-
-    // Original logic for non-Windows
-    return super.getEnhancedPath()
+    return paths.join(path.delimiter)
   }
 
   getCurrentVersion() {
@@ -228,33 +280,85 @@ exit /b 0
   async fetchGitHubData() {
     const options = {
       headers: {
-        'User-Agent': 'MyApp-UpdateChecker',
-        Accept: 'application/vnd.github.v3+json'
-      }
+        'User-Agent': 'SHJMS-eLibrary-App',
+        Accept: 'application/json',
+        ...(this.githubToken && { Authorization: `Bearer ${this.githubToken}` })
+      },
+      timeout: 10000
     }
 
-    return new Promise((resolve, reject) => {
-      https
-        .get(`${this.repoUrl}/commits`, options, (res) => {
-          let data = ''
-          res.on('data', (chunk) => (data += chunk))
-          res.on('end', () => {
-            try {
-              const commits = JSON.parse(data)
-              resolve({
-                sha: commits[0].sha,
-                commits: commits.map((commit) => ({
-                  message: commit.commit.message,
-                  date: commit.commit.author.date
-                }))
+    try {
+      // First try getting release information
+      const releaseUrl = `${this.repoUrl}/releases/latest`
+      console.log('Checking releases:', releaseUrl)
+
+      // Fallback to commits if no releases
+      const commitsUrl = `${this.repoUrl}/commits`
+      console.log('Checking commits:', commitsUrl)
+
+      return new Promise((resolve, reject) => {
+        https
+          .get(commitsUrl, options, (res) => {
+            let data = ''
+
+            if (res.statusCode === 403) {
+              console.error('GitHub API Error:', {
+                status: res.statusCode,
+                headers: res.headers,
+                remaining: res.headers['x-ratelimit-remaining'],
+                reset: res.headers['x-ratelimit-reset']
               })
-            } catch (error) {
-              reject(error)
+              reject(new Error('GitHub API rate limit exceeded'))
+              return
             }
+
+            if (res.statusCode !== 200) {
+              console.error('GitHub API Error:', {
+                status: res.statusCode,
+                headers: res.headers
+              })
+              reject(new Error(`GitHub API error: ${res.statusCode}`))
+              return
+            }
+
+            res.on('data', (chunk) => (data += chunk))
+            res.on('end', () => {
+              try {
+                const commits = JSON.parse(data)
+                console.log('GitHub Response:', {
+                  totalCommits: commits.length,
+                  firstCommit: commits[0]
+                })
+
+                if (!Array.isArray(commits) || commits.length === 0) {
+                  throw new Error('No commits found')
+                }
+
+                resolve({
+                  sha: commits[0].sha,
+                  commits: commits.map((commit) => ({
+                    sha: commit.sha,
+                    message: commit.commit.message,
+                    date: commit.commit.author.date,
+                    author: commit.commit.author.name,
+                    url: commit.html_url
+                  }))
+                })
+              } catch (error) {
+                console.error('Parse error:', error)
+                reject(error)
+              }
+            })
           })
-        })
-        .on('error', reject)
-    })
+          .on('error', (error) => {
+            console.error('Network error:', error)
+            reject(error)
+          })
+      })
+    } catch (error) {
+      console.error('Fetch error:', error)
+      throw error
+    }
   }
 
   parseProgress(output) {
@@ -268,4 +372,4 @@ exit /b 0
   }
 }
 
-module.exports = UpdateHandler
+export default UpdateHandler
