@@ -2,7 +2,7 @@ import React from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import './MonthSelector.css'
 
-const MonthSelector = ({ selectedDate, onDateChange }) => {
+const MonthSelector = ({ currentMonth, currentYear, onMonthChange }) => {
   const months = [
     'January',
     'February',
@@ -18,34 +18,31 @@ const MonthSelector = ({ selectedDate, onDateChange }) => {
     'December'
   ]
 
-  const currentDate = new Date()
-  const isCurrentMonth =
-    selectedDate.getMonth() === currentDate.getMonth() &&
-    selectedDate.getFullYear() === currentDate.getFullYear()
-
   const handlePrevMonth = () => {
-    const newDate = new Date(selectedDate)
-    newDate.setMonth(selectedDate.getMonth() - 1)
-    onDateChange(newDate)
+    if (currentMonth === 0) {
+      onMonthChange(11, currentYear - 1)
+    } else {
+      onMonthChange(currentMonth - 1, currentYear)
+    }
   }
 
   const handleNextMonth = () => {
-    const newDate = new Date(selectedDate)
-    newDate.setMonth(selectedDate.getMonth() + 1)
-    if (newDate <= currentDate) {
-      onDateChange(newDate)
+    if (currentMonth === 11) {
+      onMonthChange(0, currentYear + 1)
+    } else {
+      onMonthChange(currentMonth + 1, currentYear)
     }
   }
 
   return (
     <div className="month-selector">
-      <button className="month-nav-btn" onClick={handlePrevMonth}>
+      <button onClick={handlePrevMonth} className="month-nav-btn">
         <FaChevronLeft />
       </button>
-      <span className="month-display">
-        {months[selectedDate.getMonth()]} {selectedDate.getFullYear()}
+      <span className="current-month">
+        {months[currentMonth]} {currentYear}
       </span>
-      <button className="month-nav-btn" onClick={handleNextMonth} disabled={isCurrentMonth}>
+      <button onClick={handleNextMonth} className="month-nav-btn">
         <FaChevronRight />
       </button>
     </div>
