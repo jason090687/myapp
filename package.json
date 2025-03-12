@@ -1,7 +1,7 @@
 {
   "name": "myapp",
-  "version": "1.0.0",
-  "description": "An Electron application with React",
+  "version": "0.0.1",
+  "description": "An Electron application with Vite + React",
   "main": "./out/main/index.js",
   "author": "M&J",
   "homepage": "https://electron-vite.org",
@@ -65,9 +65,9 @@
     "productName": "eLibrary",
     "asar": false,
     "files": [
+      "dist/**/*",
       "out/**/*",
-      "node_modules/**/*",
-      "package.json"
+      "node_modules/**/*"
     ],
     "win": {
       "icon": "./build/icon.ico",
