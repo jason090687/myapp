@@ -452,7 +452,7 @@ function Dashboard() {
                   </div>
                   <div className="card-content">
                     <h3>{card.title}</h3>
-                    <p>{card.value}</p>ar
+                    <p>{card.value}</p>
                   </div>
                 </div>
               ))}
