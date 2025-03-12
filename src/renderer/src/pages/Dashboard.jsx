@@ -8,7 +8,8 @@ import {
   FaClock,
   FaExclamationTriangle,
   FaUsers,
-  FaMoneyBill
+  FaMoneyBill,
+  FaFileDownload
 } from 'react-icons/fa'
 import {
   Chart as ChartJS,
@@ -18,7 +19,8 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  BarElement // Add this
 } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import { Link, useNavigate } from 'react-router-dom'
@@ -41,15 +43,17 @@ import {
   TableSkeleton,
   BooksSkeleton
 } from '../components/Dashboard/DashboardSkeletons'
-import ReportGenerator from '../pages/ReportGenerator'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import MonthSelector from '../components/Dashboard/MonthSelector'
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 
-// Register ChartJS components
+// Register all required components
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  BarElement, // Add this
   Title,
   Tooltip,
   Legend,
@@ -325,61 +329,204 @@ function Dashboard() {
     navigate(route)
   }
 
-  const handleMonthChange = async (newDate) => {
-    setSelectedDate(newDate)
+  const handleMonthChange = async (month, year) => {
+    setSelectedDate(new Date(year, month))
     setChartLoading(true)
     try {
       const monthlyData = await fetchMonthlyReport(token)
-
-      // Find the data for selected month
       const selectedMonthData = monthlyData.find((data) => {
-        const [year, month] = data.month.split('-')
-        return (
-          parseInt(month) === newDate.getMonth() + 1 && parseInt(year) === newDate.getFullYear()
-        )
+        const [dataYear, dataMonth] = data.month.split('-')
+        return parseInt(dataMonth) === month + 1 && parseInt(dataYear) === year
       }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
 
       setChartData({
         labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
         datasets: [
           {
-            label: `Library Statistics - ${newDate.toLocaleString('default', { month: 'long' })} ${newDate.getFullYear()}`,
+            label: `Library Statistics - ${selectedDate.toLocaleString('default', { month: 'long' })} ${year}`,
             data: [
               selectedMonthData.processed || 0,
               selectedMonthData.borrowed || 0,
               selectedMonthData.returned || 0,
               selectedMonthData.overdue || 0
             ],
-            borderColor: 'rgb(53, 162, 235)',
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-            tension: 0.4,
-            fill: true,
-            pointStyle: 'circle',
-            pointRadius: 6,
-            pointHoverRadius: 8
+            borderRadius: 6,
+            backgroundColor: [
+              'rgba(53, 162, 235, 0.8)',
+              'rgba(255, 159, 64, 0.8)',
+              'rgba(75, 192, 192, 0.8)',
+              'rgba(255, 99, 132, 0.8)'
+            ],
+            borderColor: [
+              'rgb(53, 162, 235)',
+              'rgb(255, 159, 64)',
+              'rgb(75, 192, 192)',
+              'rgb(255, 99, 132)'
+            ],
+            borderWidth: 1
           }
         ]
       })
     } catch (error) {
       console.error('Error fetching monthly report:', error)
-      setChartData({
-        labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
-        datasets: [
-          {
-            label: 'No data available',
-            data: [0, 0, 0, 0],
-            borderColor: 'rgb(53, 162, 235)',
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-            tension: 0.4,
-            fill: true,
-            pointStyle: 'circle',
-            pointRadius: 6,
-            pointHoverRadius: 8
-          }
-        ]
-      })
     } finally {
       setChartLoading(false)
+    }
+  }
+
+  const generatePDF = async () => {
+    try {
+      // Create canvas and chart image (existing code)
+      const canvas = document.createElement('canvas')
+      canvas.width = 400 // Reduced width for side-by-side layout
+      canvas.height = 400
+      const ctx = canvas.getContext('2d')
+
+      const pdfChart = new ChartJS(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          ...chartOptions,
+          animation: false,
+          responsive: false
+        }
+      })
+
+      const chartImage = canvas.toDataURL('image/png')
+      pdfChart.destroy()
+
+      // Create PDF with landscape orientation
+      const pdfDoc = await PDFDocument.create()
+      const page = pdfDoc.addPage([1000, 800]) // Landscape dimensions
+      const { height, width } = page.getSize()
+      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+
+      // Add centered title
+      const title = `Monthly Library Report - ${selectedDate.toLocaleString('default', { month: 'long' })} ${selectedDate.getFullYear()}`
+      const fontSize = 24
+      const titleWidth = timesRomanFont.widthOfTextAtSize(title, fontSize)
+      const titleX = (width - titleWidth) / 2 // Center horizontally
+
+      page.drawText(title, {
+        x: titleX,
+        y: height - 50,
+        size: fontSize,
+        font: timesRomanFont,
+        color: rgb(0.1, 0.1, 0.4)
+      })
+
+      // Add chart on the left side
+      const pngImage = await pdfDoc.embedPng(chartImage)
+      const pngDims = pngImage.scale(0.8)
+      page.drawImage(pngImage, {
+        x: 50,
+        y: height - 450,
+        width: width / 2 - 75, // Half width minus padding
+        height: 350
+      })
+
+      // Helper function to draw table cell
+      const drawTableCell = (text, x, y, width, isHeader = false) => {
+        page.drawRectangle({
+          x,
+          y: y - 25,
+          width,
+          height: 25,
+          borderWidth: 1,
+          borderColor: rgb(0.8, 0.8, 0.8),
+          color: isHeader ? rgb(0.95, 0.95, 0.95) : rgb(1, 1, 1, 0)
+        })
+
+        page.drawText(text.toString().slice(0, 40), {
+          // Limit text length
+          x: x + 10,
+          y: y - 18,
+          size: isHeader ? 12 : 11,
+          font: timesRomanFont,
+          color: rgb(0, 0, 0)
+        })
+      }
+
+      // Draw tables on the right side
+      const tableStartX = width / 2 + 25
+      const columnWidth = (width / 2 - 75) / 2
+      let currentY = height - 100
+
+      // Draw Top Borrowers table
+      page.drawText('Top Borrowers', {
+        x: tableStartX,
+        y: currentY,
+        size: 16,
+        font: timesRomanFont,
+        color: rgb(0.2, 0.2, 0.2)
+      })
+
+      currentY -= 40
+      drawTableCell('Name', tableStartX, currentY, columnWidth, true)
+      drawTableCell('Books Borrowed', tableStartX + columnWidth, currentY, columnWidth, true)
+
+      topBorrowers.slice(0, 5).forEach((borrower) => {
+        currentY -= 25
+        drawTableCell(borrower.name, tableStartX, currentY, columnWidth)
+        drawTableCell(
+          borrower.borrowed_books_count,
+          tableStartX + columnWidth,
+          currentY,
+          columnWidth
+        )
+      })
+
+      // Add spacing
+      currentY -= 50
+
+      // Draw Most Borrowed Books table
+      page.drawText('Most Borrowed Books', {
+        x: tableStartX,
+        y: currentY,
+        size: 16,
+        font: timesRomanFont,
+        color: rgb(0.2, 0.2, 0.2)
+      })
+
+      currentY -= 40
+      drawTableCell('Title', tableStartX, currentY, columnWidth, true)
+      drawTableCell('Borrows', tableStartX + columnWidth, currentY, columnWidth, true)
+
+      topBooks.slice(0, 5).forEach((book) => {
+        currentY -= 25
+        drawTableCell(book.title, tableStartX, currentY, columnWidth)
+        drawTableCell(book.borrow_count, tableStartX + columnWidth, currentY, columnWidth)
+      })
+
+      // Add footer
+      page.drawText(`Generated on: ${new Date().toLocaleDateString()}`, {
+        x: 50,
+        y: 30,
+        size: 10,
+        font: timesRomanFont,
+        color: rgb(0.5, 0.5, 0.5)
+      })
+
+      // Save and download (existing code)
+      const pdfBytes = await pdfDoc.save()
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+
+      if (window.electron?.ipcRenderer) {
+        const buffer = await blob.arrayBuffer()
+        window.electron.ipcRenderer.send('save-pdf', {
+          buffer: Array.from(new Uint8Array(buffer)),
+          fileName: `library-report-${selectedDate.toLocaleString('default', { month: 'long' })}-${selectedDate.getFullYear()}.pdf`
+        })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `library-report-${selectedDate.toLocaleString('default', { month: 'long' })}-${selectedDate.getFullYear()}.pdf`
+        link.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error)
     }
   }
 
@@ -459,7 +606,6 @@ function Dashboard() {
             </div>
           )}
           {/* Add ReportGenerator at the top of the dashboard */}
-          <ReportGenerator chartData={chartData} />
 
           {/* Stats Container */}
           <div className="stats-container">
@@ -467,37 +613,33 @@ function Dashboard() {
               {loadingStates.chart ? (
                 <ChartSkeleton />
               ) : (
-                <div className="chart-container" style={{ height: '400px' }}>
-                  <Bar
-                    data={{
-                      ...chartData,
-                      datasets: [
-                        {
-                          ...chartData.datasets[0],
-                          borderRadius: 6,
-                          backgroundColor: [
-                            'rgba(53, 162, 235, 0.8)',
-                            'rgba(255, 159, 64, 0.8)',
-                            'rgba(75, 192, 192, 0.8)',
-                            'rgba(255, 99, 132, 0.8)'
-                          ],
-                          borderColor: [
-                            'rgb(53, 162, 235)',
-                            'rgb(255, 159, 64)',
-                            'rgb(75, 192, 192)',
-                            'rgb(255, 99, 132)'
-                          ],
-                          borderWidth: 1,
-                          datalabels: {
-                            display: true
-                          }
-                        }
-                      ]
-                    }}
-                    options={chartOptions}
-                    plugins={[ChartDataLabels]}
-                  />
-                </div>
+                <>
+                  <div className="chart-header">
+                    <MonthSelector
+                      currentMonth={selectedDate.getMonth()}
+                      currentYear={selectedDate.getFullYear()}
+                      onMonthChange={handleMonthChange}
+                    />
+                    <button
+                      className="generate-report-btn"
+                      onClick={generatePDF}
+                      disabled={chartLoading}
+                    >
+                      <FaFileDownload />
+                      Generate Report
+                    </button>
+                  </div>
+                  <div className="chart-container" style={{ height: '400px' }}>
+                    {chartLoading ? (
+                      <div className="chart-loading-overlay">
+                        <div className="loading-spinner"></div>
+                        <p>Loading data...</p>
+                      </div>
+                    ) : (
+                      <Bar data={chartData} options={chartOptions} plugins={[ChartDataLabels]} />
+                    )}
+                  </div>
+                </>
               )}
             </div>
 

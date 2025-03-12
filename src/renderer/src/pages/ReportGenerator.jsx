@@ -5,12 +5,15 @@ import { useSelector } from 'react-redux'
 import axios from 'axios'
 import { Chart } from 'chart.js/auto'
 import '../components/Dashboard/ReportGenerator.css'
+import { fetchMonthlyReport } from '../Features/api'
+import MonthSelector from '../components/Dashboard/MonthSelector'
 
-const ReportGenerator = ({ chartData }) => {
+const ReportGenerator = ({ chartData: initialChartData }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState(null)
+  const [chartData, setChartData] = useState(initialChartData)
 
   // Get token from Redux store
   const token = useSelector((state) => state.auth.token)
@@ -243,27 +246,60 @@ const ReportGenerator = ({ chartData }) => {
     }
   }
 
+  const handleMonthChange = async (month, year) => {
+    setSelectedMonth(month)
+    setSelectedYear(year)
+
+    try {
+      const monthlyData = await fetchMonthlyReport(token)
+      const monthData = monthlyData.find((data) => {
+        const [dataYear, dataMonth] = data.month.split('-')
+        return parseInt(dataMonth) === month + 1 && parseInt(dataYear) === year
+      }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
+
+      setChartData({
+        labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
+        datasets: [
+          {
+            label: `Library Statistics - ${months[month]} ${year}`,
+            data: [
+              monthData.processed || 0,
+              monthData.borrowed || 0,
+              monthData.returned || 0,
+              monthData.overdue || 0
+            ],
+            borderRadius: 6,
+            backgroundColor: [
+              'rgba(53, 162, 235, 0.8)',
+              'rgba(255, 159, 64, 0.8)',
+              'rgba(75, 192, 192, 0.8)',
+              'rgba(255, 99, 132, 0.8)'
+            ],
+            borderColor: [
+              'rgb(53, 162, 235)',
+              'rgb(255, 159, 64)',
+              'rgb(75, 192, 192)',
+              'rgb(255, 99, 132)'
+            ],
+            borderWidth: 1
+          }
+        ]
+      })
+    } catch (error) {
+      setError('Failed to fetch data for selected month')
+      console.error('Error fetching monthly data:', error)
+    }
+  }
+
   return (
     <div className="report-generator">
       {error && <div className="error-message">{error}</div>}
       <div className="report-controls">
-        <div className="date-selector">
-          <FaCalendar />
-          <select value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>
-            {months.map((month, index) => (
-              <option key={index} value={index}>
-                {month}
-              </option>
-            ))}
-          </select>
-          <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
+        <MonthSelector
+          currentMonth={selectedMonth}
+          currentYear={selectedYear}
+          onMonthChange={handleMonthChange}
+        />
         <button className="generate-report-btn" onClick={generatePDF} disabled={isGenerating}>
           <FaFileDownload />
           {isGenerating ? 'Generating...' : 'Generate Report'}
