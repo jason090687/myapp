@@ -69,7 +69,7 @@ function SoftwareUpdate() {
           : 'Update installed successfully! Restart now?'
 
       if (window.confirm(restartMessage)) {
-        window.electron.ipcRenderer.send('app:restart')
+        window.Electron.ipcRenderer.send('app:restart')
       }
     } catch (error) {
       setUpdateStatus((prev) => ({
