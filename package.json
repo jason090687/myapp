@@ -73,19 +73,12 @@
     "asar": false,
     "files": [
       "out/**/*",
-      "node_modules/**/*",
-      "package.json",
-      "build/**/*"
+      "node_modules/**/*"
     ],
     "win": {
-      "target": [
-        "nsis"
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage"
-      ]
+      "icon": "./build/icon.ico",
+       "target": "nsis",
+       "sign": false
+     }
     }
   }
-}

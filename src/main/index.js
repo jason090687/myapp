@@ -1,9 +1,14 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs'
 import UpdateHandler from './update-handler.js'
 import { paths } from './utils/paths.js'
+
+const iconPath = 
+  process.platform === 'win32'
+    ? path.join(__dirname, '../../build/ico.ico')
+    : path.join(__dirname, '../../build/icon.png')
 
 let updateHandler = null // Single instance
 
@@ -15,7 +20,7 @@ function createWindow() {
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
     title: 'SHJMS eLibrary',
-    icon: paths.getIconPath(),
+    icon: iconPath, // Updated icon path
     fullscreen: false,
     show: false,
     autoHideMenuBar: true,
