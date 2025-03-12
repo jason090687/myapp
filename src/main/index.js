@@ -10,6 +10,8 @@ const iconPath =
     ? path.join(__dirname, '../../build/ico.ico')
     : path.join(__dirname, '../../build/icon.png')
 
+const UpdateHandler = require('./update-handler')
+
 function createWindow() {
   // Define fixed dimensions
   const WINDOW_WIDTH = 1366
@@ -67,6 +69,9 @@ function createWindow() {
       mainWindow.center()
     }
   })
+
+  // Initialize update handler
+  const updateHandler = new UpdateHandler(mainWindow)
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.

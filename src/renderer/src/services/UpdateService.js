@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const GITHUB_API = 'https://api.github.com/repos/jason090687/myapp'
+const GITHUB_API_URL = 'https://api.github.com/repos/jason090687/myapp'
 const CURRENT_VERSION = '1.0.0'
 const MAX_RETRIES = 3
 const RETRY_DELAY = 1000
@@ -27,41 +27,58 @@ class UpdateService {
     }
   }
 
+  static async checkForDeployment() {
+    try {
+      const { data: deployments } = await axios.get(`${GITHUB_API_URL}/deployments`, {
+        headers: { Accept: 'application/vnd.github.v3+json' }
+      })
+      return deployments[0] || null
+    } catch (error) {
+      console.error('Failed to check deployment:', error)
+      throw error
+    }
+  }
+
   static async checkForUpdates() {
     try {
-      // Remove cache-control headers and use simpler request
-      const commitResponse = await this.instance.get('/repos/jason090687/myapp/commits/main')
-      
-      const latestCommit = commitResponse.data
-      const currentCommit = localStorage.getItem('currentCommit')
-
-      // Get recent commits without cache headers
-      const commitsResponse = await this.instance.get('/repos/jason090687/myapp/commits', {
-        params: { 
-          sha: 'main',
-          per_page: 10
-        }
-      })
-
-      const recentCommits = commitsResponse.data.map(commit => ({
-        message: commit.commit.message,
-        date: commit.commit.author.date,
-        author: commit.commit.author.name,
-        sha: commit.sha.substring(0, 7)
-      }))
-
-      return {
-        hasUpdate: latestCommit.sha !== currentCommit,
-        latestCommit: latestCommit.sha,
-        currentCommit,
-        changes: recentCommits,
-        version: CURRENT_VERSION,
-        lastUpdated: latestCommit.commit.author.date
-      }
+      const response = await window.electron.ipcRenderer.invoke('check-for-updates')
+      return response
     } catch (error) {
-      console.error('GitHub API Error:', error)
-      throw new Error(this.getErrorMessage(error))
+      throw new Error('Failed to check for updates')
     }
+  }
+
+  static async downloadUpdate() {
+    try {
+      const response = await window.electron.ipcRenderer.invoke('download-update')
+      return response
+    } catch (error) {
+      throw new Error('Failed to download update')
+    }
+  }
+
+  static async applyUpdate(updateData) {
+    try {
+      await window.electron.ipcRenderer.invoke('apply-update', updateData)
+    } catch (error) {
+      throw new Error('Failed to apply update')
+    }
+  }
+
+  static async rebuildApplication() {
+    try {
+      await window.electron.ipcRenderer.invoke('rebuild-application')
+    } catch (error) {
+      throw new Error('Failed to rebuild application')
+    }
+  }
+
+  static onUpdateProgress(callback) {
+    window.electron.ipcRenderer.on('update-progress', callback)
+  }
+
+  static onUpdateComplete(callback) {
+    window.electron.ipcRenderer.on('update-complete', callback)
   }
 
   static getErrorMessage(error) {
@@ -81,61 +98,6 @@ class UpdateService {
     }
     // Something else went wrong
     return 'Failed to check for updates.'
-  }
-
-  static async downloadUpdate() {
-    try {
-      // Get the repository content
-      const response = await this.instance.get('/repos/jason090687/myapp/contents', {
-        params: { ref: 'main' }
-      })
-
-      const files = response.data.map((file) => ({
-        name: file.name,
-        path: file.path,
-        sha: file.sha,
-        downloadUrl: file.download_url
-      }))
-
-      // Download each file
-      const downloads = await Promise.all(
-        files.map(async (file) => {
-          if (file.downloadUrl) {
-            const fileResponse = await axios.get(file.downloadUrl)
-            return {
-              path: file.path,
-              content: fileResponse.data
-            }
-          }
-          return null
-        })
-      )
-
-      return downloads.filter(Boolean)
-    } catch (error) {
-      console.error('Download failed:', error)
-      throw new Error('Failed to download updates. Please try again.')
-    }
-  }
-
-  static async applyUpdate(updateData) {
-    try {
-      // Store the new commit hash
-      localStorage.setItem('currentCommit', updateData.latestCommit)
-      localStorage.setItem('lastUpdateCheck', new Date().toISOString())
-
-      // Here you would process the downloaded files
-      // This is a placeholder for the actual update logic
-      console.log('Applying updates...', updateData)
-
-      return {
-        success: true,
-        updated: new Date().toISOString()
-      }
-    } catch (error) {
-      console.error('Update application failed:', error)
-      throw new Error('Failed to apply updates. Please try again.')
-    }
   }
 
   static getUpdateHistory() {
