@@ -127,6 +127,20 @@
   -webkit-text-fill-color: transparent;
 }
 
+.card-content p.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 /* Chart and Stats Container */
 .stats-container {
   display: grid;
@@ -192,6 +206,7 @@
   margin: auto;
   height: 400px;
   width: 100%;
+  transition: opacity 0.3s ease;
 }
 
 .chart-header {
@@ -1053,4 +1068,55 @@ h3 {
 .book-filter-btn.inactive:hover {
   background: rgba(10, 11, 100, 0.05);
   color: #0a0b64;
+}
+
+.chart-wrapper {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  min-height: 400px;
+  transition: opacity 0.3s ease;
+}
+
+.chart-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  animation: fadeIn 0.3s ease;
+}
+
+.chart-loading-overlay p {
+  color: #0a0b64;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-style: italic;
+  background: rgba(241, 245, 249, 0.5);
+  border-radius: 0.8rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
