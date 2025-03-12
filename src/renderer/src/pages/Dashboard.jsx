@@ -339,11 +339,14 @@ function Dashboard() {
         return parseInt(dataMonth) === month + 1 && parseInt(dataYear) === year
       }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
 
+      // Create month string for label
+      const monthString = new Date(year, month).toLocaleString('default', { month: 'long' })
+
       setChartData({
         labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
         datasets: [
           {
-            label: `Library Statistics - ${selectedDate.toLocaleString('default', { month: 'long' })} ${year}`,
+            label: `Library Statistics - ${monthString} ${year}`, // Use direct month and year
             data: [
               selectedMonthData.processed || 0,
               selectedMonthData.borrowed || 0,
