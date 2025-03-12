@@ -39,49 +39,72 @@ class UpdateService {
     }
   }
 
+  static owner = 'jason090687'
+  static repo = 'myapp'
+
   static async checkForUpdates() {
     try {
-      const response = await window.electron.ipcRenderer.invoke('check-for-updates')
-      return response
+      // Verify electron and updateChecker exist
+      if (!window?.electron?.updateChecker) {
+        console.error('Update service not available:', {
+          hasElectron: !!window.electron,
+          hasUpdateChecker: !!(window.electron && window.electron.updateChecker)
+        })
+        throw new Error('Update service not initialized')
+      }
+      const result = await window.electron.updateChecker.checkForUpdates()
+      return result
     } catch (error) {
-      throw new Error('Failed to check for updates')
+      console.error('Check for updates failed:', error)
+      throw error
     }
   }
 
   static async downloadUpdate() {
-    try {
-      const response = await window.electron.ipcRenderer.invoke('download-update')
-      return response
-    } catch (error) {
-      throw new Error('Failed to download update')
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
     }
+    return await window.electron.updateChecker.downloadUpdate()
   }
 
   static async applyUpdate(updateData) {
-    try {
-      await window.electron.ipcRenderer.invoke('apply-update', updateData)
-    } catch (error) {
-      throw new Error('Failed to apply update')
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
     }
+    return await window.electron.updateChecker.applyUpdate(updateData)
   }
 
-  static async rebuildApplication() {
-    try {
-      await window.electron.ipcRenderer.invoke('rebuild-application')
-    } catch (error) {
-      throw new Error('Failed to rebuild application')
+  static restart() {
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
+    }
+    window.electron.updateChecker.restart()
+  }
+
+  static onUpdateStatus(callback) {
+    if (window?.electron?.on) {
+      window.electron.on('update-status', callback)
     }
   }
 
   static onUpdateProgress(callback) {
-    window.electron.ipcRenderer.on('update-progress', callback)
+    if (window?.electron?.on) {
+      window.electron.on('update-progress', callback)
+    }
   }
 
-  static onUpdateComplete(callback) {
-    window.electron.ipcRenderer.on('update-complete', callback)
+  static cleanupListeners() {
+    if (window?.electron?.removeAllListeners) {
+      window.electron.removeAllListeners('update-status')
+      window.electron.removeAllListeners('update-progress')
+      window.electron.removeAllListeners('update-complete')
+    }
   }
 
   static getErrorMessage(error) {
+    if (error.message === 'Update service not initialized') {
+      return 'Update service is not available. Please restart the application.'
+    }
     if (error.response) {
       // Server responded with error
       if (error.response.status === 403) {
@@ -98,6 +121,48 @@ class UpdateService {
     }
     // Something else went wrong
     return 'Failed to check for updates.'
+  }
+
+  static async rebuildApplication() {
+    if (!window?.electron?.updateChecker) {
+      throw new Error('Update service not initialized')
+    }
+    try {
+      // Save any necessary state to persist across rebuild
+      localStorage.setItem('rebuildInProgress', 'true')
+
+      const result = await window.electron.updateChecker.rebuildApplication()
+
+      if (!result.success) {
+        throw new Error('Rebuild failed')
+      }
+
+      return result
+    } catch (error) {
+      console.error('Rebuild failed:', error)
+      localStorage.removeItem('rebuildInProgress')
+      throw error
+    }
+  }
+
+  static isRebuildInProgress() {
+    return localStorage.getItem('rebuildInProgress') === 'true'
+  }
+
+  static clearRebuildState() {
+    localStorage.removeItem('rebuildInProgress')
+  }
+
+  static async rebuildApplication() {
+    try {
+      await window.Electron.ipcRenderer.invoke('rebuild-application')
+    } catch (error) {
+      throw new Error('Failed to rebuild application')
+    }
+  }
+
+  static onUpdateComplete(callback) {
+    window.Electron.ipcRenderer.on('update-complete', callback)
   }
 
   static getUpdateHistory() {

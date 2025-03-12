@@ -61,20 +61,35 @@
     "tailwindcss": "^4.0.6",
     "vite": "^6.1.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jason090687/myapp.git"
+  },
   "build": {
-    "appId": "com.countmein.myapp",
-    "productName": "eLibrary",
-    "asar": false,
-    "files": [
-      "out/**/*",
-      "node_modules/**/*",
-      "package.json"
+    "appId": "com.myapp.app",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "jason090687",
+        "repo": "myapp",
+        "private": true,
+        "token": "process.env.GH_TOKEN"
+      }
     ],
-    "win": {
-      "icon": "./build/icon.ico",
-      "target": "nsis",
-      "sign": false
+    "mac": {
+      "target": [
+        "dmg"
+      ]
     },
-    "forceCodeSigning": false
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
   }
 }

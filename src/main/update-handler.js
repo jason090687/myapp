@@ -1,11 +1,12 @@
 import { ipcMain, app } from 'electron'
-import { execSync, spawn } from 'child_process'
+import { execSync } from 'child_process'
 import { join, dirname } from 'path'
 import fs from 'fs'
 import https from 'https'
 import os from 'os'
 import { paths } from './utils/paths.js'
 import dotenv from 'dotenv'
+import { autoUpdater } from 'electron-updater'
 
 // Load environment variables
 dotenv.config()
@@ -13,362 +14,125 @@ dotenv.config()
 class UpdateHandler {
   constructor(mainWindow) {
     this.mainWindow = mainWindow
+    this.setupAutoUpdater()
+    this.removeExistingHandlers()
     this.setupHandlers()
-    this.owner = 'jason090687'
-    this.repo = 'myapp'
-    this.repoUrl = `https://api.github.com/repos/${this.owner}/${this.repo}`
-    this.githubToken = process.env.GITHUB_TOKEN
-    if (!this.githubToken) {
-      console.warn('No GitHub token found. API rate limits will be restricted.')
-    }
-    this.isWindows = os.platform() === 'win32'
-    this.appPath = paths.root
-    this.userDataPath = app.getPath('userData')
   }
 
-  setupHandlers() {
-    ipcMain.handle('check-for-updates', () => this.checkForUpdates())
-    ipcMain.handle('download-update', () => this.downloadUpdate())
-    ipcMain.handle('apply-update', (event, updateData) => this.applyUpdate(updateData))
-    ipcMain.handle('rebuild-application', () => this.rebuildApplication())
+  removeExistingHandlers() {
+    ipcMain.removeHandler('check-for-updates')
+    ipcMain.removeHandler('download-update')
+    ipcMain.removeHandler('apply-update')
+    ipcMain.removeHandler('rebuild-application')
   }
 
-  async checkForUpdates() {
-    try {
-      const localVersion = this.getCurrentVersion()
-      const remoteData = await this.fetchGitHubData()
+  setupAutoUpdater() {
+    autoUpdater.autoDownload = false
+    autoUpdater.allowDowngrade = true
+    autoUpdater.logger = console
+    autoUpdater.setFeedURL({
+      owner: 'jason090687',
+      repo: 'myapp',
+      provider: 'github'
+    })
 
-      const hasUpdate = remoteData.sha !== localVersion
+    autoUpdater.on('checking-for-update', () => {
+      this.sendStatus('checking')
+    })
 
-      return {
-        hasUpdate,
-        latestCommit: remoteData.sha,
-        changes: remoteData.commits || [],
-        currentVersion: localVersion
-      }
-    } catch (error) {
-      console.error('Update check failed:', error)
-      throw error
-    }
-  }
+    autoUpdater.on('update-available', (info) => {
+      this.sendStatus('update-available', info)
+    })
 
-  async downloadUpdate() {
-    try {
-      // Pull latest changes
-      execSync('git pull origin main', {
-        cwd: process.cwd(),
-        stdio: 'inherit'
-      })
+    autoUpdater.on('update-not-available', (info) => {
+      this.sendStatus('up-to-date', info)
+    })
 
-      return { success: true }
-    } catch (error) {
-      console.error('Download failed:', error)
-      throw error
-    }
-  }
+    autoUpdater.on('download-progress', (progress) => {
+      this.sendProgress(progress)
+    })
 
-  async applyUpdate(updateData) {
-    try {
-      if (this.isWindows) {
-        return await this.applyWindowsUpdate()
-      }
-      return await this.standardUpdate()
-    } catch (error) {
-      console.error('Update application failed:', error)
-      throw error
-    }
-  }
+    autoUpdater.on('update-downloaded', (info) => {
+      this.sendStatus('ready', info)
+    })
 
-  async applyWindowsUpdate() {
-    const updateDir = join(this.userDataPath, 'updates')
-    const batchPath = join(updateDir, 'update.bat')
-
-    try {
-      // Ensure update directory exists
-      if (!fs.existsSync(updateDir)) {
-        fs.mkdirSync(updateDir, { recursive: true })
-      }
-
-      // Create batch file content with error handling
-      const batchContent = `
-@echo off
-echo Starting update process...
-cd /d "%~dp0"
-cd "${this.appPath.replace(/\\/g, '\\\\')}"
-
-echo Installing dependencies...
-call npm install
-if %errorlevel% neq 0 (
-    echo Failed to install dependencies
-    exit /b %errorlevel%
-)
-
-echo Building application...
-call npm run build
-if %errorlevel% neq 0 (
-    echo Failed to build application
-    exit /b %errorlevel%
-)
-
-echo Update completed successfully
-exit /b 0
-`.trim()
-
-      // Write batch file
-      fs.writeFileSync(batchPath, batchContent)
-
-      // Execute batch file with elevated privileges
-      const updateProcess = spawn(
-        'powershell.exe',
-        [
-          '-Command',
-          `Start-Process -FilePath '${batchPath}' -Verb RunAs -Wait -WindowStyle Hidden`
-        ],
-        {
-          windowsHide: true,
-          stdio: 'pipe',
-          shell: true
-        }
-      )
-
-      return new Promise((resolve, reject) => {
-        let output = ''
-
-        updateProcess.stdout?.on('data', (data) => {
-          output += data.toString()
-          console.log('Update output:', data.toString())
-        })
-
-        updateProcess.stderr?.on('data', (data) => {
-          output += data.toString()
-          console.error('Update error:', data.toString())
-        })
-
-        updateProcess.on('error', (error) => {
-          console.error('Failed to start update process:', error)
-          reject(error)
-        })
-
-        updateProcess.on('close', (code) => {
-          try {
-            // Clean up batch file
-            if (fs.existsSync(batchPath)) {
-              fs.unlinkSync(batchPath)
-            }
-
-            if (code === 0) {
-              resolve({ success: true, output })
-            } else {
-              reject(new Error(`Update failed with code ${code}\nOutput: ${output}`))
-            }
-          } catch (error) {
-            reject(error)
-          }
-        })
-      })
-    } catch (error) {
-      // Clean up on error
-      if (fs.existsSync(batchPath)) {
-        fs.unlinkSync(batchPath)
-      }
-      throw error
-    }
-  }
-
-  async standardUpdate() {
-    try {
-      // Install dependencies
-      execSync('npm install', {
-        cwd: process.cwd(),
-        stdio: 'inherit'
-      })
-
-      // Rebuild application
-      await this.rebuildApplication()
-      return { success: true }
-    } catch (error) {
-      throw error
-    }
-  }
-
-  async rebuildApplication() {
-    return new Promise((resolve, reject) => {
-      // Get npm path based on platform
-      const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-      const npmPath = this.getNpmPath(npmCmd)
-
-      if (!npmPath) {
-        reject(new Error('Could not find npm installation'))
-        return
-      }
-
-      const build = spawn(npmPath, ['run', 'build'], {
-        cwd: process.cwd(),
-        stdio: 'pipe',
-        shell: true,
-        env: { ...process.env, PATH: this.getEnhancedPath() }
-      })
-
-      let buildOutput = ''
-
-      build.stdout.on('data', (data) => {
-        buildOutput += data.toString()
-        const progress = this.parseProgress(data.toString())
-        if (progress) {
-          this.mainWindow.webContents.send('update-progress', progress)
-        }
-      })
-
-      build.stderr.on('data', (data) => {
-        console.error(`Build error: ${data}`)
-        buildOutput += data.toString()
-      })
-
-      build.on('error', (error) => {
-        console.error('Failed to start build process:', error)
-        reject(new Error(`Build process failed to start: ${error.message}`))
-      })
-
-      build.on('close', (code) => {
-        if (code === 0) {
-          this.mainWindow.webContents.send('update-complete', { success: true })
-          resolve({ success: true, output: buildOutput })
-        } else {
-          const errorMessage = `Build failed with code ${code}\nOutput: ${buildOutput}`
-          console.error(errorMessage)
-          reject(new Error(errorMessage))
-        }
-      })
+    autoUpdater.on('error', (error) => {
+      this.sendStatus('error', error)
     })
   }
 
-  getNpmPath() {
-    if (this.isWindows) {
-      const possiblePaths = [
-        join(this.appPath, 'node_modules', '.bin', 'npm.cmd'),
-        join(app.getPath('appData'), 'npm', 'npm.cmd'),
-        join(os.homedir(), 'AppData', 'Roaming', 'npm', 'npm.cmd'),
-        'npm.cmd' // fallback to PATH
-      ]
+  setupHandlers() {
+    // Check for updates
+    ipcMain.handle('check-for-updates', async () => {
+      try {
+        const updateCheckResult = await autoUpdater.checkForUpdates()
+        return {
+          hasUpdate: updateCheckResult?.updateInfo?.version !== app.getVersion(),
+          currentVersion: app.getVersion(),
+          latestVersion: updateCheckResult?.updateInfo?.version,
+          changes: updateCheckResult?.updateInfo?.releaseNotes || []
+        }
+      } catch (error) {
+        console.error('Check for updates failed:', error)
+        throw error
+      }
+    })
 
-      return possiblePaths.find((npmPath) => fs.existsSync(npmPath)) || 'npm.cmd'
-    }
+    // Download update
+    ipcMain.handle('download-update', () => autoUpdater.downloadUpdate())
 
-    return 'npm'
+    // Apply update
+    ipcMain.handle('apply-update', () => autoUpdater.quitAndInstall(false, true))
+
+    // Manual rebuild
+    ipcMain.handle('rebuild-application', async () => {
+      try {
+        const appPath = app.getAppPath()
+        const result = await this.performRebuild(appPath)
+        return { success: true, ...result }
+      } catch (error) {
+        console.error('Rebuild failed:', error)
+        throw error
+      }
+    })
   }
 
-  getEnhancedPath() {
-    const paths = [
-      join(this.appPath, 'node_modules', '.bin'),
-      dirname(this.getNpmPath()),
-      this.isWindows ? join(app.getPath('appData'), 'npm') : '/usr/local/bin',
-      process.env.PATH
-    ].filter(Boolean)
-
-    return paths.join(path.delimiter)
-  }
-
-  getCurrentVersion() {
+  async performRebuild(appPath) {
     try {
-      return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim()
-    } catch (error) {
-      console.error('Failed to get current version:', error)
-      return null
-    }
-  }
-
-  async fetchGitHubData() {
-    const options = {
-      headers: {
-        'User-Agent': 'SHJMS-eLibrary-App',
-        Accept: 'application/json',
-        ...(this.githubToken && { Authorization: `Bearer ${this.githubToken}` })
-      },
-      timeout: 10000
-    }
-
-    try {
-      // First try getting release information
-      const releaseUrl = `${this.repoUrl}/releases/latest`
-      console.log('Checking releases:', releaseUrl)
-
-      // Fallback to commits if no releases
-      const commitsUrl = `${this.repoUrl}/commits`
-      console.log('Checking commits:', commitsUrl)
-
-      return new Promise((resolve, reject) => {
-        https
-          .get(commitsUrl, options, (res) => {
-            let data = ''
-
-            if (res.statusCode === 403) {
-              console.error('GitHub API Error:', {
-                status: res.statusCode,
-                headers: res.headers,
-                remaining: res.headers['x-ratelimit-remaining'],
-                reset: res.headers['x-ratelimit-reset']
-              })
-              reject(new Error('GitHub API rate limit exceeded'))
-              return
-            }
-
-            if (res.statusCode !== 200) {
-              console.error('GitHub API Error:', {
-                status: res.statusCode,
-                headers: res.headers
-              })
-              reject(new Error(`GitHub API error: ${res.statusCode}`))
-              return
-            }
-
-            res.on('data', (chunk) => (data += chunk))
-            res.on('end', () => {
-              try {
-                const commits = JSON.parse(data)
-                console.log('GitHub Response:', {
-                  totalCommits: commits.length,
-                  firstCommit: commits[0]
-                })
-
-                if (!Array.isArray(commits) || commits.length === 0) {
-                  throw new Error('No commits found')
-                }
-
-                resolve({
-                  sha: commits[0].sha,
-                  commits: commits.map((commit) => ({
-                    sha: commit.sha,
-                    message: commit.commit.message,
-                    date: commit.commit.author.date,
-                    author: commit.commit.author.name,
-                    url: commit.html_url
-                  }))
-                })
-              } catch (error) {
-                console.error('Parse error:', error)
-                reject(error)
-              }
-            })
-          })
-          .on('error', (error) => {
-            console.error('Network error:', error)
-            reject(error)
-          })
+      // Pull latest changes
+      execSync('git pull origin main', {
+        cwd: appPath,
+        stdio: 'pipe'
       })
+
+      // Install dependencies
+      execSync('npm install', {
+        cwd: appPath,
+        stdio: 'pipe'
+      })
+
+      // Rebuild application
+      execSync('npm run build', {
+        cwd: appPath,
+        stdio: 'pipe'
+      })
+
+      return { success: true }
     } catch (error) {
-      console.error('Fetch error:', error)
       throw error
     }
   }
 
-  parseProgress(output) {
-    // Add custom logic to parse build output and estimate progress
-    // This is a simple example
-    if (output.includes('Building')) return 25
-    if (output.includes('Bundling')) return 50
-    if (output.includes('Optimizing')) return 75
-    if (output.includes('Done')) return 100
-    return null
+  sendStatus(status, data = {}) {
+    if (this.mainWindow) {
+      this.mainWindow.webContents.send('update-status', { status, data })
+    }
+  }
+
+  sendProgress(progressData) {
+    if (this.mainWindow) {
+      this.mainWindow.webContents.send('update-progress', progressData)
+    }
   }
 }
 

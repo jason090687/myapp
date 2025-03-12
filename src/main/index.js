@@ -5,6 +5,8 @@ import fs from 'fs'
 import UpdateHandler from './update-handler.js'
 import { paths } from './utils/paths.js'
 
+let updateHandler = null // Single instance
+
 function createWindow() {
   const WINDOW_WIDTH = 1366
   const WINDOW_HEIGHT = 768
@@ -19,7 +21,9 @@ function createWindow() {
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(paths.preload, 'index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
     }
   })
 
@@ -62,8 +66,12 @@ function createWindow() {
     }
   })
 
-  // Initialize update handler
-  const updateHandler = new UpdateHandler(mainWindow)
+  // Only create update handler once
+  if (!updateHandler) {
+    updateHandler = new UpdateHandler(mainWindow)
+  } else {
+    updateHandler.mainWindow = mainWindow
+  }
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
@@ -137,6 +145,19 @@ app.whenReady().then(() => {
       return true
     } catch (error) {
       console.error('Failed to install update:', error)
+      throw error
+    }
+  })
+
+  // Add rebuild handler
+  ipcMain.handle('rebuild-application', async () => {
+    try {
+      // Save any necessary state
+      await app.relaunch()
+      app.exit(0)
+      return { success: true }
+    } catch (error) {
+      console.error('Rebuild failed:', error)
       throw error
     }
   })

@@ -31,7 +31,8 @@ import {
   fetchBorrowedBooksStats,
   fetchMarcBooks,
   fetchTotalPenalties,
-  fetchReturnedBooksCount
+  fetchReturnedBooksCount,
+  fetchActiveUsers
 } from '../Features/api'
 import {
   CardsSkeleton,
@@ -39,7 +40,7 @@ import {
   TableSkeleton,
   BooksSkeleton
 } from '../components/Dashboard/DashboardSkeletons'
-import ReportGenerator from '../components/Dashboard/ReportGenerator'
+import ReportGenerator from '../pages/ReportGenerator'
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -80,6 +81,10 @@ function Dashboard() {
     borrowers: true,
     checkouts: true,
     books: true
+  })
+  const [activeUsers, setActiveUsers] = useState({
+    total: 0,
+    users: []
   })
 
   // Helper to check if any section is still loading
@@ -222,6 +227,21 @@ function Dashboard() {
     fetchReturnedCount()
   }, [token])
 
+  // Add new useEffect for fetching active users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!token) return
+      try {
+        const userData = await fetchActiveUsers(token)
+        setActiveUsers(userData)
+      } catch (error) {
+        console.error('Error fetching active users:', error)
+        setActiveUsers({ total: 0, users: [] })
+      }
+    }
+    fetchUsers()
+  }, [token])
+
   // Add toggle handler
   const handleBookFilterToggle = (filter) => {
     setActiveBookFilter(filter)
@@ -285,7 +305,12 @@ function Dashboard() {
       value: penalties.overdueCount || '0', // Updated to use API count
       icon: FaClock
     },
-    { title: 'Active Users', value: topBorrowers.length || '0', icon: FaUsers }, // Updated title
+    {
+      title: 'Active Users',
+      value: activeUsers.total || '0',
+      icon: FaUsers,
+      tooltip: 'Total number of active users'
+    }, // Updated title
     {
       title: 'Pending Fees',
       value: `₱${Math.round(penalties.totalPenalties || 0).toLocaleString()}`,

@@ -123,12 +123,11 @@ export const updateUserProfile = async (token, formData) => {
   try {
     const response = await axios.patch(
       `${API_URL}/accounts/auth/users/me/`,
-      formData, // FormData handles both file and text fields
-      getAuthHeaders(token, 'multipart/form-data') // Include multipart content type for files
+      formData,
+      getAuthHeaders(token, 'multipart/form-data')
     )
     return response.data // Axios automatically parses JSON responses
   } catch (error) {
-    // Standardize error handling
     throw new Error(error.response?.data?.detail || 'Failed to update profile')
   }
 }
@@ -139,6 +138,7 @@ export const fetchBooks = async (token, page = 1, search = '') => {
       `${API_URL}/marc/search/?page=${page}&search=${encodeURIComponent(search)}`,
       getAuthHeaders(token)
     )
+    // No need to transform the URL since it's already complete from the API
     return response.data
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch books')
@@ -693,5 +693,67 @@ export const resetPasswordWithOtp = async (email, otp, newPassword) => {
     return response.data
   } catch (error) {
     throw new Error(error.response?.data?.detail || 'Failed to reset password')
+  }
+}
+
+export const fetchBookDetails = async (token, bookId) => {
+  try {
+    const response = await axios.get(`${API_URL}/marc/record/${bookId}/`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error fetching book details:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch book details')
+  }
+}
+
+export const fetchAllUsers = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/accounts/auth/users/`, getAuthHeaders(token))
+    return {
+      total: response.data.count,
+      users: response.data.results
+    }
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    return {
+      total: 0,
+      users: []
+    }
+  }
+}
+
+export const fetchActiveUsers = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/accounts/auth/users/`, getAuthHeaders(token))
+    return {
+      total: response.data.count,
+      users: response.data.results
+    }
+  } catch (error) {
+    console.error('Error fetching active users:', error)
+    return {
+      total: 0,
+      users: []
+    }
+  }
+}
+
+export const fetchMonthlyStats = async (token, month, year) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/dashboard/monthly-stats/?month=${month}&year=${year}`,
+      getAuthHeaders(token)
+    )
+    return {
+      totalBooks: response.data.total_books || 0,
+      borrowed: response.data.borrowed || 0,
+      returned: response.data.returned || 0,
+      overdue: response.data.overdue || 0,
+      month: month,
+      year: year
+    }
+  } catch (error) {
+    console.error('Error fetching monthly stats:', error)
+    throw new Error('Failed to fetch monthly statistics')
   }
 }

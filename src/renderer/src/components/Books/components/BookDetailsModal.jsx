@@ -1,16 +1,71 @@
-import React from 'react'
-import { FaTimes, FaEdit, FaTrash } from 'react-icons/fa'
+import React, { useEffect, useState } from 'react'
+import { FaTimes, FaEdit, FaTrash, FaBook } from 'react-icons/fa'
 import { formatDate } from '../utils/bookUtils'
+import { fetchBookDetails } from '../../../Features/api' // Updated import path
+import { useSelector } from 'react-redux'
 import './BookDetailsModal.css'
 
 const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
+  const [bookDetails, setBookDetails] = useState(null)
+  const [imageLoading, setImageLoading] = useState(true)
+  const { token } = useSelector((state) => state.auth)
+
+  useEffect(() => {
+    const getBookDetails = async () => {
+      if (isOpen && book?.id) {
+        try {
+          const details = await fetchBookDetails(token, book.id)
+          setBookDetails(details)
+        } catch (error) {
+          console.error('Error fetching book details:', error)
+        }
+      }
+    }
+
+    getBookDetails()
+  }, [isOpen, book?.id, token])
+
   if (!isOpen || !book) return null
 
-  const bookDetails = [
+  const renderBookCover = (coverUrl) => (
+    <div className="book-cover-container" style={{ display: 'flex', justifyContent: 'center' }}>
+      {coverUrl ? (
+        <>
+          {imageLoading && <div className="book-cover-skeleton pulse" />}
+          <img
+            src={
+              coverUrl.startsWith('http')
+                ? coverUrl
+                : `http://countmein.pythonanywhere.com${coverUrl}`
+            }
+            alt={`Cover of ${book.title}`}
+            className={`book-cover-image ${imageLoading ? 'hidden' : ''}`}
+            onLoad={() => setImageLoading(false)}
+            onError={(e) => {
+              setImageLoading(false)
+              e.target.onerror = null
+              e.target.parentNode.innerHTML = `<div class="default-book-cover">
+                <FaBook size={24} />
+              </div>`
+            }}
+          />
+        </>
+      ) : (
+        <div className="default-book-cover">
+          <FaBook size={24} />
+        </div>
+      )}
+    </div>
+  )
+
+  const details = [
+    {
+      label: 'Book Cover',
+      value: renderBookCover(bookDetails?.book_cover || book.book_cover),
+      isComponent: true
+    },
     { label: 'Title', value: book.title },
     { label: 'Author', value: book.author },
-    { label: 'Series Title', value: book.seriesTitle },
-    { label: 'Publisher', value: book.publisher },
     { label: 'Place of Publication', value: book.placeOfPublication },
     { label: 'Year', value: book.year },
     { label: 'Edition', value: book.edition },
@@ -21,7 +76,6 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     {
       label: 'Copy Number',
       value: (() => {
-        // Remove any existing "of" format and extract just the number
         const copyNum = book.copy_number.toString().split(' of ')[0]
         const totalCopies = parseInt(book.copies)
         return totalCopies ? `${copyNum} of ${totalCopies}` : copyNum
@@ -49,12 +103,12 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
 
         <div className="book-details-body">
           <div className="details-grid">
-            {bookDetails.map(
-              ({ label, value }) =>
+            {details.map(
+              ({ label, value, isComponent }) =>
                 value && (
                   <div key={label} className="detail-item">
                     <span className="detail-label">{label}</span>
-                    <span className="detail-value">{value}</span>
+                    {isComponent ? value : <span className="detail-value">{value}</span>}
                   </div>
                 )
             )}
