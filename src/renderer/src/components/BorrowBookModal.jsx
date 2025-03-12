@@ -12,7 +12,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     student: '',
     book: '',
     due_date: '',
-    status: 'Borrowed'
+    status: 'Borrowed',
+    lexile_level: '' // Add this line
   }
   const [formData, setFormData] = useState(initialFormData)
   const [books, setBooks] = useState([])
@@ -62,12 +63,11 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       try {
         const booksResponse = await fetchAllBooks(token, bookSearch)
         const availableBooks = booksResponse.results
-          .filter((book) => book.status !== 'Borrowed') // Only include books that are not borrowed
+          .filter((book) => book.status !== 'Borrowed')
           .map((book) => ({
             id: book.id,
-            title: book.title
-            // author: book.author,
-            // isbn: book.isbn
+            title: book.title,
+            lexile_level: book.lexile_level // Add this line
           }))
         setBooks(availableBooks)
       } catch (error) {
@@ -114,7 +114,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         student: formData.student,
         book: formData.book,
         due_date: formData.due_date,
-        status: 'Borrowed'
+        status: 'Borrowed',
+        lexile_level: formData.lexile_level
       }
 
       await borrowBook(token, borrowData)
@@ -143,7 +144,11 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
 
   const handleBookSelect = (book) => {
     setSelectedBook(book)
-    setFormData((prev) => ({ ...prev, book: book.id }))
+    setFormData((prev) => ({ 
+      ...prev, 
+      book: book.id,
+      lexile_level: book.lexile_level || '' // Add this line
+    }))
     setBookSearch(book.title)
     setShowBookDropdown(false)
   }
@@ -255,6 +260,21 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="borrow-form-group">
+              <label htmlFor="lexile_level">Lexile Level*</label>
+              <InputField
+                type="text"
+                id="lexile_level"
+                name="lexile_level"
+                value={formData.lexile_level}
+                onChange={handleChange}
+                required
+                icon={FaBook}
+                placeholder="Enter lexile level"
+                className="borrow-input"
+                readOnly
+              />
             </div>
             <div className="borrow-form-group">
               <label htmlFor="due_date">Due Date*</label>

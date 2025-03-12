@@ -24,6 +24,7 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
   const detailItems = [
     { label: 'Student Name', value: borrowData.student_name },
     { label: 'Book Title', value: borrowData.book_title },
+    { label: 'Lexile Level', value: borrowData.lexile_level || 'N/A' }, // Add this line
     { label: 'Borrow Date', value: formatDate(borrowData.borrowed_date) },
     { label: 'Due Date', value: formatDate(borrowData.due_date) },
     { label: 'Status', value: borrowData.status },

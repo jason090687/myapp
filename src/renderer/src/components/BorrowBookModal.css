@@ -174,12 +174,18 @@
   border-radius: 0.875rem;
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
+  z-index: 1;
 }
 
 .borrow-form-group:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
   border-color: #cbd5e1;
+}
+
+.borrow-form-group:has(.borrow-search-wrapper),
+.borrow-form-group:has(.borrow-search-wrapper:focus-within) {
+  z-index: 1010;
 }
 
 .borrow-form-group label {
@@ -343,7 +349,7 @@
   height: 42px;
   display: flex;
   align-items: center;
-  z-index: 1002; /* Higher than modal content */
+  z-index: 1010; /* Increased z-index */
   background: white;
 }
 
@@ -383,14 +389,15 @@
   background: white;
   border: none;
   border-radius: 1rem;
-  max-height: 180px; /* Reduced height */
+  max-height: 180px;
   overflow-y: auto;
-  z-index: 1003; /* Higher than search wrapper */
+  z-index: 1011; /* Higher than search wrapper */
   box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(0, 0, 0, 0.05);
   padding: 0.25rem;
   margin-top: 0.25rem;
+  pointer-events: all;
 }
 
 .borrow-search-wrapper .select-icon {
@@ -417,6 +424,13 @@
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.borrow-search-input:focus + .borrow-search-results,
+.borrow-search-results:hover {
+  display: block !important;
+  z-index: 1011;
+  pointer-events: all;
 }
 
 .borrow-search-results {
