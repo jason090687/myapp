@@ -20,7 +20,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js'
-import { Line } from 'react-chartjs-2'
+import { Bar } from 'react-chartjs-2'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
@@ -32,7 +32,8 @@ import {
   fetchMarcBooks,
   fetchTotalPenalties,
   fetchReturnedBooksCount,
-  fetchActiveUsers
+  fetchActiveUsers,
+  fetchMonthlyReport
 } from '../Features/api'
 import {
   CardsSkeleton,
@@ -41,9 +42,19 @@ import {
   BooksSkeleton
 } from '../components/Dashboard/DashboardSkeletons'
 import ReportGenerator from '../pages/ReportGenerator'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 // Register ChartJS components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartDataLabels
+)
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -86,6 +97,8 @@ function Dashboard() {
     total: 0,
     users: []
   })
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [chartLoading, setChartLoading] = useState(false)
 
   // Helper to check if any section is still loading
   const isAnyLoading = Object.values(loadingStates).some((state) => state)
@@ -99,22 +112,33 @@ function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [dashStats, borrowStats, returnedData] = await Promise.all([
+        const [dashStats, monthlyData, borrowStats, returnedData] = await Promise.all([
           fetchDashboardStats(),
+          fetchMonthlyReport(token),
           fetchBorrowedBooksStats(),
           fetchReturnedBooksCount(token)
         ])
 
+        // Get current month's data for chart only
+        const currentDate = new Date()
+        const currentMonthData = monthlyData.find((data) => {
+          const [year, month] = data.month.split('-')
+          return (
+            parseInt(month) === currentDate.getMonth() + 1 &&
+            parseInt(year) === currentDate.getFullYear()
+          )
+        }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
+
         setChartData({
-          labels: ['Total Books', 'Borrowed', 'Returned', 'Overdue'],
+          labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
           datasets: [
             {
-              label: 'Library Statistics',
+              label: `Library Statistics - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
               data: [
-                dashStats.totalBooks || 0,
-                borrowStats.borrowed || 0,
-                returnedData.returnedCount || 0,
-                penalties.overdueCount || 0
+                currentMonthData.processed || 0,
+                currentMonthData.borrowed || 0,
+                currentMonthData.returned || 0,
+                currentMonthData.overdue || 0
               ],
               borderColor: 'rgb(53, 162, 235)',
               backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -128,8 +152,15 @@ function Dashboard() {
         })
 
         setTotalBooks(dashStats.totalBooks)
-        setBookStats(borrowStats)
-        setReturnedBooks(returnedResponse.returned_books_count)
+        setBookStats({
+          ...borrowStats,
+          borrowed: borrowStats.borrowed || 0,
+          returned: returnedData.returnedCount || 0, // Use original returned count
+          overdue: penalties.overdueCount || 0 // Use original overdue count
+        })
+        setReturnedStats({
+          returnedCount: returnedData.returnedCount || 0 // Keep original returned count
+        })
       } catch (error) {
         console.error('Error fetching stats:', error)
       } finally {
@@ -247,7 +278,7 @@ function Dashboard() {
     setActiveBookFilter(filter)
   }
 
-  // Add chart options
+  // Update chart options to have a single plugins object
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -258,6 +289,20 @@ function Dashboard() {
       title: {
         display: true,
         text: 'Library Statistics'
+      },
+      tooltip: {
+        enabled: true,
+        mode: 'index',
+        intersect: false
+      },
+      datalabels: {
+        anchor: 'end',
+        align: 'top',
+        formatter: (value) => value,
+        font: {
+          weight: 'bold'
+        },
+        color: '#333'
       }
     },
     scales: {
@@ -278,6 +323,64 @@ function Dashboard() {
 
   const handleCardClick = (route) => {
     navigate(route)
+  }
+
+  const handleMonthChange = async (newDate) => {
+    setSelectedDate(newDate)
+    setChartLoading(true)
+    try {
+      const monthlyData = await fetchMonthlyReport(token)
+
+      // Find the data for selected month
+      const selectedMonthData = monthlyData.find((data) => {
+        const [year, month] = data.month.split('-')
+        return (
+          parseInt(month) === newDate.getMonth() + 1 && parseInt(year) === newDate.getFullYear()
+        )
+      }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
+
+      setChartData({
+        labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
+        datasets: [
+          {
+            label: `Library Statistics - ${newDate.toLocaleString('default', { month: 'long' })} ${newDate.getFullYear()}`,
+            data: [
+              selectedMonthData.processed || 0,
+              selectedMonthData.borrowed || 0,
+              selectedMonthData.returned || 0,
+              selectedMonthData.overdue || 0
+            ],
+            borderColor: 'rgb(53, 162, 235)',
+            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+            tension: 0.4,
+            fill: true,
+            pointStyle: 'circle',
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }
+        ]
+      })
+    } catch (error) {
+      console.error('Error fetching monthly report:', error)
+      setChartData({
+        labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
+        datasets: [
+          {
+            label: 'No data available',
+            data: [0, 0, 0, 0],
+            borderColor: 'rgb(53, 162, 235)',
+            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+            tension: 0.4,
+            fill: true,
+            pointStyle: 'circle',
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }
+        ]
+      })
+    } finally {
+      setChartLoading(false)
+    }
   }
 
   const cards = [
@@ -349,18 +452,14 @@ function Dashboard() {
                   </div>
                   <div className="card-content">
                     <h3>{card.title}</h3>
-                    <p>{card.value}</p>
+                    <p>{card.value}</p>ar
                   </div>
                 </div>
               ))}
             </div>
           )}
           {/* Add ReportGenerator at the top of the dashboard */}
-          <ReportGenerator
-            borrowData={recentCheckouts}
-            returnData={returnedStats}
-            overdueData={penalties}
-          />
+          <ReportGenerator chartData={chartData} />
 
           {/* Stats Container */}
           <div className="stats-container">
@@ -369,7 +468,35 @@ function Dashboard() {
                 <ChartSkeleton />
               ) : (
                 <div className="chart-container" style={{ height: '400px' }}>
-                  <Line data={chartData} options={chartOptions} />
+                  <Bar
+                    data={{
+                      ...chartData,
+                      datasets: [
+                        {
+                          ...chartData.datasets[0],
+                          borderRadius: 6,
+                          backgroundColor: [
+                            'rgba(53, 162, 235, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(255, 99, 132, 0.8)'
+                          ],
+                          borderColor: [
+                            'rgb(53, 162, 235)',
+                            'rgb(255, 159, 64)',
+                            'rgb(75, 192, 192)',
+                            'rgb(255, 99, 132)'
+                          ],
+                          borderWidth: 1,
+                          datalabels: {
+                            display: true
+                          }
+                        }
+                      ]
+                    }}
+                    options={chartOptions}
+                    plugins={[ChartDataLabels]}
+                  />
                 </div>
               )}
             </div>

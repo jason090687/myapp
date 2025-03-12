@@ -757,3 +757,13 @@ export const fetchMonthlyStats = async (token, month, year) => {
     throw new Error('Failed to fetch monthly statistics')
   }
 }
+
+export const fetchMonthlyReport = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/marc/monthly-report/`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error fetching monthly report:', error)
+    return []
+  }
+}

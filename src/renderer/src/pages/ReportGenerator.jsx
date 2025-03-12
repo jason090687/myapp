@@ -3,9 +3,10 @@ import { FaFileDownload, FaCalendar } from 'react-icons/fa'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
+import { Chart } from 'chart.js/auto'
 import '../components/Dashboard/ReportGenerator.css'
 
-const ReportGenerator = () => {
+const ReportGenerator = ({ chartData }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [isGenerating, setIsGenerating] = useState(false)
@@ -107,25 +108,124 @@ const ReportGenerator = () => {
     setError(null)
 
     try {
-      const allBorrowedData = await fetchAllBorrowedData()
-      const weeklyStats = organizeDataByWeeks(allBorrowedData)
+      const canvas = document.createElement('canvas')
+      canvas.width = 800
+      canvas.height = 400
+      const ctx = canvas.getContext('2d')
 
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          ...chartData,
+          datasets: [
+            {
+              ...chartData.datasets[0],
+              borderRadius: 6,
+              backgroundColor: [
+                'rgba(53, 162, 235, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(255, 99, 132, 0.8)'
+              ],
+              borderColor: [
+                'rgb(53, 162, 235)',
+                'rgb(255, 159, 64)',
+                'rgb(75, 192, 192)',
+                'rgb(255, 99, 132)'
+              ],
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: false,
+          animation: false,
+          plugins: {
+            legend: {
+              position: 'top'
+            },
+            title: {
+              display: true,
+              text: `Library Statistics - ${months[selectedMonth]} ${selectedYear}`
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                drawBorder: false,
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      })
+
+      // Convert chart to image
+      const chartImage = canvas.toDataURL('image/png')
+
+      // Create PDF
       const pdfDoc = await PDFDocument.create()
       const page = pdfDoc.addPage([800, 1000])
       const { height } = page.getSize()
+      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
 
-      // ... rest of PDF generation code remains the same ...
-      // ...existing code...
+      // Add title
+      page.drawText(`Monthly Library Report - ${months[selectedMonth]} ${selectedYear}`, {
+        x: 50,
+        y: height - 50,
+        size: 24,
+        font: timesRomanFont
+      })
 
+      // Add chart image
+      const pngImage = await pdfDoc.embedPng(chartImage)
+      const pngDims = pngImage.scale(0.8) // Scale down the image a bit
+      page.drawImage(pngImage, {
+        x: 50,
+        y: height - 450, // Position below title
+        width: pngDims.width,
+        height: pngDims.height
+      })
+
+      // Add statistics below the chart
+      const monthlyStats = {
+        processed: chartData.datasets[0].data[0] || 0,
+        borrowed: chartData.datasets[0].data[1] || 0,
+        returned: chartData.datasets[0].data[2] || 0,
+        overdue: chartData.datasets[0].data[3] || 0
+      }
+
+      const stats = [
+        { label: 'Processed Books', value: monthlyStats.processed },
+        { label: 'Borrowed Books', value: monthlyStats.borrowed },
+        { label: 'Returned Books', value: monthlyStats.returned },
+        { label: 'Overdue Books', value: monthlyStats.overdue }
+      ]
+
+      stats.forEach((stat, index) => {
+        page.drawText(`${stat.label}: ${stat.value}`, {
+          x: 50,
+          y: height - 500 - index * 30, // Position below chart
+          size: 14,
+          font: timesRomanFont
+        })
+      })
+
+      // Save and download
       const pdfBytes = await pdfDoc.save()
       const blob = new Blob([pdfBytes], { type: 'application/pdf' })
 
       if (window.electron?.ipcRenderer) {
         const buffer = await blob.arrayBuffer()
-        const fileName = `library-report-${months[selectedMonth]}-${selectedYear}.pdf`
         window.electron.ipcRenderer.send('save-pdf', {
           buffer: Array.from(new Uint8Array(buffer)),
-          fileName
+          fileName: `library-report-${months[selectedMonth]}-${selectedYear}.pdf`
         })
       } else {
         const url = URL.createObjectURL(blob)
