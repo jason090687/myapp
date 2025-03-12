@@ -71,9 +71,7 @@
     ],
     "win": {
       "icon": "./build/icon.ico",
-      "target": "nsis",
-      "sign": false
-    },
-    "forceCodeSigning": false
+      "target": "nsis"
+    }
   }
 }
