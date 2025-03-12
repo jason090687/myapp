@@ -5,12 +5,22 @@ import fs from 'fs'
 import https from 'https'
 import os from 'os'
 import { paths } from './utils/paths.js'
+import dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config()
 
 class UpdateHandler {
   constructor(mainWindow) {
     this.mainWindow = mainWindow
     this.setupHandlers()
-    this.repoUrl = 'https://api.github.com/repos/jason090687/myapp' // Verified GitHub repo URL
+    this.owner = 'jason090687'
+    this.repo = 'myapp'
+    this.repoUrl = `https://api.github.com/repos/${this.owner}/${this.repo}`
+    this.githubToken = process.env.GITHUB_TOKEN
+    if (!this.githubToken) {
+      console.warn('No GitHub token found. API rate limits will be restricted.')
+    }
     this.isWindows = os.platform() === 'win32'
     this.appPath = paths.root
     this.userDataPath = app.getPath('userData')
@@ -270,33 +280,85 @@ exit /b 0
   async fetchGitHubData() {
     const options = {
       headers: {
-        'User-Agent': 'MyApp-UpdateChecker',
-        Accept: 'application/vnd.github.v3+json'
-      }
+        'User-Agent': 'SHJMS-eLibrary-App',
+        Accept: 'application/json',
+        ...(this.githubToken && { Authorization: `Bearer ${this.githubToken}` })
+      },
+      timeout: 10000
     }
 
-    return new Promise((resolve, reject) => {
-      https
-        .get(`${this.repoUrl}/commits`, options, (res) => {
-          let data = ''
-          res.on('data', (chunk) => (data += chunk))
-          res.on('end', () => {
-            try {
-              const commits = JSON.parse(data)
-              resolve({
-                sha: commits[0].sha,
-                commits: commits.map((commit) => ({
-                  message: commit.commit.message,
-                  date: commit.commit.author.date
-                }))
+    try {
+      // First try getting release information
+      const releaseUrl = `${this.repoUrl}/releases/latest`
+      console.log('Checking releases:', releaseUrl)
+
+      // Fallback to commits if no releases
+      const commitsUrl = `${this.repoUrl}/commits`
+      console.log('Checking commits:', commitsUrl)
+
+      return new Promise((resolve, reject) => {
+        https
+          .get(commitsUrl, options, (res) => {
+            let data = ''
+
+            if (res.statusCode === 403) {
+              console.error('GitHub API Error:', {
+                status: res.statusCode,
+                headers: res.headers,
+                remaining: res.headers['x-ratelimit-remaining'],
+                reset: res.headers['x-ratelimit-reset']
               })
-            } catch (error) {
-              reject(error)
+              reject(new Error('GitHub API rate limit exceeded'))
+              return
             }
+
+            if (res.statusCode !== 200) {
+              console.error('GitHub API Error:', {
+                status: res.statusCode,
+                headers: res.headers
+              })
+              reject(new Error(`GitHub API error: ${res.statusCode}`))
+              return
+            }
+
+            res.on('data', (chunk) => (data += chunk))
+            res.on('end', () => {
+              try {
+                const commits = JSON.parse(data)
+                console.log('GitHub Response:', {
+                  totalCommits: commits.length,
+                  firstCommit: commits[0]
+                })
+
+                if (!Array.isArray(commits) || commits.length === 0) {
+                  throw new Error('No commits found')
+                }
+
+                resolve({
+                  sha: commits[0].sha,
+                  commits: commits.map((commit) => ({
+                    sha: commit.sha,
+                    message: commit.commit.message,
+                    date: commit.commit.author.date,
+                    author: commit.commit.author.name,
+                    url: commit.html_url
+                  }))
+                })
+              } catch (error) {
+                console.error('Parse error:', error)
+                reject(error)
+              }
+            })
           })
-        })
-        .on('error', reject)
-    })
+          .on('error', (error) => {
+            console.error('Network error:', error)
+            reject(error)
+          })
+      })
+    } catch (error) {
+      console.error('Fetch error:', error)
+      throw error
+    }
   }
 
   parseProgress(output) {
