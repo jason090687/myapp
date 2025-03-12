@@ -10,7 +10,8 @@ const iconPath =
     ? path.join(__dirname, '../../build/ico.ico')
     : path.join(__dirname, '../../build/icon.png')
 
-const UpdateHandler = require('./update-handler')
+// Update the import path to use absolute path
+const UpdateHandler = require(path.join(__dirname, 'update-handler.js'))
 
 function createWindow() {
   // Define fixed dimensions
