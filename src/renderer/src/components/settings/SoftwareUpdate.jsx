@@ -42,6 +42,13 @@ function SoftwareUpdate() {
       const updateData = await UpdateService.downloadUpdate()
       setUpdateStatus((prev) => ({ ...prev, isDownloading: false, isInstalling: true }))
 
+      // Show Windows UAC warning if needed
+      if (process.platform === 'win32') {
+        alert(
+          'The update will require administrator privileges. Please accept the UAC prompt when it appears.'
+        )
+      }
+
       // Install
       await UpdateService.applyUpdate({
         latestCommit: updateStatus.latestCommit,
@@ -55,16 +62,21 @@ function SoftwareUpdate() {
         downloadProgress: 100
       }))
 
-      // Show success message and prompt for restart
-      if (window.confirm('Update installed successfully! Restart now?')) {
-        window.location.reload()
+      // Show platform-specific restart message
+      const restartMessage =
+        process.platform === 'win32'
+          ? 'Update installed successfully! The application needs to restart. Click OK to restart now.'
+          : 'Update installed successfully! Restart now?'
+
+      if (window.confirm(restartMessage)) {
+        window.electron.ipcRenderer.send('app:restart')
       }
     } catch (error) {
       setUpdateStatus((prev) => ({
         ...prev,
         isDownloading: false,
         isInstalling: false,
-        error: 'Update failed. Please try again.'
+        error: `Update failed: ${error.message}`
       }))
     }
   }
