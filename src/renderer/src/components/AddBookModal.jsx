@@ -47,7 +47,14 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     additional_author: '',
     copies: '',
     status: 'Available',
-    date_processed: new Date().toISOString().slice(0, 16),
+    date_processed: new Date().toLocaleString('sv-SE', { 
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).replace(' ', 'T'),
     processed_by: currentUser?.id || '',
     book_cover: null // Add book_cover to initial form state
   }
@@ -190,7 +197,17 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
       for (let currentCopy = 1; currentCopy <= totalCopies; currentCopy++) {
         const bookData = new FormData()
         Object.keys(formData).forEach((key) => {
-          if (key !== 'book_cover') {
+          if (key === 'date_processed') {
+            // Update date_processed to current time for each submission
+            bookData.append(key, new Date().toLocaleString('sv-SE', { 
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            }).replace(' ', 'T'))
+          } else if (key !== 'book_cover') {
             bookData.append(key, formData[key])
           }
         })
@@ -409,7 +426,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
                 <InputField
                   type="text"
                   id="book_cover"
-                  name="book_cover"
+                  name="book_cover_display"
                   value={formData.selectedFileName || 'Click to upload image...'}
                   readOnly
                   icon={FaImage}
