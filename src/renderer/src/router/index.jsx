@@ -52,7 +52,7 @@ const router = createHashRouter([
     element: <Settings />,
     children: [
       {
-        index: true,
+        path: 'backup',
         element: <BackupSettings />
       }
     ]

@@ -5,16 +5,17 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   main: {
     build: {
+      outDir: 'out/main',
       rollupOptions: {
         input: {
-          index: resolve(__dirname, 'src/main/index.js'),
-          'update-handler': resolve(__dirname, 'src/main/update-handler.js')
+          index: resolve(__dirname, 'src/main/index.js')
         }
       }
     }
   },
   preload: {
     build: {
+      outDir: 'out/preload',
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/preload/index.js')
@@ -30,11 +31,7 @@ export default defineConfig({
     },
     plugins: [react()],
     build: {
-      rollupOptions: {
-        input: {
-          main: resolve(__dirname, 'src/renderer/index.html')
-        }
-      }
+      outDir: 'out/renderer'
     }
   }
 })

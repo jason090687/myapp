@@ -216,142 +216,24 @@
 }
 
 .update-badge {
-  background: #ef4444;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  margin-left: 8px;
-  animation: pulse 2s infinite;
+  display: none;
 }
 
-.update-info {
-  background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.version-info {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.checking-updates {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: #4b5563;
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-.update-available {
-  background: #f0fdf4;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid #86efac;
-  margin: 1rem 0;
-}
-
-.update-notes {
-  margin: 1rem 0;
-}
-
-.update-notes ul {
-  margin-top: 0.5rem;
-  padding-left: 1.5rem;
-}
-
-.download-progress {
-  background: #f1f5f9;
-  border-radius: 1rem;
-  height: 1.5rem;
-  position: relative;
-  overflow: hidden;
-  margin: 1rem 0;
-}
-
-.progress-bar {
-  background: linear-gradient(90deg, #0a0b64, #4f46e5);
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
+.update-info,
+.version-info,
+.checking-updates,
+.spinning,
+.update-available,
+.update-notes,
+.download-progress,
 .download-btn,
-.check-updates-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  background: #0a0b64;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.download-btn:hover,
-.check-updates-btn:hover {
-  background: #000080;
-  transform: translateY(-1px);
-}
-
-.download-btn:disabled,
-.check-updates-btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.up-to-date {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: #059669;
-  background: #f0fdf4;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-}
-
-.check-icon {
-  font-size: 1.5rem;
-}
-
-.update-error {
-  color: #dc2626;
-  background: #fef2f2;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.check-updates-btn,
+.up-to-date,
+.check-icon,
+.update-error,
+.update-progress,
+.progress-bar-wrapper {
+  display: none;
 }
 
 .github-link {
@@ -384,16 +266,4 @@
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.875rem;
-}
-
-.update-progress {
-  margin: 1rem 0;
-}
-
-.progress-bar-wrapper {
-  background: #f1f5f9;
-  border-radius: 1rem;
-  height: 0.75rem;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
 }
