@@ -1,7 +1,9 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
-import path, { join } from 'path'
+import path from 'path'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import fs from 'fs'
+
+const { session } = require('electron')
 
 const iconPath =
   process.platform === 'win32'
@@ -9,9 +11,9 @@ const iconPath =
     : path.join(__dirname, '../../build/icon.png')
 
 // Define paths object
-const paths = {
-  preload: path.join(__dirname, '../preload')
-}
+// const paths = {
+//   preload: path.join(__dirname, '../preload')
+// }
 
 function createWindow() {
   const WINDOW_WIDTH = 1366
@@ -26,11 +28,15 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'), // Updated preload path
+      preload: path.join(__dirname, '..', 'preload', 'index.mjs'), // Fix path resolution
       sandbox: false,
-      contextIsolation: true,
+      contextIsolation: true, // add this
       nodeIntegration: false,
-      webviewTag: true // Enable webview
+      // Remove security risk features
+      webviewTag: false,
+      allowRunningInsecureContent: false,
+      experimentalFeatures: false,
+      enableBlinkFeatures: false
     }
   })
 
@@ -72,6 +78,30 @@ function createWindow() {
         }
       }
     }, 1000)
+  })
+
+  // Handle Autofill errors
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    if (message.includes('Autofill')) {
+      console.warn('Autofill error:', message)
+    }
+  })
+
+  // Handle VSync errors
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    if (message.includes('GetVSyncParametersIfAvailable')) {
+      console.warn('VSync error:', message)
+    }
+  })
+
+  // Suppress specific errors
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    if (
+      message.includes('Autofill.enable failed') ||
+      message.includes('GetVSyncParametersIfAvailable')
+    ) {
+      event.preventDefault()
+    }
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -144,6 +174,21 @@ app.whenReady().then(() => {
     } catch (error) {
       console.error('Error saving PDF:', error)
     }
+  })
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self'; " +
+            "script-src 'self'; " +
+            "style-src 'self' 'unsafe-inline'; " +
+            "connect-src 'self' http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com; " +
+            "img-src 'self' data: https: blob: http://countmein.pythonanywhere.com;"
+        ]
+      }
+    })
   })
 
   createWindow()
