@@ -70,15 +70,15 @@
   "build": {
     "appId": "com.countmein.myapp",
     "productName": "eLibrary",
-    "asar": false,
+    "asar": true,
     "files": [
       "out/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "package.json"
     ],
     "win": {
       "icon": "./build/icon.ico",
-      "target": "nsis",
-      "sign": false
+      "target": "nsis"
     }
   }
 }
