@@ -47,14 +47,16 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     additional_author: '',
     copies: '',
     status: 'Available',
-    date_processed: new Date().toLocaleString('sv-SE', { 
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).replace(' ', 'T'),
+    date_processed: new Date()
+      .toLocaleString('sv-SE', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+      .replace(' ', 'T'),
     processed_by: currentUser?.id || '',
     book_cover: null // Add book_cover to initial form state
   }
@@ -88,7 +90,6 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
       try {
         const statuses = await fetchBookStatuses(token)
         setStatusOptions(statuses)
-        console.log('Status options:', statuses)
       } catch (error) {
         console.error('Error loading status options:', error)
       }
@@ -199,14 +200,19 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
         Object.keys(formData).forEach((key) => {
           if (key === 'date_processed') {
             // Update date_processed to current time for each submission
-            bookData.append(key, new Date().toLocaleString('sv-SE', { 
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
-            }).replace(' ', 'T'))
+            bookData.append(
+              key,
+              new Date()
+                .toLocaleString('sv-SE', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                })
+                .replace(' ', 'T')
+            )
           } else if (key !== 'book_cover') {
             bookData.append(key, formData[key])
           }
