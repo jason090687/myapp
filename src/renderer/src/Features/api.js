@@ -190,6 +190,24 @@ export const addNewBook = async (token, bookData) => {
   }
 }
 
+export const uploadNewBook = async (token, bookData) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/marc/record/`,
+      bookData, // Use bookData directly as FormData
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.error('API Error:', error.response?.data || error.message)
+    throw error
+  }
+}
+
 export const updateBook = async (token, bookId, bookData) => {
   try {
     const response = await axios.patch(

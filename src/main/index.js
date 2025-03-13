@@ -1,6 +1,6 @@
-import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen, dialog } from 'electron'
 import path from 'path'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs'
 
 const { session } = require('electron')
@@ -9,11 +9,6 @@ const iconPath =
   process.platform === 'win32'
     ? path.join(__dirname, '../../build/ico.ico')
     : path.join(__dirname, '../../build/icon.png')
-
-// Define paths object
-// const paths = {
-//   preload: path.join(__dirname, '../preload')
-// }
 
 function createWindow() {
   const WINDOW_WIDTH = 1366
@@ -28,11 +23,10 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, '..', 'preload', 'index.mjs'), // Fix path resolution
+      preload: path.join(__dirname, '../preload/index.js'),
       sandbox: false,
-      contextIsolation: true, // add this
+      contextIsolation: true,
       nodeIntegration: false,
-      // Remove security risk features
       webviewTag: false,
       allowRunningInsecureContent: false,
       experimentalFeatures: false,
@@ -44,10 +38,9 @@ function createWindow() {
   mainWindow.center()
 
   // Load the app
-  if (process.env.VITE_DEV_SERVER_URL) {
-    console.log('Loading development server...')
-    mainWindow.loadURL('http://localhost:5173')
-    mainWindow.webContents.openDevTools() // Open DevTools in development
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    mainWindow.webContents.openDevTools()
   } else {
     const indexPath = path.join(__dirname, '../renderer/index.html')
     console.log('Loading production file from:', indexPath)
@@ -55,30 +48,8 @@ function createWindow() {
       mainWindow.loadFile(indexPath)
     } else {
       console.error('Could not find index.html at:', indexPath)
-      mainWindow.loadURL('http://localhost:5173')
     }
   }
-
-  // Handle loading errors
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error('Failed to load:', errorCode, errorDescription)
-    const currentURL = mainWindow.webContents.getURL()
-    console.log('Attempted to load URL:', currentURL)
-
-    // Retry loading after a short delay
-    setTimeout(() => {
-      if (process.env.VITE_DEV_SERVER_URL) {
-        console.log('Retrying with dev server...')
-        mainWindow.loadURL('http://localhost:5173')
-      } else {
-        console.log('Retrying with file...')
-        const indexPath = path.join(__dirname, '../renderer/index.html')
-        if (fs.existsSync(indexPath)) {
-          mainWindow.loadFile(indexPath)
-        }
-      }
-    }, 1000)
-  })
 
   // Handle Autofill errors
   mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
@@ -181,11 +152,13 @@ app.whenReady().then(() => {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          "default-src 'self'; " +
-            "script-src 'self'; " +
-            "style-src 'self' 'unsafe-inline'; " +
-            "connect-src 'self' http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com; " +
-            "img-src 'self' data: https: blob: http://countmein.pythonanywhere.com;"
+          "default-src 'self';" +
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval';" +
+            "style-src 'self' 'unsafe-inline';" +
+            "connect-src 'self' http://localhost:* ws://localhost:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com;" +
+            "img-src 'self' data: https: blob: http://countmein.pythonanywhere.com;" +
+            `worker-src 'self' blob:;` +
+            `frame-src 'self';`
         ]
       }
     })

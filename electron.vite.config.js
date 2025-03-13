@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   main: {
     build: {
+      watch: process.env.NODE_ENV === 'development' ? {} : null,
       outDir: 'out/main',
       rollupOptions: {
         input: {
@@ -15,6 +16,7 @@ export default defineConfig({
   },
   preload: {
     build: {
+      watch: process.env.NODE_ENV === 'development' ? {} : null,
       outDir: 'out/preload',
       rollupOptions: {
         input: {
