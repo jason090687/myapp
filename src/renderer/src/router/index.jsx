@@ -10,7 +10,6 @@ import BackupSettings from '../components/settings/BackupSettings.jsx'
 import Help from '../pages/Help'
 import CreateNewPassword from '../pages/CreateNewPassword.jsx'
 import ProfilePage from '../pages/ProfilePage.jsx'
-import SoftwareUpdate from '../components/settings/SoftwareUpdate.jsx'
 import OtpVerification from '../pages/OtpVerification'
 import ActivationSuccess from '../pages/ActivationSuccess.jsx'
 import ResetPasswordOtp from '../pages/ResetPasswordOtp'
@@ -55,10 +54,6 @@ const router = createHashRouter([
       {
         index: true,
         element: <BackupSettings />
-      },
-      {
-        path: 'software-update',
-        element: <SoftwareUpdate />
       }
     ]
   },

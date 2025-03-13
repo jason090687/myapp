@@ -1,6 +1,5 @@
 const { app, BrowserWindow, session } = require('electron')
 const path = require('path')
-const { installExtension, REDUX_DEVTOOLS } = require('electron-devtools-installer')
 
 async function createWindow() {
   // Create the browser window.
@@ -48,15 +47,6 @@ async function createWindow() {
       }
     })
   })
-
-  // Install DevTools extensions
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      await installExtension(REDUX_DEVTOOLS)
-    } catch (e) {
-      console.error('Redux DevTools installation failed:', e)
-    }
-  }
 
   // Disable Autofill warnings
   win.webContents.on('did-finish-load', () => {

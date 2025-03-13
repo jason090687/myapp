@@ -77,8 +77,8 @@
     ],
     "win": {
       "icon": "./build/icon.ico",
-       "target": "nsis",
-       "sign": false
-     }
+      "target": "nsis",
+      "sign": false
     }
   }
+}

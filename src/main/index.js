@@ -1,16 +1,17 @@
 import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import path, { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
 import fs from 'fs'
-import UpdateHandler from './update-handler.js'
-import { paths } from './utils/paths.js'
 
-const iconPath = 
+const iconPath =
   process.platform === 'win32'
     ? path.join(__dirname, '../../build/ico.ico')
     : path.join(__dirname, '../../build/icon.png')
 
-let updateHandler = null // Single instance
+// Define paths object
+const paths = {
+  preload: path.join(__dirname, '../preload')
+}
 
 function createWindow() {
   const WINDOW_WIDTH = 1366
@@ -20,20 +21,58 @@ function createWindow() {
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
     title: 'SHJMS eLibrary',
-    icon: iconPath, // Updated icon path
+    icon: iconPath,
     fullscreen: false,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(paths.preload, 'index.js'),
+      preload: join(__dirname, '../preload/index.js'), // Updated preload path
       sandbox: false,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webviewTag: true // Enable webview
     }
   })
 
   // Center the window
   mainWindow.center()
+
+  // Load the app
+  if (process.env.VITE_DEV_SERVER_URL) {
+    console.log('Loading development server...')
+    mainWindow.loadURL('http://localhost:5173')
+    mainWindow.webContents.openDevTools() // Open DevTools in development
+  } else {
+    const indexPath = path.join(__dirname, '../renderer/index.html')
+    console.log('Loading production file from:', indexPath)
+    if (fs.existsSync(indexPath)) {
+      mainWindow.loadFile(indexPath)
+    } else {
+      console.error('Could not find index.html at:', indexPath)
+      mainWindow.loadURL('http://localhost:5173')
+    }
+  }
+
+  // Handle loading errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorCode, errorDescription)
+    const currentURL = mainWindow.webContents.getURL()
+    console.log('Attempted to load URL:', currentURL)
+
+    // Retry loading after a short delay
+    setTimeout(() => {
+      if (process.env.VITE_DEV_SERVER_URL) {
+        console.log('Retrying with dev server...')
+        mainWindow.loadURL('http://localhost:5173')
+      } else {
+        console.log('Retrying with file...')
+        const indexPath = path.join(__dirname, '../renderer/index.html')
+        if (fs.existsSync(indexPath)) {
+          mainWindow.loadFile(indexPath)
+        }
+      }
+    }, 1000)
+  })
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.maximize()
@@ -70,21 +109,6 @@ function createWindow() {
       mainWindow.center()
     }
   })
-
-  // Only create update handler once
-  if (!updateHandler) {
-    updateHandler = new UpdateHandler(mainWindow)
-  } else {
-    updateHandler.mainWindow = mainWindow
-  }
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(paths.renderer, 'index.html'))
-  }
 }
 
 // This method will be called when Electron has finished
@@ -119,51 +143,6 @@ app.whenReady().then(() => {
       }
     } catch (error) {
       console.error('Error saving PDF:', error)
-    }
-  })
-
-  // Add this to your existing ipcMain handlers
-  ipcMain.handle('install-update', async (event, updateData) => {
-    try {
-      const { app } = require('electron')
-      const fs = require('fs')
-      const path = require('path')
-
-      // Create updates directory if it doesn't exist
-      const updateDir = path.join(app.getPath('userData'), 'updates')
-      if (!fs.existsSync(updateDir)) {
-        fs.mkdirSync(updateDir)
-      }
-
-      // Save the update file
-      const updatePath = path.join(updateDir, 'update.zip')
-      fs.writeFileSync(updatePath, Buffer.from(updateData))
-
-      // Extract and apply update
-      const AdmZip = require('adm-zip')
-      const zip = new AdmZip(updatePath)
-      zip.extractAllTo(app.getAppPath(), true)
-
-      // Clean up
-      fs.unlinkSync(updatePath)
-
-      return true
-    } catch (error) {
-      console.error('Failed to install update:', error)
-      throw error
-    }
-  })
-
-  // Add rebuild handler
-  ipcMain.handle('rebuild-application', async () => {
-    try {
-      // Save any necessary state
-      await app.relaunch()
-      app.exit(0)
-      return { success: true }
-    } catch (error) {
-      console.error('Rebuild failed:', error)
-      throw error
     }
   })
 
