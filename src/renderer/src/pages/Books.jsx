@@ -79,7 +79,7 @@ function Books() {
       <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
       <div className={`books-container ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="books-content">
-          <BooksHeader onSearch={handleSearch} onAddBook={handleAddBook} />
+          <BooksHeader onSearch={handleSearch} onAddBook={handleAddBook} token={token} />
 
           <BooksTable
             books={books}

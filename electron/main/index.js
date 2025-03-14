@@ -7,8 +7,9 @@ async function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, '../preload/index.js'),
       webSecurity: true,
       devTools: true,
       spellcheck: true
@@ -41,8 +42,10 @@ async function createWindow() {
           "default-src 'self'",
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
           "style-src 'self' 'unsafe-inline'",
-          "connect-src 'self' http://countmein.pythonanywhere.com",
-          "img-src 'self' data: https:"
+          "connect-src 'self' http://countmein.pythonanywhere.com ws: wss:",
+          "img-src 'self' data: https:",
+          "frame-src 'self'",
+          "worker-src 'self' blob:"
         ].join('; ')
       }
     })

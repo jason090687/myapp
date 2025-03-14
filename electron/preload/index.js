@@ -1,28 +1,20 @@
-const { contextBridge, ipcRenderer } = require('electron')
+import { contextBridge } from 'electron'
+import { electronAPI } from '@electron-toolkit/preload'
 
-// Disable Autofill API warnings
-delete window.navigator.serviceWorker
-delete window.Autofill
+// Custom APIs for renderer
+const api = {}
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  platform: process.platform
-  // Add any other required APIs here
-})
-
-contextBridge.exposeInMainWorld('electron', {
-  fetch: async (url, options) => {
-    try {
-      const response = await fetch(url, options)
-      return response
-    } catch (error) {
-      console.error('Fetch error:', error)
-      throw error
-    }
-  },
-  github: {
-    checkUpdates: () => ipcRenderer.invoke('check-github-updates'),
-    downloadUpdate: () => ipcRenderer.invoke('download-update')
+// Use `contextBridge` APIs to expose Electron APIs to
+// renderer only if context isolation is enabled, otherwise
+// just add to the DOM global.
+if (process.contextIsolated) {
+  try {
+    contextBridge.exposeInMainWorld('electron', electronAPI)
+    contextBridge.exposeInMainWorld('api', api)
+  } catch (error) {
+    console.error(error)
   }
-})
-
-window.ALLOWED_ORIGINS = ['http://countmein.pythonanywhere.com']
+} else {
+  window.electron = electronAPI
+  window.api = api
+}

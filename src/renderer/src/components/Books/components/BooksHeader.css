@@ -70,3 +70,34 @@
     font-size: 0.9rem;
   }
 } */
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.add-book-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.add-book-btn:hover {
+  background-color: #45a049;
+}
+
+.import-btn {
+  background-color: #2196f3;
+}
+
+.import-btn:hover {
+  background-color: #1976d2;
+}

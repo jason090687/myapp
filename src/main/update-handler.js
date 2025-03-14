@@ -1,7 +1,8 @@
 import { ipcMain, app } from 'electron'
 import { execSync } from 'child_process'
-import { paths } from './utils/paths'
 import dotenv from 'dotenv'
+import fs from 'fs'
+import path from 'path'
 
 // Load environment variables
 dotenv.config()
@@ -31,8 +32,23 @@ class UpdateHandler {
     })
   }
 
+  cleanBuildDirectories(appPath) {
+    const dirsToClean = ['out', 'dist', 'build']
+
+    dirsToClean.forEach((dir) => {
+      const dirPath = path.join(appPath, dir)
+      if (fs.existsSync(dirPath)) {
+        fs.rmSync(dirPath, { recursive: true, force: true })
+        console.log(`Cleaned ${dir} directory`)
+      }
+    })
+  }
+
   async performRebuild(appPath) {
     try {
+      // Clean build directories first
+      this.cleanBuildDirectories(appPath)
+
       // Pull latest changes
       execSync('git pull origin main', {
         cwd: appPath,
@@ -45,11 +61,13 @@ class UpdateHandler {
         stdio: 'pipe'
       })
 
-      // Rebuild application
-      execSync('npm run build', {
-        cwd: appPath,
-        stdio: 'pipe'
-      })
+      // Only build in production mode
+      if (!process.env.VITE_DEV_SERVER_URL) {
+        execSync('npm run build', {
+          cwd: appPath,
+          stdio: 'pipe'
+        })
+      }
 
       return { success: true }
     } catch (error) {
