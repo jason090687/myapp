@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
+import Papa from 'papaparse'
 import { uploadNewBook } from '../../../Features/api'
 import { toast } from 'react-hot-toast'
 import './ImportBooks.css'
@@ -12,6 +13,7 @@ function ImportBooks({ onClose, onRefresh }) {
   const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [selectedFile, setSelectedFile] = useState(null)
   const [loadingText, setLoadingText] = useState('')
+  const [parsedData, setParsedData] = useState(null)
 
   const loadingMessages = [
     'Uploading your books...',
@@ -31,70 +33,9 @@ function ImportBooks({ onClose, onRefresh }) {
     }
   }, [importing])
 
-  const parseCSV = (text) => {
-    try {
-      // Detect delimiter (comma, semicolon, or tab)
-      const delimiter = text.includes('\t') ? '\t' : text.includes(';') ? ';' : ','
-
-      // Split by newlines and filter out empty lines
-      const rows = text
-        .split('\n')
-        .map((row) => row.trim())
-        .filter((row) => row.length > 0)
-        .map((row) => row.split(delimiter))
-
-      // Find the header row index (looking for "CALL NUMBER" or "ACC. #")
-      const headerIndex = rows.findIndex((row) =>
-        row.some(
-          (cell) =>
-            cell.includes('CALL NUMBER') ||
-            cell.includes('ACC.') ||
-            cell.includes('REFERENCE BOOKS')
-        )
-      )
-
-      if (headerIndex === -1) {
-        throw new Error('Could not find header row in CSV')
-      }
-
-      // Skip header and any rows before it
-      const dataRows = rows.slice(headerIndex + 1)
-
-      // Map the data rows to book objects
-      const books = dataRows
-        .filter((row) => row.length >= 6) // Ensure minimum required columns
-        .map((row) => {
-          // Log the row for debugging
-          console.log('Processing row:', row)
-
-          return {
-            call_number: row[0]?.trim() || null,
-            accession_number: row[1]?.trim() || null,
-            author: row[2]?.trim() || null,
-            title: row[3]?.trim() || null,
-            copies: row[4]?.trim() ? parseInt(row[4].trim()) : null,
-            year: row[5]?.trim() ? parseInt(row[5].trim()) : null
-          }
-        })
-        .filter(
-          (book) =>
-            // Ensure at least one required field is present
-            book.call_number || book.accession_number || book.title
-        )
-
-      // Log the parsed books for debugging
-      console.log('Parsed books:', books)
-
-      if (books.length === 0) {
-        throw new Error('No valid books found in the file')
-      }
-
-      return books
-    } catch (error) {
-      console.error('CSV Parsing Error:', error)
-      console.log('Raw text:', text)
-      throw new Error(`CSV parsing failed: ${error.message}`)
-    }
+  const currentLoadingState = {
+    icon: <div className="spinner"></div>,
+    text: loadingText || 'Processing...'
   }
 
   const uploadBooks = async (books) => {
@@ -149,33 +90,90 @@ function ImportBooks({ onClose, onRefresh }) {
 
   const processFile = async (file) => {
     try {
-      setImporting(true)
       if (!file) return
-
       setSelectedFile(file)
-      const reader = new FileReader()
-      reader.onload = async (e) => {
-        const content = e.target.result
-        try {
-          const books = parseCSV(content)
-          if (books.length === 0) {
-            throw new Error('No valid books found in CSV')
+
+      Papa.parse(file, {
+        skipEmptyLines: true,
+        complete: (results) => {
+          try {
+            if (results.errors.length > 0) {
+              console.error('CSV Parsing Errors:', results.errors)
+              throw new Error('Error parsing CSV file')
+            }
+
+            const rows = results.data
+            // Find header row index and skip it
+            const headerIndex = rows.findIndex((row) =>
+              row.some(
+                (cell) =>
+                  cell?.includes('CALL NUMBER') ||
+                  cell?.includes('ACC.') ||
+                  cell?.includes('REFERENCE BOOKS')
+              )
+            )
+
+            if (headerIndex === -1) {
+              throw new Error('Could not find header row in CSV')
+            }
+
+            // Skip header and any rows before it, plus the header row itself
+            const books = rows
+              .slice(headerIndex + 1) // Skip the header row too
+              .filter((row) => row.length >= 6)
+              .map((row) => ({
+                call_number: row[0]?.trim() || null,
+                accession_number: row[1]?.trim() || null,
+                author: row[2]?.trim() || null,
+                title: row[3]?.trim() || null,
+                copies: row[4]?.trim() ? parseInt(row[4].trim()) : null,
+                year: row[5]?.trim() ? parseInt(row[5].trim()) : null
+              }))
+              .filter((book) => book.call_number || book.accession_number || book.title)
+
+            if (books.length === 0) {
+              throw new Error('No valid books found in the file')
+            }
+
+            setParsedData(books)
+          } catch (error) {
+            console.error('Error parsing CSV:', error)
+            toast.error('Invalid CSV file format or no valid books found')
           }
-          await uploadBooks(books)
-        } catch (error) {
-          console.error('Error parsing CSV:', error)
-          toast.error('Invalid CSV file format or no valid books found')
+        },
+        error: (error) => {
+          console.error('Error reading file:', error)
+          toast.error('Error reading file')
         }
-      }
-      reader.readAsText(file)
+      })
+    } catch (error) {
+      console.error('Error processing file:', error)
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (!parsedData) return
+    setImporting(true)
+    try {
+      await uploadBooks(parsedData)
+    } catch (error) {
+      console.error('Error uploading books:', error)
+      toast.error('Upload failed')
     } finally {
       setImporting(false)
+    }
+  }
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose()
     }
   }
 
   const removeFile = () => {
     setSelectedFile(null)
     setProgress({ current: 0, total: 0 })
+    setParsedData(null)
   }
 
   const handleDrag = (e) => {
@@ -199,77 +197,138 @@ function ImportBooks({ onClose, onRefresh }) {
     }
   }
 
-  return (
-    <>
-      <div className="import-modal-overlay" onClick={onClose}></div>
-      <div className="import-books-modal">
-        <button className="close-button" onClick={onClose}>
-          <FaTimes />
-        </button>
-        <div className="modal-content">
-          <h2>Import Books</h2>
+  const renderPreviewTable = () => {
+    if (!parsedData) return null
 
-          {importing && (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <div className="loading-text">{loadingText}</div>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                ></div>
-                <span>
-                  {progress.current} / {progress.total}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {selectedFile ? (
-            <div className="selected-file">
-              <FaFile className="file-icon" />
-              <span className="file-name">{selectedFile.name}</span>
-              <button className="remove-file" onClick={removeFile} disabled={importing}>
-                <FaTrash />
-              </button>
-            </div>
-          ) : (
-            <div
-              className={`drop-zone ${dragActive ? 'drag-active' : ''}`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <FaCloudUploadAlt className="upload-icon" />
-              <p>Drag and drop your CSV file here</p>
-              <p>or</p>
-              <label className="file-input-label">
-                <input
-                  type="file"
-                  accept=".csv,.txt"
-                  onChange={(e) => processFile(e.target.files[0])}
-                  disabled={importing}
-                />
-                <span>{importing ? 'Uploading...' : 'Choose File'}</span>
-              </label>
-            </div>
-          )}
-
-          <div className="format-info">
-            <h3>Expected Format (Tab-separated):</h3>
-            <div className="format-table">
-              <div>CALL NUMBER</div>
-              <div>ACC. # (Accession Number)</div>
-              <div>AUTHOR/S</div>
-              <div>TITLE/S</div>
-              <div># OF COPIES</div>
-              <div>COPYRIGHT</div>
-            </div>
-          </div>
+    return (
+      <div className="csv-preview">
+        <h3>Preview ({parsedData.length} books found)</h3>
+        <div className="preview-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Call Number</th>
+                <th>Accession Number</th>
+                <th>Author</th>
+                <th>Title</th>
+                <th>Copies</th>
+                <th>Year</th>
+              </tr>
+            </thead>
+            <tbody>
+              {parsedData.map((book, index) => (
+                <tr key={index}>
+                  <td className="call-number" data-content={book.call_number}>
+                    {book.call_number || '-'}
+                  </td>
+                  <td>{book.accession_number || '-'}</td>
+                  <td>{book.author || '-'}</td>
+                  <td>{book.title || '-'}</td>
+                  <td>{book.copies || '-'}</td>
+                  <td>{book.year || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-    </>
+    )
+  }
+
+  return (
+    <div className="modal-overlay" onClick={handleOverlayClick}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {importing ? (
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Importing Books</h2>
+            </div>
+            <div className="upload-progress">
+              <div className="loading-icon-container">{currentLoadingState.icon}</div>
+              <div className="loading-status">
+                <h3>{currentLoadingState.text}</h3>
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                  >
+                    <span className="progress-text">
+                      {progress.current} / {progress.total} books
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="modal-header">
+              <h2>Import Books</h2>
+              <button className="close-btn" onClick={onClose}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="import-form">
+              {selectedFile ? (
+                <>
+                  <div className="selected-file">
+                    <FaFile className="file-icon" />
+                    <span className="file-name">{selectedFile.name}</span>
+                    <button className="remove-file" onClick={removeFile}>
+                      <FaTrash />
+                    </button>
+                  </div>
+                  {parsedData && (
+                    <>
+                      {renderPreviewTable()}
+                      <div className="action-buttons">
+                        <button className="submit-btn" onClick={handleSubmit}>
+                          Import {parsedData.length} Books
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div
+                  className={`drop-zone ${dragActive ? 'drag-active' : ''}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <FaCloudUploadAlt className="upload-icon" />
+                  <p>Drag and drop your CSV file here</p>
+                  <p>or</p>
+                  <label className="file-input-label">
+                    <input
+                      type="file"
+                      accept=".csv,.txt"
+                      onChange={(e) => processFile(e.target.files[0])}
+                    />
+                    <span>Choose File</span>
+                  </label>
+                </div>
+              )}
+              {!selectedFile && (
+                <div className="format-info">
+                  <h3>Expected Format (Tab-separated):</h3>
+                  <div className="format-table">
+                    <div>CALL NUMBER</div>
+                    <div>ACC. # (Accession Number)</div>
+                    <div>AUTHOR/S</div>
+                    <div>TITLE/S</div>
+                    <div># OF COPIES</div>
+                    <div>COPYRIGHT</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   )
 }
 
