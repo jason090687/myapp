@@ -8,6 +8,7 @@ import './BookDetailsModal.css'
 const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
   const [bookDetails, setBookDetails] = useState(null)
   const [imageLoading, setImageLoading] = useState(true)
+  const [isClosing, setIsClosing] = useState(false) // Add this state
   const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
@@ -88,9 +89,22 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     { label: 'Processed By', value: book.processedBy }
   ]
 
+  const handleDelete = async (id) => {
+    setIsClosing(true)
+    // Reduce timeout to make it feel snappier
+    setTimeout(() => {
+      onDelete(id)
+      onClose()
+      setIsClosing(false)
+    }, 200)
+  }
+
   return (
     <div className="book-details-overlay" onClick={onClose}>
-      <div className="book-details-content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`book-details-content ${isClosing ? 'modal-exit' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="book-details-header">
           <div className="header-content">
             <h2>Book Details</h2>
@@ -119,7 +133,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
           <button className="action-button edit" onClick={() => onEdit(book)}>
             <FaEdit /> Edit
           </button>
-          <button className="action-button delete" onClick={() => onDelete(book.id)}>
+          <button className="action-button delete" onClick={() => handleDelete(book.id)}>
             <FaTrash /> Delete
           </button>
         </div>
