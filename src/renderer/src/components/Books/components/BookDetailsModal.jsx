@@ -29,7 +29,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
   if (!isOpen || !book) return null
 
   const renderBookCover = (coverUrl) => (
-    <div className="book-cover-container" style={{ display: 'flex', justifyContent: 'center' }}>
+    <div className="book-cover-container" style={{ display: 'flex', justifyContent: 'start' }}>
       {coverUrl ? (
         <>
           {imageLoading && <div className="book-cover-skeleton pulse" />}
@@ -74,6 +74,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     { label: 'Physical Description', value: book.physicalDescription },
     { label: 'ISBN', value: book.isbn },
     { label: 'Accession Number', value: book.accessionNo },
+    { label: 'call_number', value: book.call_number },
     {
       label: 'Copy Number',
       value: (() => {
@@ -110,7 +111,13 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
             <h2>Book Details</h2>
             <span className={`status-tag ${book.status?.toLowerCase()}`}>{book.status}</span>
           </div>
-          <button className="close-button" onClick={onClose}>
+          <button
+            className="close-button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose()
+            }}
+          >
             <FaTimes />
           </button>
         </div>
