@@ -16,34 +16,28 @@ function ImportBooks({ onClose, onRefresh }) {
   const [parsedData, setParsedData] = useState(null)
 
   const loadingMessages = [
-    'Uploading your books...',
-    'Processing data...',
-    'Almost there...',
-    'Hang tight, importing...',
-    'Just a moment...'
+    { text: 'Processing your library data...', icon: '📚' },
+    { text: 'Organizing books...', icon: '📖' },
+    { text: 'Adding new books to shelf...', icon: '📑' },
+    { text: 'Cataloging items...', icon: '🗃️' },
+    { text: 'Almost there...', icon: '✨' }
   ]
+
+  const [currentLoadingState, setCurrentLoadingState] = useState(loadingMessages[0])
 
   useEffect(() => {
     if (importing) {
       const interval = setInterval(() => {
-        const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
-        setLoadingText(randomMessage)
-      }, 2000)
+        const randomIndex = Math.floor(Math.random() * loadingMessages.length)
+        setCurrentLoadingState(loadingMessages[randomIndex])
+      }, 3000)
       return () => clearInterval(interval)
     }
   }, [importing])
 
-  const currentLoadingState = {
-    icon: <div className="spinner"></div>,
-    text: loadingText || 'Processing...'
-  }
-
   const uploadBooks = async (books) => {
     setProgress({ current: 0, total: books.length })
     let successCount = 0
-    let failureCount = 0
-
-    const loadingToast = toast.loading('Uploading books...')
 
     try {
       for (const book of books) {
@@ -53,37 +47,33 @@ function ImportBooks({ onClose, onRefresh }) {
           fields.forEach((field) => {
             let value = book[field]
             if (field === 'copies' || field === 'year') {
-              value = value ? parseInt(value) : null
+              value = value ? parseInt(value) : ''
               if (isNaN(value)) {
                 throw new Error(`Invalid value for ${field}: ${book[field]}`)
               }
             }
-            formData.append(field, value === '' ? null : value)
+            formData.append(field, value === '' ? '' : value) // Changed null to empty string
           })
 
           await uploadNewBook(token, formData)
           successCount++
         } catch (error) {
           console.error(`Failed to upload book: ${book.title}`, error)
-          failureCount++
         }
         setProgress((prev) => ({ ...prev, current: prev.current + 1 }))
       }
 
-      toast.dismiss(loadingToast)
-
       if (successCount > 0) {
         toast.success(`Successfully imported ${successCount} books`)
-        if (failureCount > 0) {
-          toast.error(`Failed to import ${failureCount} books`)
-        }
-        onClose()
-        onRefresh() // Refresh the books table
+        // Add a small delay before closing and refreshing
+        setTimeout(() => {
+          onRefresh() // Refresh the books table first
+          onClose() // Then close the modal
+        }, 500)
       } else {
         toast.error('No books were imported successfully')
       }
     } catch (error) {
-      toast.dismiss(loadingToast)
       toast.error('Import failed: ' + error.message)
     }
   }
@@ -103,31 +93,28 @@ function ImportBooks({ onClose, onRefresh }) {
             }
 
             const rows = results.data
-            // Find header row index and skip it
-            const headerIndex = rows.findIndex((row) =>
-              row.some(
-                (cell) =>
-                  cell?.includes('CALL NUMBER') ||
-                  cell?.includes('ACC.') ||
-                  cell?.includes('REFERENCE BOOKS')
-              )
-            )
-
-            if (headerIndex === -1) {
-              throw new Error('Could not find header row in CSV')
-            }
-
-            // Skip header and any rows before it, plus the header row itself
             const books = rows
-              .slice(headerIndex + 1) // Skip the header row too
+              .slice(2) // Start from row 3
+              .filter((row) => {
+                // Skip rows containing header-like content or all dashes
+                const isHeaderRow = row.some(
+                  (cell) =>
+                    cell?.includes('TITLE/S') ||
+                    cell?.includes('AUTHOR/S') ||
+                    cell?.includes('ACC.') ||
+                    cell === '-'
+                )
+                const isAllDashes = row.every((cell) => cell === '-')
+                return !isHeaderRow && !isAllDashes
+              })
               .filter((row) => row.length >= 6)
               .map((row) => ({
-                call_number: row[0]?.trim() || null,
-                accession_number: row[1]?.trim() || null,
-                author: row[2]?.trim() || null,
-                title: row[3]?.trim() || null,
-                copies: row[4]?.trim() ? parseInt(row[4].trim()) : null,
-                year: row[5]?.trim() ? parseInt(row[5].trim()) : null
+                call_number: row[0]?.trim() || '',
+                accession_number: row[1]?.trim() || '',
+                author: row[2]?.trim() || '',
+                title: row[3]?.trim() || '',
+                copies: row[4]?.trim() ? parseInt(row[4].trim()) : '',
+                year: row[5]?.trim() ? parseInt(row[5].trim()) : ''
               }))
               .filter((book) => book.call_number || book.accession_number || book.title)
 
@@ -219,13 +206,13 @@ function ImportBooks({ onClose, onRefresh }) {
               {parsedData.map((book, index) => (
                 <tr key={index}>
                   <td className="call-number" data-content={book.call_number}>
-                    {book.call_number || '-'}
+                    {book.call_number || ''}
                   </td>
-                  <td>{book.accession_number || '-'}</td>
-                  <td>{book.author || '-'}</td>
-                  <td>{book.title || '-'}</td>
-                  <td>{book.copies || '-'}</td>
-                  <td>{book.year || '-'}</td>
+                  <td>{book.accession_number || ''}</td>
+                  <td>{book.author || ''}</td>
+                  <td>{book.title || ''}</td>
+                  <td>{book.copies || ''}</td>
+                  <td>{book.year || ''}</td>
                 </tr>
               ))}
             </tbody>
@@ -239,23 +226,19 @@ function ImportBooks({ onClose, onRefresh }) {
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         {importing ? (
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Importing Books</h2>
-            </div>
-            <div className="upload-progress">
-              <div className="loading-icon-container">{currentLoadingState.icon}</div>
-              <div className="loading-status">
-                <h3>{currentLoadingState.text}</h3>
+          <div className="loading-container">
+            <div className="loading-content">
+              <div className="loading-icon">{currentLoadingState.icon}</div>
+              <h3 className="loading-title">{currentLoadingState.text}</h3>
+              <div className="progress-wrapper">
                 <div className="progress-bar">
                   <div
                     className="progress-fill"
                     style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                  >
-                    <span className="progress-text">
-                      {progress.current} / {progress.total} books
-                    </span>
-                  </div>
+                  />
+                </div>
+                <div className="progress-text">
+                  {progress.current} of {progress.total} books
                 </div>
               </div>
             </div>
