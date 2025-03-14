@@ -5,7 +5,17 @@ import './RenewModal.css'
 import { useSelector } from 'react-redux'
 import { Bounce, toast } from 'react-toastify'
 
-const RenewModal = ({ isOpen, onClose, onSubmit, borrowData = {} }) => {
+const RenewModal = ({
+  isOpen = false,
+  onClose = () => {},
+  onSubmit = () => {},
+  borrowData = {
+    id: '',
+    student: '',
+    book: '',
+    due_date: ''
+  }
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { token } = useSelector((state) => state.auth)
 
@@ -129,24 +139,15 @@ const RenewModal = ({ isOpen, onClose, onSubmit, borrowData = {} }) => {
 }
 
 RenewModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  onSubmit: PropTypes.func,
   borrowData: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     student_name: PropTypes.string,
     book_title: PropTypes.string,
     due_date: PropTypes.string
   })
-}
-
-RenewModal.defaultProps = {
-  borrowData: {
-    id: '',
-    student: '',
-    book: '',
-    due_date: ''
-  }
 }
 
 export default RenewModal

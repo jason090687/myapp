@@ -192,6 +192,7 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
   width: 100%;
+  max-width: 100%;
 }
 
 .chart:hover,
