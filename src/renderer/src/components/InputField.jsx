@@ -3,7 +3,14 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import PropTypes from 'prop-types'
 import './InputField.css'
 
-const InputField = ({ type, placeholder, icon: Icon, value, onChange, name }) => {
+const InputField = ({
+  type = 'text',
+  placeholder = '',
+  icon: Icon,
+  value = '',
+  onChange = () => {},
+  name = ''
+}) => {
   const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e) => {
@@ -37,16 +44,12 @@ const InputField = ({ type, placeholder, icon: Icon, value, onChange, name }) =>
 }
 
 InputField.propTypes = {
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
   placeholder: PropTypes.string,
   icon: PropTypes.elementType.isRequired,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired
-}
-
-InputField.defaultProps = {
-  placeholder: ''
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  name: PropTypes.string
 }
 
 export default InputField

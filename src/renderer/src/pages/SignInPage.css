@@ -215,13 +215,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
   height: 100%; /* Fill button height */
+  width: 100%; /* Added to ensure full width */
+  padding: 0 1rem; /* Added padding for better spacing */
 }
 
 .spinner {
-  width: 20px; /* Slightly larger spinner */
-  height: 20px;
+  width: 24px; /* Made slightly larger */
+  height: 24px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top: 2px solid #fff;
@@ -232,6 +233,9 @@
 .spinner-wrapper span {
   font-size: 0.875rem; /* Adjusted text size */
   white-space: nowrap; /* Prevent text wrapping */
+  text-align: center; /* Added to ensure text is centered */
+  flex: 1; /* Added to allow text to take remaining space */
+  margin-right: 20px; /* Added to offset the spinner width */
 }
 
 @keyframes spin {

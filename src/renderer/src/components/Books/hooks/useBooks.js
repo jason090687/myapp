@@ -118,27 +118,29 @@ export const useBooks = (token) => {
     }
   }
 
-  const handleDeleteBook = async (bookId) => {
+  const handleDeleteBook = async (id) => {
     try {
-      await deleteBook(token, bookId)
-      setBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
-      setAllBooks((prevBooks) => prevBooks.filter((book) => book.id !== bookId))
-      setPagination((prev) => ({
-        ...prev,
-        count: Math.max(0, prev.count - 1)
-      }))
-      toast.success('Book deleted successfully', {
-        position: 'top-right',
-        autoClose: 2000
-      })
-      return true
+      await deleteBook(token, id)
+      toast.success('Book deleted successfully')
+
+      // Refetch the current page data to fill the gap
+      await fetchBooksData(pagination.currentPage)
+
+      // If we're on a page with only one item, go to previous page
+      if (books.length === 1 && pagination.currentPage > 1) {
+        await fetchBooksData(pagination.currentPage - 1)
+      } else {
+        // Otherwise just refresh current page
+        await fetchBooksData(pagination.currentPage)
+      }
+
+      // Also update the full book list if it exists
+      if (allBooks.length > 0) {
+        await fetchAllBooks()
+      }
     } catch (error) {
       console.error('Error deleting book:', error)
-      toast.error('Failed to delete book. Please try again.', {
-        position: 'top-right',
-        autoClose: 3000
-      })
-      return false
+      toast.error('Failed to delete book')
     }
   }
 

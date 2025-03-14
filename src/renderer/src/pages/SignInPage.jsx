@@ -162,7 +162,6 @@ function SignInPage() {
                   {isLoading ? (
                     <div className="spinner-wrapper">
                       <div className="spinner" />
-                      <span>Signing in...</span>
                     </div>
                   ) : (
                     'Log In'

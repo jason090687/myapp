@@ -207,7 +207,6 @@ function SignUpPage() {
             {isLoading ? (
               <div className="spinner-wrapper">
                 <div className="spinner" />
-                <span>Signing up...</span>
               </div>
             ) : (
               'Sign Up'

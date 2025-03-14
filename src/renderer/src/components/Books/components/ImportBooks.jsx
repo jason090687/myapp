@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
@@ -14,6 +14,9 @@ function ImportBooks({ onClose, onRefresh }) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [loadingText, setLoadingText] = useState('')
   const [parsedData, setParsedData] = useState(null)
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [isCancelled, setIsCancelled] = useState(false)
+  const cancelRef = useRef(false)
 
   const loadingMessages = [
     { text: 'Processing your library data...', icon: '📚' },
@@ -41,6 +44,11 @@ function ImportBooks({ onClose, onRefresh }) {
 
     try {
       for (const book of books) {
+        if (cancelRef.current) {
+          toast.success(`Import cancelled. ${successCount} books were imported.`)
+          return
+        }
+
         try {
           const formData = new FormData()
           const fields = ['call_number', 'accession_number', 'author', 'title', 'copies', 'year']
@@ -58,8 +66,10 @@ function ImportBooks({ onClose, onRefresh }) {
           await uploadNewBook(token, formData)
           successCount++
         } catch (error) {
+          if (cancelRef.current) return
           console.error(`Failed to upload book: ${book.title}`, error)
         }
+        if (cancelRef.current) return
         setProgress((prev) => ({ ...prev, current: prev.current + 1 }))
       }
 
@@ -74,7 +84,9 @@ function ImportBooks({ onClose, onRefresh }) {
         toast.error('No books were imported successfully')
       }
     } catch (error) {
-      toast.error('Import failed: ' + error.message)
+      if (!cancelRef.current) {
+        toast.error('Import failed: ' + error.message)
+      }
     }
   }
 
@@ -141,13 +153,18 @@ function ImportBooks({ onClose, onRefresh }) {
   const handleSubmit = async () => {
     if (!parsedData) return
     setImporting(true)
+    cancelRef.current = false
     try {
       await uploadBooks(parsedData)
     } catch (error) {
-      console.error('Error uploading books:', error)
-      toast.error('Upload failed')
+      if (!cancelRef.current) {
+        console.error('Error uploading books:', error)
+        toast.error('Upload failed')
+      }
     } finally {
-      setImporting(false)
+      if (!cancelRef.current) {
+        setImporting(false)
+      }
     }
   }
 
@@ -182,6 +199,17 @@ function ImportBooks({ onClose, onRefresh }) {
     if (file) {
       await processFile(file)
     }
+  }
+
+  const handleCancelImport = () => {
+    cancelRef.current = true
+    setIsCancelling(true)
+    setTimeout(() => {
+      onRefresh() // Refresh the table before closing
+      setImporting(false)
+      setIsCancelling(false)
+      onClose()
+    }, 500)
   }
 
   const renderPreviewTable = () => {
@@ -229,7 +257,9 @@ function ImportBooks({ onClose, onRefresh }) {
           <div className="loading-container">
             <div className="loading-content">
               <div className="loading-icon">{currentLoadingState.icon}</div>
-              <h3 className="loading-title">{currentLoadingState.text}</h3>
+              <h3 className="loading-title">
+                {isCancelling ? 'Cancelling import...' : currentLoadingState.text}
+              </h3>
               <div className="progress-wrapper">
                 <div className="progress-bar">
                   <div
@@ -241,6 +271,11 @@ function ImportBooks({ onClose, onRefresh }) {
                   {progress.current} of {progress.total} books
                 </div>
               </div>
+              {!isCancelling && (
+                <button className="cancel-import-btn" onClick={handleCancelImport}>
+                  Cancel
+                </button>
+              )}
             </div>
           </div>
         ) : (
