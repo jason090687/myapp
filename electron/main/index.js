@@ -9,9 +9,9 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, '../preload/index.js'),
+      preload: path.join(__dirname, '../preload/index.mjs'),
       webSecurity: true,
-      devTools: true,
+      // devTools: true,
       spellcheck: true
     }
   })
@@ -33,26 +33,13 @@ async function createWindow() {
     })
   })
 
-  // Configure CSP
-  win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-          "style-src 'self' 'unsafe-inline'",
-          "connect-src 'self' http://countmein.pythonanywhere.com ws: wss:",
-          "img-src 'self' data: https:",
-          "frame-src 'self'",
-          "worker-src 'self' blob:"
-        ].join('; ')
-      }
-    })
-  })
+  // Remove or comment out the existing CSP configuration block
+  // win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+  //   ...
+  // })
 
   // Disable Autofill warnings
-  win.webContents.on('did-finish-load', () => {
+  mainWindow.webContents.on('did-finish-load', () => {
     win.webContents.executeJavaScript(`
       delete window.navigator.serviceWorker;
       delete window.Autofill;
@@ -68,6 +55,8 @@ async function createWindow() {
 
   return win
 }
+
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
 app.whenReady().then(createWindow)
 

@@ -1,20 +1,29 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
+
+// Expose protected methods to renderer process
+contextBridge.exposeInMainWorld('api', {
+  send: (channel, data) => {
+    const validChannels = ['save-pdf', 'ping']
+    if (validChannels.includes(channel)) {
+      ipcRenderer.send(channel, data)
+    }
+  },
+  receive: (channel, func) => {
+    const validChannels = ['update-status', 'update-progress']
+    if (validChannels.includes(channel)) {
+      ipcRenderer.on(channel, (event, ...args) => func(...args))
+    }
+  }
+})
 
 // Custom APIs for renderer
 const api = {}
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+// Add additional context bridge exposure if needed
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('electron', api)
   } catch (error) {
     console.error(error)
   }
-} else {
-  window.electron = electronAPI
-  window.api = api
 }

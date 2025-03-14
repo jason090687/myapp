@@ -23,14 +23,15 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js'),
+      preload: path.join(__dirname, '../preload/index.mjs'),
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: false,
       allowRunningInsecureContent: false,
       experimentalFeatures: false,
-      enableBlinkFeatures: false
+      enableBlinkFeatures: false,
+      devTools: !app.isPackaged // Disable DevTools in production
     }
   })
 
@@ -40,7 +41,7 @@ function createWindow() {
   // Load the app
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-    mainWindow.webContents.openDevTools()
+    // mainWindow.webContents.openDevTools()
   } else {
     const indexPath = path.join(__dirname, '../renderer/index.html')
     console.log('Loading production file from:', indexPath)
@@ -50,6 +51,14 @@ function createWindow() {
       console.error('Could not find index.html at:', indexPath)
     }
   }
+
+  // Add F12 shortcut for DevTools
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12') {
+      mainWindow.webContents.toggleDevTools()
+      event.preventDefault()
+    }
+  })
 
   // Handle Autofill errors
   mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
@@ -153,12 +162,15 @@ app.whenReady().then(() => {
         ...details.responseHeaders,
         'Content-Security-Policy': [
           "default-src 'self';" +
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval';" +
+            "script-src 'self' 'unsafe-inline';" +
             "style-src 'self' 'unsafe-inline';" +
             "connect-src 'self' http://localhost:* ws://localhost:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com;" +
             "img-src 'self' data: https: blob: http://countmein.pythonanywhere.com;" +
-            `worker-src 'self' blob:;` +
-            `frame-src 'self';`
+            "worker-src 'self' blob:;" +
+            "frame-src 'self';" +
+            "font-src 'self' data:;" +
+            "media-src 'self';" +
+            "object-src 'none'"
         ]
       }
     })
