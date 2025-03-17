@@ -314,7 +314,8 @@ export const processOverduePayment = async (token, borrowId, paymentData) => {
         paid: true,
         paid_at: paymentData.paid_at,
         is_returned: paymentData.is_returned || false,
-        returned_date: paymentData.is_returned ? new Date().toISOString().split('T')[0] : null
+        returned_date: paymentData.is_returned ? new Date().toISOString().split('T')[0] : null,
+        or_number: paymentData.or_number // Add this line to include OR number
       },
       getAuthHeaders(token)
     )
