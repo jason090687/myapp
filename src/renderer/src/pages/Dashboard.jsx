@@ -295,23 +295,10 @@ function Dashboard() {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
-        labels: {
-          font: {
-            size: 14,
-            weight: 'bold'
-          },
-          padding: 20
-        }
+        display: false // Hide the legend
       },
       title: {
-        display: true,
-        text: 'Library Statistics',
-        font: {
-          size: 20,
-          weight: 'bold'
-        },
-        padding: 20
+        display: true // Hide the title
       },
       tooltip: {
         enabled: true,
