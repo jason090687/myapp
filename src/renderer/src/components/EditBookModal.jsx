@@ -120,7 +120,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
         physical_description: bookData.physicalDescription || '',
         isbn: bookData.isbn || '',
         accession_number: bookData.accessionNo || '',
-        call_number: bookData.callNumber || '',
+        call_number: bookData.call_number || '', // Changed from callNumber to call_number
         barcode: bookData.barcode || '',
         date_received: formatDatetime(bookData.dateReceived || ''),
         subject: bookData.subject || '',
