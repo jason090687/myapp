@@ -19,20 +19,18 @@ function Books() {
 
   const {
     books,
-    allBooks,
-    sortedBooks,
     isLoading,
-    isFetchingAll,
     pagination,
     sortConfig,
     fetchBooksData,
-    fetchAllBooks,
     handleDeleteBook,
     handleSort,
     handlePageChange
   } = useBooks(token)
 
-  const { searchTerm, debouncedSearchTerm, handleSearch } = useBookSearch(fetchAllBooks)
+  const { searchTerm, debouncedSearchTerm, handleSearch } = useBookSearch(() => {
+    fetchBooksData(1, debouncedSearchTerm)
+  })
 
   const {
     isModalOpen,
@@ -60,7 +58,7 @@ function Books() {
   }
 
   useEffect(() => {
-    fetchAllBooks(debouncedSearchTerm)
+    fetchBooksData(1, debouncedSearchTerm)
   }, [debouncedSearchTerm])
 
   useEffect(() => {
@@ -83,13 +81,12 @@ function Books() {
             onSearch={handleSearch}
             onAddBook={handleAddBook}
             token={token}
-            onRefresh={fetchBooksData} // Add this line
+            onRefresh={fetchBooksData}
           />
 
           <BooksTable
             books={books}
             isLoading={isLoading}
-            isFetchingAll={isFetchingAll}
             sortConfig={sortConfig}
             onSort={handleSort}
             onEditBook={handleEditBook}
@@ -97,11 +94,11 @@ function Books() {
             onRowClick={handleRowClick}
           />
 
-          {!isLoading && !isFetchingAll && books.length > 0 && (
+          {!isLoading && books.length > 0 && (
             <Pagination
               currentPage={pagination.currentPage}
-              totalPages={Math.ceil((sortedBooks || allBooks).length / 10)}
-              totalItems={(sortedBooks || allBooks).length}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalItems}
               onPageChange={handlePageChange}
             />
           )}

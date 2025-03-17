@@ -135,10 +135,9 @@ export const updateUserProfile = async (token, formData) => {
 export const fetchBooks = async (token, page = 1, search = '') => {
   try {
     const response = await axios.get(
-      `${API_URL}/marc/search/?page=${page}&search=${encodeURIComponent(search)}`,
+      `${API_URL}/marc/search/?page=${page}&page_size=10&search=${encodeURIComponent(search)}`,
       getAuthHeaders(token)
     )
-    // No need to transform the URL since it's already complete from the API
     return response.data
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch books')
