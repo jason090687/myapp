@@ -78,9 +78,9 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     {
       label: 'Copy Number',
       value: (() => {
-        const copyNum = book.copy_number.toString().split(' of ')[0]
-        const totalCopies = parseInt(book.copies)
-        return totalCopies ? `${copyNum} of ${totalCopies}` : copyNum
+        const copyNum = book.copy_number?.toString()?.split(' of ')[0] || '1'
+        const totalCopies = parseInt(book.copies) || 1
+        return totalCopies > 1 ? `${copyNum} of ${totalCopies}` : copyNum
       })()
     },
     { label: 'Barcode', value: book.barcode },
