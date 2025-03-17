@@ -111,30 +111,31 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
         id: bookData.id,
         title: bookData.title || '',
         author: bookData.author || '',
-        series_title: bookData.seriesTitle || '',
+        series_title: bookData.series_title || '',
         publisher: bookData.publisher || '',
-        place_of_publication: bookData.placeOfPublication || '',
+        place_of_publication: bookData.place_of_publication || '',
         year: bookData.year || '',
         edition: bookData.edition || '',
         volume: bookData.volume || '',
-        physical_description: bookData.physicalDescription || '',
+        physical_description: bookData.physical_description || '',
         isbn: bookData.isbn || '',
-        accession_number: bookData.accessionNo || '',
-        call_number: bookData.call_number || '', // Changed from callNumber to call_number
+        accession_number: bookData.accession_number || '',
+        call_number: bookData.call_number || '',
         barcode: bookData.barcode || '',
-        date_received: formatDatetime(bookData.dateReceived || ''),
+        date_received: formatDatetime(bookData.date_received || ''),
         subject: bookData.subject || '',
-        additional_author: bookData.additionalAuthor || '',
-        status: bookData.status || 'available', // Add fallback
-        date_processed: formatDatetime(bookData.dateProcessed || new Date()),
-        processed_by: userDetails?.id || currentUser?.id || bookData.processed_by,
-        processed_by_name: userDetails?.first_name || currentUser?.name || '', // Store name separately
+        additional_author: bookData.additional_author || '',
+        status: bookData.status?.toLowerCase() || 'available',
+        date_processed: formatDatetime(bookData.date_processed || new Date()),
+        processed_by: bookData.processed_by || currentUser?.id,
+        processed_by_name: bookData.name || currentUser?.name || '',
+        copies: bookData.copies || '1',
         book_cover: null,
         selectedFileName: '',
-        coverPreview: null
+        coverPreview: bookData.book_cover || null
       }))
     }
-  }, [bookData, userDetails, currentUser]) // Ensure effect runs when `bookData` updates
+  }, [bookData, userDetails, currentUser])
 
   // Add a reset function
   const resetForm = () => {

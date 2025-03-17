@@ -67,14 +67,16 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     },
     { label: 'Title', value: book.title },
     { label: 'Author', value: book.author },
-    { label: 'Place of Publication', value: book.placeOfPublication },
+    { label: 'Series Title', value: book.series_title },
+    { label: 'Publisher', value: book.publisher },
+    { label: 'Place of Publication', value: book.place_of_publication },
     { label: 'Year', value: book.year },
     { label: 'Edition', value: book.edition },
     { label: 'Volume', value: book.volume },
-    { label: 'Physical Description', value: book.physicalDescription },
+    { label: 'Physical Description', value: book.physical_description },
     { label: 'ISBN', value: book.isbn },
-    { label: 'Accession Number', value: book.accessionNo },
-    { label: 'call_number', value: book.call_number },
+    { label: 'Accession Number', value: book.accession_number },
+    { label: 'Call Number', value: book.call_number },
     {
       label: 'Copy Number',
       value: (() => {
@@ -84,10 +86,12 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
       })()
     },
     { label: 'Barcode', value: book.barcode },
-    { label: 'Date Received', value: formatDate(book.dateReceived) },
+    { label: 'Date Received', value: formatDate(book.date_received) },
     { label: 'Subject', value: book.subject },
-    { label: 'Date Processed', value: formatDate(book.dateProcessed) },
-    { label: 'Processed By', value: book.processedBy }
+    { label: 'Additional Author', value: book.additional_author },
+    { label: 'Status', value: book.status },
+    { label: 'Date Processed', value: formatDate(book.date_processed) },
+    { label: 'Processed By', value: book.name }
   ]
 
   const handleDelete = async (id) => {
