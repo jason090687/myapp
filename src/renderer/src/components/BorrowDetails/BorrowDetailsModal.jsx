@@ -60,7 +60,6 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
     setProcessingAction('pay')
     try {
       await onPay(data)
-      // Don't close the modal here
     } catch (error) {
       console.error('Error processing payment:', error)
       toast.error('Failed to process payment')

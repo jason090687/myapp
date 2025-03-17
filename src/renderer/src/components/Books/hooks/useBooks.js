@@ -7,72 +7,35 @@ export const useBooks = (token) => {
   const [books, setBooks] = useState([])
   const [allBooks, setAllBooks] = useState([])
   const [sortedBooks, setSortedBooks] = useState(null)
-  const [isLoading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isFetchingAll, setIsFetchingAll] = useState(false)
   const [pagination, setPagination] = useState({
-    count: 0,
-    next: null,
-    previous: null,
-    currentPage: 1
+    currentPage: 1,
+    totalPages: 0,
+    totalItems: 0
   })
-  const [sortConfig, setSortConfig] = useState({
-    column: null,
-    direction: null
-  })
+  const [sortConfig, setSortConfig] = useState({ column: '', direction: '' })
 
-  const fetchBooksData = async (page = 1, searchTerm = '') => {
-    setLoading(true)
+  const fetchBooksData = async (page = 1, search = '') => {
+    setIsLoading(true)
     try {
-      const response = await fetchBooks(token, page, searchTerm)
-      if (response) {
-        const booksData = response.results.map(mapBookData)
-        setBooks(booksData)
-        setPagination({
-          count: response.count,
-          next: response.next,
-          previous: response.previous,
-          currentPage: page
-        })
-      }
-    } catch (error) {
-      console.error('Error fetching books', error)
-      toast.error('Failed to fetch books. Please try again.', {
-        position: 'top-right',
-        autoClose: 3000
+      const data = await fetchBooks(token, page, search)
+      setBooks(data.results)
+      setPagination({
+        currentPage: page,
+        totalPages: Math.ceil(data.count / 10),
+        totalItems: data.count
       })
+    } catch (error) {
+      toast.error('Failed to fetch books')
+      console.error('Error fetching books:', error)
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  const handlePageChange = async (newPage) => {
-    if (newPage < 1 || newPage > Math.ceil((sortedBooks || allBooks).length / 10)) return
-
-    setLoading(true)
-    try {
-      // If we have sorted data, use it for pagination
-      if (sortedBooks) {
-        const startIndex = (newPage - 1) * 10
-        const endIndex = startIndex + 10
-        setBooks(sortedBooks.slice(startIndex, endIndex))
-      } else {
-        // Otherwise, fetch new page from server
-        const startIndex = (newPage - 1) * 10
-        const endIndex = startIndex + 10
-        setBooks(allBooks.slice(startIndex, endIndex))
-      }
-
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: newPage,
-        previous: newPage > 1,
-        next: newPage < Math.ceil((sortedBooks || allBooks).length / 10)
-      }))
-    } catch (error) {
-      console.error('Error changing page:', error)
-    } finally {
-      setLoading(false)
-    }
+  const handlePageChange = (newPage) => {
+    fetchBooksData(newPage)
   }
 
   const fetchAllBooks = async (searchTerm = '') => {
@@ -145,31 +108,17 @@ export const useBooks = (token) => {
   }
 
   const handleSort = (column) => {
-    setLoading(true)
-    try {
-      const direction =
-        sortConfig.column === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
-      const sorted = sortData(allBooks, column, direction)
-      setSortedBooks(sorted)
-      setSortConfig({ column, direction })
+    const direction =
+      sortConfig.column === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+    setSortConfig({ column, direction })
 
-      // Update current page view with sorted data
-      const startIndex = (pagination.currentPage - 1) * 10
-      const endIndex = startIndex + 10
-      setBooks(sorted.slice(startIndex, endIndex))
+    const sortedBooks = [...books].sort((a, b) => {
+      if (a[column] < b[column]) return direction === 'asc' ? -1 : 1
+      if (a[column] > b[column]) return direction === 'asc' ? 1 : -1
+      return 0
+    })
 
-      setPagination((prev) => ({
-        ...prev,
-        count: sorted.length,
-        next: endIndex < sorted.length,
-        previous: startIndex > 0
-      }))
-    } catch (error) {
-      console.error('Error sorting books:', error)
-      toast.error('Failed to sort books')
-    } finally {
-      setLoading(false)
-    }
+    setBooks(sortedBooks)
   }
 
   return {

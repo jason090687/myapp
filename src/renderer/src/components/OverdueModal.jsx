@@ -6,7 +6,13 @@ import { Bounce, toast } from 'react-toastify'
 import { useSelector } from 'react-redux'
 import { processOverduePayment, fetchOverdueBorrowedBooks } from '../Features/api'
 
-const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess }) => {
+const OverdueModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  borrowData = { id: 0, student_name: '', book_title: '', due_date: new Date().toISOString() },
+  onSuccess = () => {}
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [overdueAmount, setOverdueAmount] = useState(0)
   const [isLoadingAmount, setIsLoadingAmount] = useState(false)
@@ -79,25 +85,19 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess })
       }
 
       await processOverduePayment(token, borrowData.id, paymentData)
-
-      // First update the data
       await onSubmit(paymentData)
-
-      // Then trigger success callback if provided
-      if (onSuccess) {
-        await onSuccess()
-      }
 
       toast.success(
         selectedAction === 'return'
           ? 'Book returned and payment processed successfully!'
-          : selectedAction === 'renew'
-            ? 'Book renewed and payment processed successfully!'
-            : 'Payment processed successfully!'
+          : 'Book renewed and payment processed successfully!'
       )
 
-      // Only close after all operations are successful
+      // Close both modals
       onClose()
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (error) {
       console.error(error)
       toast.error(error.message || 'Failed to process payment')
@@ -158,7 +158,6 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess })
               value={selectedAction}
               onChange={(e) => setSelectedAction(e.target.value)}
             >
-              <option value="pay">Pay Overdue Only</option>
               <option value="return">Return Book and Pay</option>
               <option value="renew">Renew Book and Pay</option>
             </select>
@@ -180,10 +179,8 @@ const OverdueModal = ({ isOpen, onClose, onSubmit, borrowData = {}, onSuccess })
               </div>
             ) : selectedAction === 'return' ? (
               'Return and Pay'
-            ) : selectedAction === 'renew' ? (
-              'Renew and Pay'
             ) : (
-              'Pay Overdue'
+              'Renew and Pay'
             )}
           </button>
         </div>
@@ -197,10 +194,11 @@ OverdueModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   borrowData: PropTypes.shape({
-    student_name: PropTypes.string.isRequired,
-    book_title: PropTypes.string.isRequired,
-    due_date: PropTypes.string.isRequired
-  }).isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    student_name: PropTypes.string,
+    book_title: PropTypes.string,
+    due_date: PropTypes.string
+  }),
   onSuccess: PropTypes.func
 }
 

@@ -50,7 +50,6 @@ body {
 
 .sidebar-header {
   height: var(--navbar-height);
-  padding: 0 1.5rem; /* Changed padding to be horizontal only */
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -314,6 +313,7 @@ body {
   justify-content: center;
   margin-left: 12px; /* Consistent margin */
   padding: 0.75rem;
+  margin-right: 0;
 }
 
 /* Add tooltip for help guide when collapsed */
@@ -888,6 +888,7 @@ checkout-header a {
   width: 45px;
   padding: 0.75rem;
   margin-left: 0;
+  margin-right: 0;
   justify-content: center;
 }
 
