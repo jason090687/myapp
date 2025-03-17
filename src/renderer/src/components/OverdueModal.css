@@ -480,3 +480,25 @@
   background: #cbd5e1;
   border-radius: 3px;
 }
+
+.or-number-input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 0.875rem;
+  color: #1e293b;
+  transition: all 0.2s ease;
+  margin-top: 0.25rem;
+}
+
+.or-number-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.or-number-input::placeholder {
+  color: #94a3b8;
+}

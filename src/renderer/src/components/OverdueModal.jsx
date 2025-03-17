@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { FaCalendar, FaMoneyBill } from 'react-icons/fa'
 import './OverdueModal.css'
-import { Bounce, toast } from 'react-toastify'
+import { toast } from 'react-toastify'
 import { useSelector } from 'react-redux'
 import { processOverduePayment, fetchOverdueBorrowedBooks } from '../Features/api'
 
@@ -17,6 +17,7 @@ const OverdueModal = ({
   const [overdueAmount, setOverdueAmount] = useState(0)
   const [isLoadingAmount, setIsLoadingAmount] = useState(false)
   const [selectedAction, setSelectedAction] = useState('pay')
+  const [orNumber, setOrNumber] = useState('') // Add this line
   const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
@@ -63,7 +64,14 @@ const OverdueModal = ({
   }
 
   const handlePayment = async () => {
-    if (isSubmitting || !borrowData.id) return
+    if (isSubmitting || !borrowData.id || !orNumber.trim()) {
+      // Add OR number validation
+      if (!orNumber.trim()) {
+        toast.error('OR Number is required')
+        return
+      }
+      return
+    }
     setIsSubmitting(true)
 
     try {
@@ -71,7 +79,8 @@ const OverdueModal = ({
         id: borrowData.id,
         amount: overdueAmount,
         paid: true,
-        paid_at: new Date().toISOString().split('T')[0]
+        paid_at: new Date().toISOString().split('T')[0],
+        or_Number: orNumber.trim() // Add OR number to payload
       }
 
       if (selectedAction === 'return') {
@@ -150,6 +159,17 @@ const OverdueModal = ({
               <FaCalendar className="calendar-icon" />
               {new Date().toLocaleDateString()}
             </p>
+          </div>
+          <div className="overdue-info-group">
+            <label>OR Number</label>
+            <input
+              type="text"
+              className="or-number-input"
+              value={orNumber}
+              onChange={(e) => setOrNumber(e.target.value)}
+              placeholder="Enter OR Number"
+              required
+            />
           </div>
           <div className="overdue-info-group">
             <label>Select Action</label>
