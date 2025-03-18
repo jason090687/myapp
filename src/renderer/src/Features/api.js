@@ -875,3 +875,27 @@ export const fetchAllStudentsForSearch = async (token) => {
     throw new Error(error.response?.data?.message || 'Failed to fetch all students')
   }
 }
+
+// Employee APIs
+export const fetchEmployees = async (token, page = 1, searchTerm = '') => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/employees/?page=${page}&search=${encodeURIComponent(searchTerm)}`,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error fetching employees:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch employees')
+  }
+}
+
+export const createEmployee = async (token, employeeData) => {
+  try {
+    const response = await axios.post(`${API_URL}/employees/`, employeeData, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error creating employee:', error.response?.data || error.message)
+    throw new Error(error.response?.data?.message || 'Failed to create employee')
+  }
+}

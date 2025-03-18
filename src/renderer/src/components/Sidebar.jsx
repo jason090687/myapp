@@ -13,7 +13,8 @@ import {
   FaBell,
   FaUserCircle,
   FaQuestion,
-  FaGraduationCap
+  FaGraduationCap,
+  FaUsers
 } from 'react-icons/fa'
 import { ToastContainer, toast, Bounce } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -58,6 +59,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/books', icon: FaBook, label: 'Books' },
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
     { path: '/students', icon: FaGraduationCap, label: 'Students' },
+    { path: '/staff', icon: FaUsers, label: 'Staff' }, // Add this line
     { separator: true }, // Add separator here
     { path: '/settings', icon: FaCog, label: 'Settings' },
     {

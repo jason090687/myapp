@@ -15,6 +15,7 @@ import ActivationSuccess from '../pages/ActivationSuccess.jsx'
 import ResetPasswordOtp from '../pages/ResetPasswordOtp'
 import StudentsPage from '../pages/StudentsPage'
 import StudentDetailsPage from '../pages/StudentDetailsPage'
+import StaffPage from '../pages/StaffPage'
 
 const router = createHashRouter([
   {
@@ -86,6 +87,10 @@ const router = createHashRouter([
   {
     path: '/students/:studentId',
     element: <StudentDetailsPage />
+  },
+  {
+    path: '/staff',
+    element: <StaffPage />
   }
 ])
 
