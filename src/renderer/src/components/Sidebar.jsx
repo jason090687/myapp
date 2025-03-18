@@ -93,7 +93,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
           <div className="logo-container">
             <img src={logo} alt="logo" style={{ width: '30px', height: '30px' }} />
             <h2 className="brand-text" onClick={handleLogo}>
-              E-Library
+              eLibrary
             </h2>
           </div>
         </div>
