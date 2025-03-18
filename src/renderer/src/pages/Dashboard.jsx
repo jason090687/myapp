@@ -117,9 +117,9 @@ function Dashboard() {
     const fetchStats = async () => {
       try {
         const [dashStats, monthlyData, borrowStats, returnedData] = await Promise.all([
-          fetchDashboardStats(),
+          fetchDashboardStats(token),
           fetchMonthlyReport(token),
-          fetchBorrowedBooksStats(),
+          fetchBorrowedBooksStats(token),
           fetchReturnedBooksCount(token)
         ])
 
@@ -145,16 +145,16 @@ function Dashboard() {
                 currentMonthData.overdue || 0
               ],
               backgroundColor: [
-                'rgba(53, 162, 235, 0.8)',   // Blue for Processed
-                'rgba(255, 159, 64, 0.8)',   // Orange for Borrowed
-                'rgba(75, 192, 192, 0.8)',   // Green for Returned
-                'rgba(255, 99, 132, 0.8)'    // Red for Overdue
+                'rgba(53, 162, 235, 0.8)', // Blue for Processed
+                'rgba(255, 159, 64, 0.8)', // Orange for Borrowed
+                'rgba(75, 192, 192, 0.8)', // Green for Returned
+                'rgba(255, 99, 132, 0.8)' // Red for Overdue
               ],
               borderColor: [
-                'rgb(53, 162, 235)',         // Blue border
-                'rgb(255, 159, 64)',         // Orange border
-                'rgb(75, 192, 192)',         // Green border
-                'rgb(255, 99, 132)'          // Red border
+                'rgb(53, 162, 235)', // Blue border
+                'rgb(255, 159, 64)', // Orange border
+                'rgb(75, 192, 192)', // Green border
+                'rgb(255, 99, 132)' // Red border
               ],
               borderWidth: 1,
               borderRadius: 6
@@ -181,7 +181,7 @@ function Dashboard() {
 
     const fetchStudents = async () => {
       try {
-        const students = await fetchAllStudentsWithBorrowCount()
+        const students = await fetchAllStudentsWithBorrowCount(token)
         setTopBorrowers(students)
       } catch (error) {
         console.error('Error fetching students:', error)
@@ -192,7 +192,7 @@ function Dashboard() {
 
     const loadRecentCheckouts = async () => {
       try {
-        const checkouts = await fetchRecentCheckouts(5)
+        const checkouts = await fetchRecentCheckouts(token, 5)
         // Sort checkouts by borrowed_date in descending order (newest first)
         const sortedCheckouts = checkouts.sort(
           (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
@@ -382,16 +382,16 @@ function Dashboard() {
               selectedMonthData.overdue || 0
             ],
             backgroundColor: [
-              'rgba(53, 162, 235, 0.8)',   // Blue for Processed
-              'rgba(255, 159, 64, 0.8)',   // Orange for Borrowed
-              'rgba(75, 192, 192, 0.8)',   // Green for Returned
-              'rgba(255, 99, 132, 0.8)'    // Red for Overdue
+              'rgba(53, 162, 235, 0.8)', // Blue for Processed
+              'rgba(255, 159, 64, 0.8)', // Orange for Borrowed
+              'rgba(75, 192, 192, 0.8)', // Green for Returned
+              'rgba(255, 99, 132, 0.8)' // Red for Overdue
             ],
             borderColor: [
-              'rgb(53, 162, 235)',         // Blue border
-              'rgb(255, 159, 64)',         // Orange border
-              'rgb(75, 192, 192)',         // Green border
-              'rgb(255, 99, 132)'          // Red border
+              'rgb(53, 162, 235)', // Blue border
+              'rgb(255, 159, 64)', // Orange border
+              'rgb(75, 192, 192)', // Green border
+              'rgb(255, 99, 132)' // Red border
             ],
             borderWidth: 1,
             borderRadius: 6
@@ -413,7 +413,7 @@ function Dashboard() {
       canvas.width = 1000 // Larger base width for better quality
       canvas.height = 1000
       const ctx = canvas.getContext('2d')
-      
+
       // Scale the context for higher resolution
       ctx.scale(scale, scale)
 
@@ -424,7 +424,7 @@ function Dashboard() {
           ...chartOptions,
           animation: false,
           responsive: false,
-          devicePixelRatio: scale, // Ensure chart renders at high resolution
+          devicePixelRatio: scale // Ensure chart renders at high resolution
         }
       })
 
