@@ -13,7 +13,9 @@ import {
   FaCalendarAlt,
   FaUserCog,
   FaChevronRight,
-  FaChevronLeft
+  FaChevronLeft,
+  FaGraduationCap,
+  FaUsers
 } from 'react-icons/fa'
 import './HelpGuideModal.css'
 
@@ -35,102 +37,115 @@ const HelpGuideModal = ({ isOpen, onClose }) => {
           steps: [
             'Click "Add New Book" button',
             'Fill in book details (title, author, ISBN, etc.)',
-            'Set initial book status',
-            'Save to add to catalog'
+            'Upload MARC record if available',
+            'Set initial book status and availability'
           ]
         },
         {
           icon: FaEdit,
-          title: 'Editing Books',
+          title: 'Managing Books',
           steps: [
-            'Find book in the table',
-            'Click "Edit" button',
-            'Update necessary information',
-            'Save changes'
-          ]
-        },
-        {
-          icon: FaSearch,
-          title: 'Searching Books',
-          steps: [
-            'Use the search bar at the top',
-            'Type title, author, or ISBN',
-            'Results update automatically',
-            'Sort columns by clicking headers'
+            'Search books using global search or filters',
+            'View detailed book information',
+            'Update book status and details',
+            'Track book history and availability'
           ]
         }
       ]
     },
     {
       icon: FaBookmark,
-      title: 'Borrowing Books',
-      description:
-        'Process book borrowing, returns, and renewals. Monitor due dates and book availability.',
+      title: 'Borrowing System',
+      description: 'Manage book borrowing, returns, and track due dates.',
       examples: [
         {
-          icon: FaPlus,
-          title: 'Borrowing Process',
-          steps: [
-            'Click "Borrow Book" button',
-            'Enter student ID',
-            'Select book from available list',
-            'Set due date and confirm'
-          ]
-        },
-        {
           icon: FaExchangeAlt,
-          title: 'Returns & Renewals',
+          title: 'Borrow Process',
           steps: [
-            'Find borrowed book in list',
-            'Click "Return" to process return',
-            'For renewal, click "Renew"',
-            'Maximum 3 renewals allowed'
+            'Select student from database',
+            'Scan or select books to borrow',
+            'Set due dates and terms'
           ]
         },
         {
           icon: FaCalendarAlt,
-          title: 'Due Date Management',
+          title: 'Returns & Renewals',
           steps: [
-            'Monitor upcoming due dates',
-            'Receive notifications for overdue books',
-            'Process renewals before due date',
-            'Update status upon return'
+            'Process book returns',
+            'Handle late returns and penalties',
+            'Manage book renewals',
+            'Update borrowing history'
           ]
         }
       ]
     },
     {
-      icon: FaHistory,
-      title: 'History',
-      description:
-        'View complete transaction history, including past borrows, returns, and renewals.',
+      icon: FaGraduationCap,
+      title: 'Student Management',
+      description: 'Track and manage student records and borrowing history.',
       examples: [
         {
-          icon: FaSearch,
-          title: 'Viewing History',
+          icon: FaUsers,
+          title: 'Student Records',
           steps: [
-            'Access History section',
-            'Filter by date range',
-            'Search by student or book',
-            'View transaction details'
+            'Maintain student profiles',
+            'Track borrowing history',
+            'Monitor overdue books',
+            'Handle penalties and payments'
+          ]
+        },
+        {
+          icon: FaHistory,
+          title: 'Reports & Statistics',
+          steps: [
+            'Generate student activity reports',
+            'View borrowing statistics',
+            'Track frequent borrowers',
+            'Monitor student status'
+          ]
+        }
+      ]
+    },
+    {
+      icon: FaUserCog,
+      title: 'Staff Section',
+      description: 'Coming soon: Staff management and access control features.',
+      examples: [
+        {
+          icon: FaUsers,
+          title: 'Staff Management',
+          steps: [
+            'Coming Soon: Staff profile management',
+            'Coming Soon: Role assignments',
+            'Coming Soon: Activity monitoring',
+            'Coming Soon: Access permissions'
           ]
         }
       ]
     },
     {
       icon: FaCog,
-      title: 'Settings',
-      description:
-        'Configure your account settings, manage notifications, and customize your preferences.',
+      title: 'System Features',
+      description: 'Additional features and settings for library management.',
       examples: [
         {
-          icon: FaUserCog,
-          title: 'Account Settings',
+          icon: FaSearch,
+          title: 'Global Search',
           steps: [
-            'Update profile information',
-            'Change password'
-            // 'Set notification preferences',
-            // 'Customize dashboard view'
+            'Search across all library records',
+            'Filter results by category',
+            'Quick access to records',
+            'Real-time search suggestions'
+          ]
+        },
+        {
+          icon: FaUserCog,
+          title: 'Session Management',
+          steps: [
+            'Auto-logout after 15 minutes inactivity',
+            'Secure authentication',
+            'Profile settings and preferences',
+            'Activity tracking and history'
           ]
         }
       ]
