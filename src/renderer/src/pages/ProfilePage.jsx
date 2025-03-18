@@ -103,7 +103,7 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                <div className="profile-section">
+                {/* <div className="profile-section">
                   <div className="section-header">
                     <h2>Security</h2>
                   </div>
@@ -113,7 +113,7 @@ const ProfilePage = () => {
                       Change Password
                     </button>
                   </div>
-                </div>
+                </div> */}
               </div>
             </>
           )}
