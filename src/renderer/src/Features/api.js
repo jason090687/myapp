@@ -371,22 +371,22 @@ export const fetchNewBooks = async (token) => {
   }
 }
 
-export const fetchTotalBooksCount = async () => {
+export const fetchTotalBooksCount = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/marc/search/`)
+    const response = await axios.get(`${API_URL}/marc/search/`, getAuthHeaders(token))
     return response.data.count
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch total books count')
   }
 }
 
-export const fetchDashboardStats = async () => {
+export const fetchDashboardStats = async (token) => {
   try {
     const [booksRes, borrowedRes, returnedRes, overdueRes] = await Promise.all([
-      axios.get(`${API_URL}/marc/search/`),
-      axios.get(`${API_URL}/borrow/list/`),
-      axios.get(`${API_URL}/borrow/list/?is_returned=true`),
-      axios.get(`${API_URL}/borrow/list/?is_overdue=true`)
+      axios.get(`${API_URL}/marc/search/`, getAuthHeaders(token)),
+      axios.get(`${API_URL}/borrow/list/`, getAuthHeaders(token)),
+      axios.get(`${API_URL}/borrow/list/?is_returned=true`, getAuthHeaders(token)),
+      axios.get(`${API_URL}/borrow/list/?is_overdue=true`, getAuthHeaders(token))
     ])
 
     return {
@@ -400,13 +400,13 @@ export const fetchDashboardStats = async () => {
   }
 }
 
-export const fetchAllStudentsWithBorrowCount = async () => {
+export const fetchAllStudentsWithBorrowCount = async (token) => {
   try {
-    const firstResponse = await axios.get(`${API_URL}/students/`)
+    const firstResponse = await axios.get(`${API_URL}/students/`, getAuthHeaders(token))
     const totalPages = Math.ceil(firstResponse.data.count / 10)
 
     const pagePromises = Array.from({ length: totalPages }, (_, i) =>
-      axios.get(`${API_URL}/students/?page=${i + 1}`)
+      axios.get(`${API_URL}/students/?page=${i + 1}`, getAuthHeaders(token))
     )
 
     const pages = await Promise.all(pagePromises)
@@ -420,18 +420,21 @@ export const fetchAllStudentsWithBorrowCount = async () => {
   }
 }
 
-export const fetchRecentCheckouts = async (limit = 5) => {
+export const fetchRecentCheckouts = async (token, limit = 5) => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/list/`)
+    const response = await axios.get(`${API_URL}/borrow/list/`, getAuthHeaders(token))
     return response.data.results.slice(0, limit)
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch recent checkouts')
   }
 }
 
-export const fetchBorrowedBooksStats = async () => {
+export const fetchBorrowedBooksStats = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/list/?page_size=1000`)
+    const response = await axios.get(
+      `${API_URL}/borrow/list/?page_size=1000`,
+      getAuthHeaders(token)
+    )
     const books = response.data.results
 
     // Count books by status
