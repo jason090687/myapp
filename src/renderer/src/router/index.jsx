@@ -13,6 +13,8 @@ import ProfilePage from '../pages/ProfilePage.jsx'
 import OtpVerification from '../pages/OtpVerification'
 import ActivationSuccess from '../pages/ActivationSuccess.jsx'
 import ResetPasswordOtp from '../pages/ResetPasswordOtp'
+import StudentsPage from '../pages/StudentsPage'
+import StudentDetailsPage from '../pages/StudentDetailsPage'
 
 const router = createHashRouter([
   {
@@ -76,6 +78,14 @@ const router = createHashRouter([
   {
     path: '/reset-password-otp',
     element: <ResetPasswordOtp />
+  },
+  {
+    path: '/students',
+    element: <StudentsPage />
+  },
+  {
+    path: '/students/:studentId',
+    element: <StudentDetailsPage />
   }
 ])
 

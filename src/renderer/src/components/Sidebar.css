@@ -1012,3 +1012,16 @@ checkout-header a {
     bottom: 0.5rem;
   }
 }
+
+/* Add separator styles */
+.nav-separator {
+  width: calc(100% - 2rem);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0.5rem 1rem;
+}
+
+.sidebar.collapsed .nav-separator {
+  width: calc(100% - 1rem);
+  margin: 0.5rem 0.5rem;
+}

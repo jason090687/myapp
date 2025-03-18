@@ -258,6 +258,15 @@ export const fetchStudents = async (token) => {
   }
 }
 
+export const fetchStudentsList = async (token, page = 1) => {
+  try {
+    const response = await axios.get(`${API_URL}/students/?page=${page}`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch students')
+  }
+}
+
 // Add this new function for borrowing books
 export const borrowBook = async (token, borrowData) => {
   try {
@@ -783,5 +792,83 @@ export const fetchMonthlyReport = async (token) => {
   } catch (error) {
     console.error('Error fetching monthly report:', error)
     return []
+  }
+}
+
+export const fetchStudentDetails = async (token, studentId) => {
+  try {
+    const response = await axios.get(`${API_URL}/students/${studentId}/`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('API Error:', error.response?.data || error.message)
+    throw new Error(error.response?.data?.message || 'Failed to fetch student details')
+  }
+}
+
+export const updateStudentDetails = async (token, studentId, updateData) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/students/${studentId}/`,
+      updateData,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('API Error:', error.response?.data || error.message)
+    throw new Error(error.response?.data?.message || 'Failed to update student details')
+  }
+}
+
+export const createStudent = async (token, studentData) => {
+  try {
+    const response = await axios.post(`${API_URL}/students/`, studentData, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error creating student:', error.response?.data || error.message)
+    throw new Error(error.response?.data?.message || 'Failed to create student')
+  }
+}
+
+export const fetchStudentYearLevels = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/students/`, getAuthHeaders(token))
+    return response.data.year_level || []
+  } catch (error) {
+    console.error('Error fetching year levels:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch year levels')
+  }
+}
+
+// First, update or add this function to your API file
+export const searchStudents = async (token, searchTerm, page = 1) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/students/?search=${encodeURIComponent(searchTerm)}&page=${page}`,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Search students error:', error)
+    throw new Error(error.response?.data?.message || 'Failed to search students')
+  }
+}
+
+export const fetchAllStudentsForSearch = async (token) => {
+  try {
+    let allStudents = []
+    let page = 1
+    let hasMore = true
+
+    while (hasMore) {
+      const response = await axios.get(`${API_URL}/students/?page=${page}`, getAuthHeaders(token))
+      allStudents = [...allStudents, ...response.data.results]
+      hasMore = response.data.next !== null
+      page++
+    }
+
+    return allStudents
+  } catch (error) {
+    console.error('Error fetching all students:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch all students')
   }
 }

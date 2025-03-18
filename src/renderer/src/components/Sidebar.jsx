@@ -12,7 +12,8 @@ import {
   FaSearch,
   FaBell,
   FaUserCircle,
-  FaQuestion
+  FaQuestion,
+  FaGraduationCap
 } from 'react-icons/fa'
 import { ToastContainer, toast, Bounce } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -56,6 +57,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
     { path: '/books', icon: FaBook, label: 'Books' },
     { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
+    { path: '/students', icon: FaGraduationCap, label: 'Students' },
+    { separator: true }, // Add separator here
     { path: '/settings', icon: FaCog, label: 'Settings' },
     {
       icon: FaQuestion,
@@ -97,28 +100,32 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
         <nav className="sidebar-nav">
           <ul>
-            {menuItems.map((item, index) => (
-              <li
-                key={item.path || index}
-                className={location.pathname === item.path ? 'active' : ''}
-              >
-                {item.isAction ? (
-                  <button
-                    onClick={item.onClick}
-                    className="nav-action-btn"
-                    data-tooltip={item.label}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </button>
-                ) : (
-                  <Link to={item.path} data-tooltip={item.label}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                )}
-              </li>
-            ))}
+            {menuItems.map((item, index) =>
+              item.separator ? (
+                <div key={`separator-${index}`} className="nav-separator" />
+              ) : (
+                <li
+                  key={item.path || index}
+                  className={location.pathname === item.path ? 'active' : ''}
+                >
+                  {item.isAction ? (
+                    <button
+                      onClick={item.onClick}
+                      className="nav-action-btn"
+                      data-tooltip={item.label}
+                    >
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </button>
+                  ) : (
+                    <Link to={item.path} data-tooltip={item.label}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  )}
+                </li>
+              )
+            )}
           </ul>
 
           <div className="logout-container">
