@@ -129,6 +129,44 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.book-card.unpaid-book {
+  background: rgba(254, 226, 226, 0.6);
+  border: 2px solid #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+.book-card.borrowed-book {
+  background: rgba(224, 242, 254, 0.6);
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.book-card.returned-book {
+  background: rgba(241, 245, 249, 0.4);
+  border: 2px solid #e2e8f0;
+}
+
+.book-card.unpaid-book:hover {
+  background: rgba(254, 226, 226, 0.8);
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.15);
+  transform: translateY(-4px);
+}
+
+.book-card.borrowed-book:hover {
+  background: rgba(224, 242, 254, 0.8);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+  transform: translateY(-4px);
+}
+
+.book-card.returned-book:hover {
+  background: rgba(241, 245, 249, 0.6);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
 }
 
 .book-card:hover {
@@ -139,7 +177,6 @@
 .book-title {
   font-size: 1.125rem;
   color: #1e293b;
-  margin-bottom: 0.5rem;
 }
 
 .book-author {
@@ -151,22 +188,15 @@
 .book-details {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 10px;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   font-size: 0.875rem;
-}
-
-.detail-label {
-  color: #64748b;
-}
-
-.detail-value {
-  color: #1e293b;
-  font-weight: 500;
+  padding: 5px 0;
+  gap: 5px;
 }
 
 .status-badge {
@@ -530,7 +560,6 @@ input:checked + .slider:before {
   animation: spin 1s linear infinite;
   margin-right: 0.5rem;
 }
-*/
 
 /* Update spinner styles to match SignInPage */
 .spinner-wrapper {
@@ -591,4 +620,82 @@ input:checked + .slider:before {
 .no-books-message p {
   font-size: 0.9375rem;
   color: #64748b;
+}
+
+.detail-group {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.payment-details {
+  background: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.detail-status.overdue {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.detail-status.borrowed {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.detail-status.returned {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.detail-payment {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.detail-payment.paid {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.detail-payment.unpaid {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.amount {
+  font-family: monospace;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.book-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
 }

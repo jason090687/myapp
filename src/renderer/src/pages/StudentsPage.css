@@ -3,7 +3,6 @@
   margin: 0 auto; /* Center the container */
   margin-left: auto; /* Override previous margin-left */
   margin-right: auto;
-  margin-top: calc(var(--navbar-height) + 1rem); /* Add some spacing from navbar */
   background: var(--secondary-color);
   transition: all var(--transition-duration) var(--transition-timing);
 }

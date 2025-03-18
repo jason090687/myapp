@@ -685,7 +685,7 @@ h3 {
 .book-details span {
   padding: 2px 8px;
   border-radius: 4px;
-  background-color: #f3f4f6;
+  /* background-color: #f3f4f6; */
 }
 
 .status-indicator {

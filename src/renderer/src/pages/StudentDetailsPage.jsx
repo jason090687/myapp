@@ -145,22 +145,56 @@ const StudentDetailsPage = () => {
                 <div className="books-grid">
                   {student?.borrowed_books?.length > 0 ? (
                     student.borrowed_books.map((book, index) => (
-                      <div key={index} className="book-card">
+                      <div
+                        key={index}
+                        className={`book-card ${
+                          !book.paid && book.amount > 0
+                            ? 'unpaid-book'
+                            : book.status?.toLowerCase() === 'borrowed'
+                              ? 'borrowed-book'
+                              : book.status?.toLowerCase() === 'returned'
+                                ? 'returned-book'
+                                : ''
+                        }`}
+                      >
                         <div className="book-content">
                           <h3 className="book-title">{book.title}</h3>
                           <p className="book-author">{book.author || 'No author specified'}</p>
                           <div className="book-details">
-                            <div className="detail-item">
-                              <span className="detail-label">ISBN:</span>
-                              <span className="detail-value">{book.isbn || 'N/A'}</span>
+                            <div className="detail-group">
+                              <div className="detail-item">
+                                <span className="detail-label">Borrowed:</span>
+                                <span className="detail-value">{formatDate(book.borrow_date)}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Due Date:</span>
+                                <span className="detail-value">{formatDate(book.due_date)}</span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Return Date:</span>
+                                <span className="detail-value">{formatDate(book.return_date)}</span>
+                              </div>
                             </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Borrowed:</span>
-                              <span className="detail-value">{formatDate(book.borrow_date)}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Due Date:</span>
-                              <span className="detail-value">{formatDate(book.return_date)}</span>
+
+                            <div className="detail-group payment-details">
+                              <div className="detail-item">
+                                <span className="detail-label">Status:</span>
+                                <span className={`detail-status ${book.status?.toLowerCase()}`}>
+                                  {book.status}
+                                </span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Amount:</span>
+                                <span className="detail-value amount">
+                                  ₱{book.amount ? book.amount.toFixed(2) : '0.00'}
+                                </span>
+                              </div>
+                              <div className="detail-item">
+                                <span className="detail-label">Payment:</span>
+                                <span className={`detail-payment ${book.paid ? 'paid' : 'unpaid'}`}>
+                                  {book.paid ? 'Paid' : 'Unpaid'}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
