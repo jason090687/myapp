@@ -175,22 +175,10 @@
   line-height: 1.5;
   text-align: center;
   word-break: break-word;
-  font-size: 0.9375rem;
 }
 
 .books-table td:hover::after {
-  content: attr(data-content);
-  position: absolute;
-  left: 0;
-  top: 100%;
-  background: #1a1a1a;
-  color: white;
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  z-index: 1000;
-  white-space: normal;
-  max-width: 300px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: none;
 }
 
 .books-table td[data-content] {
@@ -200,8 +188,9 @@
 .books-table td[data-content]:hover::after {
   content: attr(data-content);
   position: absolute;
-  left: 0;
+  left: 50%;
   top: 100%;
+  transform: translateX(-50%);
   background: #1a1a1a;
   color: white;
   padding: 0.75rem;
@@ -214,7 +203,6 @@
   font-size: 0.875rem;
   line-height: 1.5;
   text-align: left;
-  height: 500px;
 }
 
 .books-table tbody tr {
