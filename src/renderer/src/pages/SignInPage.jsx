@@ -112,7 +112,7 @@ function SignInPage() {
       <div className="container">
         {/* Left Side - Login Form */}
         <div className="left-side">
-          <h2>E-Library</h2>
+          <h2>eLibrary</h2>
           <div className="input-field-wrapper">
             <form onSubmit={handleSubmit} className="login-form">
               <div className="input-group">
