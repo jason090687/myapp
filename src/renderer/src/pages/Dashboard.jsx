@@ -35,7 +35,8 @@ import {
   fetchTotalPenalties,
   fetchReturnedBooksCount,
   fetchActiveUsers,
-  fetchMonthlyReport
+  fetchMonthlyReport,
+  fetchMonthlyStudentStats
 } from '../Features/api'
 import {
   CardsSkeleton,
@@ -46,6 +47,7 @@ import {
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import MonthSelector from '../components/Dashboard/MonthSelector'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import TopBorrowerMonthSelector from '../components/Dashboard/TopBorrowerMonthSelector'
 
 // Register all required components
 ChartJS.register(
@@ -103,6 +105,7 @@ function Dashboard() {
   })
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [chartLoading, setChartLoading] = useState(false)
+  const [selectedBorrowerMonth, setSelectedBorrowerMonth] = useState(new Date())
 
   // Helper to check if any section is still loading
   const isAnyLoading = Object.values(loadingStates).some((state) => state)
@@ -112,6 +115,35 @@ function Dashboard() {
   }
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
+
+  // Move fetchStudents outside useEffect and make it a component method
+  const fetchStudents = async (month, year) => {
+    try {
+      const date = new Date(year, month)
+      const monthString = date.toLocaleString('default', { 
+        month: 'long',
+        year: 'numeric'
+      })
+      
+      const stats = await fetchMonthlyStudentStats(token)
+      const monthlyStats = stats.find(stat => stat.month === monthString)
+      
+      if (monthlyStats) {
+        setTopBorrowers(monthlyStats.students.map(student => ({
+          student_id: student.student_id,
+          student_name: student.student_name,
+          books_borrowed: student.books_borrowed
+        })))
+      } else {
+        setTopBorrowers([])
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error)
+      setTopBorrowers([])
+    } finally {
+      setLoadingStates(prev => ({ ...prev, borrowers: false }))
+    }
+  }
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -179,14 +211,13 @@ function Dashboard() {
       }
     }
 
-    const fetchStudents = async () => {
-      try {
-        const students = await fetchAllStudentsWithBorrowCount(token)
-        setTopBorrowers(students)
-      } catch (error) {
-        console.error('Error fetching students:', error)
-      } finally {
-        setLoadingStates((prev) => ({ ...prev, borrowers: false }))
+    const fetchInitialData = async () => {
+      if (token) {
+        fetchStats()
+        const currentDate = new Date()
+        fetchStudents(currentDate.getMonth(), currentDate.getFullYear())
+        loadRecentCheckouts()
+        loadBooks()
       }
     }
 
@@ -233,12 +264,7 @@ function Dashboard() {
       }
     }
 
-    if (token) {
-      fetchStats()
-      fetchStudents()
-      loadRecentCheckouts()
-      loadBooks()
-    }
+    fetchInitialData()
   }, [token, penalties.overdueCount]) // Add penalties.overdueCount as dependency
 
   // Add new useEffect for fetching penalties
@@ -304,7 +330,7 @@ function Dashboard() {
         display: true // Hide the title
       },
       tooltip: {
-        enabled: true,
+        enabled: false,
         mode: 'index',
         intersect: false,
         titleFont: {
@@ -476,8 +502,8 @@ function Dashboard() {
           color: isHeader ? rgb(0.95, 0.95, 0.95) : rgb(1, 1, 1, 0)
         })
 
-        page.drawText(text.toString().slice(0, 40), {
-          // Limit text length
+        const safeText = text ? text.toString().slice(0, 40) : '';
+        page.drawText(safeText, {
           x: x + 10,
           y: y - 18,
           size: isHeader ? 12 : 11,
@@ -506,9 +532,9 @@ function Dashboard() {
 
       topBorrowers.slice(0, 5).forEach((borrower) => {
         currentY -= 25
-        drawTableCell(borrower.name, tableStartX, currentY, columnWidth)
+        drawTableCell(borrower.student_name || 'N/A', tableStartX, currentY, columnWidth)
         drawTableCell(
-          borrower.borrowed_books_count,
+          borrower.books_borrowed || '0',
           tableStartX + columnWidth,
           currentY,
           columnWidth
@@ -533,8 +559,8 @@ function Dashboard() {
 
       topBooks.slice(0, 5).forEach((book) => {
         currentY -= 25
-        drawTableCell(book.title, tableStartX, currentY, columnWidth)
-        drawTableCell(book.borrow_count, tableStartX + columnWidth, currentY, columnWidth)
+        drawTableCell(book.title || 'N/A', tableStartX, currentY, columnWidth)
+        drawTableCell(book.borrow_count || '0', tableStartX + columnWidth, currentY, columnWidth)
       })
 
       // Add footer
@@ -567,6 +593,11 @@ function Dashboard() {
     } catch (error) {
       console.error('Error generating PDF:', error)
     }
+  }
+
+  const handleBorrowerMonthChange = (month, year) => {
+    setSelectedBorrowerMonth(new Date(year, month))
+    fetchStudents(month, year) // Now this will work because fetchStudents is in scope
   }
 
   const cards = [
@@ -687,25 +718,44 @@ function Dashboard() {
                 <TableSkeleton rows={5} columns={4} />
               ) : (
                 <div>
-                  <h3>Top Borrowers</h3>
+                  <div className="borrowers-header" style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginBottom: '1rem' 
+                  }}>
+                    <h3>Top Borrowers</h3>
+                    <TopBorrowerMonthSelector
+                      currentMonth={selectedBorrowerMonth.getMonth()}
+                      currentYear={selectedBorrowerMonth.getFullYear()}
+                      onMonthChange={handleBorrowerMonthChange}
+                    />
+                  </div>
                   <table>
                     <thead>
                       <tr>
-                        <th>Students</th>
+                        <th>Name</th>
                         <th>Books Borrowed</th>
                       </tr>
                     </thead>
                     <tbody>
                       {topBorrowers
-                      .filter(borrower => borrower.borrowed_books_count >= 10)
-                      .map((borrower, index) => (
-                        <tr key={borrower.id_number}>
-                          <td>{borrower.name}</td>
-                          <td>
-                            <strong>{borrower.borrowed_books_count}</strong>
+                        .sort((a, b) => b.books_borrowed - a.books_borrowed)
+                        .map((borrower) => (
+                          <tr key={borrower.student_id}>
+                            <td>{borrower.student_name}</td>
+                            <td>
+                              <strong>{borrower.books_borrowed}</strong>
+                            </td>
+                          </tr>
+                        ))}
+                      {topBorrowers.length === 0 && (
+                        <tr>
+                          <td colSpan="2" style={{ textAlign: 'center' }}>
+                            No borrowers found for {selectedBorrowerMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
