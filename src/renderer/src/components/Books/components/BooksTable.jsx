@@ -21,7 +21,7 @@ const TABLE_COLUMNS = [
   { key: 'date_received', label: 'DATE RECEIVED', sortable: true, type: 'date', required: true },
   { key: 'subject', label: 'SUBJECT', sortable: false },
   { key: 'date_processed', label: 'DATE PROCESSED', sortable: true, type: 'date' },
-  { key: 'processed_by', label: 'PROCESSED BY', sortable: true },
+  { key: 'name', label: 'PROCESSED BY', sortable: true },
   { key: 'status', label: 'STATUS', sortable: true }
 ]
 
@@ -65,7 +65,7 @@ const BooksTable = ({
         if (column.key === 'status') {
           return <span className={`status-badge ${value.toLowerCase()}`}>{value}</span>
         }
-        if (column.key === 'copy_number') {
+        if (column.key === 'copies') {
           // Remove any existing "of" format and extract just the number
           const copyNum = value.toString().split(' of ')[0]
           const totalCopies = parseInt(book.copies)
