@@ -31,7 +31,7 @@ import {
   fetchRecentCheckouts,
   fetchTopBooks,
   fetchBorrowedBooksStats,
-  fetchMarcBooks,
+  fetchNewArrivals, // Add this
   fetchTotalPenalties,
   fetchReturnedBooksCount,
   fetchActiveUsers,
@@ -207,9 +207,11 @@ function Dashboard() {
 
     const loadBooks = async () => {
       try {
-        const [topData, marcData] = await Promise.all([fetchTopBooks(token), fetchMarcBooks(token)])
+        const [topData, newArrivalsData] = await Promise.all([
+          fetchTopBooks(token),
+          fetchNewArrivals(token)
+        ])
 
-        // topData is now directly the array of top books
         const formattedTopBooks = topData
           .map((book) => ({
             id: book.book_id,
@@ -220,7 +222,8 @@ function Dashboard() {
           .slice(0, 5)
 
         setTopBooks(formattedTopBooks)
-        setNewBooks(marcData.results)
+        // newArrivalsData is already the array of books from the API
+        setNewBooks(newArrivalsData || [])
       } catch (error) {
         console.error('Error loading books:', error)
         setTopBooks([])
@@ -688,12 +691,14 @@ function Dashboard() {
                   <table>
                     <thead>
                       <tr>
-                        <th>Student</th>
+                        <th>Students</th>
                         <th>Books Borrowed</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {topBorrowers.map((borrower, index) => (
+                      {topBorrowers
+                      .filter(borrower => borrower.borrowed_books_count >= 10)
+                      .map((borrower, index) => (
                         <tr key={borrower.id_number}>
                           <td>{borrower.name}</td>
                           <td>
@@ -769,20 +774,16 @@ function Dashboard() {
               ) : (
                 <div className="books-list">
                   {activeBookFilter === 'new' ? (
-                    newBooks.length > 0 ? (
+                    newBooks && newBooks.length > 0 ? (
                       newBooks.map((book) => (
                         <div className="book-title-card" key={book.id}>
                           <span className="new-badge">NEW</span>
                           <h4>{book.title}</h4>
                           <p className="book-author">{book.author}</p>
-                          {book.callNumber && (
-                            <small className="call-number">Call Number: {book.callNumber}</small>
-                          )}
-                          <small className="days-ago">{getDaysAgoText(book.daysAgo)}</small>
                         </div>
                       ))
                     ) : (
-                      <div className="no-books">No new books in the last 5 days</div>
+                      <div className="no-books">No new arrivals found</div>
                     )
                   ) : (
                     topBooks.map((book) => (

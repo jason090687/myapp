@@ -899,3 +899,13 @@ export const createEmployee = async (token, employeeData) => {
     throw new Error(error.response?.data?.message || 'Failed to create employee')
   }
 }
+
+export const fetchNewArrivals = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/marc/new-arrivals/`, getAuthHeaders(token))
+    return response.data.results || [] // Return the results array directly
+  } catch (error) {
+    console.error('Error fetching new arrivals:', error)
+    return []
+  }
+}
