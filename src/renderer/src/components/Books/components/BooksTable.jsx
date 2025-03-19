@@ -6,22 +6,22 @@ import { useState, useEffect } from 'react'
 const TABLE_COLUMNS = [
   { key: 'title', label: 'TITLE', sortable: true, required: true },
   { key: 'author', label: 'AUTHOR', sortable: true, required: true },
-  { key: 'seriesTitle', label: 'SERIES TITLE', sortable: false },
+  { key: 'series_title', label: 'SERIES TITLE', sortable: false },
   { key: 'publisher', label: 'PUBLISHER', sortable: true },
-  { key: 'placeOfPublication', label: 'PLACE OF PUBLICATION', sortable: false },
+  { key: 'place_of_publication', label: 'PLACE OF PUBLICATION', sortable: false },
   { key: 'year', label: 'YEAR', sortable: true, type: 'number' },
   { key: 'edition', label: 'EDITION', sortable: false },
   { key: 'volume', label: 'VOLUME', sortable: false },
-  { key: 'physicalDescription', label: 'PHYSICAL DESCRIPTION', sortable: false },
+  { key: 'physical_description', label: 'PHYSICAL DESCRIPTION', sortable: false },
   { key: 'isbn', label: 'ISBN', sortable: false },
-  { key: 'accessionNo', label: 'ACCESSION NUMBER', sortable: true },
+  { key: 'accession_number', label: 'ACCESSION NUMBER', sortable: true },
   { key: 'call_number', label: 'CALL NUMBER', sortable: true }, // Add this line
-  { key: 'copy_number', label: 'COPY NO.', sortable: true, required: true },
+  { key: 'copies', label: 'COPY NO.', sortable: true, required: true },
   { key: 'barcode', label: 'BARCODE', sortable: false },
-  { key: 'dateReceived', label: 'DATE RECEIVED', sortable: true, type: 'date', required: true },
+  { key: 'date_received', label: 'DATE RECEIVED', sortable: true, type: 'date', required: true },
   { key: 'subject', label: 'SUBJECT', sortable: false },
-  { key: 'dateProcessed', label: 'DATE PROCESSED', sortable: true, type: 'date' },
-  { key: 'processedBy', label: 'PROCESSED BY', sortable: true },
+  { key: 'date_processed', label: 'DATE PROCESSED', sortable: true, type: 'date' },
+  { key: 'processed_by', label: 'PROCESSED BY', sortable: true },
   { key: 'status', label: 'STATUS', sortable: true }
 ]
 
