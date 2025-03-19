@@ -155,7 +155,7 @@ const OtpVerification = () => {
       />
       <div className="container">
         <div className="left-side">
-          <h2>E-Library</h2>
+          <h2>eLibrary</h2>
           <div className="input-field-wrapper">
             <form onSubmit={handleSubmit} className="login-form">
               <h3 className="text-2xl font-bold text-center mb-4">OTP Verification</h3>

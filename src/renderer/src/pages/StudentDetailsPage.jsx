@@ -170,10 +170,14 @@ const StudentDetailsPage = () => {
                                 <span className="detail-label">Due Date:</span>
                                 <span className="detail-value">{formatDate(book.due_date)}</span>
                               </div>
-                              <div className="detail-item">
-                                <span className="detail-label">Return Date:</span>
-                                <span className="detail-value">{formatDate(book.return_date)}</span>
-                              </div>
+                              {book.return_date && (
+                                <div className="detail-item">
+                                  <span className="detail-label">Return Date:</span>
+                                  <span className="detail-value">
+                                    {formatDate(book.return_date)}
+                                  </span>
+                                </div>
+                              )}
                             </div>
 
                             <div className="detail-group payment-details">
