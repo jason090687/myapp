@@ -46,7 +46,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     subject: '',
     additional_author: '',
     copies: '',
-    status: 'available', // Change to lowercase to match API
+    status: '', // Change to lowercase to match API
     date_processed: new Date().toISOString().split('T')[0],
     processed_by: currentUser.id,
     book_cover: null,
@@ -87,16 +87,17 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     getStatuses()
   }, [token])
 
-  // Update date formatting helper
-  const formatDatetime = (dateString) => {
+  // Update formatDatetime to handle both date and datetime-local inputs
+  const formatDatetime = (dateString, type = 'date') => {
     if (!dateString) return ''
     try {
       const date = new Date(dateString)
-      // Ensure the date is valid
       if (isNaN(date.getTime())) return ''
-
-      // Format as YYYY-MM-DDThh:mm
-      return date.toISOString().slice(0, 16)
+      
+      if (type === 'datetime-local') {
+        return date.toISOString().slice(0, 16) // Format as YYYY-MM-DDThh:mm
+      }
+      return date.toISOString().slice(0, 10) // Format as YYYY-MM-DD
     } catch (error) {
       console.error('Date formatting error:', error)
       return ''
@@ -114,22 +115,22 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
         series_title: bookData.series_title || '',
         publisher: bookData.publisher || '',
         place_of_publication: bookData.place_of_publication || '',
-        year: bookData.year || '',
+        year: bookData.year?.toString() || '', // Convert number to string
         edition: bookData.edition || '',
-        volume: bookData.volume || '',
+        volume: bookData.volume?.toString() || '', // Convert number to string
         physical_description: bookData.physical_description || '',
         isbn: bookData.isbn || '',
         accession_number: bookData.accession_number || '',
         call_number: bookData.call_number || '',
         barcode: bookData.barcode || '',
-        date_received: formatDatetime(bookData.date_received || ''),
+        date_received: formatDatetime(bookData.date_received),
         subject: bookData.subject || '',
         additional_author: bookData.additional_author || '',
-        status: bookData.status?.toLowerCase() || 'available',
-        date_processed: formatDatetime(bookData.date_processed || new Date()),
+        status: bookData.status || 'available',
+        date_processed: formatDatetime(bookData.date_processed || new Date(), 'datetime-local'),
         processed_by: bookData.processed_by || currentUser?.id,
         processed_by_name: bookData.name || currentUser?.name || '',
-        copies: bookData.copies || '1',
+        copies: bookData.copies?.toString() || '1', // Convert number to string
         book_cover: null,
         selectedFileName: '',
         coverPreview: bookData.book_cover || null
@@ -242,7 +243,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
       }
 
       await updateBook(token, formData.id, formDataToSend)
-      toast.success('Book updated successfully!', toastConfig)
+      // toast.success('Book updated successfully!', toastConfig) remove double TOAST
       onSubmit(formDataToSend)
       onClose()
     } catch (error) {
@@ -253,15 +254,16 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     }
   }
 
+  // Update input fields array to ensure number inputs are handled properly
   const inputFields = [
     { name: 'title', label: 'Title*', icon: FaBook, required: true },
     { name: 'author', label: 'Author*', icon: FaUser, required: true },
     { name: 'series_title', label: 'Series Title', icon: FaBookOpen },
     { name: 'publisher', label: 'Publisher', icon: FaBuilding },
     { name: 'place_of_publication', label: 'Place of Publication', icon: FaMapMarker },
-    { name: 'year', label: 'Year', icon: FaCalendar, type: 'number' },
+    { name: 'year', label: 'Year', icon: FaCalendar, type: 'text' }, // Changed from 'number'
     { name: 'edition', label: 'Edition', icon: FaBookmark },
-    { name: 'volume', label: 'Volume', icon: FaVolumeUp },
+    { name: 'volume', label: 'Volume', icon: FaVolumeUp, type: 'text' }, // Changed from implicit number
     { name: 'physical_description', label: 'Physical Description', icon: FaBox },
     { name: 'isbn', label: 'ISBN', icon: FaBarcode },
     { name: 'accession_number', label: 'Accession Number', icon: FaHashtag },

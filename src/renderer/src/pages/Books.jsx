@@ -53,12 +53,21 @@ function Books() {
   }
 
   const handleCloseDetailsModal = () => {
-    setIsDetailsModalOpen(false)
+    // First set selected book to null, then close modal
     setSelectedBook(null)
+    setTimeout(() => {
+      setIsDetailsModalOpen(false)
+    }, 0)
   }
 
   useEffect(() => {
     fetchBooksData(1, debouncedSearchTerm)
+    
+    // Cleanup function to ensure modals are closed when component unmounts
+    return () => {
+      setIsDetailsModalOpen(false)
+      setSelectedBook(null)
+    }
   }, [debouncedSearchTerm])
 
   useEffect(() => {
@@ -120,13 +129,15 @@ function Books() {
         currentUser={user}
       />
 
-      <BookDetailsModal
-        isOpen={isDetailsModalOpen}
-        onClose={handleCloseDetailsModal}
-        book={selectedBook}
-        onEdit={handleEditBook}
-        onDelete={handleDeleteBook}
-      />
+      {isDetailsModalOpen && selectedBook && (
+        <BookDetailsModal
+          isOpen={isDetailsModalOpen}
+          onClose={handleCloseDetailsModal}
+          book={selectedBook}
+          onEdit={handleEditBook}
+          onDelete={handleDeleteBook}
+        />
+      )}
     </div>
   )
 }
