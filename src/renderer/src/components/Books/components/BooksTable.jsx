@@ -32,8 +32,7 @@ const BooksTable = ({
   sortConfig,
   onSort,
   onEditBook,
-  onDeleteBook,
-  onRowClick
+  onDeleteBook
 }) => {
   const [selectedBook, setSelectedBook] = useState(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
@@ -48,8 +47,6 @@ const BooksTable = ({
   const handleRowClick = (book) => {
     if (windowWidth <= 1500) {
       setSelectedBook(book)
-      // Remove the onRowClick call since we're handling the modal internally
-      // onRowClick && onRowClick(book) // Remove this line
     }
   }
 

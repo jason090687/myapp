@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { Bounce, toast } from 'react-toastify'
 import Sidebar from '../components/Sidebar'
 import BooksHeader from '../components/Books/components/BooksHeader'
 import BooksTable from '../components/Books/components/BooksTable'
@@ -62,7 +61,7 @@ function Books() {
 
   useEffect(() => {
     fetchBooksData(1, debouncedSearchTerm)
-    
+
     // Cleanup function to ensure modals are closed when component unmounts
     return () => {
       setIsDetailsModalOpen(false)
