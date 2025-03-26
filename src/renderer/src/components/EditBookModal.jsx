@@ -49,6 +49,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     status: '', // Change to lowercase to match API
     date_processed: new Date().toISOString().split('T')[0],
     processed_by: currentUser.id,
+    description: '', // Add description field
     book_cover: null,
     selectedFileName: '',
     coverPreview: null
@@ -93,7 +94,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
     try {
       const date = new Date(dateString)
       if (isNaN(date.getTime())) return ''
-      
+
       if (type === 'datetime-local') {
         return date.toISOString().slice(0, 16) // Format as YYYY-MM-DDThh:mm
       }
@@ -131,6 +132,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
         processed_by: bookData.processed_by || currentUser?.id,
         processed_by_name: bookData.name || currentUser?.name || '',
         copies: bookData.copies?.toString() || '1', // Convert number to string
+        description: bookData.description || '', // Add description from bookData
         book_cover: null,
         selectedFileName: '',
         coverPreview: bookData.book_cover || null
@@ -160,6 +162,7 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
       status: 'available',
       date_processed: new Date().toISOString().split('T')[0],
       processed_by: currentUser.id,
+      description: '', // Add description reset
       book_cover: null,
       selectedFileName: '',
       coverPreview: null
@@ -391,6 +394,17 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
                   />
                 </div>
               )}
+            </div>
+
+            <div className="form-group description-group">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Enter book description..."
+              />
             </div>
           </div>
 

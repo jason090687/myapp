@@ -93,18 +93,6 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="id_number">ID Number</label>
-          <input
-            type="text"
-            id="id_number"
-            name="id_number"
-            value={formData.id_number}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
           <label htmlFor="year_level">Year Level</label>
           <input
             type="text"

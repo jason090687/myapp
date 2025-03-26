@@ -38,6 +38,7 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
     edition: '',
     volume: '',
     physical_description: '',
+    description: '', // Add description to initial form state
     isbn: '',
     accession_number: '',
     call_number: '',
@@ -466,6 +467,17 @@ const AddBookModal = ({ isOpen, onClose, onSubmit, currentUser, onRefresh }) => 
                   </button>
                 </div>
               )}
+            </div>
+
+            <div className="form-group description-group">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Enter book description..."
+              />
             </div>
           </div>
 

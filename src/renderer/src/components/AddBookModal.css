@@ -524,3 +524,25 @@
 .image-input {
   padding: 0.5rem;
 }
+
+.form-group.description-group {
+  grid-column: 1 / -1; /* Make it span all columns */
+  margin-top: 1rem;
+}
+
+.form-group.description-group textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-group.description-group textarea:focus {
+  border-color: #0a0b64;
+  box-shadow: 0 0 0 3px rgba(10, 11, 100, 0.1);
+  outline: none;
+}
