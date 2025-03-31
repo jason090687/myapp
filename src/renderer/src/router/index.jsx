@@ -16,11 +16,13 @@ import ResetPasswordOtp from '../pages/ResetPasswordOtp'
 import StudentsPage from '../pages/StudentsPage'
 import StudentDetailsPage from '../pages/StudentDetailsPage'
 import StaffPage from '../pages/StaffPage'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 const router = createHashRouter([
   {
     path: '/',
-    element: <SignInPage />
+    element: <SignInPage />,
+    errorElement: <ErrorBoundary />
   },
   {
     path: '/signup',
@@ -40,7 +42,12 @@ const router = createHashRouter([
   },
   {
     path: '/books',
-    element: <Books />
+    element: (
+      <ErrorBoundary>
+        <Books />
+      </ErrorBoundary>
+    ),
+    errorElement: <ErrorBoundary />
   },
   {
     path: '/borrowed',

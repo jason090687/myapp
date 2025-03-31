@@ -164,8 +164,8 @@ app.whenReady().then(() => {
           "default-src 'self';" +
             "script-src 'self' 'unsafe-inline';" +
             "style-src 'self' 'unsafe-inline';" +
-            "connect-src 'self' http://localhost:* ws://localhost:* http://192.168.0.145:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com;" + // Added IP address
-            "img-src 'self' data: https: blob: http://countmein.pythonanywhere.com http://192.168.0.145;" +
+            "connect-src 'self' http://localhost:* ws://localhost:* http://192.168.0.145:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com;" +
+            "img-src 'self' data: https: blob: http://192.168.0.145:8000 http://192.168.0.145:* http://192.168.0.145:8000;" + // Updated this line
             "worker-src 'self' blob:;" +
             "frame-src 'self';" +
             "font-src 'self' data:;" +

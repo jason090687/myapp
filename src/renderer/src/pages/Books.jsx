@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import Sidebar from '../components/Sidebar'
 import BooksHeader from '../components/Books/components/BooksHeader'
@@ -11,6 +11,7 @@ import { useBookSearch } from '../components/Books/hooks/useBookSearch'
 import './Books.css'
 import Pagination from '../components/Pagination'
 import BookDetailsModal from '../components/Books/components/BookDetailsModal'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
@@ -43,31 +44,57 @@ function Books() {
     handleEditSubmit
   } = useBookModals(token, fetchBooksData, pagination.currentPage)
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [selectedBook, setSelectedBook] = useState(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
 
-  const handleRowClick = (book) => {
-    setSelectedBook(book)
-    setIsDetailsModalOpen(true)
-  }
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+      if (window.innerWidth > 1500) {
+        setIsDetailsModalOpen(false)
+        setSelectedBook(null)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
-  const handleCloseDetailsModal = () => {
-    // First set selected book to null, then close modal
-    setSelectedBook(null)
-    setTimeout(() => {
-      setIsDetailsModalOpen(false)
-    }, 0)
-  }
+  const handleRowClick = useCallback(
+    (book) => {
+      if (windowWidth <= 1500) {
+        // First close the modal
+        setIsDetailsModalOpen(false)
+
+        // Clear the selected book
+        setTimeout(() => {
+          setSelectedBook(null)
+          // Then set new book and open modal
+          setTimeout(() => {
+            setSelectedBook(book)
+            setIsDetailsModalOpen(true)
+          }, 50)
+        }, 100)
+      }
+    },
+    [windowWidth]
+  )
+
+  const handleCloseDetailsModal = useCallback(() => {
+    setIsDetailsModalOpen(false)
+    const timer = setTimeout(() => {
+      setSelectedBook(null)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     fetchBooksData(1, debouncedSearchTerm)
 
-    // Cleanup function to ensure modals are closed when component unmounts
     return () => {
-      setIsDetailsModalOpen(false)
-      setSelectedBook(null)
+      handleCloseDetailsModal()
     }
-  }, [debouncedSearchTerm])
+  }, [debouncedSearchTerm, handleCloseDetailsModal])
 
   useEffect(() => {
     const handleResize = () => {
@@ -80,37 +107,45 @@ function Books() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  useEffect(() => {
+    return () => {
+      handleCloseDetailsModal()
+    }
+  }, [handleCloseDetailsModal])
+
   return (
     <div className="app-wrapper">
       <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
       <div className={`books-container ${isCollapsed ? 'collapsed' : ''}`}>
-        <div className="books-content">
-          <BooksHeader
-            onSearch={handleSearch}
-            onAddBook={handleAddBook}
-            token={token}
-            onRefresh={fetchBooksData}
-          />
-
-          <BooksTable
-            books={books}
-            isLoading={isLoading}
-            sortConfig={sortConfig}
-            onSort={handleSort}
-            onEditBook={handleEditBook}
-            onDeleteBook={handleDeleteBook}
-            onRowClick={handleRowClick}
-          />
-
-          {!isLoading && books.length > 0 && (
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={pagination.totalItems}
-              onPageChange={handlePageChange}
+        <ErrorBoundary>
+          <div className="books-content">
+            <BooksHeader
+              onSearch={handleSearch}
+              onAddBook={handleAddBook}
+              token={token}
+              onRefresh={fetchBooksData}
             />
-          )}
-        </div>
+
+            <BooksTable
+              books={books}
+              isLoading={isLoading}
+              sortConfig={sortConfig}
+              onSort={handleSort}
+              onEditBook={handleEditBook}
+              onDeleteBook={handleDeleteBook}
+              onRowClick={handleRowClick}
+            />
+
+            {!isLoading && books.length > 0 && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </div>
+        </ErrorBoundary>
       </div>
 
       <AddBookModal
@@ -128,14 +163,19 @@ function Books() {
         currentUser={user}
       />
 
-      {isDetailsModalOpen && selectedBook && (
-        <BookDetailsModal
-          isOpen={isDetailsModalOpen}
-          onClose={handleCloseDetailsModal}
-          book={selectedBook}
-          onEdit={handleEditBook}
-          onDelete={handleDeleteBook}
-        />
+      {windowWidth <= 1500 && (
+        <ErrorBoundary>
+          {selectedBook && isDetailsModalOpen && (
+            <BookDetailsModal
+              key={`modal-${selectedBook.id}`}
+              book={selectedBook}
+              isOpen={true}
+              onClose={handleCloseDetailsModal}
+              onEdit={handleEditBook}
+              onDelete={handleDeleteBook}
+            />
+          )}
+        </ErrorBoundary>
       )}
     </div>
   )
