@@ -1,7 +1,6 @@
 import { FaSortUp, FaSortDown, FaEdit, FaTrash } from 'react-icons/fa'
 import { formatDate } from '../utils/bookUtils'
-import BookDetailsModal from './BookDetailsModal'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 const TABLE_COLUMNS = [
   { key: 'title', label: 'TITLE', sortable: true, required: true },
@@ -15,7 +14,7 @@ const TABLE_COLUMNS = [
   { key: 'physical_description', label: 'PHYSICAL DESCRIPTION', sortable: false },
   { key: 'isbn', label: 'ISBN', sortable: false },
   { key: 'accession_number', label: 'ACCESSION NUMBER', sortable: true },
-  { key: 'call_number', label: 'CALL NUMBER', sortable: true }, // Add this line
+  { key: 'call_number', label: 'CALL NUMBER', sortable: true },
   { key: 'copies', label: 'COPY NO.', sortable: true, required: true },
   { key: 'barcode', label: 'BARCODE', sortable: false },
   { key: 'date_received', label: 'DATE RECEIVED', sortable: true, type: 'date', required: true },
@@ -32,23 +31,32 @@ const BooksTable = ({
   sortConfig,
   onSort,
   onEditBook,
-  onDeleteBook
+  onDeleteBook,
+  onRowClick
 }) => {
-  const [selectedBook, setSelectedBook] = useState(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
-  // Add window resize listener
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const handleRowClick = (book) => {
-    if (windowWidth <= 1500) {
-      setSelectedBook(book)
-    }
-  }
+  const handleRowClick = useCallback(
+    (e, book) => {
+      if (e.target.closest('.action-buttons-container')) {
+        e.stopPropagation()
+        return
+      }
+
+      if (windowWidth <= 1500) {
+        e.preventDefault()
+        e.stopPropagation()
+        onRowClick?.(book)
+      }
+    },
+    [windowWidth, onRowClick]
+  )
 
   const renderCellContent = (column, value, book) => {
     if (!value && value !== 0) return '-'
@@ -63,7 +71,6 @@ const BooksTable = ({
           return <span className={`status-badge ${value.toLowerCase()}`}>{value}</span>
         }
         if (column.key === 'copies') {
-          // Remove any existing "of" format and extract just the number
           const copyNum = value.toString().split(' of ')[0]
           const totalCopies = parseInt(book.copies)
           return totalCopies ? `${copyNum} of ${totalCopies}` : copyNum
@@ -80,7 +87,7 @@ const BooksTable = ({
             key={column.key}
             className={`col-${column.key} ${column.sortable ? 'sortable' : ''}`}
             onClick={(e) => {
-              e.stopPropagation() // Stop event propagation
+              e.stopPropagation()
               if (column.sortable) {
                 onSort(column.key)
               }
@@ -133,7 +140,7 @@ const BooksTable = ({
       {books.slice(0, 10).map((book, index) => (
         <tr
           key={book.id || index}
-          onClick={() => handleRowClick(book)}
+          onClick={(e) => handleRowClick(e, book)}
           style={{ cursor: windowWidth <= 1500 ? 'pointer' : 'default' }}
         >
           {TABLE_COLUMNS.map((column) => (
@@ -159,7 +166,6 @@ const BooksTable = ({
       ))}
       {books.length < 10 &&
         [...Array(10 - books.length)].map((_, index) => (
-          // Add empty rows to maintain consistent height
           <tr key={`empty-${index}`} style={{ height: '61px' }}>
             {TABLE_COLUMNS.map((column) => (
               <td key={column.key} className={`col-${column.key}`}></td>
@@ -171,30 +177,18 @@ const BooksTable = ({
   )
 
   return (
-    <>
-      <div className="table-container">
-        <div className="books-table-wrapper">
-          <table className="books-table" role="grid">
-            {renderTableHeader()}
-            {isLoading || isFetchingAll
-              ? renderLoadingState()
-              : !books.length
-                ? renderEmptyState()
-                : renderTableBody()}
-          </table>
-        </div>
+    <div className="table-container">
+      <div className="books-table-wrapper">
+        <table className="books-table" role="grid">
+          {renderTableHeader()}
+          {isLoading || isFetchingAll
+            ? renderLoadingState()
+            : !books.length
+              ? renderEmptyState()
+              : renderTableBody()}
+        </table>
       </div>
-
-      {windowWidth <= 1500 && (
-        <BookDetailsModal
-          book={selectedBook}
-          isOpen={!!selectedBook}
-          onClose={() => setSelectedBook(null)}
-          onEdit={onEditBook}
-          onDelete={onDeleteBook}
-        />
-      )}
-    </>
+    </div>
   )
 }
 
