@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "myapp",
+  "name": "eLibrary",
   "version": "0.0.1",
   "description": "An Electron application with Vite + React",
   "main": "./out/main/index.js",
