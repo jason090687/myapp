@@ -17,6 +17,7 @@ import StudentsPage from '../pages/StudentsPage'
 import StudentDetailsPage from '../pages/StudentDetailsPage'
 import StaffPage from '../pages/StaffPage'
 import ErrorBoundary from '../components/ErrorBoundary'
+import StaffDetailPage from '../pages/StaffDetailPage'
 
 const router = createHashRouter([
   {
@@ -98,6 +99,10 @@ const router = createHashRouter([
   {
     path: '/staff',
     element: <StaffPage />
+  },
+  {
+    path: '/staff/:staffId',
+    element: <StaffDetailPage />
   }
 ])
 

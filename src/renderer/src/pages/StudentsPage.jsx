@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { fetchStudentsList, createStudent, searchStudents } from '../Features/api'
+import { createStudent, searchStudents } from '../Features/api'
 import { useSelector } from 'react-redux'
-import { FaSearch, FaGraduationCap, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
-import { Bounce, toast, ToastContainer } from 'react-toastify' // Add ToastContainer import
-import 'react-toastify/dist/ReactToastify.css' // Add this import
+import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
+import { Bounce, toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import Sidebar from '../components/Sidebar'
 import AddStudentModal from '../components/AddStudentModal'
 import './StudentsPage.css'

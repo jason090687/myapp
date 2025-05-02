@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_URL = 'http://192.168.0.145:8000/api/v1'
+// const API_URL = 'http://192.168.0.145:8000/api/v1'
+const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
 
 const apiConfig = {
   baseURL: API_URL,
@@ -877,16 +878,23 @@ export const fetchAllStudentsForSearch = async (token) => {
 }
 
 // Employee APIs
-export const fetchEmployees = async (token, page = 1, searchTerm = '') => {
+export const fetchEmployees = async (token) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/employees/?page=${page}&search=${encodeURIComponent(searchTerm)}`,
-      getAuthHeaders(token)
-    )
+    const response = await axios.get(`${API_URL}/students/employees/`, getAuthHeaders(token))
     return response.data
   } catch (error) {
     console.error('Error fetching employees:', error)
     throw new Error(error.response?.data?.message || 'Failed to fetch employees')
+  }
+}
+
+export const fetchStaffDetails = async (token, staffId) => {
+  try {
+    const response = await axios.get(`${API_URL}/students/${staffId}/`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('API Error:', error.response?.data || error.message)
+    throw new Error(error.response?.data?.message || 'Failed to fetch student details')
   }
 }
 

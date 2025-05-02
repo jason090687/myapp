@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import ReactModal from 'react-modal'
-import { FaTimes } from 'react-icons/fa'
-import 'react-toastify/dist/ReactToastify.css'
+import ReactModal from 'react-modal' // Changed from 'react-modal' to 'ReactModal'
+import { FaTimes } from 'react-icons/fa' // Add FaSpinner
+import { toast } from 'react-toastify'
 
 const customStyles = {
   content: {
@@ -22,14 +22,23 @@ const customStyles = {
   }
 }
 
-const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
+const EditStaffModal = ({ isOpen, onClose, onSubmit, studentData }) => {
   const [formData, setFormData] = useState({
     name: '',
     id_number: '',
-    year_level: '',
-    active: true
+    active: false
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (studentData) {
+      setFormData({
+        name: studentData.name || '',
+        id_number: studentData.id_number || '',
+        active: studentData.active || false
+      })
+    }
+  }, [studentData])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -45,23 +54,24 @@ const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
     try {
       await onSubmit(formData)
       onClose()
+      toast.success('Student details updated successfully!')
     } catch (error) {
-      console.error('Error:', error)
+      toast.error(error.message || 'Failed to update student details')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <ReactModal
+    <ReactModal // Changed from Modal to ReactModal
       isOpen={isOpen}
       onRequestClose={onClose}
       style={customStyles}
-      contentLabel="Add Student"
+      contentLabel="Edit Student"
       ariaHideApp={false}
     >
       <div className="modal-header">
-        <h2>Add New Student</h2>
+        <h2>Edit Student Details</h2>
         <button onClick={onClose} className="close-btn">
           <FaTimes />
         </button>
@@ -80,28 +90,19 @@ const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="id_number">ID Number</label>
-          <input
-            type="text"
-            id="id_number"
-            name="id_number"
-            value={formData.id_number}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="year_level">Year Level</label>
-          <input
-            type="text"
-            id="year_level"
-            name="year_level"
-            value={formData.year_level}
-            onChange={handleChange}
-            required
-          />
+        <div className="form-group status-toggle">
+          <div className="toggle-container">
+            <label className="toggle">
+              <input
+                type="checkbox"
+                name="active"
+                checked={formData.active}
+                onChange={handleChange}
+              />
+              <span className="slider"></span>
+            </label>
+            <span className="toggle-label">Active Status</span>
+          </div>
         </div>
 
         <div className="modal-actions">
@@ -111,11 +112,11 @@ const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
           <button type="submit" className="submit-btn" disabled={isSubmitting}>
             {isSubmitting ? (
               <div className="spinner-wrapper">
-                <div className="spinner" />
-                <span>Adding...</span>
+                <div className="spinnerer" />
+                <span>Saving...</span>
               </div>
             ) : (
-              'Add Student'
+              'Save Changes'
             )}
           </button>
         </div>
@@ -124,10 +125,11 @@ const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
   )
 }
 
-AddStudentModal.propTypes = {
+EditStaffModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired
+  onSubmit: PropTypes.func.isRequired,
+  studentData: PropTypes.object
 }
 
-export default AddStudentModal
+export default EditStaffModal

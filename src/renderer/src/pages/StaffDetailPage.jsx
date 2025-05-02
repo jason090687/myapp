@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux'
 import { FaArrowLeft, FaGraduationCap, FaBook, FaEdit } from 'react-icons/fa'
 import Sidebar from '../components/Sidebar'
 import './StudentDetailsPage.css'
-import { fetchStudentDetails, updateStudentDetails } from '../Features/api'
-import EditStudentModal from '../components/EditStudentModal'
+import { fetchStaffDetails, updateStudentDetails } from '../Features/api'
+import EditStaffModal from '../components/EditStaffModal'
 
 const SkeletonLoader = () => (
   <>
@@ -46,20 +46,20 @@ const SkeletonLoader = () => (
   </>
 )
 
-const StudentDetailsPage = () => {
-  const [student, setStudent] = useState(null)
+const StaffDetailPage = () => {
+  const [staff, setStaff] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const { studentId } = useParams()
+  const { staffId } = useParams()
   const navigate = useNavigate()
   const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
     const loadStudentDetails = async () => {
       try {
-        const data = await fetchStudentDetails(token, studentId)
-        setStudent(data)
+        const data = await fetchStaffDetails(token, staffId)
+        setStaff(data)
       } catch (error) {
         console.error('Error loading student details:', error)
       } finally {
@@ -68,7 +68,7 @@ const StudentDetailsPage = () => {
     }
 
     loadStudentDetails()
-  }, [token, studentId])
+  }, [token, staffId])
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -84,8 +84,8 @@ const StudentDetailsPage = () => {
 
   const handleEditSubmit = async (updatedData) => {
     try {
-      const data = await updateStudentDetails(token, studentId, updatedData)
-      setStudent(data)
+      const data = await updateStudentDetails(token, staffId, updatedData)
+      setStaff(data)
     } catch (error) {
       console.error('Error updating student:', error)
       throw error
@@ -97,7 +97,7 @@ const StudentDetailsPage = () => {
       <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
       <main className="main">
         <div className="student-details-container">
-          <button className="back-button" onClick={() => navigate('/students')}>
+          <button className="back-button" onClick={() => navigate('/staff')}>
             <FaArrowLeft /> Back to Students
           </button>
 
@@ -111,27 +111,23 @@ const StudentDetailsPage = () => {
                     <FaGraduationCap className="student-icon" />
                     <div className="student-main-info">
                       <div className="student-title">
-                        <h1>{student?.name}</h1>
+                        <h1>{staff?.name}</h1>
                         <button className="edit-button" onClick={handleEditClick}>
                           <FaEdit />
                         </button>
                       </div>
-                      <p className="student-id">ID: {student?.id_number}</p>
+                      <p className="student-id">ID: {staff?.id_number}</p>
                     </div>
                   </div>
                   <div className="student-stats">
                     <div className="stat-item">
-                      <span className="stat-label">Year Level</span>
-                      <span className="stat-value">{student?.year_level}</span>
-                    </div>
-                    <div className="stat-item">
                       <span className="stat-label">Borrowed Books</span>
-                      <span className="stat-value">{student?.borrowed_books_count}</span>
+                      <span className="stat-value">{staff?.borrowed_books_count}</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-label">Status</span>
-                      <span className={`status-badge ${student?.active ? 'active' : 'inactive'}`}>
-                        {student?.active ? 'Active' : 'Inactive'}
+                      <span className={`status-badge ${staff?.active ? 'active' : 'inactive'}`}>
+                        {staff?.active ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                   </div>
@@ -143,8 +139,8 @@ const StudentDetailsPage = () => {
                   <FaBook /> Book Records
                 </h2>
                 <div className="books-grid">
-                  {student?.borrowed_books?.length > 0 ? (
-                    student.borrowed_books.map((book, index) => (
+                  {staff?.borrowed_books?.length > 0 ? (
+                    staff.borrowed_books.map((book, index) => (
                       <div
                         key={index}
                         className={`book-card ${
@@ -218,14 +214,14 @@ const StudentDetailsPage = () => {
         </div>
       </main>
 
-      <EditStudentModal
+      <EditStaffModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+        studentData={staff}
         onSubmit={handleEditSubmit}
-        studentData={student}
       />
     </div>
   )
 }
 
-export default StudentDetailsPage
+export default StaffDetailPage
