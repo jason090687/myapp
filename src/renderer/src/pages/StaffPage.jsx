@@ -113,12 +113,12 @@ const StaffPage = () => {
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan="3" className="loading-cell">
+                    <td colSpan="4" className="loading-cell">
                       <div className="student-spinner"></div>
                       <span className="student-loading-text">Loading staff...</span>
                     </td>
                   </tr>
-                ) : (
+                ) : employees.length > 0 ? (
                   employees.map((employee) => (
                     <tr
                       key={employee.id_number}
@@ -135,6 +135,12 @@ const StaffPage = () => {
                       </td>
                     </tr>
                   ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="no-data-cell">
+                      No staff found
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>

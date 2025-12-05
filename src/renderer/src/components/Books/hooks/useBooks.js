@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { fetchBooks, deleteBook } from '../../../Features/api'
 import { toast } from 'react-toastify'
-import { sortData } from '../utils/bookUtils'
 
 export const useBooks = (token) => {
   const [books, setBooks] = useState([])
@@ -16,23 +15,26 @@ export const useBooks = (token) => {
   })
   const [sortConfig, setSortConfig] = useState({ column: '', direction: '' })
 
-  const fetchBooksData = async (page = 1, search = '') => {
-    setIsLoading(true)
-    try {
-      const data = await fetchBooks(token, page, search)
-      setBooks(data.results)
-      setPagination({
-        currentPage: page,
-        totalPages: Math.ceil(data.count / 10),
-        totalItems: data.count
-      })
-    } catch (error) {
-      toast.error('Failed to fetch books')
-      console.error('Error fetching books:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const fetchBooksData = useCallback(
+    async (page = 1, search = '') => {
+      setIsLoading(true)
+      try {
+        const data = await fetchBooks(token, page, search)
+        setBooks(data.results)
+        setPagination({
+          currentPage: page,
+          totalPages: Math.ceil(data.count / 10),
+          totalItems: data.count
+        })
+      } catch (error) {
+        toast.error('Failed to fetch books')
+        console.error('Error fetching books:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [token]
+  )
 
   const handlePageChange = (newPage) => {
     fetchBooksData(newPage)
@@ -82,12 +84,18 @@ export const useBooks = (token) => {
   }
 
   const handleDeleteBook = async (id) => {
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this book? This action cannot be undone.'
+    )
+
+    if (!confirmDelete) {
+      return
+    }
+
     try {
       await deleteBook(token, id)
       toast.success('Book deleted successfully')
-
-      // Refetch the current page data to fill the gap
-      await fetchBooksData(pagination.currentPage)
 
       // If we're on a page with only one item, go to previous page
       if (books.length === 1 && pagination.currentPage > 1) {

@@ -124,11 +124,6 @@ const Borrowed = () => {
     }
   }, [token])
 
-  // Update list when search term changes
-  useEffect(() => {
-    fetchBorrowedData()
-  }, [debouncedSearchTerm])
-
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
 
   const handleSidebarToggle = () => setIsCollapsed(!isCollapsed)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-export const useBookSearch = (fetchBooks) => {
+export const useBookSearch = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
 

@@ -144,8 +144,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
 
   const handleBookSelect = (book) => {
     setSelectedBook(book)
-    setFormData((prev) => ({ 
-      ...prev, 
+    setFormData((prev) => ({
+      ...prev,
       book: book.id,
       lexile_level: book.lexile_level || '' // Add this line
     }))
@@ -207,7 +207,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         </div>
         <form onSubmit={handleSubmit} className="borrow-modal-form">
           <div className="borrow-form-grid">
-            <div className="borrow-form-group">
+            <div className="borrow-form-group student-field">
               <label htmlFor="student" className="required">
                 Student ID
               </label>
@@ -223,7 +223,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                 className="borrow-input"
               />
             </div>
-            <div className="borrow-form-group">
+            <div className="borrow-form-group book-field">
               <label htmlFor="book-search">Book*</label>
               <div className="borrow-search-wrapper" ref={bookInputRef}>
                 <FaBook className="borrow-search-icon" />

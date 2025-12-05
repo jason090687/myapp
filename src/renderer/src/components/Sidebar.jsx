@@ -5,13 +5,8 @@ import {
   FaHome,
   FaBook,
   FaBookmark,
-  FaHistory,
   FaCog,
   FaSignOutAlt,
-  FaBars,
-  FaSearch,
-  FaBell,
-  FaUserCircle,
   FaQuestion,
   FaGraduationCap,
   FaUsers
@@ -138,7 +133,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
               disabled={isLoading}
             >
               <FaSignOutAlt className="logout-icon" />
-              <span className="logout-text">{isLoading ? 'Logging out...' : 'Logout'}</span>
+              <span className="logout-text">Logout</span>
             </button>
           </div>
         </nav>

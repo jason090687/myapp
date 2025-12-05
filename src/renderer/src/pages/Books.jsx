@@ -1,10 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import BooksHeader from '../components/Books/components/BooksHeader'
 import BooksTable from '../components/Books/components/BooksTable'
-import AddBookModal from '../components/AddBookModal'
-import EditBookModal from '../components/EditBookModal'
 import { useBooks } from '../components/Books/hooks/useBooks'
 import { useBookModals } from '../components/Books/hooks/useBookModals'
 import { useBookSearch } from '../components/Books/hooks/useBookSearch'
@@ -14,6 +13,7 @@ import BookDetailsModal from '../components/Books/components/BookDetailsModal'
 import ErrorBoundary from '../components/ErrorBoundary'
 
 function Books() {
+  const navigate = useNavigate()
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
   const { token, user } = useSelector((state) => state.auth)
 
@@ -28,21 +28,9 @@ function Books() {
     handlePageChange
   } = useBooks(token)
 
-  const { searchTerm, debouncedSearchTerm, handleSearch } = useBookSearch(() => {
-    fetchBooksData(1, debouncedSearchTerm)
-  })
+  const { debouncedSearchTerm, handleSearch } = useBookSearch()
 
-  const {
-    isModalOpen,
-    isEditModalOpen,
-    editingBook,
-    handleAddBook,
-    handleEditBook,
-    handleCloseModal,
-    handleCloseEditModal,
-    handleSubmitBook,
-    handleEditSubmit
-  } = useBookModals(token, fetchBooksData, pagination.currentPage)
+  const { handleAddBook, handleEditBook } = useBookModals()
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [selectedBook, setSelectedBook] = useState(null)
@@ -62,22 +50,9 @@ function Books() {
 
   const handleRowClick = useCallback(
     (book) => {
-      if (windowWidth <= 1500) {
-        // First close the modal
-        setIsDetailsModalOpen(false)
-
-        // Clear the selected book
-        setTimeout(() => {
-          setSelectedBook(null)
-          // Then set new book and open modal
-          setTimeout(() => {
-            setSelectedBook(book)
-            setIsDetailsModalOpen(true)
-          }, 50)
-        }, 100)
-      }
+      navigate(`/books/edit-book/${book.id}`)
     },
-    [windowWidth]
+    [navigate]
   )
 
   const handleCloseDetailsModal = useCallback(() => {
@@ -90,11 +65,7 @@ function Books() {
 
   useEffect(() => {
     fetchBooksData(1, debouncedSearchTerm)
-
-    return () => {
-      handleCloseDetailsModal()
-    }
-  }, [debouncedSearchTerm, handleCloseDetailsModal])
+  }, [debouncedSearchTerm, fetchBooksData])
 
   useEffect(() => {
     const handleResize = () => {
@@ -147,21 +118,6 @@ function Books() {
           </div>
         </ErrorBoundary>
       </div>
-
-      <AddBookModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmitBook}
-        currentUser={user}
-      />
-
-      <EditBookModal
-        isOpen={isEditModalOpen && editingBook !== null}
-        onClose={handleCloseEditModal}
-        onSubmit={handleEditSubmit}
-        bookData={editingBook}
-        currentUser={user}
-      />
 
       {windowWidth <= 1500 && (
         <ErrorBoundary>

@@ -78,12 +78,6 @@
     0 1px 0 rgba(255, 255, 255, 0.5) inset;
 }
 
-.overdue-info-group:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
-  border-color: #cbd5e1;
-}
-
 .overdue-info-group label {
   display: block;
   font-size: 0.75rem;

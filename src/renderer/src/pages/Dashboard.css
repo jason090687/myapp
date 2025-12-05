@@ -97,10 +97,10 @@
 }
 
 .card-icon {
-  font-size: 2.25rem;
-  padding: 1.25rem;
+  font-size: 1.5rem;
+  padding: 0.875rem;
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 1.25rem;
+  border-radius: 0.875rem;
   backdrop-filter: blur(5px);
 }
 

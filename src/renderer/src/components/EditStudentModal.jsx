@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import ReactModal from 'react-modal' // Changed from 'react-modal' to 'ReactModal'
-import { FaTimes, FaSpinner } from 'react-icons/fa' // Add FaSpinner
+import { FaTimes } from 'react-icons/fa' // Add FaSpinner
 import { toast } from 'react-toastify'
 
 const customStyles = {
@@ -80,6 +80,17 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="edit-form">
+        <div className="form-group">
+          <label htmlFor="name">Student ID</label>
+          <input
+            type="text"
+            id="id_number"
+            name="id_number"
+            value={formData.id_number}
+            onChange={handleChange}
+            required
+          />
+        </div>
         <div className="form-group">
           <label htmlFor="name">Name</label>
           <input

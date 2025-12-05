@@ -1,15 +1,15 @@
 import axios from 'axios'
 
-const API_URL = 'http://192.168.0.145:8000/api/v1'
-// const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
+// const API_URL = 'http://192.168.0.145:8000/api/v1'
+const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
 
-const apiConfig = {
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  withCredentials: false // Change this to false
-}
+// const apiConfig = {
+//   baseURL: API_URL,
+//   headers: {
+//     'Content-Type': 'application/json'
+//   },
+//   withCredentials: false // Change this to false
+// }
 
 const getAuthHeaders = (token) => ({
   headers: {
@@ -522,10 +522,21 @@ export const fetchBookStatuses = async (token) => {
 export const fetchTotalPenalties = async (token) => {
   try {
     const response = await axios.get(`${API_URL}/borrow/fines/`, getAuthHeaders(token))
+
+    // Validate the response data to ensure it's reasonable
+    const totalPenalties = response.data.total_penalties
+    const overdueCount = response.data.overdue_count
+
+    // Check if the values are numbers and within reasonable bounds
+    const isValidTotalPenalties =
+      typeof totalPenalties === 'number' && totalPenalties >= 0 && totalPenalties < 1000000
+    const isValidOverdueCount =
+      typeof overdueCount === 'number' && overdueCount >= 0 && overdueCount < 10000
+
     return {
-      totalPenalties: response.data.total_penalties || 0,
-      overdueCount: response.data.overdue_count || 0,
-      overdueBooks: response.data.overdue_books || []
+      totalPenalties: isValidTotalPenalties ? totalPenalties : 0,
+      overdueCount: isValidOverdueCount ? overdueCount : 0,
+      overdueBooks: Array.isArray(response.data.overdue_books) ? response.data.overdue_books : []
     }
   } catch (error) {
     console.error('Error fetching total penalties:', error)

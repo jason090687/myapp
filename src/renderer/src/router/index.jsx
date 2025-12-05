@@ -18,6 +18,9 @@ import StudentDetailsPage from '../pages/StudentDetailsPage'
 import StaffPage from '../pages/StaffPage'
 import ErrorBoundary from '../components/ErrorBoundary'
 import StaffDetailPage from '../pages/StaffDetailPage'
+import AddBook from '../components/AddBook.jsx'
+import EditBook from '../pages/EditBook.jsx'
+import ProtectedRoute from '../components/ProtectedRoute'
 
 const router = createHashRouter([
   {
@@ -39,28 +42,62 @@ const router = createHashRouter([
   },
   {
     path: '/dashboard',
-    element: <Dashboard />
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/books',
     element: (
-      <ErrorBoundary>
-        <Books />
-      </ErrorBoundary>
+      <ProtectedRoute>
+        <ErrorBoundary>
+          <Books />
+        </ErrorBoundary>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />
   },
   {
+    path: '/books/add-book',
+    element: (
+      <ProtectedRoute>
+        <AddBook />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/books/edit-book/:id',
+    element: (
+      <ProtectedRoute>
+        <EditBook />
+      </ProtectedRoute>
+    )
+  },
+  {
     path: '/borrowed',
-    element: <Borrowed />
+    element: (
+      <ProtectedRoute>
+        <Borrowed />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/profile',
-    element: <ProfilePage />
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/settings',
-    element: <Settings />,
+    element: (
+      <ProtectedRoute>
+        <Settings />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: 'backup',
@@ -74,7 +111,11 @@ const router = createHashRouter([
   },
   {
     path: '/help',
-    element: <Help />
+    element: (
+      <ProtectedRoute>
+        <Help />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/otp-verification',
@@ -90,19 +131,35 @@ const router = createHashRouter([
   },
   {
     path: '/students',
-    element: <StudentsPage />
+    element: (
+      <ProtectedRoute>
+        <StudentsPage />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/students/:studentId',
-    element: <StudentDetailsPage />
+    element: (
+      <ProtectedRoute>
+        <StudentDetailsPage />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/staff',
-    element: <StaffPage />
+    element: (
+      <ProtectedRoute>
+        <StaffPage />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/staff/:staffId',
-    element: <StaffDetailPage />
+    element: (
+      <ProtectedRoute>
+        <StaffDetailPage />
+      </ProtectedRoute>
+    )
   }
 ])
 

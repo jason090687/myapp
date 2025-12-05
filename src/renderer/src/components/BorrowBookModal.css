@@ -20,7 +20,7 @@
   border-radius: 1.2rem;
   width: 95%;
   max-width: 700px; /* Reduced from 900px */
-  max-height: 550px; /* Reduced from 600px */
+  max-height: 650px; /* Increased from 550px */
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow:
     0 20px 40px -12px rgba(0, 0, 0, 0.12),
@@ -155,8 +155,7 @@
 .borrow-form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 columns for BorrowBookModal */
-  max-height: 300px; /* Reduced height */
-  overflow-y: visible; /* Change from auto to visible */
+  overflow-y: visible;
   gap: 1rem;
   padding: 0.5rem;
   position: relative; /* Add this */
@@ -172,15 +171,14 @@
   background: #f8fafc;
   padding: 0.875rem;
   border-radius: 0.875rem;
-  border: 1px solid #e2e8f0;
+  border: none;
   transition: all 0.2s ease;
   z-index: 1;
 }
 
-.borrow-form-group:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
-  border-color: #cbd5e1;
+.book-field,
+.student-field {
+  grid-column: span 2;
 }
 
 .borrow-form-group:has(.borrow-search-wrapper),
@@ -342,7 +340,7 @@
 .borrow-search-wrapper {
   position: relative;
   width: 100%;
-  border: 2px solid #e2e8f0;
+  border: none;
   border-radius: 1rem;
   background-color: #f8fafc;
   transition: border-color 0.2s;

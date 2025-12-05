@@ -20,7 +20,7 @@ import {
 } from 'react-icons/fa'
 import { fetchUserDetails, updateBook, fetchBookStatuses } from '../Features/api'
 import { useSelector } from 'react-redux'
-import './AddBookModal.css' // Use the same modal styles
+import './AddBook.css'
 import { Bounce, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 

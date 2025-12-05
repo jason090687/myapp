@@ -165,7 +165,7 @@
 }
 
 .books-table td {
-  padding: 1.25rem 1rem;
+  /* padding: 1.25rem 1rem; */
   color: #1e293b;
   border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
@@ -432,12 +432,12 @@
 .books-table .col-action {
   position: sticky;
   right: 0;
-  width: 80px; /* Reduced from previous width */
-  min-width: 80px;
+  width: 10px;
+  /* min-width: 10px; */
   background: white;
   z-index: 2;
-  padding: 0.5rem; /* Reduced padding */
-  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
+  /* padding: 0.5rem; */
+  box-shadow: -2px 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .books-table td.col-action {
@@ -462,7 +462,7 @@
   gap: 4px; /* Reduced gap */
   justify-content: center;
   align-items: center;
-  width: 100%;
+  /* width: 50%; */
   padding: 0;
   margin: 0;
   border: none;
@@ -472,9 +472,9 @@
 }
 
 .action-btn {
-  padding: 6px; /* Reduced padding */
-  width: 28px; /* Fixed width */
-  height: 28px; /* Fixed height */
+  /* padding: 6px; */
+  width: 10px;
+  /* height: 28px; */
   min-width: unset;
   border-radius: 4px;
   display: flex;
