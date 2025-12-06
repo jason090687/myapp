@@ -5,6 +5,7 @@ import ForgotPassword from '../pages/ForgotPassword'
 import Dashboard from '../pages/Dashboard'
 import Books from '../pages/Books'
 import Borrowed from '../pages/Borrowed'
+import BorrowBookPage from '../pages/BorrowBookPage'
 import Settings from '../pages/Settings'
 import BackupSettings from '../components/settings/BackupSettings.jsx'
 import Help from '../pages/Help'
@@ -80,6 +81,14 @@ const router = createHashRouter([
     element: (
       <ProtectedRoute>
         <Borrowed />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/borrow-book',
+    element: (
+      <ProtectedRoute>
+        <BorrowBookPage />
       </ProtectedRoute>
     )
   },

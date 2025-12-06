@@ -9,14 +9,15 @@ import {
   processOverduePayment // Add this import
 } from '../Features/api'
 import './Borrowed.css'
-import BorrowBookModal from '../components/BorrowBookModal'
 import RenewModal from '../components/RenewModal'
 import OverdueModal from '../components/OverdueModal'
 import { Bounce, toast } from 'react-toastify'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import BorrowDetailsModal from '../components/BorrowDetails/BorrowDetailsModal'
+import BorrowBookModal from '../components/BorrowBookModal'
 
 const Borrowed = () => {
+  const navigate = useNavigate()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
@@ -29,7 +30,6 @@ const Borrowed = () => {
     previous: null,
     currentPage: 1
   })
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isRenewModalOpen, setIsRenewModalOpen] = useState(false)
   const [selectedBorrow, setSelectedBorrow] = useState(null)
   const [isOverdueModalOpen, setIsOverdueModalOpen] = useState(false)
@@ -39,6 +39,7 @@ const Borrowed = () => {
   const shouldHighlight = searchParams.get('highlight') === 'true'
   const [selectedBorrowDetails, setSelectedBorrowDetails] = useState(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false)
 
   // Add function to check if book is overdue
   const isOverdue = (dueDate) => {
@@ -134,19 +135,7 @@ const Borrowed = () => {
     }
   }
 
-  const handleBorrowBook = () => setIsModalOpen(true)
-
-  const handleCloseModal = () => setIsModalOpen(false)
-
-  const handleSubmitBorrow = async (borrowData) => {
-    try {
-      // await borrowBook(token, borrowData)
-      setIsModalOpen(false)
-      await fetchBorrowedData(pagination.currentPage) // Refresh the borrowed books list
-    } catch (error) {
-      console.error('Error borrowing book:', error)
-    }
-  }
+  const handleBorrowBook = () => setIsBorrowModalOpen(true)
 
   const handleReturnBook = async (borrowId) => {
     try {
@@ -425,11 +414,6 @@ const Borrowed = () => {
             </div>
           </div>
         </div>
-        <BorrowBookModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSubmit={handleSubmitBorrow}
-        />
         <RenewModal
           isOpen={isRenewModalOpen}
           onClose={() => setIsRenewModalOpen(false)}
@@ -453,6 +437,7 @@ const Borrowed = () => {
             onPay={handleOverdueClick}
           />
         )}
+        <BorrowBookModal isOpen={isBorrowModalOpen} onClose={() => setIsBorrowModalOpen(false)} />
       </div>
     </div>
   )

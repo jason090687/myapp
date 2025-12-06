@@ -1,35 +1,83 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import PropTypes from 'prop-types'
-import { FaUser, FaBook, FaCalendar } from 'react-icons/fa'
+import { useState, useEffect } from 'react'
+import { FaUser, FaBook, FaCalendar, FaTimes, FaChevronDown, FaChevronUp } from 'react-icons/fa'
 import { fetchAllBooks, borrowBook } from '../Features/api'
 import InputField from './InputField'
 import './BorrowBookModal.css'
 import { useSelector } from 'react-redux'
 import { Bounce, toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
-function BorrowBookModal({ isOpen, onClose, onSubmit }) {
+function BorrowBookModal({ isOpen, onClose }) {
+  const navigate = useNavigate()
   const initialFormData = {
     student: '',
-    book: '',
+    books: [],
+    lexile_level: '',
     due_date: '',
-    status: 'Borrowed',
-    lexile_level: '' // Add this line
+    status: 'Borrowed'
   }
   const [formData, setFormData] = useState(initialFormData)
   const [books, setBooks] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [bookSearch, setBookSearch] = useState('')
-  const [selectedBook, setSelectedBook] = useState(null)
-  const [showBookDropdown, setShowBookDropdown] = useState(false)
+  const [globalSearch, setGlobalSearch] = useState('')
+  const [showGlobalDropdown, setShowGlobalDropdown] = useState(false)
+  const [globalHighlightedIndex, setGlobalHighlightedIndex] = useState(-1)
   const { token } = useSelector((state) => state.auth)
-  const bookInputRef = useRef(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [highlightedIndex, setHighlightedIndex] = useState(-1)
-  const dropdownRef = useRef(null)
+  const [isBooksExpanded, setIsBooksExpanded] = useState(false)
 
-  const filteredBooks = useMemo(() => {
-    return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
-  }, [books, bookSearch])
+  const getGlobalFilteredBooks = () => {
+    return books.filter((book) => book.title.toLowerCase().includes(globalSearch.toLowerCase()))
+  }
+
+  const handleGlobalSelect = (e, book) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setFormData((prev) => ({
+      ...prev,
+      books: [...prev.books, { book: book.id }]
+    }))
+    setShowGlobalDropdown(false)
+    setGlobalSearch('')
+  }
+
+  const handleGlobalKeyDown = (e) => {
+    const filtered = getGlobalFilteredBooks()
+
+    switch (e.key) {
+      case 'ArrowDown':
+        if (showGlobalDropdown && filtered.length > 0) {
+          e.preventDefault()
+          setGlobalHighlightedIndex((prev) => (prev < filtered.length - 1 ? prev + 1 : prev))
+        }
+        break
+      case 'ArrowUp':
+        if (showGlobalDropdown && filtered.length > 0) {
+          e.preventDefault()
+          setGlobalHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0))
+        }
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (showGlobalDropdown && globalHighlightedIndex >= 0 && filtered.length > 0) {
+          handleGlobalSelect(e, filtered[globalHighlightedIndex])
+        }
+        break
+      case 'Escape':
+        setShowGlobalDropdown(false)
+        setGlobalHighlightedIndex(-1)
+        break
+      default:
+        break
+    }
+  }
+
+  const removeBook = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      books: prev.books.filter((_, i) => i !== index)
+    }))
+  }
 
   const notifySuccess = () =>
     toast.success('Book borrowed successfully!', {
@@ -56,78 +104,95 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     })
 
   useEffect(() => {
-    if (!isOpen) return
-
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        const booksResponse = await fetchAllBooks(token, bookSearch)
+        const booksResponse = await fetchAllBooks(token)
         const availableBooks = booksResponse.results
           .filter((book) => book.status !== 'Borrowed')
           .map((book) => ({
             id: book.id,
             title: book.title,
-            lexile_level: book.lexile_level // Add this line
+            lexile_level: book.lexile_level
           }))
         setBooks(availableBooks)
-      } catch (error) {
+      } catch {
         toast.error('Failed to fetch books')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchData()
-  }, [isOpen, token, bookSearch])
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (bookInputRef.current && !bookInputRef.current.contains(event.target)) {
-        setShowBookDropdown(false)
-      }
+    if (isOpen) {
+      fetchData()
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  useEffect(() => {
-    if (highlightedIndex >= 0 && dropdownRef.current) {
-      const highlightedElement = dropdownRef.current.children[highlightedIndex]
-      if (highlightedElement) {
-        highlightedElement.scrollIntoView({
-          block: 'nearest',
-          behavior: 'smooth'
-        })
-      }
-    }
-  }, [highlightedIndex])
+  }, [token, isOpen])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (isSubmitting) return
 
+    // Validation
+    if (!formData.student.trim()) {
+      toast.error('Please enter a student ID', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'light'
+      })
+      return
+    }
+
+    if (formData.books.length === 0) {
+      toast.error('Please select at least one book', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'light'
+      })
+      return
+    }
+
+    if (!formData.lexile_level.trim()) {
+      toast.error('Please enter a lexile level', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'light'
+      })
+      return
+    }
+
+    if (!formData.due_date) {
+      toast.error('Please select a due date', {
+        position: 'top-right',
+        autoClose: 3000,
+        theme: 'light'
+      })
+      return
+    }
+
     setIsSubmitting(true)
     setIsLoading(true)
 
     try {
-      const borrowData = {
-        student: formData.student,
-        book: formData.book,
-        due_date: formData.due_date,
-        status: 'Borrowed',
-        lexile_level: formData.lexile_level
+      // Borrow each book
+      for (const bookData of formData.books) {
+        if (bookData.book) {
+          const borrowData = {
+            student: formData.student,
+            book: bookData.book,
+            due_date: formData.due_date,
+            status: 'Borrowed',
+            lexile_level: formData.lexile_level
+          }
+          await borrowBook(token, borrowData)
+        }
       }
 
-      await borrowBook(token, borrowData)
-      onSubmit(borrowData)
-
       setFormData(initialFormData)
-      setBookSearch('')
-      setSelectedBook(null)
-      onClose()
+      navigate('/borrowed')
       notifySuccess()
+      onClose()
     } catch (error) {
-      notifyError()
+      notifyError(error.message || 'Failed to borrow book')
     } finally {
       setIsSubmitting(false)
       setIsLoading(false)
@@ -142,153 +207,133 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     }))
   }
 
-  const handleBookSelect = (book) => {
-    setSelectedBook(book)
-    setFormData((prev) => ({
-      ...prev,
-      book: book.id,
-      lexile_level: book.lexile_level || '' // Add this line
-    }))
-    setBookSearch(book.title)
-    setShowBookDropdown(false)
-  }
+  if (!isOpen) return null
 
-  const handleKeyDown = (e) => {
-    if (!showBookDropdown || filteredBooks.length === 0) return
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        setHighlightedIndex((prevIndex) => {
-          const nextIndex = prevIndex < filteredBooks.length - 1 ? prevIndex + 1 : prevIndex
-          return nextIndex
-        })
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        setHighlightedIndex((prevIndex) => {
-          const nextIndex = prevIndex > 0 ? prevIndex - 1 : 0
-          return nextIndex
-        })
-        break
-      case 'Enter':
-        e.preventDefault()
-        if (highlightedIndex >= 0) {
-          handleBookSelect(filteredBooks[highlightedIndex])
-        }
-        break
-      case 'Escape':
-        setShowBookDropdown(false)
-        setHighlightedIndex(-1)
-        break
-      default:
-        break
-    }
-  }
-
-  useEffect(() => {
-    setHighlightedIndex(-1)
-  }, [bookSearch])
-
-  useEffect(() => {
-    if (!showBookDropdown) {
-      setHighlightedIndex(-1)
-    }
-  }, [showBookDropdown])
-
-  return isOpen ? (
+  return (
     <div className="borrow-modal-overlay">
-      <div className="borrow-modal-content">
+      <div className="borrow-modal">
         <div className="borrow-modal-header">
-          <h2>Borrow Book</h2>
-          <button onClick={onClose} className="borrow-modal-close">
-            &times;
-          </button>
+          <div className="header-left">
+            <div className="header-top">
+              <h2>Borrow Book</h2>
+              <button onClick={onClose} className="borrow-modal-close">
+                ×
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="Search books online..."
+              className="global-search"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              onClick={() => setShowGlobalDropdown(true)}
+              onKeyDown={handleGlobalKeyDown}
+              onBlur={() => setTimeout(() => setShowGlobalDropdown(false), 200)}
+            />
+            {showGlobalDropdown && (
+              <div className="global-search-results">
+                {getGlobalFilteredBooks().map((book, index) => (
+                  <div
+                    key={book.id}
+                    className={`global-search-item ${index === globalHighlightedIndex ? 'highlighted' : ''}`}
+                    onClick={(e) => handleGlobalSelect(e, book)}
+                    onMouseEnter={() => setGlobalHighlightedIndex(index)}
+                  >
+                    {book.title} {book.author ? `- ${book.author}` : ''}
+                    {book.isbn ? `(ISBN: ${book.isbn})` : ''}
+                  </div>
+                ))}
+                {getGlobalFilteredBooks().length === 0 && globalSearch && (
+                  <div className="global-search-item no-results">No books found</div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         <form onSubmit={handleSubmit} className="borrow-modal-form">
           <div className="borrow-form-grid">
-            <div className="borrow-form-group student-field">
-              <label htmlFor="student" className="required">
-                Student ID
-              </label>
-              <InputField
-                type="text"
-                id="student"
-                name="student"
-                value={formData.student}
-                onChange={handleChange}
-                required
-                icon={FaUser}
-                placeholder="Enter student ID"
-                className="borrow-input"
-              />
-            </div>
-            <div className="borrow-form-group book-field">
-              <label htmlFor="book-search">Book*</label>
-              <div className="borrow-search-wrapper" ref={bookInputRef}>
-                <FaBook className="borrow-search-icon" />
-                <input
+            <div className="horizontal-fields">
+              <div className="borrow-form-group student-field">
+                <label htmlFor="student" className="required">
+                  Student ID
+                </label>
+                <InputField
                   type="text"
-                  id="book-search"
-                  placeholder="Search book..."
-                  value={bookSearch}
-                  onChange={(e) => setBookSearch(e.target.value)}
-                  onClick={() => setShowBookDropdown(true)}
-                  onKeyDown={handleKeyDown}
-                  className="borrow-search-input"
+                  id="student"
+                  name="student"
+                  value={formData.student}
+                  onChange={handleChange}
                   required
+                  icon={FaUser}
+                  placeholder="Enter student ID"
+                  className="borrow-input"
                 />
-                {showBookDropdown && (
-                  <div className="borrow-search-results" ref={dropdownRef}>
-                    {isLoading ? (
-                      <div className="borrow-search-item">Loading books...</div>
-                    ) : filteredBooks.length > 0 ? (
-                      filteredBooks.map((book, index) => (
-                        <div
-                          key={book.id}
-                          className={`borrow-search-item ${index === highlightedIndex ? 'highlighted' : ''}`}
-                          onClick={() => handleBookSelect(book)}
-                          onMouseEnter={() => setHighlightedIndex(index)}
-                        >
-                          {book.title} {book.author ? `- ${book.author}` : ''}
-                          {book.isbn ? `(ISBN: ${book.isbn})` : ''}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="borrow-search-item borrow-no-results">No books found</div>
-                    )}
-                  </div>
-                )}
+              </div>
+              <div className="borrow-form-group">
+                <label htmlFor="lexile_level">Lexile Level*</label>
+                <InputField
+                  type="text"
+                  id="lexile_level"
+                  name="lexile_level"
+                  value={formData.lexile_level}
+                  onChange={handleChange}
+                  required
+                  icon={FaBook}
+                  placeholder="Enter lexile level"
+                  className="borrow-input"
+                />
+              </div>
+              <div className="borrow-form-group">
+                <label htmlFor="due_date">Due Date*</label>
+                <InputField
+                  type="date"
+                  id="due_date"
+                  name="due_date"
+                  value={formData.due_date}
+                  onChange={handleChange}
+                  required
+                  icon={FaCalendar}
+                  className="borrow-input"
+                />
               </div>
             </div>
-            <div className="borrow-form-group">
-              <label htmlFor="lexile_level">Lexile Level*</label>
-              <InputField
-                type="text"
-                id="lexile_level"
-                name="lexile_level"
-                value={formData.lexile_level}
-                onChange={handleChange}
-                required
-                icon={FaBook}
-                placeholder="Enter lexile level"
-                className="borrow-input"
-                readOnly
-              />
-            </div>
-            <div className="borrow-form-group">
-              <label htmlFor="due_date">Due Date*</label>
-              <InputField
-                type="date"
-                id="due_date"
-                name="due_date"
-                value={formData.due_date}
-                onChange={handleChange}
-                required
-                icon={FaCalendar}
-                className="borrow-input"
-              />
-            </div>
+            <button
+              type="button"
+              className="books-toggle-btn"
+              onClick={() => setIsBooksExpanded(!isBooksExpanded)}
+            >
+              <span>Books</span>
+              {isBooksExpanded ? <FaChevronUp /> : <FaChevronDown />}
+            </button>
+            {isBooksExpanded && (
+              <div className="books-container">
+                {formData.books.length > 0 &&
+                  formData.books.map((bookData, index) => (
+                    <div key={index} className="borrow-form-group book-field">
+                      <div className="borrow-display-wrapper">
+                        <FaBook className="borrow-search-icon" />
+                        <input
+                          type="text"
+                          id={`book-display-${index}`}
+                          value={
+                            books.find((b) => b.id === formData.books[index].book)
+                              ? books.find((b) => b.id === formData.books[index].book).title
+                              : 'No book selected'
+                          }
+                          className="borrow-display-input"
+                          readOnly
+                          required
+                        />
+                        <FaTimes
+                          className="remove-icon-inside"
+                          onClick={() => removeBook(index)}
+                          title="Remove book"
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
           <div className="borrow-modal-footer">
             <button type="button" onClick={onClose} className="borrow-cancel-btn">
@@ -311,13 +356,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         </form>
       </div>
     </div>
-  ) : null
-}
-
-BorrowBookModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired
+  )
 }
 
 export default BorrowBookModal
