@@ -98,7 +98,7 @@ const StaffDetailPage = () => {
       <main className="main">
         <div className="student-details-container">
           <button className="back-button" onClick={() => navigate('/staff')}>
-            <FaArrowLeft /> Back to Students
+            <FaArrowLeft /> Back to Staff
           </button>
 
           {isLoading ? (
