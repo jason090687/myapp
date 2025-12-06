@@ -223,6 +223,7 @@ const StudentDetailsPage = () => {
         onClose={() => setIsEditModalOpen(false)}
         onSubmit={handleEditSubmit}
         studentData={student}
+        studentId={studentId}
       />
     </div>
   )
