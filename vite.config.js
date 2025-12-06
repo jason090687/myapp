@@ -3,6 +3,7 @@ import electron from 'vite-plugin-electron'
 import renderer from 'vite-plugin-electron-renderer'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+import obfuscator from 'rollup-plugin-obfuscator'
 
 export default defineConfig({
   plugins: [
@@ -12,7 +13,11 @@ export default defineConfig({
         entry: 'electron/main.js'
       }
     ]),
-    renderer()
+    renderer(),
+    obfuscator({
+      compact: true,
+      controlFlowFlattening: true
+    })
   ],
   server: {
     hmr: true,

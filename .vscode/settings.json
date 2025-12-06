@@ -8,5 +8,5 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["Qrcode", "Toastify"]
+  "cSpell.words": ["lexile", "Qrcode", "Toastify"]
 }
