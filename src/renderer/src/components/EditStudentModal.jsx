@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import ReactModal from 'react-modal' // Changed from 'react-modal' to 'ReactModal'
-import { FaTimes } from 'react-icons/fa' // Add FaSpinner
+import ReactModal from 'react-modal'
+import { FaTimes } from 'react-icons/fa'
 import { toast } from 'react-toastify'
+import { useSelector } from 'react-redux'
+import { updateStudentDetails } from '../Features/api'
 
 const customStyles = {
   content: {
@@ -22,7 +24,7 @@ const customStyles = {
   }
 }
 
-const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData }) => {
+const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData, studentId }) => {
   const [formData, setFormData] = useState({
     name: '',
     id_number: '',
@@ -30,6 +32,7 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData }) => {
     active: false
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
     if (studentData) {
@@ -54,7 +57,18 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData }) => {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await onSubmit(formData)
+      // Use the API directly to update student details
+      const updatedStudent = await updateStudentDetails(
+        token,
+        studentId || studentData?.id_number,
+        formData
+      )
+
+      // Call the parent's onSubmit if provided (for updating local state)
+      if (onSubmit) {
+        await onSubmit(updatedStudent)
+      }
+
       onClose()
       toast.success('Student details updated successfully!')
     } catch (error) {
@@ -152,8 +166,9 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData }) => {
 EditStudentModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  studentData: PropTypes.object
+  onSubmit: PropTypes.func,
+  studentData: PropTypes.object,
+  studentId: PropTypes.string
 }
 
 export default EditStudentModal
