@@ -2,15 +2,17 @@
   --sidebar-width: 250px;
   --sidebar-collapsed-width: 70px;
   --navbar-height: 60px;
-  --primary-color: #ffffff;
-  --secondary-color: #f8f9fa;
-  --text-color: #333;
-  --background-color: #0a0b64; /* Changed back to original blue */
-  --transition-duration: 0.2s; /* Slightly faster transition */
-  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1); /* Smooth easing */
-  --hover-color: rgba(255, 255, 255, 0.1);
-  --text-muted: #cbd5e1; /* Adjusted for better contrast */
-  --active-bg: rgba(255, 255, 255, 0.1); /* Adjusted for the blue background */
+  --primary-color: #1e293b;
+  --secondary-color: #f8fafc;
+  --text-color: #1e293b;
+  --background-color: #ffffff;
+  --border-color: #e2e8f0;
+  --transition-duration: 0.2s;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --hover-color: #f1f5f9;
+  --text-muted: #64748b;
+  --active-bg: #e0f2fe;
+  --active-text: #0369a1;
 }
 
 * {
@@ -34,14 +36,14 @@ body {
   height: 100vh;
   position: fixed;
   background: var(--background-color);
-  color: white;
+  color: var(--primary-color);
   transition: all var(--transition-duration) var(--transition-timing);
-  will-change: width; /* Performance optimization */
-  backface-visibility: hidden; /* Reduce flickering */
-  transform: translateZ(0); /* Enable GPU acceleration */
+  will-change: width;
+  backface-visibility: hidden;
+  transform: translateZ(0);
   z-index: 1000;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-  border-right: none; /* Removed the border */
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
+  border-right: 1px solid var(--border-color);
 }
 
 .sidebar.collapsed {
@@ -52,7 +54,7 @@ body {
   height: var(--navbar-height);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-header .logo {
@@ -131,8 +133,8 @@ body {
   padding: 0.75rem 1rem;
   color: var(--text-muted);
   text-decoration: none;
-  gap: 12px; /* Consistent spacing */
-  width: calc(100% - 2rem); /* Full width minus margins */
+  gap: 12px;
+  width: calc(100% - 2rem);
   transition: all var(--transition-duration) var(--transition-timing);
   will-change: transform, width;
   margin: 0.25rem 1rem;
@@ -146,20 +148,20 @@ body {
 .sidebar-nav a:hover,
 .sidebar-nav li.active a {
   background: var(--active-bg);
-  color: var(--primary-color);
+  color: var(--active-text);
   transition: all var(--transition-duration) var(--transition-timing);
-  border-radius: 10px;
+  border-radius: 0.5rem;
   transform: translateX(0);
 }
 
 .sidebar-nav li.active a i,
 .sidebar-nav a:hover i {
-  color: white;
+  color: var(--active-text);
 }
 
 .sidebar-nav li.active a span,
 .sidebar-nav a:hover span {
-  color: white;
+  color: var(--active-text);
 }
 
 .sidebar-nav span {
@@ -193,7 +195,7 @@ body {
   left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  background: var(--background-color);
+  background: var(--primary-color);
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
@@ -202,7 +204,7 @@ body {
   transition: opacity 0.3s ease;
   pointer-events: none;
   font-family: 'Inter', sans-serif;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   z-index: 1000;
 }
 
@@ -234,8 +236,8 @@ body {
 }
 
 .logout-btn:hover {
-  background: #dc2626;
-  color: var(--primary-color);
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .logout-icon {
@@ -276,13 +278,13 @@ body {
   content: attr(data-tooltip);
   position: absolute;
   left: 60px;
-  background: var(--background-color);
+  background: var(--primary-color);
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
   white-space: nowrap;
   z-index: 1000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
 }
 
 /* Add styles for the nav action button */
@@ -305,7 +307,7 @@ body {
 
 .nav-action-btn:hover {
   background: var(--active-bg);
-  color: var(--primary-color);
+  color: var(--active-text);
 }
 
 .sidebar.collapsed .nav-action-btn {
@@ -323,13 +325,13 @@ body {
   left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  background: var(--background-color);
+  background: var(--primary-color);
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
   white-space: nowrap;
   opacity: 1;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   z-index: 1000;
 }
 
@@ -1019,7 +1021,7 @@ checkout-header a {
 .nav-separator {
   width: calc(100% - 2rem);
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-color);
   margin: 0.5rem 1rem;
 }
 

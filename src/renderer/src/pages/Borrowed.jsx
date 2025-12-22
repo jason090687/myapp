@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'
+import { RotateCcw, RefreshCw, DollarSign } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useSelector } from 'react-redux'
 import {
   fetchBorrowedBooks,
   returnBook,
   renewBook,
-  processOverduePayment // Add this import
+  processOverduePayment,
+  fetchAllStudentsForSearch,
+  fetchAllBooks
 } from '../Features/api'
 import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
@@ -39,6 +42,36 @@ const Borrowed = () => {
   const shouldHighlight = searchParams.get('highlight') === 'true'
   const [selectedBorrowDetails, setSelectedBorrowDetails] = useState(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const [studentMap, setStudentMap] = useState({})
+  const [bookMap, setBookMap] = useState({})
+
+  useEffect(() => {
+    if (!token) return
+
+    const fetchMappings = async () => {
+      try {
+        const [studentsData, booksData] = await Promise.all([
+          fetchAllStudentsForSearch(token),
+          fetchAllBooks(token, '')
+        ])
+
+        const studentMapping = {}
+        studentsData.forEach((student) => {
+          studentMapping[student.id] = student.name || 'Unknown'
+        })
+        setStudentMap(studentMapping)
+        const bookMapping = {}
+        booksData.results.forEach((book) => {
+          bookMapping[book.id] = book.title || 'Unknown'
+        })
+        setBookMap(bookMapping)
+      } catch (error) {
+        console.error('Error fetching mappings:', error)
+      }
+    }
+
+    fetchMappings()
+  }, [token])
 
   // Add function to check if book is overdue
   const isOverdue = (dueDate) => {
@@ -66,10 +99,9 @@ const Borrowed = () => {
   const getStatusText = (item) => {
     if (item.is_returned) return 'Return'
     if (item.paid && isOverdue(item.due_date)) return 'Paid'
-    return isOverdue(item.due_date) ? 'DUE' : 'BORROWED' // Changed to uppercase for emphasis
+    return isOverdue(item.due_date) ? 'DUE' : 'BORROWED'
   }
 
-  // Debounce effect for search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
@@ -77,20 +109,16 @@ const Borrowed = () => {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Add sorting function
   const sortBorrowedBooks = (books) => {
     return [...books].sort((a, b) => {
-      // First prioritize non-returned books
       if (a.is_returned !== b.is_returned) {
         return a.is_returned ? 1 : -1
       }
 
-      // Then sort by borrow date (newest first)
       return new Date(b.borrowed_date) - new Date(a.borrowed_date)
     })
   }
 
-  // Fetch borrowed books data
   const fetchBorrowedData = async (page = 1) => {
     if (!token) {
       console.error('Token missing: Skipping API call')
@@ -201,8 +229,8 @@ const Borrowed = () => {
   const handleOverdueClick = (borrowItem) => {
     setSelectedOverdue({
       id: borrowItem.id,
-      student_name: borrowItem.student,
-      book_title: borrowItem.book_title,
+      student: borrowItem.student,
+      book: borrowItem.book_title,
       due_date: borrowItem.due_date
     })
     setIsOverdueModalOpen(true)
@@ -253,13 +281,18 @@ const Borrowed = () => {
   const getFilteredBooks = () => {
     if (!searchTerm) return borrowedBooks
 
-    return borrowedBooks.filter(
-      (book) =>
-        book.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.book_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        formatDate(book.borrowed_date).toLowerCase().includes(searchTerm.toLowerCase()) ||
-        formatDate(book.due_date).toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const searchLower = searchTerm.toLowerCase()
+    return borrowedBooks.filter((book) => {
+      const studentName = studentMap[book.student] || book.student_name || book.student || ''
+      const bookTitle = bookMap[book.book] || book.book_title || book.book || ''
+
+      return (
+        studentName.toLowerCase().includes(searchLower) ||
+        bookTitle.toLowerCase().includes(searchLower) ||
+        formatDate(book.borrowed_date).toLowerCase().includes(searchLower) ||
+        formatDate(book.due_date).toLowerCase().includes(searchLower)
+      )
+    })
   }
 
   // Update the search handler
@@ -278,19 +311,25 @@ const Borrowed = () => {
         className="action-btn return"
         disabled={item.is_returned}
         onClick={() => handleReturnBook(item.id)}
+        title={item.is_returned ? 'Already Returned' : 'Return Book'}
       >
-        {item.is_returned ? 'Returned' : 'Return'}
+        <RotateCcw size={20} />
       </button>
       <button
         className="action-btn renew"
         disabled={item.is_returned || item.renewed_count >= 3}
         onClick={() => handleRenewClick(item)}
+        title={item.renewed_count >= 3 ? 'Renewal Limit Reached' : 'Renew Book'}
       >
-        Renew
+        <RefreshCw size={20} />
       </button>
       {isOverdue(item.due_date) && !item.is_returned && !item.paid && (
-        <button className="action-btn overdue" onClick={() => handleOverdueClick(item)}>
-          Pay
+        <button
+          className="action-btn overdue"
+          onClick={() => handleOverdueClick(item)}
+          title="Pay Overdue Fine"
+        >
+          <DollarSign size={20} />
         </button>
       )}
     </div>
@@ -298,7 +337,6 @@ const Borrowed = () => {
 
   const totalPages = Math.ceil(pagination.count / 10)
 
-  // Add this effect to scroll to the highlighted item
   useEffect(() => {
     if (highlightedId && shouldHighlight) {
       const element = document.getElementById(`borrowed-item-${highlightedId}`)
@@ -386,8 +424,10 @@ const Borrowed = () => {
                             : getRowClassName(item)
                         } ${windowWidth <= 1500 ? 'clickable-row' : ''}`}
                       >
-                        <td>{item.student_name}</td>
-                        <td>{item.book_title}</td>
+                        <td>
+                          {studentMap[item.student] || item.student_name || item.student || 'N/A'}
+                        </td>
+                        <td>{bookMap[item.book] || item.book_title || item.book || 'N/A'}</td>
                         <td>{formatDate(item.borrowed_date)}</td>
                         <td>{formatDate(item.due_date)}</td>
                         <td>

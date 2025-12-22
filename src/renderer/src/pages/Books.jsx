@@ -10,7 +10,9 @@ import { useBookSearch } from '../components/Books/hooks/useBookSearch'
 import './Books.css'
 import Pagination from '../components/Pagination'
 import BookDetailsModal from '../components/Books/components/BookDetailsModal'
+import ConfirmDeleteModal from '../components/Books/components/ConfirmDeleteModal'
 import ErrorBoundary from '../components/ErrorBoundary'
+import ToastContainer from '../components/Toast/ToastContainer'
 
 function Books() {
   const navigate = useNavigate()
@@ -25,7 +27,11 @@ function Books() {
     fetchBooksData,
     handleDeleteBook,
     handleSort,
-    handlePageChange
+    handlePageChange,
+    deleteConfirm,
+    isDeleting,
+    confirmDelete,
+    cancelDelete
   } = useBooks(token)
 
   const { debouncedSearchTerm, handleSearch } = useBookSearch()
@@ -35,6 +41,11 @@ function Books() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [selectedBook, setSelectedBook] = useState(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+
+  // Extract unique categories from books
+  const categories = Array.from(
+    new Set(books.filter((book) => book.subject).map((book) => book.subject))
+  ).sort()
 
   useEffect(() => {
     const handleResize = () => {
@@ -95,6 +106,9 @@ function Books() {
               onAddBook={handleAddBook}
               token={token}
               onRefresh={fetchBooksData}
+              sortConfig={sortConfig}
+              onSort={handleSort}
+              categories={categories}
             />
 
             <BooksTable
@@ -105,16 +119,9 @@ function Books() {
               onEditBook={handleEditBook}
               onDeleteBook={handleDeleteBook}
               onRowClick={handleRowClick}
+              pagination={pagination}
+              onPageChange={handlePageChange}
             />
-
-            {!isLoading && books.length > 0 && (
-              <Pagination
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
-                totalItems={pagination.totalItems}
-                onPageChange={handlePageChange}
-              />
-            )}
           </div>
         </ErrorBoundary>
       </div>
@@ -133,6 +140,16 @@ function Books() {
           )}
         </ErrorBoundary>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={deleteConfirm.isOpen}
+        bookTitle={deleteConfirm.bookTitle}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        isDeleting={isDeleting}
+      />
+
+      <ToastContainer />
     </div>
   )
 }

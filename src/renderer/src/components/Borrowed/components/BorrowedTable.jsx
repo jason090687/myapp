@@ -6,6 +6,7 @@ import { getRowClassName, sortBorrowedBooks } from '../utils/statusUtils'
 import Pagination from '../../Pagination'
 import { useMemo, useState, useEffect } from 'react'
 import BorrowedDetailsModal from '../../BorrowDetails/BorrowDetailsModal'
+import './BorrowedTable.css'
 
 const TABLE_COLUMNS = [
   { key: 'student', label: 'Student', render: (item) => item.student || 'N/A' },

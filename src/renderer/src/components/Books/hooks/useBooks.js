@@ -8,12 +8,14 @@ export const useBooks = (token) => {
   const [sortedBooks, setSortedBooks] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFetchingAll, setIsFetchingAll] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 0,
     totalItems: 0
   })
   const [sortConfig, setSortConfig] = useState({ column: '', direction: '' })
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, bookId: null, bookTitle: '' })
 
   const fetchBooksData = useCallback(
     async (page = 1, search = '') => {
@@ -83,19 +85,18 @@ export const useBooks = (token) => {
     }
   }
 
-  const handleDeleteBook = async (id) => {
-    // Show confirmation dialog
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this book? This action cannot be undone.'
-    )
+  const handleDeleteBook = async (id, bookTitle) => {
+    // Open confirmation modal
+    setDeleteConfirm({ isOpen: true, bookId: id, bookTitle: bookTitle || 'this book' })
+  }
 
-    if (!confirmDelete) {
-      return
-    }
+  const confirmDelete = async () => {
+    const { bookId } = deleteConfirm
+    setIsDeleting(true)
 
     try {
-      await deleteBook(token, id)
-      toast.success('Book deleted successfully')
+      await deleteBook(token, bookId)
+      window.showToast('Success', 'Book deleted successfully!', 'success', 4000)
 
       // If we're on a page with only one item, go to previous page
       if (books.length === 1 && pagination.currentPage > 1) {
@@ -111,8 +112,15 @@ export const useBooks = (token) => {
       }
     } catch (error) {
       console.error('Error deleting book:', error)
-      toast.error('Failed to delete book')
+      window.showToast('Error', 'Failed to delete book', 'error', 4000)
+    } finally {
+      setIsDeleting(false)
+      setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
     }
+  }
+
+  const cancelDelete = () => {
+    setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
   }
 
   const handleSort = (column) => {
@@ -137,9 +145,13 @@ export const useBooks = (token) => {
     isFetchingAll,
     pagination,
     sortConfig,
+    deleteConfirm,
+    isDeleting,
     fetchBooksData,
     fetchAllBooks,
     handleDeleteBook,
+    confirmDelete,
+    cancelDelete,
     setBooks,
     setSortedBooks,
     setPagination,

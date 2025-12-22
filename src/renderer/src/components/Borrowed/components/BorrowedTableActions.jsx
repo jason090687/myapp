@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types'
+import { RotateCcw, RefreshCw, DollarSign } from 'lucide-react'
 import { isOverdue } from '../utils/dateUtils'
 
 const BorrowedTableActions = ({ item, onReturn, onRenew, onOverdue }) => {
@@ -13,19 +14,29 @@ const BorrowedTableActions = ({ item, onReturn, onRenew, onOverdue }) => {
 
   return (
     <div className="action-buttons-container">
-      <button className="action-btn return" disabled={isReturned} onClick={() => onReturn(item.id)}>
-        {isReturned ? 'Returned' : 'Return'}
+      <button
+        className="action-btn return"
+        disabled={isReturned}
+        onClick={() => onReturn(item.id)}
+        title={isReturned ? 'Already Returned' : 'Return Book'}
+      >
+        <RotateCcw size={20} />
       </button>
       <button
         className="action-btn renew"
         disabled={isReturned || renewCount >= 3}
         onClick={() => onRenew(item)}
+        title={renewCount >= 3 ? 'Renewal Limit Reached' : 'Renew Book'}
       >
-        Renew
+        <RefreshCw size={20} />
       </button>
       {isOverdueAndNotPaid && (
-        <button className="action-btn overdue" onClick={() => onOverdue(item)}>
-          Pay
+        <button
+          className="action-btn overdue"
+          onClick={() => onOverdue(item)}
+          title="Pay Overdue Fine"
+        >
+          <DollarSign size={20} />
         </button>
       )}
     </div>

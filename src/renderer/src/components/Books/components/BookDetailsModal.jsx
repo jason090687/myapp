@@ -41,12 +41,12 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     (id) => {
       setIsClosing(true)
       setTimeout(() => {
-        onDelete(id)
+        onDelete(id, book?.title)
         onClose()
         setIsClosing(false)
       }, 200)
     },
-    [onDelete, onClose]
+    [onDelete, onClose, book?.title]
   )
 
   useEffect(() => {

@@ -1,6 +1,7 @@
-import { FaSortUp, FaSortDown, FaEdit, FaTrash } from 'react-icons/fa'
+import { FaEdit, FaTrash } from 'react-icons/fa'
 import { formatDate } from '../utils/bookUtils'
 import { useState, useEffect, useCallback } from 'react'
+import Pagination from '../../Pagination'
 
 const TABLE_COLUMNS = [
   { key: 'title', label: 'TITLE', sortable: true, required: true },
@@ -28,11 +29,11 @@ const BooksTable = ({
   books,
   isLoading,
   isFetchingAll,
-  sortConfig,
-  onSort,
   onEditBook,
   onDeleteBook,
-  onRowClick
+  onRowClick,
+  pagination,
+  onPageChange
 }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
@@ -83,25 +84,10 @@ const BooksTable = ({
     <thead>
       <tr>
         {TABLE_COLUMNS.map((column) => (
-          <th
-            key={column.key}
-            className={`col-${column.key} ${column.sortable ? 'sortable' : ''}`}
-            onClick={(e) => {
-              e.stopPropagation()
-              if (column.sortable) {
-                onSort(column.key)
-              }
-            }}
-            data-column={column.key}
-          >
+          <th key={column.key} className={`col-${column.key}`} data-column={column.key}>
             <div className="header-content">
               {column.label}
               {column.required && <span className="required-indicator">*</span>}
-              {column.sortable && sortConfig.column === column.key && (
-                <span className="sort-icon">
-                  {sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />}
-                </span>
-              )}
             </div>
           </th>
         ))}
@@ -155,7 +141,7 @@ const BooksTable = ({
               </button>
               <button
                 className="action-btn delete"
-                onClick={() => onDeleteBook(book.id)}
+                onClick={() => onDeleteBook(book.id, book.title)}
                 title="Delete"
               >
                 <FaTrash />
@@ -188,6 +174,14 @@ const BooksTable = ({
               : renderTableBody()}
         </table>
       </div>
+      {pagination && !isLoading && books.length > 0 && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.count}
+          onPageChange={onPageChange}
+        />
+      )}
     </div>
   )
 }

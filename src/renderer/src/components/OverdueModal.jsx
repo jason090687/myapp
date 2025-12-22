@@ -10,14 +10,14 @@ const OverdueModal = ({
   isOpen,
   onClose,
   onSubmit,
-  borrowData = { id: 0, student_name: '', book_title: '', due_date: new Date().toISOString() },
+  borrowData = { id: 0, student: '', book_title: '', due_date: new Date().toISOString() },
   onSuccess = () => {}
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [overdueAmount, setOverdueAmount] = useState(0)
   const [isLoadingAmount, setIsLoadingAmount] = useState(false)
   const [selectedAction, setSelectedAction] = useState('pay')
-  const [orNumber, setOrNumber] = useState('') // Add this line
+  const [orNumber, setOrNumber] = useState('')
   const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
@@ -29,8 +29,9 @@ const OverdueModal = ({
         const response = await fetchOverdueBorrowedBooks(token, borrowData.id)
         setOverdueAmount(Number(response.amount) || 0)
       } catch (error) {
-        toast.error('Failed to fetch overdue amount')
-        setOverdueAmount(0)
+        // If API fails, calculate based on overdue days
+        const calculatedAmount = calculateOverdueAmount(borrowData.due_date)
+        setOverdueAmount(calculatedAmount)
       } finally {
         setIsLoadingAmount(false)
       }
@@ -41,24 +42,41 @@ const OverdueModal = ({
     }
   }, [borrowData.id, token, isOpen])
 
+  // Calculate overdue amount based on days past due date
+  const calculateOverdueAmount = (dueDate) => {
+    const today = new Date()
+    const due = new Date(dueDate)
+
+    // Calculate days overdue
+    const diffTime = today - due
+    const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    // If not overdue, return 0
+    if (daysOverdue <= 0) return 0
+
+    // Calculate amount: 2 pesos per day
+    const dailyFine = 2
+    const amount = daysOverdue * dailyFine
+
+    return amount
+  }
+
+  // Get days overdue
+  const getDaysOverdue = () => {
+    const today = new Date()
+    const due = new Date(borrowData.due_date)
+    const diffTime = today - due
+    const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return Math.max(0, daysOverdue)
+  }
+
+  // Get daily fine amount
+  const getDailyFine = () => 2
+
   const calculateNewDueDate = (currentDueDate) => {
-    // Start with the next day
+    // Start with the next day and add 5 days (including weekends)
     let newDate = new Date(currentDueDate)
-    newDate.setDate(newDate.getDate() + 1)
-
-    let daysAdded = 0
-
-    while (daysAdded < 5) {
-      // Changed from >= to <
-      // Skip weekends (0 is Sunday, 6 is Saturday)
-      if (newDate.getDay() !== 0 && newDate.getDay() !== 6) {
-        daysAdded++
-      }
-      // If we haven't reached 5 working days, add another day
-      if (daysAdded < 5) {
-        newDate.setDate(newDate.getDate() + 1)
-      }
-    }
+    newDate.setDate(newDate.getDate() + 5)
 
     return newDate.toISOString().split('T')[0]
   }
@@ -75,9 +93,12 @@ const OverdueModal = ({
     setIsSubmitting(true)
 
     try {
+      // Calculate the fine amount: days overdue × daily fine
+      const calculatedFineAmount = getDaysOverdue() * getDailyFine()
+
       const paymentData = {
         id: borrowData.id,
-        amount: overdueAmount,
+        amount: calculatedFineAmount,
         paid: true,
         paid_at: new Date().toISOString().split('T')[0],
         or_Number: orNumber.trim() // Add OR number to payload
@@ -129,11 +150,11 @@ const OverdueModal = ({
         <div className="overdue-modal-body">
           <div className="overdue-info-group">
             <label>Student Name</label>
-            <p>{borrowData.student_name}</p>
+            <p>{borrowData.student || borrowData.student_name || 'N/A'}</p>
           </div>
           <div className="overdue-info-group">
             <label>Book Title</label>
-            <p>{borrowData.book_title}</p>
+            <p>{borrowData.book || borrowData.book_title || 'N/A'}</p>
           </div>
           <div className="overdue-info-group">
             <label>Due Date</label>
@@ -142,8 +163,14 @@ const OverdueModal = ({
               {new Date(borrowData.due_date).toLocaleDateString()}
             </p>
           </div>
-          <div className="overdue-info-group">
-            <label>Amount Due</label>
+          {/* <div className="overdue-info-group">
+            <label>Days Overdue</label>
+            <p>
+              {Math.ceil((new Date() - new Date(borrowData.due_date)) / (1000 * 60 * 60 * 24))} days
+            </p>
+          </div> */}
+          {/* <div className="overdue-info-group">
+            <label>Amount Due (₱50/day)</label>
             {isLoadingAmount ? (
               <div className="amount-loading">Loading amount...</div>
             ) : (
@@ -152,7 +179,7 @@ const OverdueModal = ({
                 {typeof overdueAmount === 'number' ? overdueAmount.toFixed(2) : '0.00'}
               </p>
             )}
-          </div>
+          </div> */}
           <div className="overdue-info-group">
             <label>Payment Date</label>
             <p>
@@ -183,6 +210,28 @@ const OverdueModal = ({
             </select>
           </div>
         </div>
+
+        {/* Payment Summary Section */}
+        <div className="overdue-payment-summary">
+          {' '}
+          <div className="summary-breakdown">
+            <div className="breakdown-row">
+              <span className="breakdown-label">Days Overdue:</span>
+              <span className="breakdown-value">{getDaysOverdue()} days</span>
+            </div>
+            <div className="breakdown-row">
+              <span className="breakdown-label">Daily Fine:</span>
+              <span className="breakdown-value">₱{getDailyFine()}/day</span>
+            </div>
+            <div className="breakdown-divider"></div>
+          </div>{' '}
+          <div className="summary-label">Total Amount to Pay</div>
+          <div className="summary-amount">
+            <FaMoneyBill className="summary-icon" />
+            {(getDaysOverdue() * getDailyFine()).toFixed(2)}
+          </div>
+        </div>
+
         <div className="overdue-modal-footer">
           <button type="button" onClick={onClose} className="overdue-cancel-btn">
             Cancel
