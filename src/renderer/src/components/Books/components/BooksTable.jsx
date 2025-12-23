@@ -69,7 +69,15 @@ const BooksTable = ({
         return value.toString()
       default:
         if (column.key === 'status') {
-          return <span className={`status-badge ${value.toLowerCase()}`}>{value}</span>
+          // Determine actual status based on borrowed copies
+          const totalCopies = parseInt(book.copies) || 0
+          const availableCopies =
+            book.available_copies !== undefined ? parseInt(book.available_copies) : totalCopies
+          const isBorrowed = availableCopies < totalCopies
+          const actualStatus = isBorrowed ? 'Borrowed' : value || 'Available'
+          return (
+            <span className={`status-badge ${actualStatus.toLowerCase()}`}>{actualStatus}</span>
+          )
         }
         if (column.key === 'copies') {
           const copyNum = value.toString().split(' of ')[0]

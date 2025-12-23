@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
+import { Card } from '../components/ui/card'
+import DashboardChart from '../components/Dashboard/DashboardChart'
+import TopBorrowers from '../components/Dashboard/TopBorrowers'
+import RecentCheckouts from '../components/Dashboard/RecentCheckouts'
+import TopBooks from '../components/Dashboard/TopBooks'
 import './Dashboard.css'
 import {
   FaBook,
@@ -36,7 +41,9 @@ import {
   fetchReturnedBooksCount,
   fetchActiveUsers,
   fetchMonthlyReport,
-  fetchMonthlyStudentStats
+  fetchMonthlyStudentStats,
+  fetchAllStudentsForSearch,
+  fetchAllBooks
 } from '../Features/api'
 import {
   CardsSkeleton,
@@ -65,18 +72,20 @@ ChartJS.register(
 function Dashboard() {
   const navigate = useNavigate()
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [totalBooks, setTotalBooks] = useState('Loading...')
+  const [totalBooks, setTotalBooks] = useState([])
   const [topBorrowers, setTopBorrowers] = useState([])
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: []
   })
   const [recentCheckouts, setRecentCheckouts] = useState([])
-  const [isLoading, setIsLoading] = useState(true) // Add this line
+  const [studentMap, setStudentMap] = useState({})
+  const [bookMap, setBookMap] = useState({})
+  // const [isLoading, setIsLoading] = useState(true) // Add this line
   const [activeBookFilter, setActiveBookFilter] = useState('top') // Add this
   const [topBooks, setTopBooks] = useState([]) // Add this
   const [newBooks, setNewBooks] = useState([]) // Add this
-  const [isLoadingBooks, setIsLoadingBooks] = useState(true) // Add this
+  // const [isLoadingBooks, setIsLoadingBooks] = useState(true) // Add this
   const { token } = useSelector((state) => state.auth) // Add this line
   const [bookStats, setBookStats] = useState({
     borrowed: 0,
@@ -108,7 +117,7 @@ function Dashboard() {
   const [selectedBorrowerMonth, setSelectedBorrowerMonth] = useState(new Date())
 
   // Helper to check if any section is still loading
-  const isAnyLoading = Object.values(loadingStates).some((state) => state)
+  // const isAnyLoading = Object.values(loadingStates).some((state) => state)
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -120,20 +129,22 @@ function Dashboard() {
   const fetchStudents = async (month, year) => {
     try {
       const date = new Date(year, month)
-      const monthString = date.toLocaleString('default', { 
+      const monthString = date.toLocaleString('default', {
         month: 'long',
         year: 'numeric'
       })
-      
+
       const stats = await fetchMonthlyStudentStats(token)
-      const monthlyStats = stats.find(stat => stat.month === monthString)
-      
+      const monthlyStats = stats.find((stat) => stat.month === monthString)
+
       if (monthlyStats) {
-        setTopBorrowers(monthlyStats.students.map(student => ({
-          student_id: student.student_id,
-          student_name: student.student_name,
-          books_borrowed: student.books_borrowed
-        })))
+        setTopBorrowers(
+          monthlyStats.students.map((student) => ({
+            student_id: student.student_id,
+            student_name: student.student_name,
+            books_borrowed: student.books_borrowed
+          }))
+        )
       } else {
         setTopBorrowers([])
       }
@@ -141,7 +152,7 @@ function Dashboard() {
       console.error('Error fetching students:', error)
       setTopBorrowers([])
     } finally {
-      setLoadingStates(prev => ({ ...prev, borrowers: false }))
+      setLoadingStates((prev) => ({ ...prev, borrowers: false }))
     }
   }
 
@@ -216,23 +227,7 @@ function Dashboard() {
         fetchStats()
         const currentDate = new Date()
         fetchStudents(currentDate.getMonth(), currentDate.getFullYear())
-        loadRecentCheckouts()
         loadBooks()
-      }
-    }
-
-    const loadRecentCheckouts = async () => {
-      try {
-        const checkouts = await fetchRecentCheckouts(token, 5)
-        // Sort checkouts by borrowed_date in descending order (newest first)
-        const sortedCheckouts = checkouts.sort(
-          (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
-        )
-        setRecentCheckouts(sortedCheckouts)
-      } catch (error) {
-        console.error('Error fetching recent checkouts:', error)
-      } finally {
-        setLoadingStates((prev) => ({ ...prev, checkouts: false }))
       }
     }
 
@@ -311,6 +306,50 @@ function Dashboard() {
       }
     }
     fetchUsers()
+  }, [token])
+
+  // Fetch student and book mappings
+  useEffect(() => {
+    if (!token) return
+
+    const fetchMappings = async () => {
+      try {
+        const [studentsData, booksData, checkouts] = await Promise.all([
+          fetchAllStudentsForSearch(token),
+          fetchAllBooks(token, ''),
+          fetchRecentCheckouts(token, 5)
+        ])
+
+        const studentMapping = {}
+        studentsData.forEach((student) => {
+          studentMapping[student.id] = student.name || 'Unknown'
+        })
+        setStudentMap(studentMapping)
+
+        const bookMapping = {}
+        booksData.results.forEach((book) => {
+          bookMapping[book.id] = book.title || 'Unknown'
+        })
+        setBookMap(bookMapping)
+
+        // Debug: log first checkout to see structure
+        console.log('First checkout:', checkouts[0])
+        console.log('Student mapping sample:', Object.entries(studentMapping).slice(0, 3))
+        console.log('Book mapping sample:', Object.entries(bookMapping).slice(0, 3))
+
+        // Sort checkouts by borrowed_date in descending order (newest first)
+        const sortedCheckouts = checkouts.sort(
+          (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
+        )
+        setRecentCheckouts(sortedCheckouts)
+      } catch (error) {
+        console.error('Error fetching mappings:', error)
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, checkouts: false }))
+      }
+    }
+
+    fetchMappings()
   }, [token])
 
   // Add toggle handler
@@ -502,7 +541,7 @@ function Dashboard() {
           color: isHeader ? rgb(0.95, 0.95, 0.95) : rgb(1, 1, 1, 0)
         })
 
-        const safeText = text ? text.toString().slice(0, 40) : '';
+        const safeText = text ? text.toString().slice(0, 40) : ''
         page.drawText(safeText, {
           x: x + 10,
           y: y - 18,
@@ -658,20 +697,14 @@ function Dashboard() {
           ) : (
             <div className="cards-grid">
               {cards.map((card, index) => (
-                <div
-                  className={`card ${card.clickable ? 'clickable' : ''}`}
+                <Card
                   key={index}
+                  icon={card.icon}
+                  title={card.title}
+                  value={card.value}
+                  clickable={card.clickable}
                   onClick={() => card.clickable && handleCardClick(card.route)}
-                  style={{ cursor: card.clickable ? 'pointer' : 'default' }}
-                >
-                  <div className="card-icon">
-                    <card.icon />
-                  </div>
-                  <div className="card-content">
-                    <h3>{card.title}</h3>
-                    <p>{card.value}</p>
-                  </div>
-                </div>
+                />
               ))}
             </div>
           )}
@@ -679,180 +712,40 @@ function Dashboard() {
 
           {/* Stats Container */}
           <div className="stats-container">
-            <div className="chart">
-              {loadingStates.chart ? (
-                <ChartSkeleton />
-              ) : (
-                <>
-                  <div className="chart-header">
-                    <MonthSelector
-                      currentMonth={selectedDate.getMonth()}
-                      currentYear={selectedDate.getFullYear()}
-                      onMonthChange={handleMonthChange}
-                    />
-                    <button
-                      className="generate-report-btn"
-                      onClick={generatePDF}
-                      disabled={chartLoading}
-                    >
-                      <FaFileDownload />
-                      Generate Report
-                    </button>
-                  </div>
-                  <div className="chart-container" style={{ height: '400px' }}>
-                    {chartLoading ? (
-                      <div className="chart-loading-overlay">
-                        <div className="loading-spinner"></div>
-                        <p>Loading data...</p>
-                      </div>
-                    ) : (
-                      <Bar data={chartData} options={chartOptions} plugins={[ChartDataLabels]} />
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+            <DashboardChart
+              chartData={chartData}
+              chartOptions={chartOptions}
+              chartLoading={chartLoading}
+              selectedDate={selectedDate}
+              onMonthChange={handleMonthChange}
+              onGeneratePDF={generatePDF}
+              isLoading={loadingStates.chart}
+            />
 
-            <div className="overdue">
-              {loadingStates.borrowers ? (
-                <TableSkeleton rows={5} columns={4} />
-              ) : (
-                <div>
-                  <div className="borrowers-header" style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    marginBottom: '1rem' 
-                  }}>
-                    <h3>Top Borrowers</h3>
-                    <TopBorrowerMonthSelector
-                      currentMonth={selectedBorrowerMonth.getMonth()}
-                      currentYear={selectedBorrowerMonth.getFullYear()}
-                      onMonthChange={handleBorrowerMonthChange}
-                    />
-                  </div>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Books Borrowed</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topBorrowers
-                        .sort((a, b) => b.books_borrowed - a.books_borrowed)
-                        .map((borrower) => (
-                          <tr key={borrower.student_id}>
-                            <td>{borrower.student_name}</td>
-                            <td>
-                              <strong>{borrower.books_borrowed}</strong>
-                            </td>
-                          </tr>
-                        ))}
-                      {topBorrowers.length === 0 && (
-                        <tr>
-                          <td colSpan="2" style={{ textAlign: 'center' }}>
-                            No borrowers found for {selectedBorrowerMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            <TopBorrowers
+              topBorrowers={topBorrowers}
+              selectedBorrowerMonth={selectedBorrowerMonth}
+              onMonthChange={handleBorrowerMonthChange}
+              isLoading={loadingStates.borrowers}
+            />
           </div>
 
           {/* Books and Checkouts */}
           <div className="top-books_and_Checkout">
-            <div className="recent-checkouts">
-              <div className="recent-checkouts-header">
-                <h3>Recent Check-out's</h3>
-                <div className="view-all">
-                  <Link to="/borrowed">View all</Link>
-                </div>
-              </div>
-              {loadingStates.checkouts ? (
-                <TableSkeleton rows={5} columns={4} />
-              ) : (
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Student</th>
-                      <th>Book</th>
-                      <th>Borrow Date</th>
-                      <th>Due Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentCheckouts.map((checkout) => (
-                      <tr key={checkout.id}>
-                        <td>{checkout.student_name}</td>
-                        <td>{checkout.book_title}</td>
-                        <td>{formatDate(checkout.borrowed_date)}</td>
-                        <td>{formatDate(checkout.due_date)}</td>
-                        <td>
-                          <span className={`status-badge ${checkout.status.toLowerCase()}`}>
-                            {checkout.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+            <RecentCheckouts
+              recentCheckouts={recentCheckouts}
+              isLoading={loadingStates.checkouts}
+              studentMap={studentMap}
+              bookMap={bookMap}
+            />
 
-            <div className="top-books">
-              <div className="book-filters">
-                <button
-                  className={`book-filter-btn ${activeBookFilter === 'top' ? 'active' : 'inactive'}`}
-                  onClick={() => handleBookFilterToggle('top')}
-                >
-                  Top Books
-                </button>
-                <button
-                  className={`book-filter-btn ${activeBookFilter === 'new' ? 'active' : 'inactive'}`}
-                  onClick={() => handleBookFilterToggle('new')}
-                >
-                  New Arrivals
-                </button>
-              </div>
-              {loadingStates.books ? (
-                <BooksSkeleton count={3} />
-              ) : (
-                <div className="books-list">
-                  {activeBookFilter === 'new' ? (
-                    newBooks && newBooks.length > 0 ? (
-                      newBooks.map((book) => (
-                        <div className="book-title-card" key={book.id}>
-                          <span className="new-badge">NEW</span>
-                          <h4>{book.title}</h4>
-                          <p className="book-author">{book.author}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="no-books">No new arrivals found</div>
-                    )
-                  ) : (
-                    topBooks.map((book) => (
-                      <div className="book" key={book.id}>
-                        <h4>{book.title}</h4>
-                        <p className="book-author">by {book.author || 'Unknown Author'}</p>
-                        <div className="borrow-count">
-                          <FaBookReader className="borrow-icon" />
-                          <span>{book.borrow_count} Borrows</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                  {(activeBookFilter === 'top' ? topBooks : newBooks).length === 0 && (
-                    <div className="no-books">No books found</div>
-                  )}
-                </div>
-              )}
-            </div>
+            <TopBooks
+              activeBookFilter={activeBookFilter}
+              onFilterToggle={handleBookFilterToggle}
+              loadingStates={loadingStates.books}
+              topBooks={topBooks}
+              newBooks={newBooks}
+            />
           </div>
         </div>
       </div>

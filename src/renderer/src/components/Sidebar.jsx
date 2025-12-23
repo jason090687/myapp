@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {
-  FaHome,
-  FaBook,
-  FaBookmark,
-  FaCog,
-  FaSignOutAlt,
-  FaQuestion,
-  FaGraduationCap,
-  FaUsers
-} from 'react-icons/fa'
-import { ToastContainer, toast, Bounce } from 'react-toastify'
+  Home,
+  Book,
+  Bookmark,
+  Settings,
+  LogOut,
+  HelpCircle,
+  GraduationCap,
+  Users
+} from 'lucide-react'
+import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import ToastProvider from './Toast/ToastProvider'
 import logo from '../assets/logo.png'
 import './Sidebar.css'
 import { fetchUserDetails } from '../Features/api'
@@ -50,15 +51,15 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
   }, [token])
 
   const menuItems = [
-    { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
-    { path: '/books', icon: FaBook, label: 'Books' },
-    { path: '/borrowed', icon: FaBookmark, label: 'Borrowed' },
-    { path: '/students', icon: FaGraduationCap, label: 'Students' },
-    { path: '/staff', icon: FaUsers, label: 'Staff' }, // Add this line
+    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/books', icon: Book, label: 'Books' },
+    { path: '/borrowed', icon: Bookmark, label: 'Borrowed' },
+    { path: '/students', icon: GraduationCap, label: 'Students' },
+    { path: '/staff', icon: Users, label: 'Staff' }, // Add this line
     { separator: true }, // Add separator here
-    { path: '/settings', icon: FaCog, label: 'Settings' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
     {
-      icon: FaQuestion,
+      icon: HelpCircle,
       label: 'Help Guide',
       onClick: () => setIsHelpModalOpen(true),
       isAction: true
@@ -132,7 +133,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
               data-tooltip="Logout"
               disabled={isLoading}
             >
-              <FaSignOutAlt className="logout-icon" />
+              <LogOut className="logout-icon" />
               <span className="logout-text">Logout</span>
             </button>
           </div>
@@ -148,19 +149,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
       <HelpGuideModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
 
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
-      />
+      <ToastProvider />
     </>
   )
 }

@@ -1,0 +1,195 @@
+.recent-checkouts-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-checkouts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.recent-checkouts-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+}
+
+.recent-checkouts-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.view-all-link {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0369a1;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.view-all-link:hover {
+  background-color: #ecf0f1;
+  border-color: #0369a1;
+}
+
+/* Table Wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.checkouts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.checkouts-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.checkouts-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.checkouts-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.checkouts-table tbody tr:hover {
+  background-color: #f0f8fc;
+  box-shadow: 0 2px 4px rgba(3, 105, 161, 0.08);
+}
+
+.checkouts-table td {
+  padding: 14px 16px;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.checkouts-table td:last-child {
+  text-align: center;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.status-badge.borrowed {
+  background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+  color: #fff;
+}
+
+.status-badge.returned {
+  background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+  color: #fff;
+}
+
+.status-badge.pending {
+  background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+  color: #fff;
+}
+
+.status-badge.overdue {
+  background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+  color: #fff;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px !important;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .recent-checkouts-container {
+    padding: 16px;
+  }
+
+  .recent-checkouts-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .view-all-link {
+    align-self: flex-start;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .checkouts-table {
+    min-width: 600px;
+  }
+
+  .checkouts-table th,
+  .checkouts-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .checkouts-table th {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recent-checkouts-container {
+    padding: 12px;
+  }
+
+  .checkouts-table {
+    min-width: 500px;
+    font-size: 12px;
+  }
+
+  .checkouts-table th,
+  .checkouts-table td {
+    padding: 8px 10px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

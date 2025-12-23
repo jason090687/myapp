@@ -1,0 +1,148 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Size variants */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-md {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+/* Color variants */
+.btn-default {
+  background-color: #1e293b;
+  color: white;
+}
+
+.btn-default:hover {
+  background-color: #0f172a;
+}
+
+.btn-default:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #e5e5e5;
+  color: #171717;
+}
+
+.btn-secondary:hover {
+  background-color: #d4d4d4;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-destructive {
+  background-color: #dc2626;
+  color: white;
+}
+
+.btn-destructive:hover {
+  background-color: #b91c1c;
+}
+
+.btn-destructive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  border: 1px solid #d4d4d4;
+  background-color: white;
+  color: #171717;
+}
+
+.btn-outline:hover {
+  background-color: #fafafa;
+}
+
+.btn-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: #171717;
+}
+
+.btn-ghost:hover {
+  background-color: #f5f5f5;
+}
+
+.btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dark mode variants */
+@media (prefers-color-scheme: dark) {
+  .btn-default {
+    background-color: #fafafa;
+    color: #171717;
+  }
+
+  .btn-default:hover {
+    background-color: #e5e5e5;
+  }
+
+  .btn-secondary {
+    background-color: #404040;
+    color: #fafafa;
+  }
+
+  .btn-secondary:hover {
+    background-color: #525252;
+  }
+
+  .btn-outline {
+    border: 1px solid #525252;
+    background-color: #0a0a0a;
+    color: #fafafa;
+  }
+
+  .btn-outline:hover {
+    background-color: #1a1a1a;
+  }
+
+  .btn-ghost {
+    color: #fafafa;
+  }
+
+  .btn-ghost:hover {
+    background-color: #262626;
+  }
+}

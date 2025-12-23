@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { FaSearch, FaPlus, FaFileImport, FaSortAmountUp } from 'react-icons/fa'
+import { Search, Plus, FileUp } from 'lucide-react'
+import { Button } from '../../ui/button'
 import ImportBooks from './ImportBooks'
 import './BooksHeader.css'
 
@@ -14,21 +15,24 @@ function BooksHeader({ onSearch, onAddBook, token, onRefresh, sortConfig, onSort
           <span className="sub-header">Manage your books effectively</span>
         </div>
         <div className="btn-container">
-          <button className="add-book-btn" onClick={onAddBook} aria-label="Add new book">
-            <FaPlus /> <span className="btn-text">Add New Book</span>
-          </button>
-          <button
-            className="add-book-btn import-btn"
+          <Button variant="primary" onClick={onAddBook} aria-label="Add new book" className="gap-2">
+            <Plus size={18} />
+            <span className="btn-text">Add New Book</span>
+          </Button>
+          <Button
             onClick={() => setShowImport(true)}
             aria-label="Import books"
+            variant="secondary"
+            className="gap-2"
           >
-            <FaFileImport /> <span className="btn-text">Import Books</span>
-          </button>
+            <FileUp size={18} />
+            <span className="btn-text">Import Books</span>
+          </Button>
         </div>
       </div>
       <div className="books-header">
         <div className="search-bar">
-          <FaSearch className="search-icon" />
+          <Search className="search-icon" size={18} />
           <input
             type="text"
             placeholder="Search books..."

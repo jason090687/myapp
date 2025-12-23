@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import InputField from './InputField'
 import AddVariantModal from './AddVariantModal'
+import { Progress } from './ui/progress'
 import {
   FaBook,
   FaUser,
@@ -397,15 +398,10 @@ const AddBook = () => {
                   </div>
                 </div>
 
-                <div className="progress-bar-container">
-                  <div
-                    className="progress-bar-fill"
-                    style={{
-                      width: `${(progressData.current / progressData.total) * 100}%`,
-                      transition: 'width 0.5s ease-in-out'
-                    }}
-                  ></div>
-                </div>
+                <Progress
+                  value={(progressData.current / progressData.total) * 100}
+                  className="progress-bar-container"
+                />
 
                 <div className="progress-details">
                   <div className="book-title-progress">
