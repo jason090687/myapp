@@ -1,10 +1,10 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import Button from '../components/Button'
 import { FaCheckCircle } from 'react-icons/fa'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './ActivationSuccess.css'
+import { Button } from '../components/ui/button'
 
 const ActivationSuccess = () => {
   const navigate = useNavigate()

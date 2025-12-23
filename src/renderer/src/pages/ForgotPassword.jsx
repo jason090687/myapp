@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { MdEmail } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom'
 import InputField from '../components/InputField'
-import Button from '../components/Button'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './ForgotPassword.css'
@@ -11,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { useDispatch, useSelector } from 'react-redux'
 import { resetPassword, reset } from '../Features/authSlice'
 import { requestPasswordResetOtp } from '../Features/api'
+import { Button } from '../components/ui/button'
 
 function ForgotPassword() {
   const [email, setEmail] = useState('')

@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 import { FaLock } from 'react-icons/fa'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import InputField from '../components/InputField'
-import Button from '../components/Button'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './CreateNewPassword.css'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { resetPasswordWithOtp } from '../Features/api'
+import { Button } from '../components/ui/button'
 
 function CreateNewPassword() {
   const navigate = useNavigate()

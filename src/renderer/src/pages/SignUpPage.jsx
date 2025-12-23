@@ -3,7 +3,6 @@ import { MdEmail, MdPerson } from 'react-icons/md'
 import { FaLock } from 'react-icons/fa'
 import InputField from '../components/InputField'
 import { useNavigate } from 'react-router-dom'
-import Button from '../components/Button'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './SignUpPage.css'
@@ -11,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { register, reset } from '../Features/authSlice'
 import { Bounce, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { Button } from '../components/ui/button'
 
 function SignUpPage() {
   const dispatch = useDispatch()

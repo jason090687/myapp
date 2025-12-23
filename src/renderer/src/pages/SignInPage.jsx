@@ -3,7 +3,6 @@ import { MdEmail } from 'react-icons/md'
 import { FaLock } from 'react-icons/fa'
 import InputField from '../components/InputField'
 import { useNavigate } from 'react-router-dom'
-import Button from '../components/Button'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './SignInPage.css'
@@ -13,6 +12,7 @@ import { login, reset } from '../Features/authSlice'
 import { Bounce, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { ToastContainer } from 'react-toastify'
+import { Button } from '../components/ui/button'
 
 function SignInPage() {
   const navigate = useNavigate()

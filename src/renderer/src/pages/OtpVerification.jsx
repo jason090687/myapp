@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { Bounce, toast, ToastContainer } from 'react-toastify'
 import { verifyOtpDirectly, resendOtpDirectly } from '../Features/api'
 import 'react-toastify/dist/ReactToastify.css'
-import Button from '../components/Button'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './OtpVerification.css'
+import { Button } from '../components/ui/button'
 
 const OtpVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
