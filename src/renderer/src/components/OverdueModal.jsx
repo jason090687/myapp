@@ -10,8 +10,9 @@ const OverdueModal = ({
   isOpen,
   onClose,
   onSubmit,
-  borrowData = { id: 0, student: '', book_title: '', due_date: new Date().toISOString() },
-  onSuccess = () => {}
+  borrowData = { id: 0, student: '', book: '', due_date: new Date().toISOString() },
+  onSuccess = () => {},
+  studentMap = {}
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [overdueAmount, setOverdueAmount] = useState(0)
@@ -150,11 +151,16 @@ const OverdueModal = ({
         <div className="overdue-modal-body">
           <div className="overdue-info-group">
             <label>Student Name</label>
-            <p>{borrowData.student || borrowData.student_name || 'N/A'}</p>
+            <p>
+              {studentMap[borrowData.student] ||
+                borrowData.student_name ||
+                borrowData.student ||
+                'N/A'}
+            </p>
           </div>
           <div className="overdue-info-group">
             <label>Book Title</label>
-            <p>{borrowData.book || borrowData.book_title || 'N/A'}</p>
+            <p>{borrowData.id || borrowData.book || 'N/A'}</p>
           </div>
           <div className="overdue-info-group">
             <label>Due Date</label>
@@ -268,7 +274,8 @@ OverdueModal.propTypes = {
     book_title: PropTypes.string,
     due_date: PropTypes.string
   }),
-  onSuccess: PropTypes.func
+  onSuccess: PropTypes.func,
+  studentMap: PropTypes.object
 }
 
 export default OverdueModal

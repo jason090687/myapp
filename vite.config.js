@@ -39,5 +39,11 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html')
       }
     }
+  },
+  renderer: {
+    server: {
+      host: '0.0.0.0',
+      port: 8000
+    }
   }
 })

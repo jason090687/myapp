@@ -15,17 +15,17 @@ import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
 import RenewModal from '../components/RenewModal'
 import OverdueModal from '../components/OverdueModal'
-import { Bounce, toast } from 'react-toastify'
 import { useSearchParams } from 'react-router-dom'
 import BorrowDetailsModal from '../components/BorrowDetails/BorrowDetailsModal'
+import { useToaster } from '../components/Toast/useToaster'
 
 const Borrowed = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [isLoading, setLoading] = useState(false)
   const [borrowedBooks, setBorrowedBooks] = useState([])
-  const { token } = useSelector((state) => state.auth) // Ensure token exists
+  const { token } = useSelector((state) => state.auth)
+  const { showToast } = useToaster()
   const [pagination, setPagination] = useState({
     count: 0,
     next: null,
@@ -64,6 +64,7 @@ const Borrowed = () => {
         booksData.results.forEach((book) => {
           bookMapping[book.id] = book.title || 'Unknown'
         })
+
         setBookMap(bookMapping)
       } catch (error) {
         console.error('Error fetching mappings:', error)
@@ -102,13 +103,6 @@ const Borrowed = () => {
     return isOverdue(item.due_date) ? 'DUE' : 'BORROWED'
   }
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm)
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [searchTerm])
-
   const sortBorrowedBooks = (books) => {
     return [...books].sort((a, b) => {
       if (a.is_returned !== b.is_returned) {
@@ -128,6 +122,7 @@ const Borrowed = () => {
     setLoading(true)
     try {
       const response = await fetchBorrowedBooks(token, page)
+      console.log(response)
       if (response) {
         const sortedBooks = sortBorrowedBooks(response.results || [])
         setBorrowedBooks(sortedBooks)
@@ -168,11 +163,12 @@ const Borrowed = () => {
 
   const handleSubmitBorrow = async (borrowData) => {
     try {
-      // await borrowBook(token, borrowData)
       setIsModalOpen(false)
-      await fetchBorrowedData(pagination.currentPage) // Refresh the borrowed books list
+      await fetchBorrowedData(1)
+      showToast('Success', 'Book borrowed successfully!', 'success')
     } catch (error) {
       console.error('Error borrowing book:', error)
+      showToast('Error', error.message || 'Failed to borrow book', 'error')
     }
   }
 
@@ -182,36 +178,18 @@ const Borrowed = () => {
         returned_date: new Date().toISOString().split('T')[0]
       })
       await fetchBorrowedData(pagination.currentPage)
-      toast.success('Book returned successfully!', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        theme: 'light',
-        transition: Bounce
-      })
+      showToast('Success', 'Book returned successfully!', 'success')
     } catch (error) {
       console.error('Error returning book:', error)
-      toast.error(error.message || 'Failed to return book', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        theme: 'light',
-        transition: Bounce
-      })
+      showToast('Error', error.message || 'Failed to return book', 'error')
     }
   }
 
   const handleRenewClick = (borrowItem) => {
     setSelectedBorrow({
       id: borrowItem.id,
-      student_name: borrowItem.student,
-      book_title: borrowItem.book_title,
+      student: borrowItem.student,
+      book: borrowItem.book_title,
       due_date: borrowItem.due_date
     })
     setIsRenewModalOpen(true)
@@ -220,8 +198,12 @@ const Borrowed = () => {
   const handleRenewSubmit = async (renewData) => {
     try {
       await renewBook(token, renewData.id, { due_date: renewData.due_date })
+      setIsRenewModalOpen(false)
       await fetchBorrowedData(pagination.currentPage)
+      showToast('Success', 'Book renewed successfully!', 'success')
     } catch (error) {
+      console.error('Error renewing book:', error)
+      showToast('Error', error.message || 'Failed to renew book', 'error')
       throw error
     }
   }
@@ -240,42 +222,17 @@ const Borrowed = () => {
     try {
       await processOverduePayment(token, paymentData.id, paymentData)
 
-      // Update local state immediately
-      setBorrowedBooks((prevBooks) =>
-        prevBooks.map((book) => {
-          if (book.id === paymentData.id) {
-            return {
-              ...book,
-              paid: true,
-              paid_at: paymentData.paid_at,
-              is_returned: paymentData.is_returned || book.is_returned,
-              returned_date: paymentData.is_returned
-                ? paymentData.returned_date
-                : book.returned_date
-            }
-          }
-          return book
-        })
-      )
-
       // Refresh the data from server
       await fetchBorrowedData(pagination.currentPage)
-
-      toast.success('Action completed successfully!')
+      showToast('Success', 'Action completed successfully!', 'success')
     } catch (error) {
-      toast.error(error.message || 'Failed to process action')
+      console.error('Error processing payment:', error)
+      showToast('Error', error.message || 'Failed to process action', 'error')
       throw error
     }
   }
 
-  // Ensure refreshTable is not wrapped in useCallback to avoid stale closure
-  const refreshTable = async () => {
-    try {
-      await fetchBorrowedData(pagination.currentPage)
-    } catch (error) {
-      console.error('Failed to refresh table:', error)
-    }
-  }
+  const refreshTable = () => fetchBorrowedData(pagination.currentPage)
 
   // Add filteredBooks computed value
   const getFilteredBooks = () => {
@@ -482,6 +439,8 @@ const Borrowed = () => {
           onSubmit={handleOverdueSubmit}
           onSuccess={refreshTable} // Add this line
           borrowData={selectedOverdue || {}}
+          studentMap={studentMap}
+          bookMap={bookMap}
         />
         {selectedBorrowDetails && windowWidth <= 1500 && (
           <BorrowDetailsModal

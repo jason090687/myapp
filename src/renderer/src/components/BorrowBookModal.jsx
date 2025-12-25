@@ -5,7 +5,7 @@ import { fetchAllBooks, borrowBook } from '../Features/api'
 import InputField from './InputField'
 import './BorrowBookModal.css'
 import { useSelector } from 'react-redux'
-import { Bounce, toast } from 'react-toastify'
+import { useToaster } from './Toast/useToaster'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
@@ -26,34 +26,11 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const dropdownRef = useRef(null)
+  const { showToast } = useToaster()
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
   }, [books, bookSearch])
-
-  const notifySuccess = () =>
-    toast.success('Book borrowed successfully!', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: false,
-      theme: 'light',
-      transition: Bounce
-    })
-
-  const notifyError = (message) =>
-    toast.error(message || 'Failed to borrow book', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: false,
-      theme: 'light',
-      transition: Bounce
-    })
 
   useEffect(() => {
     if (!isOpen) return
@@ -71,7 +48,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
           }))
         setBooks(availableBooks)
       } catch (error) {
-        toast.error('Failed to fetch books')
+        console.error('Error fetching books:', error)
+        showToast('Error', 'Failed to fetch books', 'error')
       } finally {
         setIsLoading(false)
       }
@@ -125,9 +103,9 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       setBookSearch('')
       setSelectedBook(null)
       onClose()
-      notifySuccess()
     } catch (error) {
-      notifyError()
+      console.error('Error borrowing book:', error)
+      showToast('Error', error.message || 'Failed to borrow book', 'error')
     } finally {
       setIsSubmitting(false)
       setIsLoading(false)

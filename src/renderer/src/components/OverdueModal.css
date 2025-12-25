@@ -6,12 +6,12 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   z-index: 2000; /* Higher z-index to appear above other modals */
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   padding: 1rem;
-  padding-top: calc(var(--navbar-height) + 3rem);
 }
 
 .overdue-modal-content {
@@ -26,6 +26,7 @@
   position: relative;
   animation: modalSlideUp 0.3s ease-out;
   margin: 0 auto;
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -33,10 +34,6 @@
 .overdue-modal-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
 }
 
 .overdue-modal-header h2 {
@@ -51,6 +48,7 @@
   font-size: 1.5rem;
   cursor: pointer;
   color: #64748b;
+  display: flex;
 }
 
 .overdue-modal-body {
@@ -65,17 +63,11 @@
 }
 
 .overdue-info-group {
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
   padding: 0.875rem;
-  border-radius: 0.875rem;
-  border: 1px solid #e2e8f0;
   margin-bottom: 0.75rem;
   display: flex;
-  flex-direction: column;
-  transition: all 0.2s ease;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.02),
-    0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .overdue-info-group label {
@@ -85,11 +77,9 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #64748b;
-  margin-bottom: 0.25rem;
 }
 
 .overdue-info-group p {
-  margin-top: 0.25rem;
   font-size: 0.95rem;
   font-weight: 500;
   color: #1e293b;
