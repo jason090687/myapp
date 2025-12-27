@@ -43,7 +43,9 @@ import {
   fetchMonthlyReport,
   fetchMonthlyStudentStats,
   fetchAllStudentsForSearch,
-  fetchAllBooks
+  fetchAllBooks,
+  fetchBorrowedBooks,
+  fetchAllBorrowedRecords
 } from '../Features/api'
 import {
   CardsSkeleton,
@@ -94,10 +96,6 @@ function Dashboard() {
     pending: 0,
     pendingFees: 0
   })
-  const [penalties, setPenalties] = useState({
-    totalPenalties: 0,
-    overdueCount: 0
-  })
   const [returnedStats, setReturnedStats] = useState({
     returnedCount: 0
   })
@@ -115,6 +113,12 @@ function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [chartLoading, setChartLoading] = useState(false)
   const [selectedBorrowerMonth, setSelectedBorrowerMonth] = useState(new Date())
+  const [penalties, setPenalties] = useState({
+    totalPenalties: 0,
+    overdueCount: 0
+  })
+  const [paidFees, setPaidFees] = useState([])
+  const [overdueFees, setOverdueFees] = useState([])
 
   // Helper to check if any section is still loading
   // const isAnyLoading = Object.values(loadingStates).some((state) => state)
@@ -260,7 +264,7 @@ function Dashboard() {
     }
 
     fetchInitialData()
-  }, [token, penalties.overdueCount]) // Add penalties.overdueCount as dependency
+  }, [token]) // Add penalties.overdueCount as dependency
 
   // Add new useEffect for fetching penalties
   useEffect(() => {
@@ -332,12 +336,6 @@ function Dashboard() {
         })
         setBookMap(bookMapping)
 
-        // Debug: log first checkout to see structure
-        console.log('First checkout:', checkouts[0])
-        console.log('Student mapping sample:', Object.entries(studentMapping).slice(0, 3))
-        console.log('Book mapping sample:', Object.entries(bookMapping).slice(0, 3))
-
-        // Sort checkouts by borrowed_date in descending order (newest first)
         const sortedCheckouts = checkouts.sort(
           (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
         )
@@ -351,6 +349,30 @@ function Dashboard() {
 
     fetchMappings()
   }, [token])
+
+  useEffect(() => {
+    const loadPaidFees = async () => {
+      try {
+        const paidFeeData = await fetchAllBorrowedRecords(token)
+
+        setPaidFees(paidFeeData.amount)
+        setOverdueFees(paidFeeData.overdue)
+      } catch (error) {
+        console.error('Error fetching paid fees:', error)
+        setPaidFees(0)
+      }
+    }
+
+    loadPaidFees()
+  }, [token])
+
+  const getTotalPaidFees = () => {
+    return Number(paidFees || 0).toFixed(2)
+  }
+
+  const getTotalOverdueFees = () => {
+    return overdueFees.length || 0
+  }
 
   // Add toggle handler
   const handleBookFilterToggle = (filter) => {
@@ -661,7 +683,7 @@ function Dashboard() {
     },
     {
       title: 'Overdue Books',
-      value: penalties.overdueCount || '0', // Updated to use API count
+      value: `${getTotalOverdueFees()}`, // Updated to use API count
       icon: FaClock
     },
     {
@@ -671,8 +693,8 @@ function Dashboard() {
       tooltip: 'Total number of active users'
     }, // Updated title
     {
-      title: 'Pending Fees',
-      value: `₱${Math.round(penalties.totalPenalties || 0).toLocaleString()}`,
+      title: 'Paid Fees',
+      value: `₱${getTotalPaidFees()}`,
       icon: FaMoneyBill
     },
     // Add an empty card if needed to maintain grid layout
