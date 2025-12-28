@@ -23,14 +23,13 @@ import {
 import '../components/AddBook.css'
 import { fetchUserDetails, fetchBookStatuses, updateBook, fetchBookDetails } from '../Features/api'
 import { useSelector } from 'react-redux'
-import { toast } from 'react-toastify'
+import useFetch from '../Features/useFetch'
 
 const EditBook = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const { token, user: currentUser } = useSelector((state) => state.auth)
   const [isLoading, setIsLoading] = useState(false)
-  const [userDetails, setUserDetails] = useState([])
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
 
   const initialFormState = {
@@ -69,39 +68,25 @@ const EditBook = () => {
   }
 
   const [formData, setFormData] = useState(initialFormState)
-  const [statusOptions, setStatusOptions] = useState([])
 
-  useEffect(() => {
-    setIsLoading(true)
-    const fetchUserData = async () => {
-      try {
-        const response = await fetchUserDetails(token)
-        setUserDetails(response)
-      } catch (error) {
-        console.error('Error fetching user details:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    if (token) fetchUserData()
-  }, [token, currentUser?.id])
+  // Custom useFetch calls with token and other required parameters
+  const {
+    data: userDetails,
+    loading: userLoading,
+    error: userError
+  } = useFetch(fetchUserDetails, !!token, [token])
 
-  useEffect(() => {
-    const getStatuses = async () => {
-      if (!token) {
-        console.error('Token is missing.')
-        return
-      }
-      try {
-        const statuses = await fetchBookStatuses(token)
-        setStatusOptions(statuses)
-      } catch (error) {
-        console.error('Error loading status options:', error)
-      }
-    }
+  const {
+    data: statusOptions,
+    loading: statusLoading,
+    error: statusError
+  } = useFetch(fetchBookStatuses, !!token, [token])
 
-    getStatuses()
-  }, [token])
+  const {
+    data: bookDetails,
+    loading: bookLoading,
+    error: bookError
+  } = useFetch(fetchBookDetails, !!token && !!id, [token, id])
 
   useEffect(() => {
     if (userDetails?.id) {
@@ -113,48 +98,58 @@ const EditBook = () => {
   }, [userDetails])
 
   useEffect(() => {
-    const fetchBook = async () => {
-      if (!id || !token) return
-      try {
-        const book = await fetchBookDetails(token, id)
-        // Populate form data
-        setFormData({
-          title: book.title || '',
-          author: book.author || '',
-          series_title: book.series_title || '',
-          publisher: book.publisher || '',
-          place_of_publication: book.place_of_publication || '',
-          year: book.year?.toString() || '',
-          edition: book.edition || '',
-          volume: book.volume?.toString() || '',
-          physical_description: book.physical_description || '',
-          isbn: book.isbn || '',
-          accession_number: book.accession_number || '',
-          call_number: book.call_number || '',
-          barcode: book.barcode || '',
-          date_received: book.date_received
-            ? new Date(book.date_received).toISOString().split('T')[0]
-            : '',
-          subject: book.subject || '',
-          additional_author: book.additional_author || '',
-          status: book.status || 'Available',
-          date_processed: book.date_processed
-            ? new Date(book.date_processed).toISOString().slice(0, 16)
-            : new Date().toISOString().slice(0, 16),
-          processed_by: book.processed_by || currentUser?.id || '',
-          description: book.description || '',
-          book_cover: null,
-          selectedFileName: '',
-          coverPreview: book.book_cover || null
-        })
-      } catch (error) {
-        console.error('Error fetching book details:', error)
-        toast.error('Failed to load book details')
-        navigate('/books')
-      }
+    if (userError) {
+      showToast('Failed to load user details', 'error')
     }
-    fetchBook()
-  }, [id, token, currentUser?.id, navigate])
+  }, [userError])
+
+  useEffect(() => {
+    if (statusError) {
+      showToast('Failed to load status options', 'error')
+    }
+  }, [statusError])
+
+  // Handle book details update
+  useEffect(() => {
+    if (bookDetails) {
+      setFormData({
+        title: bookDetails.title || '',
+        author: bookDetails.author || '',
+        series_title: bookDetails.series_title || '',
+        publisher: bookDetails.publisher || '',
+        place_of_publication: bookDetails.place_of_publication || '',
+        year: bookDetails.year?.toString() || '',
+        edition: bookDetails.edition || '',
+        volume: bookDetails.volume?.toString() || '',
+        physical_description: bookDetails.physical_description || '',
+        isbn: bookDetails.isbn || '',
+        accession_number: bookDetails.accession_number || '',
+        call_number: bookDetails.call_number || '',
+        barcode: bookDetails.barcode || '',
+        date_received: bookDetails.date_received
+          ? new Date(bookDetails.date_received).toISOString().split('T')[0]
+          : '',
+        subject: bookDetails.subject || '',
+        additional_author: bookDetails.additional_author || '',
+        status: bookDetails.status || 'Available',
+        date_processed: bookDetails.date_processed
+          ? new Date(bookDetails.date_processed).toISOString().slice(0, 16)
+          : new Date().toISOString().slice(0, 16),
+        processed_by: bookDetails.processed_by || currentUser?.id || '',
+        description: bookDetails.description || '',
+        book_cover: null,
+        selectedFileName: '',
+        coverPreview: bookDetails.book_cover || null
+      })
+    }
+  }, [bookDetails, currentUser?.id])
+
+  useEffect(() => {
+    if (bookError) {
+      showToast('Failed to load book details', 'error')
+      navigate('/books')
+    }
+  }, [bookError, navigate])
 
   useEffect(() => {
     const handleResize = () => {
@@ -194,15 +189,11 @@ const EditBook = () => {
     input.click()
   }
 
-  const toastConfig = {
-    position: 'top-right',
-    autoClose: 2000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    closeButton: true
+  // Helper function to show toast using custom Toast system
+  const showToast = (title, variant = 'success', description = '') => {
+    if (typeof window !== 'undefined' && window.showToast) {
+      window.showToast(title, description, variant, 4000)
+    }
   }
 
   const isFormValid = () => {
@@ -221,7 +212,7 @@ const EditBook = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isFormValid()) {
-      toast.error('Please fill in all required fields', { ...toastConfig })
+      showToast('Please fill in all required fields', 'error')
       return
     }
 
@@ -250,7 +241,7 @@ const EditBook = () => {
       })
       bookDataToSend.set('copies', 1)
       bookDataToSend.set('copy_number', 1)
-      bookDataToSend.set('processed_by', userDetails.id || currentUser.id)
+      bookDataToSend.set('processed_by', userDetails?.id || currentUser?.id)
 
       if (formData.book_cover) {
         bookDataToSend.append('book_cover', formData.book_cover)
@@ -258,10 +249,10 @@ const EditBook = () => {
 
       await updateBook(token, id, bookDataToSend)
 
-      toast.success('Book updated successfully!', toastConfig)
+      showToast('Book updated successfully!', 'success')
       navigate('/books')
     } catch (error) {
-      toast.error(error.message || 'Failed to update book', toastConfig)
+      showToast(error.message || 'Failed to update book', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -345,7 +336,7 @@ const EditBook = () => {
                     required
                   >
                     <option value="Available">Available</option>
-                    {statusOptions
+                    {(statusOptions || [])
                       .filter((option) => option.value !== 'Available')
                       .map((option) => (
                         <option key={option.value} value={option.value}>
@@ -407,7 +398,7 @@ const EditBook = () => {
                       onError={(e) => {
                         e.target.onerror = null
                         e.target.style.display = 'none'
-                        toast.error('Invalid image file', toastConfig)
+                        showToast('Invalid image file', 'error')
                       }}
                     />
                     <button
@@ -445,15 +436,26 @@ const EditBook = () => {
                 type="button"
                 onClick={() => navigate('/books')}
                 className="cancel-btn"
-                disabled={isLoading}
+                disabled={isLoading || userLoading || statusLoading || bookLoading}
               >
                 Cancel
               </button>
-              <button type="submit" className="submit-btn" disabled={isLoading || !isFormValid()}>
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={
+                  isLoading || !isFormValid() || userLoading || statusLoading || bookLoading
+                }
+              >
                 {isLoading ? (
                   <span className="spinner-wrapper">
                     <div className="spinner"></div>
                     <span>Processing...</span>
+                  </span>
+                ) : userLoading || statusLoading || bookLoading ? (
+                  <span className="spinner-wrapper">
+                    <div className="spinner"></div>
+                    <span>Loading...</span>
                   </span>
                 ) : (
                   'Update Book'

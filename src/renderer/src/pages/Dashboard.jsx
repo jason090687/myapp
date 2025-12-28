@@ -83,12 +83,10 @@ function Dashboard() {
   const [recentCheckouts, setRecentCheckouts] = useState([])
   const [studentMap, setStudentMap] = useState({})
   const [bookMap, setBookMap] = useState({})
-  // const [isLoading, setIsLoading] = useState(true) // Add this line
-  const [activeBookFilter, setActiveBookFilter] = useState('top') // Add this
-  const [topBooks, setTopBooks] = useState([]) // Add this
-  const [newBooks, setNewBooks] = useState([]) // Add this
-  // const [isLoadingBooks, setIsLoadingBooks] = useState(true) // Add this
-  const { token } = useSelector((state) => state.auth) // Add this line
+  const [activeBookFilter, setActiveBookFilter] = useState('top')
+  const [topBooks, setTopBooks] = useState([])
+  const [newBooks, setNewBooks] = useState([])
+  const { token } = useSelector((state) => state.auth)
   const [bookStats, setBookStats] = useState({
     borrowed: 0,
     returned: 0,
@@ -120,14 +118,9 @@ function Dashboard() {
   const [paidFees, setPaidFees] = useState([])
   const [overdueFees, setOverdueFees] = useState([])
 
-  // Helper to check if any section is still loading
-  // const isAnyLoading = Object.values(loadingStates).some((state) => state)
-
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
   }
-
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
 
   // Move fetchStudents outside useEffect and make it a component method
   const fetchStudents = async (month, year) => {
