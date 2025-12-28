@@ -671,7 +671,7 @@ function Dashboard() {
       tooltip: 'Total number of active users'
     }, // Updated title
     {
-      title: 'Pending Fees',
+      title: 'Paid Fees',
       value: `₱${Math.round(penalties.totalPenalties || 0).toLocaleString()}`,
       icon: FaMoneyBill
     },
@@ -680,11 +680,11 @@ function Dashboard() {
   ]
 
   // Add this helper function inside the Dashboard component
-  const getDaysAgoText = (daysAgo) => {
-    if (daysAgo === 0) return 'Added today'
-    if (daysAgo === 1) return 'Added yesterday'
-    return `Added ${daysAgo} days ago`
-  }
+  // const getDaysAgoText = (daysAgo) => {
+  //   if (daysAgo === 0) return 'Added today'
+  //   if (daysAgo === 1) return 'Added yesterday'
+  //   return `Added ${daysAgo} days ago`
+  // }
 
   return (
     <div className="app-wrapper">

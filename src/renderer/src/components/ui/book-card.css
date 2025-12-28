@@ -70,8 +70,6 @@
 .borrow-count {
   color: #0369a1;
   font-size: 0.85rem;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
   border-top: 1px solid rgba(3, 105, 161, 0.2);
   font-weight: 500;
 }
