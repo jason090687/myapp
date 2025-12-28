@@ -680,6 +680,7 @@ function Dashboard() {
       icon: FaClock
     },
     {
+<<<<<<< HEAD
       title: 'Active Users',
       value: activeUsers.total || '0',
       icon: FaUsers,
@@ -687,7 +688,18 @@ function Dashboard() {
     }, // Updated title
     {
       title: 'Paid Fees',
+<<<<<<< HEAD
+      value: `₱${Math.round(penalties.totalPenalties || 0).toLocaleString()}`,
+=======
       value: `₱${getTotalPaidFees()}`,
+>>>>>>> refs/remotes/origin/main
+=======
+      title: 'Pending Fees',
+      value: `₱${penalties.totalPenalties.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`,
+>>>>>>> parent of b0d6a2d (uses math.round in penalties)
       icon: FaMoneyBill
     },
     // Add an empty card if needed to maintain grid layout
@@ -695,11 +707,11 @@ function Dashboard() {
   ]
 
   // Add this helper function inside the Dashboard component
-  const getDaysAgoText = (daysAgo) => {
-    if (daysAgo === 0) return 'Added today'
-    if (daysAgo === 1) return 'Added yesterday'
-    return `Added ${daysAgo} days ago`
-  }
+  // const getDaysAgoText = (daysAgo) => {
+  //   if (daysAgo === 0) return 'Added today'
+  //   if (daysAgo === 1) return 'Added yesterday'
+  //   return `Added ${daysAgo} days ago`
+  // }
 
   return (
     <div className="app-wrapper">

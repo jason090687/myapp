@@ -32,14 +32,14 @@ const TopBooks = ({ activeBookFilter, onFilterToggle, loadingStates, topBooks, n
       ) : (
         <div className="books-list">
           {activeBookFilter === 'new' ? (
-            newBooks && newBooks.length > 0 ? (
+            newBooks.length > 0 ? (
               newBooks.map((book) => (
-                <BookCard key={book.id} title={book.title} author={book.author} isNew={true} />
+                <BookCard key={book.id} title={book.title} author={book.author} isNew />
               ))
             ) : (
               <div className="no-books">No new arrivals found</div>
             )
-          ) : (
+          ) : topBooks.length > 0 ? (
             topBooks.map((book) => (
               <BookCard
                 key={book.id}
@@ -48,8 +48,7 @@ const TopBooks = ({ activeBookFilter, onFilterToggle, loadingStates, topBooks, n
                 borrowCount={book.borrow_count}
               />
             ))
-          )}
-          {(activeBookFilter === 'top' ? topBooks : newBooks).length === 0 && (
+          ) : (
             <div className="no-books">No books found</div>
           )}
         </div>
