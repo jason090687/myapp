@@ -7,17 +7,23 @@ import SearchResults from './SearchResults'
 import './Sidebar.css' // Change from Sidebar.css to Navbar.css
 import './SkeletonLoader.css'
 import { useNavigate } from 'react-router-dom' // Add this import
+import { Bell } from 'lucide-react'
+import BacklogPanel from './BacklogPanel'
+import { useActivity } from '../context/ActivityContext'
 
 const Navbar = ({
   isCollapsed = false,
   onToggle = () => {},
   userDetails = {},
-  isLoading = false
+  isLoading = false,
+  isBacklogOpen = false,
+  setIsBacklogOpen = () => {}
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState(null)
   const [isSearching, setIsSearching] = useState(false)
   const searchRef = useRef(null)
+  const { activities } = useActivity()
   const { token } = useSelector((state) => state.auth)
   const navigate = useNavigate() // Add navigation hook
 
@@ -109,9 +115,19 @@ const Navbar = ({
       </div>
 
       <div className="navbar-right">
+        <button
+          className="notification-btn"
+          onClick={() => setIsBacklogOpen(true)}
+          title="View activity log"
+        >
+          <Bell size={18} />
+          {activities.length > 0 && <span className="notification-badge">{activities.length}</span>}
+        </button>
         <div className="nav-item"></div>
         {renderUserProfile()}
       </div>
+
+      <BacklogPanel isOpen={isBacklogOpen} onClose={() => setIsBacklogOpen(false)} />
     </nav>
   )
 }

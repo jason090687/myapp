@@ -1,8 +1,13 @@
-import { useState, useCallback } from 'react'
-import { fetchBooks, deleteBook } from '../../../Features/api'
+import { useState, useCallback, useEffect } from 'react'
+import { fetchBooks, deleteBook, fetchUserDetails } from '../../../Features/api'
 import { toast } from 'react-toastify'
+import { useActivity } from '../../../context/ActivityContext'
+import { useSelector } from 'react-redux'
+import useFetch from '../../../Features/useFetch'
 
 export const useBooks = (token) => {
+  const { addActivity } = useActivity()
+  const { user } = useSelector((state) => state.auth)
   const [books, setBooks] = useState([])
   const [allBooks, setAllBooks] = useState([])
   const [sortedBooks, setSortedBooks] = useState(null)
@@ -16,6 +21,7 @@ export const useBooks = (token) => {
   })
   const [sortConfig, setSortConfig] = useState({ column: '', direction: '' })
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, bookId: null, bookTitle: '' })
+  const [userDetails, setUserDetails] = useState({})
 
   const fetchBooksData = useCallback(
     async (page = 1, search = '') => {
@@ -37,6 +43,18 @@ export const useBooks = (token) => {
     },
     [token]
   )
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetchUserDetails(token)
+        setUserDetails(response)
+      } catch (error) {
+        console.error('Error fetching user details:', error)
+      }
+    }
+    fetchUser()
+  }, [token])
 
   const handlePageChange = (newPage) => {
     fetchBooksData(newPage)
@@ -91,12 +109,25 @@ export const useBooks = (token) => {
   }
 
   const confirmDelete = async () => {
-    const { bookId } = deleteConfirm
+    const { bookId, bookTitle } = deleteConfirm
     setIsDeleting(true)
 
     try {
-      await deleteBook(token, bookId)
-      window.showToast('Success', 'Book deleted successfully!', 'success', 4000)
+      const userId = userDetails?.id
+      const cancelData = {
+        cancelledBy: parseInt(userId) || null,
+        cancelledAt: new Date().toISOString()
+      }
+
+      console.log('Delete request - bookId:', bookId, 'cancelData:', cancelData)
+      await deleteBook(token, bookId, cancelData)
+      window.showToast('Success', 'Book cancelled successfully!', 'success', 4000)
+
+      // Log activity
+      addActivity({
+        type: 'book_deleted',
+        description: `Cancelled "${bookTitle}"`
+      })
 
       // If we're on a page with only one item, go to previous page
       if (books.length === 1 && pagination.currentPage > 1) {
@@ -111,8 +142,9 @@ export const useBooks = (token) => {
         await fetchAllBooks()
       }
     } catch (error) {
-      console.error('Error deleting book:', error)
-      window.showToast('Error', 'Failed to delete book', 'error', 4000)
+      console.error('Error cancelling book:', error.message)
+      console.error('Error details:', error.response?.data)
+      window.showToast('Error', 'Failed to cancel book', 'error', 4000)
     } finally {
       setIsDeleting(false)
       setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })

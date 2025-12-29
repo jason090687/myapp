@@ -9,6 +9,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import './styles/global.css'
 import { Toaster } from 'react-hot-toast'
 import { logout } from './Features/authSlice' // Import the logout action
+import { ActivityProvider } from './context/ActivityContext'
 
 // SessionProvider component to handle session expiration
 const SessionProvider = ({ children }) => {
@@ -63,10 +64,12 @@ const SessionProvider = ({ children }) => {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <SessionProvider>
-        <Toaster position="top-center" reverseOrder={false} />
-        <RouterProvider router={router} />
-      </SessionProvider>
+      <ActivityProvider>
+        <SessionProvider>
+          <Toaster position="top-center" reverseOrder={false} />
+          <RouterProvider router={router} />
+        </SessionProvider>
+      </ActivityProvider>
     </PersistGate>
   </Provider>
 )

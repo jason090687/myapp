@@ -9,7 +9,8 @@ import {
   LogOut,
   HelpCircle,
   GraduationCap,
-  Users
+  Users,
+  Bell
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -20,12 +21,14 @@ import { fetchUserDetails } from '../Features/api'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, reset } from '../Features/authSlice'
 import HelpGuideModal from './HelpGuideModal'
-import Navbar from './Navbar' // Make sure Navbar is imported
+import Navbar from './Navbar'
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
   const [userDetails, setUserDetails] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
+  const [isBacklogOpen, setIsBacklogOpen] = useState(false)
+
   const location = useLocation()
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -55,8 +58,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/books', icon: Book, label: 'Books' },
     { path: '/borrowed', icon: Bookmark, label: 'Borrowed' },
     { path: '/students', icon: GraduationCap, label: 'Students' },
-    { path: '/staff', icon: Users, label: 'Staff' }, // Add this line
-    { separator: true }, // Add separator here
+    { path: '/staff', icon: Users, label: 'Staff' },
+    { separator: true },
     { path: '/settings', icon: Settings, label: 'Settings' },
     {
       icon: HelpCircle,
@@ -145,6 +148,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
         onToggle={onToggle}
         userDetails={userDetails}
         isLoading={isLoading}
+        isBacklogOpen={isBacklogOpen}
+        setIsBacklogOpen={setIsBacklogOpen}
       />
 
       <HelpGuideModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />

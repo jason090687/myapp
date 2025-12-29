@@ -23,10 +23,12 @@ import { useSelector } from 'react-redux'
 import './AddBook.css'
 import { Bounce, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { useActivity } from '../context/ActivityContext'
 
 const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState([])
+  const { addActivity } = useActivity()
   const [statusOptions, setStatusOptions] = useState([])
   const [formData, setFormData] = useState({
     title: '',
@@ -247,6 +249,13 @@ const EditBookModal = ({ isOpen, onClose, onSubmit, bookData, currentUser }) => 
 
       await updateBook(token, formData.id, formDataToSend)
       // toast.success('Book updated successfully!', toastConfig) remove double TOAST
+
+      // Log activity
+      addActivity({
+        type: 'book_updated',
+        description: `Updated "${formData.title}" by ${formData.author}`
+      })
+
       onSubmit(formDataToSend)
       onClose()
     } catch (error) {

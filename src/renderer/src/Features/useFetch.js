@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 
 const useFetch = (fetchFunction, autoFetch = true, params = []) => {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const fetchingRef = useRef(false)
 
   const fetchData = useCallback(async () => {
+    if (fetchingRef.current) return
+    fetchingRef.current = true
     setLoading(true)
     setError(null)
     try {
@@ -15,20 +18,26 @@ const useFetch = (fetchFunction, autoFetch = true, params = []) => {
       setError(err instanceof Error ? err : new Error('An unknown error occurred'))
     } finally {
       setLoading(false)
+      fetchingRef.current = false
     }
-  }, [fetchFunction, JSON.stringify(params)])
+  }, [fetchFunction, ...params])
 
   const reset = () => {
     setData(null)
     setError(null)
     setLoading(false)
+    fetchingRef.current = false
   }
 
   useEffect(() => {
-    if (autoFetch && params.every((param) => param !== null && param !== undefined)) {
+    if (
+      autoFetch &&
+      params.every((param) => param !== null && param !== undefined) &&
+      !fetchingRef.current
+    ) {
       fetchData()
     }
-  }, [autoFetch, fetchData, JSON.stringify(params)])
+  }, [autoFetch, fetchData, ...params])
 
   return { data, loading, error, refetch: fetchData, reset }
 }

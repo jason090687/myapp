@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
-const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
-// const API_URL = 'http://192.168.2.175:8000/api/v1'
+// const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
+const API_URL = 'http://192.168.2.175:8000/api/v1'
 
 // const apiConfig = {
 //   baseURL: API_URL,
@@ -222,18 +222,29 @@ export const updateBook = async (token, bookId, bookData) => {
   }
 }
 
-export const deleteBook = async (token, bookId) => {
+export const deleteBook = async (token, bookId, cancelData = {}) => {
   try {
-    await axios.delete(`${API_URL}/marc/record/${bookId}/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+    await axios.patch(
+      `${API_URL}/marc/record/${bookId}/`,
+      {
+        cancelled: true,
+        cancelled_by: cancelData.cancelledBy,
+        cancelled_at: cancelData.cancelledAt
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       }
-    })
-    return true // Return success flag since delete usually doesn't return data
+    )
+    return true
   } catch (error) {
-    console.error('Delete error:', error.response?.data || error.message)
-    throw new Error(error.response?.data?.detail || 'Failed to delete book')
+    const errorDetail =
+      error.response?.data?.detail || error.response?.data?.message || error.message
+    console.error('Delete error:', errorDetail)
+    console.error('Full error response:', error.response?.data)
+    throw new Error(errorDetail || 'Failed to delete book')
   }
 }
 
@@ -582,8 +593,11 @@ export const fetchAllBorrowedRecords = async (token) => {
 
     // Process the records
     const processedData = {
-      borrowed: allRecords.filter((record) => !record.is_returned),
-      returned: allRecords.filter((record) => record.is_returned),
+      borrowed: allRecords.filter(
+        (record) =>
+          !record.is_returned && record.borrowed_date && new Date(record.borrowed_date) <= today
+      ),
+      returned: allRecords.filter((record) => record.is_returned === true),
       total: allRecords.length,
       amount: allRecords
         .filter((record) => record.paid === true)
@@ -594,7 +608,6 @@ export const fetchAllBorrowedRecords = async (token) => {
         (record) => !record.is_returned && record.due_date && today > new Date(record.due_date)
       )
     }
-    console.log(processedData)
 
     return processedData
   } catch (error) {

@@ -19,13 +19,15 @@ import {
   FaArrowLeft
 } from 'react-icons/fa'
 import './AddBook.css'
-import { fetchUserDetails, fetchBookStatuses, addNewBook } from '../Features/api'
+import { fetchUserDetails, addNewBook } from '../Features/api'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
+import { useActivity } from '../context/ActivityContext'
 
 const AddBook = () => {
   const navigate = useNavigate()
   const { token, user: currentUser } = useSelector((state) => state.auth)
+  const { addActivity } = useActivity()
   const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState([])
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
@@ -85,23 +87,6 @@ const AddBook = () => {
     }
     if (token) fetchUserData()
   }, [token, currentUser?.id])
-
-  useEffect(() => {
-    const getStatuses = async () => {
-      if (!token) {
-        console.error('Token is missing.')
-        return
-      }
-      try {
-        const statuses = await fetchBookStatuses(token)
-        setStatusOptions(statuses)
-      } catch (error) {
-        console.error('Error loading status options:', error)
-      }
-    }
-
-    getStatuses()
-  }, [token])
 
   useEffect(() => {
     if (userDetails?.id) {
@@ -292,6 +277,12 @@ const AddBook = () => {
         try {
           await addNewBook(token, bookData)
           successCount++
+
+          // Log activity
+          addActivity({
+            type: 'book_added',
+            description: `Added "${formData.title}" by ${formData.author}`
+          })
 
           // Update progress
           setProgressData((prev) => ({
@@ -485,13 +476,10 @@ const AddBook = () => {
                     required
                   >
                     <option value="Available">Available</option>
-                    {statusOptions
-                      .filter((option) => option.value !== 'Available')
-                      .map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
+                    <option value="Available">Borrowed</option>
+                    <option value="Available">Damaged</option>
+                    <option value="Available">Overdue</option>
+                    <option value="Available">Lost</option>
                   </select>
                 </div>
               </div>

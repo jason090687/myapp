@@ -3,15 +3,17 @@ import './DashboardSkeletons.css'
 
 export const CardsSkeleton = () => (
   <div className="cards-skeleton-grid">
-    {Array(7).fill(null).map((_, index) => (
-      <div key={index} className="skeleton-card">
-        <div className="skeleton-card-icon" />
-        <div className="skeleton-card-content">
-          <div className="skeleton-card-title" />
-          <div className="skeleton-card-value" />
+    {Array(7)
+      .fill(null)
+      .map((_, index) => (
+        <div key={index} className="skeleton-card">
+          <div className="skeleton-card-icon" />
+          <div className="skeleton-card-content">
+            <div className="skeleton-card-title" />
+            <div className="skeleton-card-value" />
+          </div>
         </div>
-      </div>
-    ))}
+      ))}
   </div>
 )
 

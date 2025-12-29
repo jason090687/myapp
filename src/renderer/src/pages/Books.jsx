@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import BooksHeader from '../components/Books/components/BooksHeader'
 import BooksTable from '../components/Books/components/BooksTable'
+import BookGrid from '../components/Books/components/BookGrid'
 import { useBooks } from '../components/Books/hooks/useBooks'
 import { useBookModals } from '../components/Books/hooks/useBookModals'
 import { useBookSearch } from '../components/Books/hooks/useBookSearch'
 import './Books.css'
-import Pagination from '../components/Pagination'
 import BookDetailsModal from '../components/Books/components/BookDetailsModal'
 import ConfirmDeleteModal from '../components/Books/components/ConfirmDeleteModal'
 import ErrorBoundary from '../components/ErrorBoundary'
@@ -38,14 +38,22 @@ function Books() {
 
   const { handleAddBook, handleEditBook } = useBookModals()
 
+  const handleGridDelete = useCallback(
+    (book) => {
+      handleDeleteBook(book.id, book.title)
+    },
+    [handleDeleteBook]
+  )
+
+  const handleGridViewDetails = useCallback((book) => {
+    setSelectedBook(book)
+    setIsDetailsModalOpen(true)
+  }, [])
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [selectedBook, setSelectedBook] = useState(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-
-  // Extract unique categories from books
-  const categories = Array.from(
-    new Set(books.filter((book) => book.subject).map((book) => book.subject))
-  ).sort()
+  const [viewMode, setViewMode] = useState('table')
 
   useEffect(() => {
     const handleResize = () => {
@@ -108,20 +116,31 @@ function Books() {
               onRefresh={fetchBooksData}
               sortConfig={sortConfig}
               onSort={handleSort}
-              categories={categories}
+              viewMode={viewMode}
+              onViewChange={setViewMode}
             />
 
-            <BooksTable
-              books={books}
-              isLoading={isLoading}
-              sortConfig={sortConfig}
-              onSort={handleSort}
-              onEditBook={handleEditBook}
-              onDeleteBook={handleDeleteBook}
-              onRowClick={handleRowClick}
-              pagination={pagination}
-              onPageChange={handlePageChange}
-            />
+            {viewMode === 'grid' ? (
+              <BookGrid
+                books={books.filter((book) => !book.cancelled)}
+                isLoading={isLoading}
+                onEditBook={handleEditBook}
+                onDeleteBook={handleGridDelete}
+                onViewDetails={handleGridViewDetails}
+              />
+            ) : (
+              <BooksTable
+                books={books.filter((book) => !book.cancelled)}
+                isLoading={isLoading}
+                sortConfig={sortConfig}
+                onSort={handleSort}
+                onEditBook={handleEditBook}
+                onDeleteBook={handleDeleteBook}
+                onRowClick={handleRowClick}
+                pagination={pagination}
+                onPageChange={handlePageChange}
+              />
+            )}
           </div>
         </ErrorBoundary>
       </div>

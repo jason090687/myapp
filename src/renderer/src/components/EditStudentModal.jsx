@@ -2,9 +2,6 @@ import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import ReactModal from 'react-modal'
 import { FaTimes } from 'react-icons/fa'
-import { toast } from 'react-toastify'
-import { useSelector } from 'react-redux'
-import { updateStudentDetails } from '../Features/api'
 
 const customStyles = {
   content: {
@@ -24,7 +21,7 @@ const customStyles = {
   }
 }
 
-const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData, studentId }) => {
+const EditStudentModal = ({ isOpen, onClose, onSubmit, student }) => {
   const [formData, setFormData] = useState({
     name: '',
     id_number: '',
@@ -32,18 +29,17 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData, studentId })
     active: false
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { token } = useSelector((state) => state.auth)
 
   useEffect(() => {
-    if (studentData) {
+    if (student && isOpen) {
       setFormData({
-        name: studentData.name || '',
-        id_number: studentData.id_number || '',
-        year_level: studentData.year_level || '',
-        active: studentData.active || false
+        name: student.name || '',
+        id_number: student.id_number || '',
+        year_level: student.year_level || '',
+        active: student.active || false
       })
     }
-  }, [studentData])
+  }, [student, isOpen])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -57,22 +53,10 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData, studentId })
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      // Use the API directly to update student details
-      const updatedStudent = await updateStudentDetails(
-        token,
-        studentId || studentData?.id_number,
-        formData
-      )
-
-      // Call the parent's onSubmit if provided (for updating local state)
-      if (onSubmit) {
-        await onSubmit(updatedStudent)
-      }
-
+      await onSubmit(formData)
       onClose()
-      toast.success('Student details updated successfully!')
     } catch (error) {
-      toast.error(error.message || 'Failed to update student details')
+      console.error('Error:', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -166,9 +150,8 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, studentData, studentId })
 EditStudentModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func,
-  studentData: PropTypes.object,
-  studentId: PropTypes.string
+  onSubmit: PropTypes.func.isRequired,
+  student: PropTypes.object
 }
 
 export default EditStudentModal

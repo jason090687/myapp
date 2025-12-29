@@ -4,6 +4,7 @@ import ReactModal from 'react-modal'
 import { FaTimes } from 'react-icons/fa'
 // import { Bounce, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { useActivity } from '../context/ActivityContext'
 
 const customStyles = {
   content: {
@@ -24,6 +25,7 @@ const customStyles = {
 }
 
 const AddStaffBookModal = ({ isOpen, onClose, onSubmit }) => {
+  const { addActivity } = useActivity()
   const [formData, setFormData] = useState({
     name: '',
     id_number: '',
@@ -44,6 +46,13 @@ const AddStaffBookModal = ({ isOpen, onClose, onSubmit }) => {
     setIsSubmitting(true)
     try {
       await onSubmit(formData)
+
+      // Log activity
+      addActivity({
+        type: 'staff_added',
+        description: `Added staff member "${formData.name}" (ID: ${formData.id_number})`
+      })
+
       onClose()
     } catch (error) {
       console.error('Error:', error)

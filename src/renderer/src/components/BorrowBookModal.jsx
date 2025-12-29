@@ -6,6 +6,7 @@ import InputField from './InputField'
 import './BorrowBookModal.css'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
+import { useActivity } from '../context/ActivityContext'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
@@ -27,6 +28,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const dropdownRef = useRef(null)
   const { showToast } = useToaster()
+  const { addActivity } = useActivity()
 
   const filteredBooks = useMemo(() => {
     return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
@@ -89,15 +91,24 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
 
     try {
       const borrowData = {
-        student: formData.student,
-        book: formData.book,
-        due_date: formData.due_date,
+        id_number: parseInt(formData.id_number),
+        student: parseInt(formData.student),
+        book: parseInt(formData.book),
+        lexile_level: formData.lexile_level,
         status: 'Borrowed',
-        lexile_level: formData.lexile_level
+        borrowed_date: new Date().toISOString().split('T')[0],
+        due_date: formData.due_date
       }
 
       await borrowBook(token, borrowData)
       onSubmit(borrowData)
+
+      // Log activity
+      const bookTitle = books.find((b) => b.id === parseInt(formData.book))?.title || 'Unknown book'
+      addActivity({
+        type: 'book_borrowed',
+        description: `"${bookTitle}" borrowed by student ${formData.student}`
+      })
 
       setFormData(initialFormData)
       setBookSearch('')

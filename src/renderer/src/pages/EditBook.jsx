@@ -21,16 +21,20 @@ import {
   FaArrowLeft
 } from 'react-icons/fa'
 import '../components/AddBook.css'
-import { fetchUserDetails, fetchBookStatuses, updateBook, fetchBookDetails } from '../Features/api'
+import { updateBook, fetchBookDetails } from '../Features/api'
+import { useToaster } from '../components/Toast/useToaster'
 import { useSelector } from 'react-redux'
-import useFetch from '../Features/useFetch'
 
 const EditBook = () => {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { token, user: currentUser } = useSelector((state) => state.auth)
+  const { showToast } = useToaster()
   const [isLoading, setIsLoading] = useState(false)
+  const [isPageLoading, setIsPageLoading] = useState(true)
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
+  const [bookDetails, setBookDetails] = useState(null)
+  // const [userDetails, setUserDetails] = useState([])
+  const { token } = useSelector((state) => state.auth)
 
   const initialFormState = {
     title: '',
@@ -60,7 +64,7 @@ const EditBook = () => {
         second: '2-digit'
       })
       .replace(' ', 'T'),
-    processed_by: currentUser?.id || '',
+    processed_by: '',
     description: '',
     book_cover: null,
     selectedFileName: '',
@@ -69,49 +73,48 @@ const EditBook = () => {
 
   const [formData, setFormData] = useState(initialFormState)
 
-  // Custom useFetch calls with token and other required parameters
-  const {
-    data: userDetails,
-    loading: userLoading,
-    error: userError
-  } = useFetch(fetchUserDetails, !!token, [token])
+  // useEffect(() => {
+  //   const loadUserDetails = async () => {
+  //     try {
+  //       const response = await fetchUserDetails(token)
+  //       setUserDetails(response)
+  //     } catch (error) {
+  //       console.error('Error fetching user details:', error)
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   }
+  //   if (token) {
+  //     loadUserDetails()
+  //   }
+  // }, [])
 
-  const {
-    data: statusOptions,
-    loading: statusLoading,
-    error: statusError
-  } = useFetch(fetchBookStatuses, !!token, [token])
-
-  const {
-    data: bookDetails,
-    loading: bookLoading,
-    error: bookError
-  } = useFetch(fetchBookDetails, !!token && !!id, [token, id])
-
+  // Fetch book details
   useEffect(() => {
-    if (userDetails?.id) {
-      setFormData((prev) => ({
-        ...prev,
-        processed_by: userDetails.id
-      }))
+    const loadBookDetails = async () => {
+      try {
+        setIsPageLoading(true)
+        const data = await fetchBookDetails(token, id)
+        console.log('Book details loaded:', data)
+        setBookDetails(data)
+      } catch (error) {
+        console.error('Error loading book details:', error)
+        showToast('Error', 'Failed to load book details', 'error')
+        navigate('/books')
+      } finally {
+        setIsPageLoading(false)
+      }
     }
-  }, [userDetails])
 
-  useEffect(() => {
-    if (userError) {
-      showToast('Failed to load user details', 'error')
+    if (token) {
+      loadBookDetails()
     }
-  }, [userError])
+  }, [id, token])
 
-  useEffect(() => {
-    if (statusError) {
-      showToast('Failed to load status options', 'error')
-    }
-  }, [statusError])
-
-  // Handle book details update
+  // Update form when book details load
   useEffect(() => {
     if (bookDetails) {
+      console.log('Updating form with book details:', bookDetails)
       setFormData({
         title: bookDetails.title || '',
         author: bookDetails.author || '',
@@ -135,32 +138,14 @@ const EditBook = () => {
         date_processed: bookDetails.date_processed
           ? new Date(bookDetails.date_processed).toISOString().slice(0, 16)
           : new Date().toISOString().slice(0, 16),
-        processed_by: bookDetails.processed_by || currentUser?.id || '',
+        processed_by: bookDetails.processed_by || '',
         description: bookDetails.description || '',
         book_cover: null,
         selectedFileName: '',
         coverPreview: bookDetails.book_cover || null
       })
     }
-  }, [bookDetails, currentUser?.id])
-
-  useEffect(() => {
-    if (bookError) {
-      showToast('Failed to load book details', 'error')
-      navigate('/books')
-    }
-  }, [bookError, navigate])
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth <= 768) {
-        setIsCollapsed(true)
-      }
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [bookDetails])
 
   const handleChange = (e) => {
     const { name, value, files } = e.target
@@ -170,7 +155,7 @@ const EditBook = () => {
     }))
   }
 
-  // Add image handling function
+  // Helper function to show toast using custom Toast system
   const handleCoverUrlClick = () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -189,13 +174,6 @@ const EditBook = () => {
     input.click()
   }
 
-  // Helper function to show toast using custom Toast system
-  const showToast = (title, variant = 'success', description = '') => {
-    if (typeof window !== 'undefined' && window.showToast) {
-      window.showToast(title, description, variant, 4000)
-    }
-  }
-
   const isFormValid = () => {
     return (
       formData.title?.trim() && // Ensure title is required
@@ -212,7 +190,7 @@ const EditBook = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isFormValid()) {
-      showToast('Please fill in all required fields', 'error')
+      showToast('Error', 'Please fill in all required fields', 'error')
       return
     }
 
@@ -241,18 +219,20 @@ const EditBook = () => {
       })
       bookDataToSend.set('copies', 1)
       bookDataToSend.set('copy_number', 1)
-      bookDataToSend.set('processed_by', userDetails?.id || currentUser?.id)
+      bookDataToSend.set('processed_by', bookDetails.processed_by || '')
 
       if (formData.book_cover) {
         bookDataToSend.append('book_cover', formData.book_cover)
       }
 
+      console.log('Submitting book update...')
       await updateBook(token, id, bookDataToSend)
 
-      showToast('Book updated successfully!', 'success')
+      showToast('Success', 'Book updated successfully!', 'success')
       navigate('/books')
     } catch (error) {
-      showToast(error.message || 'Failed to update book', 'error')
+      console.error('Error updating book:', error)
+      showToast('Error', error.message || 'Failed to update book', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -336,13 +316,10 @@ const EditBook = () => {
                     required
                   >
                     <option value="Available">Available</option>
-                    {(statusOptions || [])
-                      .filter((option) => option.value !== 'Available')
-                      .map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
+                    <option value="Borrowed">Borrowed</option>
+                    <option value="Lost">Lost</option>
+                    <option value="Damaged">Damaged</option>
+                    <option value="Overdue">Overdue</option>
                   </select>
                 </div>
               </div>
@@ -364,17 +341,13 @@ const EditBook = () => {
                 <label htmlFor="processed_by">Processed By</label>
                 <InputField
                   type="text"
-                  value={userDetails?.first_name || currentUser?.name || ''}
+                  value={bookDetails?.processed_by || ''}
                   icon={FaUser}
                   disabled
                   id="processed_by_display"
                 />
                 {/* Add hidden input to store the ID */}
-                <input
-                  type="hidden"
-                  name="processed_by"
-                  value={userDetails?.id || currentUser?.id || ''}
-                />
+                <input type="hidden" name="processed_by" value={bookDetails?.processed_by || ''} />
               </div>
 
               <div className="form-group">
@@ -436,23 +409,21 @@ const EditBook = () => {
                 type="button"
                 onClick={() => navigate('/books')}
                 className="cancel-btn"
-                disabled={isLoading || userLoading || statusLoading || bookLoading}
+                disabled={isLoading || isPageLoading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 className="submit-btn"
-                disabled={
-                  isLoading || !isFormValid() || userLoading || statusLoading || bookLoading
-                }
+                disabled={isLoading || !isFormValid() || isPageLoading}
               >
                 {isLoading ? (
                   <span className="spinner-wrapper">
                     <div className="spinner"></div>
                     <span>Processing...</span>
                   </span>
-                ) : userLoading || statusLoading || bookLoading ? (
+                ) : isPageLoading ? (
                   <span className="spinner-wrapper">
                     <div className="spinner"></div>
                     <span>Loading...</span>

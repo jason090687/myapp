@@ -5,6 +5,7 @@ import './OverdueModal.css'
 import { toast } from 'react-toastify'
 import { useSelector } from 'react-redux'
 import { processOverduePayment, fetchOverdueBorrowedBooks } from '../Features/api'
+import { useActivity } from '../context/ActivityContext'
 
 const OverdueModal = ({
   isOpen,
@@ -20,6 +21,7 @@ const OverdueModal = ({
   const [selectedAction, setSelectedAction] = useState('pay')
   const [orNumber, setOrNumber] = useState('')
   const { token } = useSelector((state) => state.auth)
+  const { addActivity } = useActivity()
 
   useEffect(() => {
     const fetchAmountData = async () => {
@@ -117,6 +119,19 @@ const OverdueModal = ({
 
       await processOverduePayment(token, borrowData.id, paymentData)
       await onSubmit(paymentData)
+
+      // Log activity
+      if (selectedAction === 'return') {
+        addActivity({
+          type: 'overdue',
+          description: `Book returned with overdue payment of ₱${calculatedFineAmount}`
+        })
+      } else if (selectedAction === 'renew') {
+        addActivity({
+          type: 'book_borrowed',
+          description: `Book renewed with overdue payment of ₱${calculatedFineAmount}`
+        })
+      }
 
       toast.success(
         selectedAction === 'return'

@@ -54,9 +54,7 @@ import {
   BooksSkeleton
 } from '../components/Dashboard/DashboardSkeletons'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import MonthSelector from '../components/Dashboard/MonthSelector'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import TopBorrowerMonthSelector from '../components/Dashboard/TopBorrowerMonthSelector'
 
 // Register all required components
 ChartJS.register(
@@ -117,6 +115,8 @@ function Dashboard() {
   })
   const [paidFees, setPaidFees] = useState([])
   const [overdueFees, setOverdueFees] = useState([])
+  const [borrowedBooks, setBorrowedBooks] = useState([])
+  const [returnBooks, setReturnBooks] = useState([])
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -259,37 +259,6 @@ function Dashboard() {
     fetchInitialData()
   }, [token]) // Add penalties.overdueCount as dependency
 
-  // Add new useEffect for fetching penalties
-  useEffect(() => {
-    const fetchPenalties = async () => {
-      if (!token) return
-      try {
-        const penaltiesData = await fetchTotalPenalties(token)
-        setPenalties({
-          totalPenalties: penaltiesData.totalPenalties,
-          overdueCount: penaltiesData.overdueCount
-        })
-      } catch (error) {
-        console.error('Error fetching penalties:', error)
-      }
-    }
-    fetchPenalties()
-  }, [token])
-
-  // Add new useEffect for fetching returned books count
-  useEffect(() => {
-    const fetchReturnedCount = async () => {
-      if (!token) return
-      try {
-        const returnedData = await fetchReturnedBooksCount(token)
-        setReturnedStats(returnedData)
-      } catch (error) {
-        console.error('Error fetching returned books count:', error)
-      }
-    }
-    fetchReturnedCount()
-  }, [token])
-
   // Add new useEffect for fetching active users
   useEffect(() => {
     const fetchUsers = async () => {
@@ -350,6 +319,8 @@ function Dashboard() {
 
         setPaidFees(paidFeeData.amount)
         setOverdueFees(paidFeeData.overdue)
+        setBorrowedBooks(paidFeeData.borrowed)
+        setReturnBooks(paidFeeData.returned)
       } catch (error) {
         console.error('Error fetching paid fees:', error)
         setPaidFees(0)
@@ -365,6 +336,14 @@ function Dashboard() {
 
   const getTotalOverdueFees = () => {
     return overdueFees.length || 0
+  }
+
+  const getTotalBorrowedBooks = () => {
+    return borrowedBooks.length || 0
+  }
+
+  const getTotalReturnedBooks = () => {
+    return returnBooks.length || 0
   }
 
   // Add toggle handler
@@ -664,19 +643,19 @@ function Dashboard() {
     },
     {
       title: 'Borrowed Books',
-      value: bookStats.borrowed || '0',
+      value: `${getTotalBorrowedBooks()}`,
       icon: FaBookReader,
       route: '/borrowed',
       clickable: true
     },
     {
       title: 'Returned Books',
-      value: returnedStats.returnedCount || '0',
+      value: `${getTotalReturnedBooks()}`,
       icon: FaUndo
     },
     {
       title: 'Overdue Books',
-      value: `${getTotalOverdueFees()}`, // Updated to use API count
+      value: `${getTotalOverdueFees()}`,
       icon: FaClock
     },
     {
@@ -687,19 +666,11 @@ function Dashboard() {
     }, // Updated title
     {
       title: 'Paid Fees',
-      value: `₱${Math.round(penalties.totalPenalties || 0).toLocaleString()}`,
+      value: `₱${getTotalPaidFees()}`,
       icon: FaMoneyBill
     },
-    // Add an empty card if needed to maintain grid layout
     { title: 'Available Books', value: totalBooks - bookStats.borrowed || '0', icon: FaBook }
   ]
-
-  // Add this helper function inside the Dashboard component
-  // const getDaysAgoText = (daysAgo) => {
-  //   if (daysAgo === 0) return 'Added today'
-  //   if (daysAgo === 1) return 'Added yesterday'
-  //   return `Added ${daysAgo} days ago`
-  // }
 
   return (
     <div className="app-wrapper">

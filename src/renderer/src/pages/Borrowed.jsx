@@ -8,8 +8,7 @@ import {
   returnBook,
   renewBook,
   processOverduePayment,
-  fetchAllStudentsForSearch,
-  fetchAllBooks
+  updateBook
 } from '../Features/api'
 import './Borrowed.css'
 import BorrowBookModal from '../components/BorrowBookModal'
@@ -42,37 +41,6 @@ const Borrowed = () => {
   const shouldHighlight = searchParams.get('highlight') === 'true'
   const [selectedBorrowDetails, setSelectedBorrowDetails] = useState(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
-  const [studentMap, setStudentMap] = useState({})
-  const [bookMap, setBookMap] = useState({})
-
-  useEffect(() => {
-    if (!token) return
-
-    const fetchMappings = async () => {
-      try {
-        const [studentsData, booksData] = await Promise.all([
-          fetchAllStudentsForSearch(token),
-          fetchAllBooks(token, '')
-        ])
-
-        const studentMapping = {}
-        studentsData.forEach((student) => {
-          studentMapping[student.id] = student.name || 'Unknown'
-        })
-        setStudentMap(studentMapping)
-        const bookMapping = {}
-        booksData.results.forEach((book) => {
-          bookMapping[book.id] = book.title || 'Unknown'
-        })
-
-        setBookMap(bookMapping)
-      } catch (error) {
-        console.error('Error fetching mappings:', error)
-      }
-    }
-
-    fetchMappings()
-  }, [token])
 
   // Add function to check if book is overdue
   const isOverdue = (dueDate) => {
@@ -98,7 +66,7 @@ const Borrowed = () => {
   }
 
   const getStatusText = (item) => {
-    if (item.is_returned) return 'Return'
+    if (item.is_returned) return 'Returned'
     if (item.paid && isOverdue(item.due_date)) return 'Paid'
     return isOverdue(item.due_date) ? 'DUE' : 'BORROWED'
   }
@@ -165,6 +133,10 @@ const Borrowed = () => {
     try {
       setIsModalOpen(false)
       await fetchBorrowedData(1)
+
+      await updateBook(token, borrowData.book, {
+        status: 'Borrowed'
+      })
       showToast('Success', 'Book borrowed successfully!', 'success')
     } catch (error) {
       console.error('Error borrowing book:', error)
@@ -173,9 +145,19 @@ const Borrowed = () => {
   }
 
   const handleReturnBook = async (borrowId) => {
+    const borrowItem = borrowedBooks.find((item) => item.id === borrowId)
+    if (!borrowItem) {
+      showToast('Error', 'Borrow record not found', 'error')
+      return
+    }
+
     try {
       await returnBook(token, borrowId, {
-        returned_date: new Date().toISOString().split('T')[0]
+        returned_date: new Date().toISOString().split('T')[0],
+        status: 'Returned'
+      })
+      await updateBook(token, borrowItem.book, {
+        status: 'Available'
       })
       await fetchBorrowedData(pagination.currentPage)
       showToast('Success', 'Book returned successfully!', 'success')
@@ -241,7 +223,7 @@ const Borrowed = () => {
     const searchLower = searchTerm.toLowerCase()
     return borrowedBooks.filter((book) => {
       const studentName = studentMap[book.student] || book.student_name || book.student || ''
-      const bookTitle = bookMap[book.book] || book.book_title || book.book || ''
+      const bookTitle = bookMap[book.book] || book.title || book.book || ''
 
       return (
         studentName.toLowerCase().includes(searchLower) ||
@@ -381,16 +363,14 @@ const Borrowed = () => {
                             : getRowClassName(item)
                         } ${windowWidth <= 1500 ? 'clickable-row' : ''}`}
                       >
-                        <td>
-                          {studentMap[item.student] || item.student_name || item.student || 'N/A'}
-                        </td>
-                        <td>{bookMap[item.book] || item.book_title || item.book || 'N/A'}</td>
+                        <td>{item.student_name}</td>
+                        <td>{item.book_title}</td>
                         <td>{formatDate(item.borrowed_date)}</td>
                         <td>{formatDate(item.due_date)}</td>
                         <td>
                           <div className="status-badge-container">
                             <span className={`status-badge ${getStatusBadgeClass(item)}`}>
-                              {getStatusText(item)}
+                              {getStatusText(item.status)}
                             </span>
                           </div>
                         </td>
@@ -439,8 +419,6 @@ const Borrowed = () => {
           onSubmit={handleOverdueSubmit}
           onSuccess={refreshTable} // Add this line
           borrowData={selectedOverdue || {}}
-          studentMap={studentMap}
-          bookMap={bookMap}
         />
         {selectedBorrowDetails && windowWidth <= 1500 && (
           <BorrowDetailsModal
