@@ -197,8 +197,8 @@ const StudentsPage = () => {
                 ) : (
                   students.map((student) => (
                     <tr
-                      key={student.id}
-                      onClick={() => handleRowClick(student.id)}
+                      key={student.id_number}
+                      onClick={() => handleRowClick(student.id_number)}
                       className="clickable-row"
                     >
                       <td>{student.id_number}</td>

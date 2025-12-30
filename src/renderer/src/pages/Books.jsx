@@ -17,16 +17,14 @@ import ToastContainer from '../components/Toast/ToastContainer'
 function Books() {
   const navigate = useNavigate()
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
-  const { token, user } = useSelector((state) => state.auth)
+  const { token } = useSelector((state) => state.auth)
 
   const {
     books,
     isLoading,
     pagination,
-    sortConfig,
     fetchBooksData,
     handleDeleteBook,
-    handleSort,
     handlePageChange,
     deleteConfirm,
     isDeleting,
@@ -37,6 +35,66 @@ function Books() {
   const { debouncedSearchTerm, handleSearch } = useBookSearch()
 
   const { handleAddBook, handleEditBook } = useBookModals()
+
+  const handleExportToCSV = useCallback(() => {
+    // Filter out cancelled books
+    const booksToExport = books.filter((book) => !book.cancelled)
+
+    if (booksToExport.length === 0) {
+      return
+    }
+
+    // Define CSV headers
+    const headers = [
+      'Title',
+      'Author',
+      'ISBN',
+      'Publisher',
+      'Year',
+      'Category',
+      'Status',
+      'Copies',
+      'Available',
+      'Date Received',
+      'Accession Number'
+    ]
+
+    // Convert books data to CSV rows
+    const csvRows = [
+      headers.join(','),
+      ...booksToExport.map((book) =>
+        [
+          `"${(book.title || '').replace(/"/g, '""')}"`,
+          `"${(book.author || '').replace(/"/g, '""')}"`,
+          `"${book.isbn || ''}"`,
+          `"${(book.publisher || '').replace(/"/g, '""')}"`,
+          book.year || '',
+          `"${(book.category || '').replace(/"/g, '""')}"`,
+          `"${book.status || ''}"`,
+          book.copies || 0,
+          book.available_copies || 0,
+          book.date_received || '',
+          `"${book.accession_number || ''}"`
+        ].join(',')
+      )
+    ]
+
+    // Create CSV content
+    const csvContent = csvRows.join('\n')
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+
+    link.setAttribute('href', url)
+    link.setAttribute('download', `books_export_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }, [books])
 
   const handleGridDelete = useCallback(
     (book) => {
@@ -54,6 +112,18 @@ function Books() {
   const [selectedBook, setSelectedBook] = useState(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [viewMode, setViewMode] = useState('table')
+  const [selectedCategory, setSelectedCategory] = useState('')
+
+  const handleCategoryChange = useCallback((category) => {
+    setSelectedCategory(category)
+  }, [])
+
+  // Filter books by category
+  const filteredBooks = books.filter((book) => {
+    if (book.cancelled) return false
+    if (!selectedCategory) return true
+    return book.category === selectedCategory
+  })
 
   useEffect(() => {
     const handleResize = () => {
@@ -114,15 +184,16 @@ function Books() {
               onAddBook={handleAddBook}
               token={token}
               onRefresh={fetchBooksData}
-              sortConfig={sortConfig}
-              onSort={handleSort}
+              onCategoryChange={handleCategoryChange}
+              selectedCategory={selectedCategory}
               viewMode={viewMode}
               onViewChange={setViewMode}
+              onExport={handleExportToCSV}
             />
 
             {viewMode === 'grid' ? (
               <BookGrid
-                books={books.filter((book) => !book.cancelled)}
+                books={filteredBooks}
                 isLoading={isLoading}
                 onEditBook={handleEditBook}
                 onDeleteBook={handleGridDelete}
@@ -130,10 +201,8 @@ function Books() {
               />
             ) : (
               <BooksTable
-                books={books.filter((book) => !book.cancelled)}
+                books={filteredBooks}
                 isLoading={isLoading}
-                sortConfig={sortConfig}
-                onSort={handleSort}
                 onEditBook={handleEditBook}
                 onDeleteBook={handleDeleteBook}
                 onRowClick={handleRowClick}

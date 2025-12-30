@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { FaCalendar, FaMoneyBill } from 'react-icons/fa'
+import { Calendar, DollarSign, X, User, BookOpen } from 'lucide-react'
+import { Button } from './ui/button'
 import './OverdueModal.css'
-import { toast } from 'react-toastify'
+import { useToaster } from './Toast/useToaster'
 import { useSelector } from 'react-redux'
 import { processOverduePayment, fetchOverdueBorrowedBooks } from '../Features/api'
 import { useActivity } from '../context/ActivityContext'
@@ -16,53 +17,11 @@ const OverdueModal = ({
   studentMap = {}
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [overdueAmount, setOverdueAmount] = useState(0)
-  const [isLoadingAmount, setIsLoadingAmount] = useState(false)
   const [selectedAction, setSelectedAction] = useState('pay')
   const [orNumber, setOrNumber] = useState('')
   const { token } = useSelector((state) => state.auth)
   const { addActivity } = useActivity()
-
-  useEffect(() => {
-    const fetchAmountData = async () => {
-      if (!borrowData.id || !token) return
-
-      setIsLoadingAmount(true)
-      try {
-        const response = await fetchOverdueBorrowedBooks(token, borrowData.id)
-        setOverdueAmount(Number(response.amount) || 0)
-      } catch (error) {
-        // If API fails, calculate based on overdue days
-        const calculatedAmount = calculateOverdueAmount(borrowData.due_date)
-        setOverdueAmount(calculatedAmount)
-      } finally {
-        setIsLoadingAmount(false)
-      }
-    }
-
-    if (isOpen && borrowData.id) {
-      fetchAmountData()
-    }
-  }, [borrowData.id, token, isOpen])
-
-  // Calculate overdue amount based on days past due date
-  const calculateOverdueAmount = (dueDate) => {
-    const today = new Date()
-    const due = new Date(dueDate)
-
-    // Calculate days overdue
-    const diffTime = today - due
-    const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    // If not overdue, return 0
-    if (daysOverdue <= 0) return 0
-
-    // Calculate amount: 2 pesos per day
-    const dailyFine = 2
-    const amount = daysOverdue * dailyFine
-
-    return amount
-  }
+  const { showToast } = useToaster()
 
   // Get days overdue
   const getDaysOverdue = () => {
@@ -88,7 +47,7 @@ const OverdueModal = ({
     if (isSubmitting || !borrowData.id || !orNumber.trim()) {
       // Add OR number validation
       if (!orNumber.trim()) {
-        toast.error('OR Number is required')
+        showToast('OR Number is required', '', 'error')
         return
       }
       return
@@ -133,10 +92,12 @@ const OverdueModal = ({
         })
       }
 
-      toast.success(
+      showToast(
         selectedAction === 'return'
           ? 'Book returned and payment processed successfully!'
-          : 'Book renewed and payment processed successfully!'
+          : 'Book renewed and payment processed successfully!',
+        '',
+        'success'
       )
 
       // Close both modals
@@ -146,7 +107,7 @@ const OverdueModal = ({
       }
     } catch (error) {
       console.error(error)
-      toast.error(error.message || 'Failed to process payment')
+      showToast('Failed to process payment', error.message || '', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -159,29 +120,35 @@ const OverdueModal = ({
       <div className="overdue-modal-content">
         <div className="overdue-modal-header">
           <h2>Process Overdue Payment</h2>
-          <button onClick={onClose} className="overdue-modal-close">
-            &times;
+          <button onClick={onClose} className="overdue-modal-close" aria-label="Close modal">
+            <X size={20} />
           </button>
         </div>
         <div className="overdue-modal-body">
           <div className="overdue-info-group">
             <label>Student Name</label>
             <p>
-              {studentMap[borrowData.student] ||
-                borrowData.student_name ||
-                borrowData.student ||
-                'N/A'}
+              <User className="user-icon" size={18} />
+              <span>
+                {studentMap[borrowData.student] ||
+                  borrowData.student_name ||
+                  borrowData.student ||
+                  'N/A'}
+              </span>
             </p>
           </div>
           <div className="overdue-info-group">
             <label>Book Title</label>
-            <p>{borrowData.id || borrowData.book || 'N/A'}</p>
+            <p>
+              <BookOpen className="book-icon" size={18} />
+              <span>{borrowData.book_title || borrowData.book || 'N/A'}</span>
+            </p>
           </div>
           <div className="overdue-info-group">
             <label>Due Date</label>
             <p>
-              <FaCalendar className="calendar-icon" />
-              {new Date(borrowData.due_date).toLocaleDateString()}
+              <Calendar className="calendar-icon" size={18} />
+              <span>{new Date(borrowData.due_date).toLocaleDateString()}</span>
             </p>
           </div>
           {/* <div className="overdue-info-group">
@@ -196,7 +163,7 @@ const OverdueModal = ({
               <div className="amount-loading">Loading amount...</div>
             ) : (
               <p className="amount">
-                <FaMoneyBill className="money-icon" />₱
+                <DollarSign className="money-icon" size={18} />₱
                 {typeof overdueAmount === 'number' ? overdueAmount.toFixed(2) : '0.00'}
               </p>
             )}
@@ -204,8 +171,8 @@ const OverdueModal = ({
           <div className="overdue-info-group">
             <label>Payment Date</label>
             <p>
-              <FaCalendar className="calendar-icon" />
-              {new Date().toLocaleDateString()}
+              <Calendar className="calendar-icon" size={18} />
+              <span>{new Date().toLocaleDateString()}</span>
             </p>
           </div>
           <div className="overdue-info-group">
@@ -247,32 +214,31 @@ const OverdueModal = ({
             <div className="breakdown-divider"></div>
           </div>{' '}
           <div className="summary-label">Total Amount to Pay</div>
-          <div className="summary-amount">
-            <FaMoneyBill className="summary-icon" />
-            {(getDaysOverdue() * getDailyFine()).toFixed(2)}
-          </div>
+          <div className="summary-amount">₱{(getDaysOverdue() * getDailyFine()).toFixed(2)}</div>
         </div>
 
         <div className="overdue-modal-footer">
-          <button type="button" onClick={onClose} className="overdue-cancel-btn">
+          <Button
+            type="button"
+            onClick={onClose}
+            variant="secondary"
+            className="overdue-cancel-btn"
+          >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handlePayment}
+            variant="primary"
             className="overdue-submit-btn"
             disabled={isSubmitting}
           >
-            {isSubmitting ? (
-              <div className="button-spinner">
-                <div className="spinner"></div>
-              </div>
-            ) : selectedAction === 'return' ? (
-              'Return and Pay'
-            ) : (
-              'Renew and Pay'
-            )}
-          </button>
+            {isSubmitting
+              ? 'Processing...'
+              : selectedAction === 'return'
+                ? 'Return and Pay'
+                : 'Renew and Pay'}
+          </Button>
         </div>
       </div>
     </div>

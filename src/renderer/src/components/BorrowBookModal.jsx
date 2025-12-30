@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import PropTypes from 'prop-types'
-import { FaUser, FaBook, FaCalendar } from 'react-icons/fa'
+import { User, BookOpen, Calendar, X } from 'lucide-react'
 import { fetchAllBooks, borrowBook } from '../Features/api'
-import InputField from './InputField'
+import { Button } from './ui/button'
 import './BorrowBookModal.css'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
@@ -190,8 +190,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       <div className="borrow-modal-content">
         <div className="borrow-modal-header">
           <h2>Borrow Book</h2>
-          <button onClick={onClose} className="borrow-modal-close">
-            &times;
+          <button onClick={onClose} className="borrow-modal-close" aria-label="Close modal">
+            <X size={20} />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="borrow-modal-form">
@@ -200,22 +200,24 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
               <label htmlFor="student" className="required">
                 Student ID
               </label>
-              <InputField
-                type="text"
-                id="student"
-                name="student"
-                value={formData.student}
-                onChange={handleChange}
-                required
-                icon={FaUser}
-                placeholder="Enter student ID"
-                className="borrow-input"
-              />
+              <div className="borrow-input-wrapper">
+                <User className="borrow-input-icon" size={18} />
+                <input
+                  type="text"
+                  id="student"
+                  name="student"
+                  value={formData.student}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter student ID"
+                  className="borrow-input"
+                />
+              </div>
             </div>
             <div className="borrow-form-group book-field">
               <label htmlFor="book-search">Book*</label>
               <div className="borrow-search-wrapper" ref={bookInputRef}>
-                <FaBook className="borrow-search-icon" />
+                <BookOpen className="borrow-search-icon" size={18} />
                 <input
                   type="text"
                   id="book-search"
@@ -252,50 +254,54 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
             </div>
             <div className="borrow-form-group">
               <label htmlFor="lexile_level">Lexile Level*</label>
-              <InputField
-                type="text"
-                id="lexile_level"
-                name="lexile_level"
-                value={formData.lexile_level}
-                onChange={handleChange}
-                required
-                icon={FaBook}
-                placeholder="Enter lexile level"
-                className="borrow-input"
-                readOnly
-              />
+              <div className="borrow-input-wrapper">
+                <BookOpen className="borrow-input-icon" size={18} />
+                <input
+                  type="text"
+                  id="lexile_level"
+                  name="lexile_level"
+                  value={formData.lexile_level}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter lexile level"
+                  className="borrow-input"
+                  readOnly
+                />
+              </div>
             </div>
             <div className="borrow-form-group">
               <label htmlFor="due_date">Due Date*</label>
-              <InputField
-                type="date"
-                id="due_date"
-                name="due_date"
-                value={formData.due_date}
-                onChange={handleChange}
-                required
-                icon={FaCalendar}
-                className="borrow-input"
-              />
+              <div className="borrow-input-wrapper">
+                <Calendar className="borrow-input-icon" size={18} />
+                <input
+                  type="date"
+                  id="due_date"
+                  name="due_date"
+                  value={formData.due_date}
+                  onChange={handleChange}
+                  required
+                  className="borrow-input"
+                />
+              </div>
             </div>
           </div>
           <div className="borrow-modal-footer">
-            <button type="button" onClick={onClose} className="borrow-cancel-btn">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="secondary"
+              className="borrow-cancel-btn"
+            >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
               className="borrow-submit-btn"
               disabled={isLoading || isSubmitting}
             >
-              {isSubmitting ? (
-                <div className="button-spinner">
-                  <div className="spinner"></div>
-                </div>
-              ) : (
-                'Borrow Book'
-              )}
-            </button>
+              {isSubmitting ? 'Borrowing...' : 'Borrow Book'}
+            </Button>
           </div>
         </form>
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Search, Plus, FileUp, Grid3x3, List } from 'lucide-react'
+import PropTypes from 'prop-types'
+import { Search, Plus, FileUp, FileDown, Grid3x3, List, Filter } from 'lucide-react'
 import { Button } from '../../ui/button'
 import ImportBooks from './ImportBooks'
 import './BooksHeader.css'
@@ -9,20 +10,21 @@ function BooksHeader({
   onAddBook,
   token,
   onRefresh,
-  sortConfig,
-  onSort,
+  onCategoryChange,
+  selectedCategory,
   onViewChange,
-  viewMode = 'table'
+  viewMode = 'table',
+  onExport
 }) {
   const [showImport, setShowImport] = useState(false)
 
   return (
     <div className="top-label">
       <div className="header-buttons">
-        <div className="title-container">
+        {/* <div className="title-container">
           <h1 className="title-header">Library Collection</h1>
           <span className="sub-header">Manage your books effectively</span>
-        </div>
+        </div> */}
       </div>
       <div className="books-header">
         <div className="search-bar">
@@ -36,29 +38,50 @@ function BooksHeader({
           />
         </div>
 
-        {/* Sorting Dropdown */}
+        {/* Categories Filter */}
 
         <div className="btn-container">
           <div className="sort-container">
-            <label htmlFor="sort-select">Sort By:</label>
+            <Filter
+              size={16}
+              style={{
+                position: 'absolute',
+                left: '0.75rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#64748b',
+                pointerEvents: 'none',
+                zIndex: 1
+              }}
+            />
+            {/* <label htmlFor="category-select">Category:</label> */}
             <select
-              id="sort-select"
+              id="category-select"
               className="sort-select"
               onChange={(e) => {
-                onSort(e.target.value)
+                onCategoryChange(e.target.value)
               }}
-              value={sortConfig.column || ''}
+              value={selectedCategory || ''}
             >
-              <option value="">Default</option>
-              <option value="title">Title</option>
-              <option value="author">Author</option>
-              <option value="year">Year</option>
-              <option value="date_received">Date Received</option>
-              <option value="status">Status</option>
+              <option value="">All Categories</option>
+              <option value="Fiction">Fiction</option>
+              <option value="Non-Fiction">Non-Fiction</option>
+              <option value="Science">Science</option>
+              <option value="History">History</option>
+              <option value="Biography">Biography</option>
+              <option value="Reference">Reference</option>
+              <option value="Children">Children</option>
+              <option value="Education">Education</option>
             </select>
           </div>
 
-          <Button variant="primary" onClick={onAddBook} aria-label="Add new book" className="gap-2">
+          <Button
+            variant="primary"
+            onClick={onAddBook}
+            aria-label="Add new book"
+            className="gap-2"
+            title="Add New Book"
+          >
             <Plus size={18} />
             {/* <span className="btn-text">Add New Book</span> */}
           </Button>
@@ -67,9 +90,20 @@ function BooksHeader({
             aria-label="Import books"
             variant="secondary"
             className="gap-2"
+            title="Import Books"
           >
             <FileUp size={18} />
             {/* <span className="btn-text">Import Books</span> */}
+          </Button>
+          <Button
+            onClick={onExport}
+            aria-label="Export books to CSV"
+            variant="secondary"
+            className="gap-2"
+            title="Export CSV"
+          >
+            <FileDown size={18} />
+            {/* <span className="btn-text">Export CSV</span> */}
           </Button>
           <div className="view-toggle">
             <button
@@ -96,6 +130,18 @@ function BooksHeader({
       )}
     </div>
   )
+}
+
+BooksHeader.propTypes = {
+  onSearch: PropTypes.func.isRequired,
+  onAddBook: PropTypes.func.isRequired,
+  token: PropTypes.string.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  onCategoryChange: PropTypes.func.isRequired,
+  selectedCategory: PropTypes.string,
+  onViewChange: PropTypes.func.isRequired,
+  viewMode: PropTypes.string,
+  onExport: PropTypes.func.isRequired
 }
 
 export default BooksHeader

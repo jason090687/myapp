@@ -9,6 +9,10 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid #e4e4e7;
+  overflow: hidden;
 }
 
 .books-table-wrapper {
@@ -21,6 +25,40 @@
 .books-table {
   width: 100%;
   table-layout: auto;
+  border-collapse: collapse;
+}
+
+.books-table thead {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 2px solid #e4e4e7;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.books-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #09090b;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.books-table tbody tr {
+  border-bottom: 1px solid #f4f4f5;
+  transition: all 0.15s ease;
+}
+
+.books-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.books-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: #3f3f46;
 }
 
 .table-pagination {
@@ -29,8 +67,8 @@
   justify-content: flex-end;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  background: #fafafa;
+  border-top: 1px solid #e4e4e7;
   flex-shrink: 0;
   width: 100%;
 }

@@ -1,6 +1,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa'
 import { formatDate } from '../utils/bookUtils'
 import { useState, useEffect, useCallback } from 'react'
+import PropTypes from 'prop-types'
 import Pagination from '../../Pagination'
 
 const TABLE_COLUMNS = [
@@ -192,6 +193,17 @@ const BooksTable = ({
       )}
     </div>
   )
+}
+
+BooksTable.propTypes = {
+  books: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool,
+  isFetchingAll: PropTypes.bool,
+  onEditBook: PropTypes.func.isRequired,
+  onDeleteBook: PropTypes.func.isRequired,
+  onRowClick: PropTypes.func,
+  pagination: PropTypes.object,
+  onPageChange: PropTypes.func
 }
 
 export default BooksTable

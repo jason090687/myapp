@@ -6,136 +6,148 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(8px);
-  padding-top: calc(var(--navbar-height) + 2rem);
+  animation: fadeIn 0.2s ease-out;
 }
 
 .renew-modal-content {
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
-  padding: 1.75rem;
-  border-radius: 1.2rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
   width: 95%;
   max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow:
-    0 20px 40px -12px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   position: relative;
-  animation: modalSlideUp 0.3s ease-out;
-  margin: 0 auto;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .renew-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .renew-modal-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1e293b;
   margin: 0;
 }
 
 .renew-modal-close {
-  background: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
   border: none;
-  font-size: 1.5rem;
-  color: #6b7280;
+  background: #f1f5f9;
+  color: #64748b;
   cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .renew-modal-close:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
+  background: #e2e8f0;
+  color: #ef4444;
 }
 
 .renew-modal-body {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.875rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   margin-bottom: 1.5rem;
-  padding: 0.5rem;
 }
 
 .renew-info-group {
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  padding: 0.875rem;
-  border-radius: 0.875rem;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.02),
-    0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .renew-info-group:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
-  border-color: #cbd5e1;
+  /* Remove hover effects to match BorrowBookModal */
 }
 
 .renew-info-group:last-child {
   background: #f0f9ff;
   border-color: #bae6fd;
-  margin-bottom: 0;
-}
-
-.renew-info-group:nth-child(1), /* Student Name */
-.renew-info-group:nth-child(2) {
-  /* Book Title */
-  grid-column: span 2;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #bae6fd;
 }
 
 .renew-info-group label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
   margin-bottom: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .renew-info-group p {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   color: #1e293b;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 500;
-  margin-top: 0.25rem;
+  padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: white;
+  position: relative;
 }
 
-.renew-info-group:nth-child(4) {
-  /* New Due Date */
-  background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-color: #bae6fd;
-}
-
-.calendar-icon {
-  color: #6366f1;
+.renew-info-group .calendar-icon,
+.renew-info-group .user-icon,
+.renew-info-group .book-icon {
+  position: absolute;
+  left: 0.875rem;
+  color: #94a3b8;
 }
 
 .renew-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  padding-top: 1rem;
-  margin-top: 1rem;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
   border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
 .renew-submit-btn,

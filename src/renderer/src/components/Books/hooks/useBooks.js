@@ -2,12 +2,9 @@ import { useState, useCallback, useEffect } from 'react'
 import { fetchBooks, deleteBook, fetchUserDetails } from '../../../Features/api'
 import { toast } from 'react-toastify'
 import { useActivity } from '../../../context/ActivityContext'
-import { useSelector } from 'react-redux'
-import useFetch from '../../../Features/useFetch'
 
 export const useBooks = (token) => {
   const { addActivity } = useActivity()
-  const { user } = useSelector((state) => state.auth)
   const [books, setBooks] = useState([])
   const [allBooks, setAllBooks] = useState([])
   const [sortedBooks, setSortedBooks] = useState(null)
