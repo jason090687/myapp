@@ -5,8 +5,7 @@ import InputField from '../components/InputField'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './ForgotPassword.css'
-import { Bounce, toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { useToaster } from '../components/Toast/useToaster'
 import { useDispatch, useSelector } from 'react-redux'
 import { resetPassword, reset } from '../Features/authSlice'
 import { requestPasswordResetOtp } from '../Features/api'
@@ -20,30 +19,13 @@ function ForgotPassword() {
   const dispatch = useDispatch()
 
   const { isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
-
-  const toastConfig = {
-    position: 'top-center',
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    transition: Bounce
-  }
-
-  const successToastConfig = {
-    ...toastConfig,
-    position: 'top-right',
-    autoClose: 2000,
-    icon: '📧'
-  }
+  const { showToast } = useToaster()
 
   const handleFinish = async (e) => {
     e.preventDefault()
 
     if (!email) {
-      toast.warning('Please enter your email address', toastConfig)
+      showToast('Warning', 'Please enter your email address', 'info')
       return
     }
 
@@ -51,13 +33,13 @@ function ForgotPassword() {
 
     try {
       await requestPasswordResetOtp(email)
-      toast.success('OTP has been sent to your email', successToastConfig)
+      showToast('Success', 'OTP has been sent to your email', 'success')
       // Add small delay before navigation to show the success toast
       setTimeout(() => {
         navigate('/reset-password-otp', { state: { email } })
       }, 500)
     } catch (error) {
-      toast.error(error.message || 'Failed to send reset OTP', toastConfig)
+      showToast('Error', error.message || 'Failed to send reset OTP', 'error')
     } finally {
       setIsSubmitting(false) // Reset loading state
     }
@@ -65,12 +47,13 @@ function ForgotPassword() {
 
   useEffect(() => {
     if (isError) {
-      toast.error('Failed to send reset link. Please try again.', toastConfig)
+      showToast('Error', 'Failed to send reset link. Please try again.', 'error')
     }
     if (isSuccess) {
-      toast.success(
+      showToast(
+        'Success',
         'A password reset link has been sent to your email. Please check your inbox!',
-        successToastConfig
+        'success'
       )
       setEmail('')
       setTimeout(() => navigate('/'), 2000)
@@ -87,18 +70,7 @@ function ForgotPassword() {
 
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable={false}
-        pauseOnHover={false}
-        theme="light"
-      />
+      {/* Custom toasts handled via useToaster */}
       <div className="container">
         <div className="left-side">
           <h2>Forgot Password</h2>

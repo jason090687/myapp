@@ -135,6 +135,23 @@ export const updateUserProfile = async (token, formData) => {
   }
 }
 
+export const changePassword = async (token, passwordData) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/accounts/auth/users/set_password/`,
+      passwordData,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.detail ||
+        error.response?.data?.old_password?.[0] ||
+        'Failed to change password'
+    )
+  }
+}
+
 export const fetchBooks = async (token, page = 1, search = '') => {
   try {
     const response = await axios.get(
@@ -827,16 +844,6 @@ export const fetchMonthlyStats = async (token, month, year) => {
   }
 }
 
-export const fetchMonthlyReport = async (token) => {
-  try {
-    const response = await axios.get(`${API_URL}/marc/monthly-report/`, getAuthHeaders(token))
-    return response.data
-  } catch (error) {
-    console.error('Error fetching monthly report:', error)
-    return []
-  }
-}
-
 export const fetchStudentDetails = async (token, studentId) => {
   try {
     const response = await axios.get(`${API_URL}/students/${studentId}/`, getAuthHeaders(token))
@@ -912,6 +919,26 @@ export const fetchAllStudentsForSearch = async (token) => {
   } catch (error) {
     console.error('Error fetching all students:', error)
     throw new Error(error.response?.data?.message || 'Failed to fetch all students')
+  }
+}
+
+export const deleteStudent = async (token, studentId, cancelData = {}) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/students/${studentId}/`,
+      {
+        cancelled: true,
+        cancelled_by: cancelData.cancelledBy,
+        cancelled_at: cancelData.cancelledAt
+      },
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error deleting student:', error.response?.data || error.message)
+    throw new Error(
+      error.response?.data?.detail || error.response?.data?.message || 'Failed to delete student'
+    )
   }
 }
 

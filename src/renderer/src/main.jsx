@@ -10,6 +10,7 @@ import './styles/global.css'
 import { Toaster } from 'react-hot-toast'
 import { logout } from './Features/authSlice' // Import the logout action
 import { ActivityProvider } from './context/ActivityContext'
+import './i18n/config' // Import i18n configuration
 
 // SessionProvider component to handle session expiration
 const SessionProvider = ({ children }) => {

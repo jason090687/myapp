@@ -1,28 +1,9 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-import ReactModal from 'react-modal'
-import { FaTimes } from 'react-icons/fa'
-// import { Bounce, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { X, User, Hash } from 'lucide-react'
+import { Button } from './ui/button'
 import { useActivity } from '../context/ActivityContext'
-
-const customStyles = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    transform: 'translate(-50%, -50%)',
-    maxWidth: '500px',
-    width: '90%',
-    borderRadius: '16px',
-    padding: '2rem'
-  },
-  overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    zIndex: 1000
-  }
-}
+import './AddStaffBookModal.css'
 
 const AddStaffBookModal = ({ isOpen, onClose, onSubmit }) => {
   const { addActivity } = useActivity()
@@ -61,63 +42,63 @@ const AddStaffBookModal = ({ isOpen, onClose, onSubmit }) => {
     }
   }
 
+  if (!isOpen) return null
+
   return (
-    <ReactModal
-      isOpen={isOpen}
-      onRequestClose={onClose}
-      style={customStyles}
-      contentLabel="Add Staff"
-      ariaHideApp={false}
-    >
-      <div className="modal-header">
-        <h2>Add New Staff</h2>
-        <button onClick={onClose} className="close-btn">
-          <FaTimes />
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="edit-form">
-        <div className="form-group">
-          <label htmlFor="name">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="id_number">ID Number</label>
-          <input
-            type="text"
-            id="id_number"
-            name="id_number"
-            value={formData.id_number}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="modal-actions">
-          <button type="button" onClick={onClose} className="cancel-btn" disabled={isSubmitting}>
-            Cancel
+    <div className="add-staff-modal-overlay">
+      <div className="add-staff-modal-content">
+        <div className="add-staff-modal-header">
+          <h2>Add New Staff</h2>
+          <button onClick={onClose} className="add-staff-modal-close" aria-label="Close modal">
+            <X size={20} />
           </button>
-          <button type="submit" className="submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <div className="spinner-wrapper">
-                <div className="spinner" />
-                <span>Adding...</span>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="add-staff-modal-body">
+            <div className="add-staff-field-group">
+              <label htmlFor="name">Full Name</label>
+              <div className="add-staff-input-wrapper">
+                <User size={18} />
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter staff member's full name"
+                />
               </div>
-            ) : (
-              'Add Staff'
-            )}
-          </button>
-        </div>
-      </form>
-    </ReactModal>
+            </div>
+
+            <div className="add-staff-field-group">
+              <label htmlFor="id_number">Employee ID</label>
+              <div className="add-staff-input-wrapper">
+                <Hash size={18} />
+                <input
+                  type="text"
+                  id="id_number"
+                  name="id_number"
+                  value={formData.id_number}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter employee ID number"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="add-staff-modal-footer">
+            <Button type="button" onClick={onClose} variant="secondary" disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Adding...' : 'Add Staff'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { FaUser, FaEnvelope, FaIdCard, FaEdit, FaKey, FaCamera } from 'react-icons/fa'
-import { toast } from 'react-toastify'
+import { useToaster } from '../components/Toast/useToaster'
 import Sidebar from '../components/Sidebar'
 import { fetchUserDetails, updateUserProfile } from '../Features/api'
 import { storeUser } from '../Features/authSlice'
@@ -15,6 +15,7 @@ import './ProfilePage.css'
 const ProfilePage = () => {
   const { token } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
+  const { showToast } = useToaster()
   const [isEditing, setIsEditing] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -31,7 +32,7 @@ const ProfilePage = () => {
         setUserDetails(data)
         setFormData(data)
       } catch (error) {
-        toast.error(error.message)
+        showToast('Error', error.message || 'Failed to fetch user details', 'error')
       } finally {
         setIsLoading(false)
       }
@@ -77,9 +78,9 @@ const ProfilePage = () => {
       setAvatarFile(null)
       setAvatarPreview(null)
       setIsEditing(false)
-      toast.success('Profile updated successfully!')
+      showToast('Success', 'Profile updated successfully!', 'success')
     } catch (error) {
-      toast.error('Failed to update profile')
+      showToast('Error', 'Failed to update profile', 'error')
     } finally {
       setIsSaving(false)
     }

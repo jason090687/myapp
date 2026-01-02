@@ -9,9 +9,7 @@ import './SignInPage.css'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import { login, reset } from '../Features/authSlice'
-import { Bounce, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { ToastContainer } from 'react-toastify'
+import { useToaster } from '../components/Toast/useToaster'
 import { Button } from '../components/ui/button'
 
 function SignInPage() {
@@ -26,17 +24,7 @@ function SignInPage() {
   const { email, password, rememberMe } = formData
 
   const { user, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
-
-  const toastConfig = {
-    position: 'top-right',
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    transition: Bounce
-  }
+  const { showToast } = useToaster()
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -50,7 +38,7 @@ function SignInPage() {
     e.preventDefault() // This will now work properly with the form
 
     if (!email || !password) {
-      toast.warning('Please provide both email and password', toastConfig)
+      showToast('Warning', 'Please provide both email and password', 'info')
       return
     }
 
@@ -65,11 +53,11 @@ function SignInPage() {
 
   useEffect(() => {
     if (isError) {
-      toast.warning(message || 'Unable to log in. Please verify your credentials.', toastConfig)
+      showToast('Error', message || 'Unable to log in. Please verify your credentials.', 'error')
     }
 
     if (isSuccess && user) {
-      toast.success('Successfully logged in!', toastConfig)
+      showToast('Success', 'Successfully logged in!', 'success')
       navigate('/dashboard')
     }
 
@@ -97,18 +85,7 @@ function SignInPage() {
 
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable={false}
-        pauseOnHover={false}
-        theme="light"
-      />
+      {/* Custom toasts handled via useToaster */}
       <div className="container">
         {/* Left Side - Login Form */}
         <div className="left-side">

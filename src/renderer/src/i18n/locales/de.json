@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "books": "Bücher",
+    "borrowed": "Ausgeliehen",
+    "students": "Studenten",
+    "staff": "Personal",
+    "settings": "Einstellungen",
+    "help": "Hilfe",
+    "profile": "Profil",
+    "logout": "Abmelden"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalBooks": "Bücher Gesamt",
+    "borrowed": "Ausgeliehen",
+    "returned": "Zurückgegeben",
+    "overdue": "Überfällig",
+    "activeUsers": "Aktive Benutzer",
+    "pendingFees": "Ausstehende Gebühren"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "general": "Allgemein",
+    "language": "Sprache",
+    "saveChanges": "Änderungen Speichern",
+    "saved": "Gespeichert!",
+    "resetToDefault": "Auf Standard Zurücksetzen"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "loading": "Laden..."
+  }
+}

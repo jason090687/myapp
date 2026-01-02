@@ -35,6 +35,8 @@ body {
   width: var(--sidebar-width);
   height: 100vh;
   position: fixed;
+  top: 0;
+  left: 0;
   background: var(--background-color);
   color: var(--primary-color);
   transition: all var(--transition-duration) var(--transition-timing);
@@ -435,6 +437,20 @@ body {
 }
 
 .sidebar.collapsed ~ .main {
+  margin-left: var(--sidebar-collapsed-width);
+  width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  margin-top: var(--navbar-height);
+  min-height: calc(100vh - var(--navbar-height));
+  background: var(--secondary-color);
+  transition: margin-left var(--transition-duration) var(--transition-timing);
+  width: calc(100% - var(--sidebar-width));
+}
+
+.main-content.collapsed {
   margin-left: var(--sidebar-collapsed-width);
   width: calc(100% - var(--sidebar-collapsed-width));
 }

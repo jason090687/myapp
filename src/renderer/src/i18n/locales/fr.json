@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "books": "Livres",
+    "borrowed": "Emprunté",
+    "students": "Étudiants",
+    "staff": "Personnel",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "profile": "Profil",
+    "logout": "Se déconnecter"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "totalBooks": "Total des Livres",
+    "borrowed": "Emprunté",
+    "returned": "Retourné",
+    "overdue": "En retard",
+    "activeUsers": "Utilisateurs Actifs",
+    "pendingFees": "Frais en Attente"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "general": "Général",
+    "language": "Langue",
+    "saveChanges": "Enregistrer les Modifications",
+    "saved": "Enregistré!",
+    "resetToDefault": "Réinitialiser par Défaut"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "loading": "Chargement..."
+  }
+}

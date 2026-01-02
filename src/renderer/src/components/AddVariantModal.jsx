@@ -41,104 +41,124 @@ const AddVariantModal = ({ isOpen, onClose, totalCopiesLimit, variants, onVarian
   if (!isOpen) return null
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h2>Manage Book Variants</h2>
-          <button onClick={onClose} className="close-btn">
+    <div className="variant-modal-overlay" onClick={onClose}>
+      <div className="variant-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="variant-modal-header">
+          <div className="variant-modal-title-section">
+            <FaBookmark className="variant-header-icon" />
+            <h2>Manage Book Variants</h2>
+          </div>
+          <button onClick={onClose} className="variant-close-btn" aria-label="Close modal">
             &times;
           </button>
         </div>
-        <div className="add-book-form">
-          <div className="variant-header">
-            <p>Total variants required: {totalCopiesLimit}</p>
+        <div className="variant-modal-body">
+          <div className="variant-info-section">
+            <div className="variant-counter">
+              <span className="variant-count">{localVariants.length}</span>
+              <span className="variant-count-label">of {totalCopiesLimit}</span>
+            </div>
             <button
               type="button"
               onClick={addVariant}
-              className="add-variant-btn"
+              className="variant-add-btn"
               disabled={localVariants.length >= totalCopiesLimit}
             >
-              <FaBookmark /> Add Variant
+              <FaBookmark />
+              <span>Add Variant</span>
             </button>
           </div>
 
           {localVariants.map((variant, index) => (
-            <div key={index} className="variant-item">
-              <div className="variant-item-header">
-                <h4 className="variant-title">Variant #{index + 1}</h4>
+            <div key={index} className="variant-card">
+              <div className="variant-card-header">
+                <div className="variant-badge">
+                  <FaBookmark className="variant-badge-icon" />
+                  <span>Variant #{index + 1}</span>
+                </div>
                 <button
                   type="button"
                   onClick={() => removeVariant(index)}
-                  className="remove-variant-btn"
+                  className="variant-remove-btn"
+                  aria-label={`Remove variant ${index + 1}`}
                 >
-                  <FaTrash /> Remove
+                  <FaTrash />
                 </button>
               </div>
 
-              <div className="variant-grid">
-                <div className="variant-field">
-                  <label>Edition</label>
+              <div className="variant-fields-grid">
+                <div className="variant-input-group">
+                  <label className="variant-label">Edition</label>
                   <InputField
                     value={variant.edition}
                     onChange={(e) => handleVariantChange(index, 'edition', e.target.value)}
                     icon={FaBookmark}
+                    placeholder="e.g., 1st Edition"
                   />
                 </div>
 
-                <div className="variant-field">
-                  <label>Volume</label>
+                <div className="variant-input-group">
+                  <label className="variant-label">Volume</label>
                   <InputField
                     value={variant.volume}
                     onChange={(e) => handleVariantChange(index, 'volume', e.target.value)}
                     icon={FaVolumeUp}
+                    placeholder="e.g., Vol. 1"
                   />
                 </div>
 
-                <div className="variant-field">
-                  <label>ISBN*</label>
+                <div className="variant-input-group">
+                  <label className="variant-label">
+                    ISBN <span className="required-asterisk">*</span>
+                  </label>
                   <InputField
                     value={variant.isbn}
                     onChange={(e) => handleVariantChange(index, 'isbn', e.target.value)}
                     icon={FaBarcode}
+                    placeholder="Enter ISBN"
                     required
                   />
                 </div>
 
-                <div className="variant-field">
-                  <label>Accession Number</label>
+                <div className="variant-input-group">
+                  <label className="variant-label">Accession Number</label>
                   <InputField
                     value={variant.accession_number}
                     onChange={(e) => handleVariantChange(index, 'accession_number', e.target.value)}
                     icon={FaHashtag}
+                    placeholder="Enter accession number"
                   />
                 </div>
 
-                <div className="variant-field">
-                  <label>Call Number</label>
+                <div className="variant-input-group">
+                  <label className="variant-label">Call Number</label>
                   <InputField
                     value={variant.call_number}
                     onChange={(e) => handleVariantChange(index, 'call_number', e.target.value)}
                     icon={FaHashtag}
+                    placeholder="Enter call number"
                   />
                 </div>
 
-                <div className="variant-field">
-                  <label>Barcode</label>
+                <div className="variant-input-group">
+                  <label className="variant-label">Barcode</label>
                   <InputField
                     value={variant.barcode}
                     onChange={(e) => handleVariantChange(index, 'barcode', e.target.value)}
                     icon={FaQrcode}
+                    placeholder="Enter barcode"
                   />
                 </div>
               </div>
             </div>
           ))}
 
-          <div className="modal-footer">
-            <button type="button" onClick={onClose} className="cancel-btn">
+          <div className="variant-modal-footer">
+            <button type="button" onClick={onClose} className="variant-cancel-btn">
               Cancel
             </button>
-            <button type="button" onClick={handleSave} className="submit-btn">
+            <button type="button" onClick={handleSave} className="variant-save-btn">
+              <FaBookmark />
               Save Variants
             </button>
           </div>

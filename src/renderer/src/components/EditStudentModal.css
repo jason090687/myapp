@@ -1,0 +1,229 @@
+/* Edit Student Modal Overlay */
+.edit-student-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Modal Content */
+.edit-student-modal-content {
+  background: white;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 480px;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+/* Modal Header */
+.edit-student-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.edit-student-modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.edit-student-modal-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.edit-student-modal-close:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Modal Body */
+.edit-student-modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Field Group */
+.edit-student-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.edit-student-field-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+/* Input Wrapper with Icon */
+.edit-student-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.edit-student-input-wrapper svg {
+  position: absolute;
+  left: 0.875rem;
+  color: #94a3b8;
+  pointer-events: none;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  stroke-width: 2;
+}
+
+.edit-student-input-wrapper input {
+  width: 100%;
+  padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+
+.edit-student-input-wrapper input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.edit-student-input-wrapper input::placeholder {
+  color: #cbd5e1;
+}
+
+/* Toggle Wrapper */
+.edit-student-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+/* Toggle Switch */
+.edit-student-toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.edit-student-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.edit-student-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.edit-student-slider:before {
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.edit-student-toggle input:checked + .edit-student-slider {
+  background-color: #3b82f6;
+}
+
+.edit-student-toggle input:checked + .edit-student-slider:before {
+  transform: translateX(24px);
+}
+
+.edit-student-toggle-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+/* Modal Footer */
+.edit-student-modal-footer {
+  padding: 1rem 1.5rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .edit-student-modal-content {
+    width: 95%;
+    max-width: none;
+  }
+
+  .edit-student-modal-header,
+  .edit-student-modal-body,
+  .edit-student-modal-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

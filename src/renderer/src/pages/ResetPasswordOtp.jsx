@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Bounce, toast, ToastContainer } from 'react-toastify'
+import { useToaster } from '../components/Toast/useToaster'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './OtpVerification.css'
@@ -18,22 +18,7 @@ const ResetPasswordOtp = () => {
 
   const userEmail = location.state?.email
 
-  const toastConfig = {
-    position: 'top-right',
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    transition: Bounce
-  }
-
-  const successToastConfig = {
-    ...toastConfig,
-    autoClose: 2000,
-    icon: '✅'
-  }
+  const { showToast } = useToaster()
 
   useEffect(() => {
     if (!userEmail) {
@@ -50,14 +35,14 @@ const ResetPasswordOtp = () => {
 
     const otpString = otp.join('')
     if (!/^\d{6}$/.test(otpString)) {
-      toast.error('Please enter a valid 6-digit code', toastConfig)
+      showToast('Error', 'Please enter a valid 6-digit code', 'error')
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      toast.success('OTP verification successful!', successToastConfig)
+      showToast('Success', 'OTP verification successful!', 'success')
 
       // Add delay before navigation
       await new Promise((resolve) => setTimeout(resolve, 1500))
@@ -70,7 +55,7 @@ const ResetPasswordOtp = () => {
       })
     } catch (err) {
       setError('Invalid OTP code. Please try again.')
-      toast.error(err.message || 'Invalid OTP code. Please try again.', toastConfig)
+      showToast('Error', err.message || 'Invalid OTP code. Please try again.', 'error')
       setOtp(['', '', '', '', '', ''])
       inputRefs[0].current.focus()
     } finally {
@@ -104,7 +89,7 @@ const ResetPasswordOtp = () => {
     const pastedData = e.clipboardData.getData('text').trim()
 
     if (!/^\d{6}$/.test(pastedData)) {
-      toast.error('Please paste a valid 6-digit code')
+      showToast('Error', 'Please paste a valid 6-digit code', 'error')
       return
     }
 
@@ -115,18 +100,7 @@ const ResetPasswordOtp = () => {
 
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable={false}
-        pauseOnHover={false}
-        theme="light"
-      />
+      {/* Custom toasts handled via useToaster */}
       <div className="container">
         <div className="left-side">
           <h2>E-Library</h2>

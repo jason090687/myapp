@@ -8,13 +8,13 @@ import logo from '../assets/logo.png'
 import './SignUpPage.css'
 import { useDispatch, useSelector } from 'react-redux'
 import { register, reset } from '../Features/authSlice'
-import { Bounce, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { useToaster } from '../components/Toast/useToaster'
 import { Button } from '../components/ui/button'
 
 function SignUpPage() {
   const dispatch = useDispatch()
   const { isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
+  const { showToast } = useToaster()
 
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
@@ -31,17 +31,6 @@ function SignUpPage() {
     special: false,
     match: false
   })
-
-  const toastConfig = {
-    position: 'top-right',
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    transition: Bounce
-  }
 
   const resetForm = () => {
     setFormData({
@@ -62,16 +51,13 @@ function SignUpPage() {
 
   useEffect(() => {
     if (isError) {
-      toast.error(message || 'Registration failed. Please try again.', toastConfig)
+      showToast('Error', message || 'Registration failed. Please try again.', 'error')
       // Clean up stored email if registration fails
       localStorage.removeItem('registrationEmail')
     }
 
     if (isSuccess) {
-      toast.success('Registration successful! Please verify your account.', {
-        ...toastConfig,
-        autoClose: 5000
-      })
+      showToast('Success', 'Registration successful! Please verify your account.', 'success')
       resetForm()
       navigate('/otp-verification')
     }
@@ -118,7 +104,7 @@ function SignUpPage() {
 
   const handleRegister = async () => {
     if (!isFormValid()) {
-      toast.error('Please complete all required fields correctly.', toastConfig)
+      showToast('Error', 'Please complete all required fields correctly.', 'error')
       return
     }
 
@@ -137,7 +123,7 @@ function SignUpPage() {
       localStorage.setItem('registrationEmail', formData.email)
       navigate('/otp-verification')
     } catch (error) {
-      toast.error(error || 'Registration failed. Please try again.', toastConfig)
+      showToast('Error', error || 'Registration failed. Please try again.', 'error')
     }
   }
 

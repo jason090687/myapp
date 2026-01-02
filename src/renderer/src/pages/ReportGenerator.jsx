@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux'
 import axios from 'axios'
 import { Chart } from 'chart.js/auto'
 import '../components/Dashboard/ReportGenerator.css'
-import { fetchMonthlyReport } from '../Features/api'
 import MonthSelector from '../components/Dashboard/MonthSelector'
 
 const ReportGenerator = ({ chartData: initialChartData }) => {
@@ -251,11 +250,8 @@ const ReportGenerator = ({ chartData: initialChartData }) => {
     setSelectedYear(year)
 
     try {
-      const monthlyData = await fetchMonthlyReport(token)
-      const monthData = monthlyData.find((data) => {
-        const [dataYear, dataMonth] = data.month.split('-')
-        return parseInt(dataMonth) === month + 1 && parseInt(dataYear) === year
-      }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
+      // Use static data since monthly report API was removed
+      const monthData = { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
 
       setChartData({
         labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],

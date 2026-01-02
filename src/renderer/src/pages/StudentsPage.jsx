@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
-import { createStudent, searchStudents, updateStudentDetails } from '../Features/api'
+import { createStudent, searchStudents, updateStudentDetails, deleteStudent } from '../Features/api'
 import { useSelector } from 'react-redux'
-import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus, FaEdit, FaTrash } from 'react-icons/fa'
-import { Bounce, toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { FaSearch, FaChevronLeft, FaChevronRight, FaEdit, FaTrash } from 'react-icons/fa'
+import { Filter, Plus } from 'lucide-react'
+import { useToaster } from '../components/Toast/useToaster'
 import Sidebar from '../components/Sidebar'
 import AddStudentModal from '../components/AddStudentModal'
 import EditStudentModal from '../components/EditStudentModal'
 import './StudentsPage.css'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../components/ui/button'
 
 const StudentsPage = () => {
   const navigate = useNavigate()
@@ -26,7 +27,9 @@ const StudentsPage = () => {
     studentId: null,
     studentName: ''
   })
+  const [filterStatus, setFilterStatus] = useState('all')
   const { token } = useSelector((state) => state.auth)
+  const { showToast } = useToaster()
 
   // Effect for fetching students with search
   useEffect(() => {
@@ -48,6 +51,14 @@ const StudentsPage = () => {
     return () => clearTimeout(timer)
   }, [token, currentPage, searchTerm])
 
+  // Filter students based on selected status
+  const getFilteredStudents = () => {
+    if (filterStatus === 'all') return students
+    if (filterStatus === 'active') return students.filter((s) => s.active)
+    if (filterStatus === 'inactive') return students.filter((s) => !s.active)
+    return students
+  }
+
   const handleRowClick = (studentId) => {
     navigate(`/students/${studentId}`)
   }
@@ -55,30 +66,14 @@ const StudentsPage = () => {
   const handleAddStudent = async (studentData) => {
     try {
       await createStudent(token, studentData)
-      toast.success('Student added successfully!', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce
-      })
+      showToast('Success', 'Student added successfully!', 'success')
       setIsAddModalOpen(false)
+      // Refresh students list so the new student appears immediately
+      const data = await searchStudents(token, searchTerm, currentPage)
+      setStudents(data.results)
+      setTotalPages(Math.ceil(data.count / 10))
     } catch (error) {
-      toast.error(error.message || 'Failed to add student', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce
-      })
+      showToast('Error', error.message || 'Failed to add student', 'error')
       throw error
     }
   }
@@ -87,34 +82,14 @@ const StudentsPage = () => {
     try {
       if (!selectedStudent) return
       await updateStudentDetails(token, selectedStudent.id_number, studentData)
-      toast.success('Student updated successfully!', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce
-      })
+      showToast('Success', 'Student updated successfully!', 'success')
       setIsEditModalOpen(false)
       setSelectedStudent(null)
       // Refresh students list
       const data = await searchStudents(token, searchTerm, currentPage)
       setStudents(data.results)
     } catch (error) {
-      toast.error(error.message || 'Failed to update student', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce
-      })
+      showToast('Error', error.message || 'Failed to update student', 'error')
       throw error
     }
   }
@@ -122,34 +97,14 @@ const StudentsPage = () => {
   const handleDeleteStudent = async () => {
     try {
       // API call for delete - implement based on your backend
-      // await deleteStudent(token, deleteConfirm.studentId)
-      toast.success('Student deleted successfully!', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce
-      })
+      await deleteStudent(token, deleteConfirm.studentId)
+      showToast('Success', 'Student deleted successfully!', 'success')
       setDeleteConfirm({ isOpen: false, studentId: null, studentName: '' })
       // Refresh students list
       const data = await searchStudents(token, searchTerm, currentPage)
       setStudents(data.results)
     } catch (error) {
-      toast.error(error.message || 'Failed to delete student', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-        transition: Bounce
-      })
+      showToast('Error', error.message || 'Failed to delete student', 'error')
     }
   }
 
@@ -170,9 +125,65 @@ const StudentsPage = () => {
                 aria-label="Search students"
               />
             </div>
-            <button className="add-student-btn" onClick={() => setIsAddModalOpen(true)}>
-              <FaPlus /> Add Student
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Filter
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    left: '0.75rem',
+                    color: '#64748b',
+                    pointerEvents: 'none',
+                    zIndex: 1
+                  }}
+                />
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="filter-select"
+                  style={{
+                    padding: '0.5rem 2.5rem 0.5rem 2.25rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #e2e8f0',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#334155',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    appearance: 'none',
+                    backgroundImage:
+                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center'
+                  }}
+                  onMouseEnter={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                  onMouseLeave={(e) => (e.target.style.borderColor = '#e2e8f0')}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#3b82f6'
+                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0'
+                    e.target.style.boxShadow = 'none'
+                  }}
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <Button
+                variant="primary"
+                onClick={() => setIsAddModalOpen(true)}
+                className="gap-2"
+                title="Add Student"
+                aria-label="Add student"
+              >
+                <Plus size={18} />
+              </Button>
+            </div>
           </div>
 
           <div className="table-container">
@@ -184,31 +195,69 @@ const StudentsPage = () => {
                   <th>Year Level</th>
                   <th>Borrowed Books</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan="5" className="loading-cell">
+                    <td colSpan="6" className="loading-cell">
                       <div className="student-spinner"></div>
                       <span className="student-loading-text">Loading students...</span>
                     </td>
                   </tr>
+                ) : getFilteredStudents().length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="loading-cell">
+                      <span className="student-loading-text">No students</span>
+                    </td>
+                  </tr>
                 ) : (
-                  students.map((student) => (
-                    <tr
-                      key={student.id_number}
-                      onClick={() => handleRowClick(student.id_number)}
-                      className="clickable-row"
-                    >
-                      <td>{student.id_number}</td>
-                      <td>{student.name}</td>
-                      <td>{student.year_level}</td>
-                      <td>{student.borrowed_books_count}</td>
-                      <td>
+                  getFilteredStudents().map((student) => (
+                    <tr key={student.id_number} className="table-row">
+                      <td onClick={() => handleRowClick(student.id_number)}>{student.id_number}</td>
+                      <td onClick={() => handleRowClick(student.id_number)}>{student.name}</td>
+                      <td onClick={() => handleRowClick(student.id_number)}>
+                        {student.year_level}
+                      </td>
+                      <td onClick={() => handleRowClick(student.id_number)}>
+                        {student.borrowed_books_count}
+                      </td>
+                      <td onClick={() => handleRowClick(student.id_number)}>
                         <span className={`status ${student.active ? 'active' : 'inactive'}`}>
                           {student.active ? 'Active' : 'Inactive'}
                         </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons-container">
+                          <button
+                            className="action-btn edit"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedStudent(student)
+                              setIsEditModalOpen(true)
+                            }}
+                            title="Edit"
+                            aria-label="Edit student"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            className="action-btn delete"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setDeleteConfirm({
+                                isOpen: true,
+                                studentId: student.id_number,
+                                studentName: student.name
+                              })
+                            }}
+                            title="Delete"
+                            aria-label="Delete student"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -216,7 +265,6 @@ const StudentsPage = () => {
               </tbody>
             </table>
           </div>
-
           <div className="pagination">
             <button
               className="pagination-btn"
@@ -254,9 +302,39 @@ const StudentsPage = () => {
               student={selectedStudent}
             />
           )}
+
+          {deleteConfirm.isOpen && (
+            <div className="delete-modal-overlay">
+              <div className="delete-modal-content">
+                <div className="delete-modal-header">
+                  <h3>Confirm Delete</h3>
+                </div>
+                <div className="delete-modal-body">
+                  <p>
+                    Are you sure you want to delete student{' '}
+                    <strong>{deleteConfirm.studentName}</strong>?
+                  </p>
+                  <p className="delete-warning">This action cannot be undone.</p>
+                </div>
+                <div className="delete-modal-footer">
+                  <button
+                    className="cancel-delete-btn"
+                    onClick={() =>
+                      setDeleteConfirm({ isOpen: false, studentId: null, studentName: '' })
+                    }
+                  >
+                    Cancel
+                  </button>
+                  <button className="confirm-delete-btn" onClick={handleDeleteStudent}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
-      <ToastContainer />
+      {/* Custom toasts handled via useToaster */}
     </div>
   )
 }

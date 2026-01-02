@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bounce, toast, ToastContainer } from 'react-toastify'
+import { useToaster } from '../components/Toast/useToaster'
 import { verifyOtpDirectly, resendOtpDirectly } from '../Features/api'
-import 'react-toastify/dist/ReactToastify.css'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './OtpVerification.css'
@@ -15,24 +14,14 @@ const OtpVerification = () => {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [emailDisplay, setEmailDisplay] = useState('')
+  const { showToast } = useToaster()
 
   // Get registration email
   const registrationEmail = localStorage.getItem('registrationEmail')
 
-  const toastConfig = {
-    position: 'top-right',
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    transition: Bounce
-  }
-
   useEffect(() => {
     if (!registrationEmail) {
-      toast.error('Registration email not found. Please sign up again.', toastConfig)
+      showToast('Error', 'Registration email not found. Please sign up again.', 'error')
       navigate('/signup')
       return
     }
@@ -56,13 +45,13 @@ const OtpVerification = () => {
     const otpString = otp.join('')
 
     if (!registrationEmail) {
-      toast.error('Registration email not found. Please sign up again.', toastConfig)
+      showToast('Error', 'Registration email not found. Please sign up again.', 'error')
       navigate('/signup')
       return
     }
 
     if (!/^\d{6}$/.test(otpString)) {
-      toast.error('Please enter a valid 6-digit code', toastConfig)
+      showToast('Error', 'Please enter a valid 6-digit code', 'error')
       return
     }
 
@@ -73,12 +62,12 @@ const OtpVerification = () => {
         email: registrationEmail,
         otp: otpString
       })
-      toast.success('Account verified successfully', toastConfig)
+      showToast('Success', 'Account verified successfully', 'success')
       localStorage.removeItem('registrationEmail')
       navigate('/activation-success') // Navigate to success page instead of login
     } catch (err) {
       setError('Invalid OTP code. Please try again.')
-      toast.error(err.message || 'Invalid OTP code. Please try again.', toastConfig)
+      showToast('Error', err.message || 'Invalid OTP code. Please try again.', 'error')
       setOtp(['', '', '', '', '', ''])
       inputRefs[0].current.focus()
     } finally {
@@ -88,16 +77,16 @@ const OtpVerification = () => {
 
   const handleResendOtp = async () => {
     if (!registrationEmail) {
-      toast.error('Registration email not found. Please sign up again.', toastConfig)
+      showToast('Error', 'Registration email not found. Please sign up again.', 'error')
       navigate('/signup')
       return
     }
 
     try {
       await resendOtpDirectly(registrationEmail)
-      toast.success(`OTP has been resent to ${emailDisplay}`, toastConfig)
+      showToast('Success', `OTP has been resent to ${emailDisplay}`, 'success')
     } catch (error) {
-      toast.error('Failed to resend OTP. Please try again.', toastConfig)
+      showToast('Error', 'Failed to resend OTP. Please try again.', 'error')
     }
   }
 
@@ -129,7 +118,7 @@ const OtpVerification = () => {
 
     // Improved validation for pasted data
     if (!/^\d{6}$/.test(pastedData)) {
-      toast.error('Please paste a valid 6-digit code', toastConfig)
+      showToast('Error', 'Please paste a valid 6-digit code', 'error')
       return
     }
 
@@ -141,18 +130,7 @@ const OtpVerification = () => {
 
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable={false}
-        pauseOnHover={false}
-        theme="light"
-      />
+      {/* Custom toasts handled via useToaster */}
       <div className="container">
         <div className="left-side">
           <h2>eLibrary</h2>

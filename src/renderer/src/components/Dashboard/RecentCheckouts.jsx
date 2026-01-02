@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { TableSkeleton } from './DashboardSkeletons'
 import './RecentCheckouts.css'
@@ -12,7 +13,7 @@ const formatDate = (dateString) => {
   })
 }
 
-const RecentCheckouts = ({ recentCheckouts, isLoading, studentMap = {}, bookMap = {} }) => {
+const RecentCheckouts = ({ recentCheckouts, isLoading }) => {
   return (
     <div className="recent-checkouts-container">
       <div className="recent-checkouts-header">
@@ -43,8 +44,8 @@ const RecentCheckouts = ({ recentCheckouts, isLoading, studentMap = {}, bookMap 
               {recentCheckouts.length > 0 ? (
                 recentCheckouts.map((checkout) => (
                   <tr key={checkout.id}>
-                    <td>{studentMap[checkout.student] || checkout.student || '-'}</td>
-                    <td>{bookMap[checkout.book] || checkout.book || '-'}</td>
+                    <td>{checkout.student_name || checkout.student || '-'}</td>
+                    <td>{checkout.book_title || checkout.book || '-'}</td>
                     <td>{formatDate(checkout.borrowed_date)}</td>
                     <td>{formatDate(checkout.due_date)}</td>
                     <td>
@@ -67,6 +68,22 @@ const RecentCheckouts = ({ recentCheckouts, isLoading, studentMap = {}, bookMap 
       )}
     </div>
   )
+}
+
+RecentCheckouts.propTypes = {
+  recentCheckouts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      student_name: PropTypes.string,
+      student: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      book_title: PropTypes.string,
+      book: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      borrowed_date: PropTypes.string,
+      due_date: PropTypes.string,
+      status: PropTypes.string
+    })
+  ).isRequired,
+  isLoading: PropTypes.bool.isRequired
 }
 
 export default RecentCheckouts

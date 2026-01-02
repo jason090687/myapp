@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
-import { FaDatabase } from 'react-icons/fa'
+import { FaDatabase, FaCog, FaUser, FaBell, FaDesktop } from 'react-icons/fa'
 import './Settings.css'
 
 function Settings() {
@@ -14,6 +14,26 @@ function Settings() {
 
   const settingsTabs = [
     {
+      id: 'general',
+      label: 'General',
+      icon: FaCog
+    },
+    {
+      id: 'account',
+      label: 'Account',
+      icon: FaUser
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: FaBell
+    },
+    {
+      id: 'system',
+      label: 'System',
+      icon: FaDesktop
+    },
+    {
       id: 'backup',
       label: 'Backup & Restore',
       icon: FaDatabase
@@ -22,8 +42,8 @@ function Settings() {
 
   // Ensure we're on a valid tab
   useEffect(() => {
-    if (!currentPath) {
-      navigate('/settings/backup')
+    if (!currentPath || currentPath === 'general') {
+      navigate('/settings/general')
     }
   }, [currentPath, navigate])
 

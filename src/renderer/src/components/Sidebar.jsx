@@ -10,11 +10,10 @@ import {
   HelpCircle,
   GraduationCap,
   Users,
-  Bell
+  Bell,
+  FileText
 } from 'lucide-react'
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import ToastProvider from './Toast/ToastProvider'
+import { useToaster } from './Toast/useToaster'
 import logo from '../assets/logo.png'
 import './Sidebar.css'
 import { fetchUserDetails } from '../Features/api'
@@ -32,6 +31,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
   const location = useLocation()
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { showToast } = useToaster()
 
   const { token } = useSelector((state) => state.auth)
 
@@ -78,10 +78,10 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     try {
       dispatch(logout())
       dispatch(reset())
-      toast.success('Logged out successfully!')
+      showToast('Success', 'Logged out successfully!', 'success')
       navigate('/')
     } catch (error) {
-      toast.error('Logout failed! Please try again.')
+      showToast('Error', 'Logout failed! Please try again.', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -154,7 +154,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
       <HelpGuideModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
 
-      <ToastProvider />
+      {/* Custom toasts are handled via useToaster; provider not needed */}
     </>
   )
 }

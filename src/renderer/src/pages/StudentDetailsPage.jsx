@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { FaArrowLeft, FaGraduationCap, FaBook, FaEdit } from 'react-icons/fa'
+import { ArrowLeft } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
+import { Button } from '../components/ui/button'
 import './StudentDetailsPage.css'
 import { fetchStudentDetails, updateStudentDetails } from '../Features/api'
 import EditStudentModal from '../components/EditStudentModal'
@@ -104,9 +106,15 @@ const StudentDetailsPage = () => {
       <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
       <main className="main">
         <div className="student-details-container">
-          <button className="back-button" onClick={() => navigate('/students')}>
-            <FaArrowLeft /> Back to Students
-          </button>
+          <Button
+            variant="secondary"
+            onClick={() => navigate('/students')}
+            className="gap-2"
+            style={{ marginBottom: '1.5rem' }}
+          >
+            <ArrowLeft size={18} />
+            Back to Students
+          </Button>
 
           {isLoading ? (
             <SkeletonLoader />

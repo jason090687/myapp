@@ -1,73 +1,26 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Card } from '../components/ui/card'
-import DashboardChart from '../components/Dashboard/DashboardChart'
+import CustomAreaChart from '../components/Dashboard/CustomAreaChart'
 import TopBorrowers from '../components/Dashboard/TopBorrowers'
 import RecentCheckouts from '../components/Dashboard/RecentCheckouts'
 import TopBooks from '../components/Dashboard/TopBooks'
 import './Dashboard.css'
-import {
-  FaBook,
-  FaBookReader,
-  FaUndo,
-  FaClock,
-  FaExclamationTriangle,
-  FaUsers,
-  FaMoneyBill,
-  FaFileDownload
-} from 'react-icons/fa'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement // Add this
-} from 'chart.js'
-import { Bar } from 'react-chartjs-2'
-import { Link, useNavigate } from 'react-router-dom'
+import { FaBook, FaBookReader, FaUndo, FaClock, FaUsers, FaMoneyBill } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
   fetchDashboardStats,
-  fetchAllStudentsWithBorrowCount,
-  fetchRecentCheckouts,
   fetchTopBooks,
   fetchBorrowedBooksStats,
-  fetchNewArrivals, // Add this
-  fetchTotalPenalties,
   fetchReturnedBooksCount,
   fetchActiveUsers,
-  fetchMonthlyReport,
   fetchMonthlyStudentStats,
-  fetchAllStudentsForSearch,
-  fetchAllBooks,
-  fetchBorrowedBooks,
-  fetchAllBorrowedRecords
+  fetchAllBorrowedRecords,
+  fetchNewArrivals,
+  fetchRecentCheckouts
 } from '../Features/api'
-import {
-  CardsSkeleton,
-  ChartSkeleton,
-  TableSkeleton,
-  BooksSkeleton
-} from '../components/Dashboard/DashboardSkeletons'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-
-// Register all required components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement, // Add this
-  Title,
-  Tooltip,
-  Legend,
-  ChartDataLabels
-)
+import { CardsSkeleton } from '../components/Dashboard/DashboardSkeletons'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -79,9 +32,8 @@ function Dashboard() {
     datasets: []
   })
   const [recentCheckouts, setRecentCheckouts] = useState([])
-  const [studentMap, setStudentMap] = useState({})
-  const [bookMap, setBookMap] = useState({})
   const [activeBookFilter, setActiveBookFilter] = useState('top')
+  const [activeChartTab, setActiveChartTab] = useState('all')
   const [topBooks, setTopBooks] = useState([])
   const [newBooks, setNewBooks] = useState([])
   const { token } = useSelector((state) => state.auth)
@@ -106,7 +58,6 @@ function Dashboard() {
     total: 0,
     users: []
   })
-  const [selectedDate, setSelectedDate] = useState(new Date())
   const [chartLoading, setChartLoading] = useState(false)
   const [selectedBorrowerMonth, setSelectedBorrowerMonth] = useState(new Date())
   const [penalties, setPenalties] = useState({
@@ -156,48 +107,65 @@ function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [dashStats, monthlyData, borrowStats, returnedData] = await Promise.all([
+        const [dashStats, borrowStats, returnedData] = await Promise.all([
           fetchDashboardStats(token),
-          fetchMonthlyReport(token),
           fetchBorrowedBooksStats(token),
           fetchReturnedBooksCount(token)
         ])
 
-        // Get current month's data for chart only
+        // Create simple chart data with current stats
         const currentDate = new Date()
-        const currentMonthData = monthlyData.find((data) => {
-          const [year, month] = data.month.split('-')
-          return (
-            parseInt(month) === currentDate.getMonth() + 1 &&
-            parseInt(year) === currentDate.getFullYear()
-          )
-        }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
+        const processedDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        const borrowedDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          7
+        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        const returnDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          14
+        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        const dueDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          21
+        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
         setChartData({
-          labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
+          labels: [processedDate, borrowedDate, returnDate, dueDate],
           datasets: [
             {
-              label: `Library Statistics - ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`,
-              data: [
-                currentMonthData.processed || 0,
-                currentMonthData.borrowed || 0,
-                currentMonthData.returned || 0,
-                currentMonthData.overdue || 0
-              ],
-              backgroundColor: [
-                'rgba(53, 162, 235, 0.8)', // Blue for Processed
-                'rgba(255, 159, 64, 0.8)', // Orange for Borrowed
-                'rgba(75, 192, 192, 0.8)', // Green for Returned
-                'rgba(255, 99, 132, 0.8)' // Red for Overdue
-              ],
-              borderColor: [
-                'rgb(53, 162, 235)', // Blue border
-                'rgb(255, 159, 64)', // Orange border
-                'rgb(75, 192, 192)', // Green border
-                'rgb(255, 99, 132)' // Red border
-              ],
-              borderWidth: 1,
-              borderRadius: 6
+              label: 'Processed',
+              data: [dashStats?.total_books || 0, null, null, null],
+              borderColor: 'rgb(59, 130, 246)',
+              backgroundColor: 'rgba(59, 130, 246, 0.2)',
+              fill: true
+            },
+            {
+              label: 'Borrowed',
+              data: [null, borrowStats.borrowed || 0, null, null],
+              borderColor: 'rgb(10, 11, 100)',
+              backgroundColor: 'rgba(10, 11, 100, 0.2)',
+              fill: true
+            },
+            {
+              label: 'Returned',
+              data: [null, null, returnedData.returnedCount || 0, null],
+              borderColor: 'rgb(16, 185, 129)',
+              backgroundColor: 'rgba(16, 185, 129, 0.2)',
+              fill: true
+            },
+            {
+              label: 'Overdue',
+              data: [null, null, null, borrowStats.overdue || 0],
+              borderColor: 'rgb(239, 68, 68)',
+              backgroundColor: 'rgba(239, 68, 68, 0.2)',
+              fill: true
             }
           ]
         })
@@ -206,8 +174,8 @@ function Dashboard() {
         setBookStats({
           ...borrowStats,
           borrowed: borrowStats.borrowed || 0,
-          returned: returnedData.returnedCount || 0, // Use original returned count
-          overdue: penalties.overdueCount || 0 // Use original overdue count
+          returned: returnedData.returnedCount || 0,
+          overdue: borrowStats.overdue || 0
         })
         setReturnedStats({
           returnedCount: returnedData.returnedCount || 0 // Keep original returned count
@@ -274,42 +242,23 @@ function Dashboard() {
     fetchUsers()
   }, [token])
 
-  // Fetch student and book mappings
   useEffect(() => {
-    if (!token) return
-
-    const fetchMappings = async () => {
+    const loadRecentCheckouts = async () => {
+      if (!token) return
       try {
-        const [studentsData, booksData, checkouts] = await Promise.all([
-          fetchAllStudentsForSearch(token),
-          fetchAllBooks(token, ''),
-          fetchRecentCheckouts(token, 5)
-        ])
-
-        const studentMapping = {}
-        studentsData.forEach((student) => {
-          studentMapping[student.id] = student.name || 'Unknown'
-        })
-        setStudentMap(studentMapping)
-
-        const bookMapping = {}
-        booksData.results.forEach((book) => {
-          bookMapping[book.id] = book.title || 'Unknown'
-        })
-        setBookMap(bookMapping)
-
+        const checkouts = await fetchRecentCheckouts(token, 5)
         const sortedCheckouts = checkouts.sort(
           (a, b) => new Date(b.borrowed_date) - new Date(a.borrowed_date)
         )
         setRecentCheckouts(sortedCheckouts)
       } catch (error) {
-        console.error('Error fetching mappings:', error)
+        console.error('Error fetching recent checkouts:', error)
+        setRecentCheckouts([])
       } finally {
         setLoadingStates((prev) => ({ ...prev, checkouts: false }))
       }
     }
-
-    fetchMappings()
+    loadRecentCheckouts()
   }, [token])
 
   useEffect(() => {
@@ -351,281 +300,12 @@ function Dashboard() {
     setActiveBookFilter(filter)
   }
 
-  // Update chart options to have a single plugins object
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false // Hide the legend
-      },
-      title: {
-        display: true // Hide the title
-      },
-      tooltip: {
-        enabled: false,
-        mode: 'index',
-        intersect: false,
-        titleFont: {
-          size: 16
-        },
-        bodyFont: {
-          size: 14
-        },
-        padding: 12
-      },
-      datalabels: {
-        anchor: 'end',
-        align: 'top',
-        formatter: (value) => value,
-        font: {
-          size: 14,
-          weight: 'bold'
-        },
-        padding: 6,
-        color: '#333'
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          drawBorder: false,
-          color: 'rgba(0, 0, 0, 0.1)'
-        },
-        ticks: {
-          font: {
-            size: 14,
-            weight: 'bold'
-          },
-          padding: 8
-        }
-      },
-      x: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          font: {
-            size: 14,
-            weight: 'bold'
-          },
-          padding: 8
-        }
-      }
-    }
+  const handleChartTabChange = (tab) => {
+    setActiveChartTab(tab)
   }
 
   const handleCardClick = (route) => {
     navigate(route)
-  }
-
-  const handleMonthChange = async (month, year) => {
-    setSelectedDate(new Date(year, month))
-    setChartLoading(true)
-    try {
-      const monthlyData = await fetchMonthlyReport(token)
-      const selectedMonthData = monthlyData.find((data) => {
-        const [dataYear, dataMonth] = data.month.split('-')
-        return parseInt(dataMonth) === month + 1 && parseInt(dataYear) === year
-      }) || { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
-
-      const monthString = new Date(year, month).toLocaleString('default', { month: 'long' })
-
-      setChartData({
-        labels: ['Processed', 'Borrowed', 'Returned', 'Overdue'],
-        datasets: [
-          {
-            label: `Library Statistics - ${monthString} ${year}`,
-            data: [
-              selectedMonthData.processed || 0,
-              selectedMonthData.borrowed || 0,
-              selectedMonthData.returned || 0,
-              selectedMonthData.overdue || 0
-            ],
-            backgroundColor: [
-              'rgba(53, 162, 235, 0.8)', // Blue for Processed
-              'rgba(255, 159, 64, 0.8)', // Orange for Borrowed
-              'rgba(75, 192, 192, 0.8)', // Green for Returned
-              'rgba(255, 99, 132, 0.8)' // Red for Overdue
-            ],
-            borderColor: [
-              'rgb(53, 162, 235)', // Blue border
-              'rgb(255, 159, 64)', // Orange border
-              'rgb(75, 192, 192)', // Green border
-              'rgb(255, 99, 132)' // Red border
-            ],
-            borderWidth: 1,
-            borderRadius: 6
-          }
-        ]
-      })
-    } catch (error) {
-      console.error('Error fetching monthly report:', error)
-    } finally {
-      setChartLoading(false)
-    }
-  }
-
-  const generatePDF = async () => {
-    try {
-      // Create high resolution canvas
-      const canvas = document.createElement('canvas')
-      const scale = 3 // Increase resolution by 3x
-      canvas.width = 1000 // Larger base width for better quality
-      canvas.height = 1000
-      const ctx = canvas.getContext('2d')
-
-      // Scale the context for higher resolution
-      ctx.scale(scale, scale)
-
-      const pdfChart = new ChartJS(ctx, {
-        type: 'bar',
-        data: chartData,
-        options: {
-          ...chartOptions,
-          animation: false,
-          responsive: false,
-          devicePixelRatio: scale // Ensure chart renders at high resolution
-        }
-      })
-
-      const chartImage = canvas.toDataURL('image/png', 1.0) // Maximum quality
-      pdfChart.destroy()
-
-      // Create PDF with landscape orientation
-      const pdfDoc = await PDFDocument.create()
-      const page = pdfDoc.addPage([1000, 800]) // Landscape dimensions
-      const { height, width } = page.getSize()
-      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-
-      // Add centered title
-      const title = `Monthly Library Report - ${selectedDate.toLocaleString('default', { month: 'long' })} ${selectedDate.getFullYear()}`
-      const fontSize = 24
-      const titleWidth = timesRomanFont.widthOfTextAtSize(title, fontSize)
-      const titleX = (width - titleWidth) / 2 // Center horizontally
-
-      page.drawText(title, {
-        x: titleX,
-        y: height - 50,
-        size: fontSize,
-        font: timesRomanFont,
-        color: rgb(0.1, 0.1, 0.4)
-      })
-
-      // Add chart on the left side
-      const pngImage = await pdfDoc.embedPng(chartImage)
-      const pngDims = pngImage.scale(0.8)
-      page.drawImage(pngImage, {
-        x: 50,
-        y: height - 450,
-        width: width / 2 - 75, // Half width minus padding
-        height: 350
-      })
-
-      // Helper function to draw table cell
-      const drawTableCell = (text, x, y, width, isHeader = false) => {
-        page.drawRectangle({
-          x,
-          y: y - 25,
-          width,
-          height: 25,
-          borderWidth: 1,
-          borderColor: rgb(0.8, 0.8, 0.8),
-          color: isHeader ? rgb(0.95, 0.95, 0.95) : rgb(1, 1, 1, 0)
-        })
-
-        const safeText = text ? text.toString().slice(0, 40) : ''
-        page.drawText(safeText, {
-          x: x + 10,
-          y: y - 18,
-          size: isHeader ? 12 : 11,
-          font: timesRomanFont,
-          color: rgb(0, 0, 0)
-        })
-      }
-
-      // Draw tables on the right side
-      const tableStartX = width / 2 + 25
-      const columnWidth = (width / 2 - 75) / 2
-      let currentY = height - 100
-
-      // Draw Top Borrowers table
-      page.drawText('Top Borrowers', {
-        x: tableStartX,
-        y: currentY,
-        size: 16,
-        font: timesRomanFont,
-        color: rgb(0.2, 0.2, 0.2)
-      })
-
-      currentY -= 40
-      drawTableCell('Name', tableStartX, currentY, columnWidth, true)
-      drawTableCell('Books Borrowed', tableStartX + columnWidth, currentY, columnWidth, true)
-
-      topBorrowers.slice(0, 5).forEach((borrower) => {
-        currentY -= 25
-        drawTableCell(borrower.student_name || 'N/A', tableStartX, currentY, columnWidth)
-        drawTableCell(
-          borrower.books_borrowed || '0',
-          tableStartX + columnWidth,
-          currentY,
-          columnWidth
-        )
-      })
-
-      // Add spacing
-      currentY -= 50
-
-      // Draw Most Borrowed Books table
-      page.drawText('Most Borrowed Books', {
-        x: tableStartX,
-        y: currentY,
-        size: 16,
-        font: timesRomanFont,
-        color: rgb(0.2, 0.2, 0.2)
-      })
-
-      currentY -= 40
-      drawTableCell('Title', tableStartX, currentY, columnWidth, true)
-      drawTableCell('Borrows', tableStartX + columnWidth, currentY, columnWidth, true)
-
-      topBooks.slice(0, 5).forEach((book) => {
-        currentY -= 25
-        drawTableCell(book.title || 'N/A', tableStartX, currentY, columnWidth)
-        drawTableCell(book.borrow_count || '0', tableStartX + columnWidth, currentY, columnWidth)
-      })
-
-      // Add footer
-      page.drawText(`Generated on: ${new Date().toLocaleDateString()}`, {
-        x: 50,
-        y: 30,
-        size: 10,
-        font: timesRomanFont,
-        color: rgb(0.5, 0.5, 0.5)
-      })
-
-      // Save and download (existing code)
-      const pdfBytes = await pdfDoc.save()
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-
-      if (window.electron?.ipcRenderer) {
-        const buffer = await blob.arrayBuffer()
-        window.electron.ipcRenderer.send('save-pdf', {
-          buffer: Array.from(new Uint8Array(buffer)),
-          fileName: `library-report-${selectedDate.toLocaleString('default', { month: 'long' })}-${selectedDate.getFullYear()}.pdf`
-        })
-      } else {
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `library-report-${selectedDate.toLocaleString('default', { month: 'long' })}-${selectedDate.getFullYear()}.pdf`
-        link.click()
-        URL.revokeObjectURL(url)
-      }
-    } catch (error) {
-      console.error('Error generating PDF:', error)
-    }
   }
 
   const handleBorrowerMonthChange = (month, year) => {
@@ -698,14 +378,12 @@ function Dashboard() {
 
           {/* Stats Container */}
           <div className="stats-container">
-            <DashboardChart
+            <CustomAreaChart
               chartData={chartData}
-              chartOptions={chartOptions}
               chartLoading={chartLoading}
-              selectedDate={selectedDate}
-              onMonthChange={handleMonthChange}
-              onGeneratePDF={generatePDF}
               isLoading={loadingStates.chart}
+              activeTab={activeChartTab}
+              onTabChange={handleChartTabChange}
             />
 
             <TopBorrowers
@@ -721,8 +399,6 @@ function Dashboard() {
             <RecentCheckouts
               recentCheckouts={recentCheckouts}
               isLoading={loadingStates.checkouts}
-              studentMap={studentMap}
-              bookMap={bookMap}
             />
 
             <TopBooks

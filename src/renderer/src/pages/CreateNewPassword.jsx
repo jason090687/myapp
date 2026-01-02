@@ -5,8 +5,7 @@ import InputField from '../components/InputField'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './CreateNewPassword.css'
-import { Bounce, toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { useToaster } from '../components/Toast/useToaster'
 import { resetPasswordWithOtp } from '../Features/api'
 import { Button } from '../components/ui/button'
 
@@ -25,19 +24,9 @@ function CreateNewPassword() {
     isValid: false,
     message: ''
   })
+  const { showToast } = useToaster()
 
   const { password, confirmPassword } = formData
-
-  const toastConfig = {
-    position: 'top-center',
-    autoClose: 3000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    transition: Bounce
-  }
 
   useEffect(() => {
     if (!userEmail || !userOtp) {
@@ -66,17 +55,17 @@ function CreateNewPassword() {
     e.preventDefault()
 
     if (!password || !confirmPassword) {
-      toast.warning('Please fill in all fields', toastConfig)
+      showToast('Warning', 'Please fill in all fields', 'info')
       return
     }
 
     if (password !== confirmPassword) {
-      toast.warning('Passwords do not match', toastConfig)
+      showToast('Warning', 'Passwords do not match', 'info')
       return
     }
 
     if (password.length < 8) {
-      toast.warning('Password must be at least 8 characters', toastConfig)
+      showToast('Warning', 'Password must be at least 8 characters', 'info')
       return
     }
 
@@ -84,14 +73,10 @@ function CreateNewPassword() {
 
     try {
       await resetPasswordWithOtp(userEmail, userOtp, password)
-      toast.success('Password reset successful!', {
-        ...toastConfig,
-        position: 'top-right',
-        icon: '✅'
-      })
+      showToast('Success', 'Password reset successful!', 'success')
       setTimeout(() => navigate('/'), 1500)
     } catch (error) {
-      toast.error(error.message || 'Failed to reset password. Please try again.', toastConfig)
+      showToast('Error', error.message || 'Failed to reset password. Please try again.', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -103,18 +88,7 @@ function CreateNewPassword() {
 
   return (
     <>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable={false}
-        pauseOnHover={false}
-        theme="light"
-      />
+      {/* Custom toasts handled via useToaster */}
       <div className="container">
         <div className="left-side">
           <h2>Create New Password</h2>

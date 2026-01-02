@@ -16,18 +16,20 @@ import {
   FaTag,
   FaPen,
   FaImage,
-  FaArrowLeft
+  FaArrowLeft,
+  FaCog
 } from 'react-icons/fa'
 import './AddBook.css'
 import { fetchUserDetails, addNewBook } from '../Features/api'
 import { useSelector } from 'react-redux'
-import { toast } from 'react-toastify'
+import { useToaster } from './Toast/useToaster'
 import { useActivity } from '../context/ActivityContext'
 
 const AddBook = () => {
   const navigate = useNavigate()
   const { token, user: currentUser } = useSelector((state) => state.auth)
   const { addActivity } = useActivity()
+  const { showToast } = useToaster()
   const [isLoading, setIsLoading] = useState(false)
   const [userDetails, setUserDetails] = useState([])
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
@@ -71,7 +73,6 @@ const AddBook = () => {
   }
 
   const [formData, setFormData] = useState(initialFormState)
-  const [statusOptions, setStatusOptions] = useState([])
 
   useEffect(() => {
     setIsLoading(true)
@@ -159,17 +160,6 @@ const AddBook = () => {
     input.click()
   }
 
-  const toastConfig = {
-    position: 'top-right',
-    autoClose: 2000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'light',
-    closeButton: true
-  }
-
   const isFormValid = () => {
     const totalCopiesNum = parseInt(formData.total_copies)
     const hasValidVariants =
@@ -205,7 +195,7 @@ const AddBook = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isFormValid()) {
-      toast.error('Please fill in all required fields', { ...toastConfig })
+      showToast('Error', 'Please fill in all required fields', 'error')
       return
     }
 
@@ -434,9 +424,11 @@ const AddBook = () => {
                   <button
                     type="button"
                     onClick={() => setIsVariantModalOpen(true)}
-                    className="submit-btn"
+                    className="manage-variants-btn"
+                    disabled={!formData.total_copies || parseInt(formData.total_copies) <= 0}
                   >
-                    Manage Variants
+                    <FaCog />
+                    <span>Manage Variants</span>
                   </button>
                 </div>
 
@@ -535,7 +527,7 @@ const AddBook = () => {
                       onError={(e) => {
                         e.target.onerror = null
                         e.target.style.display = 'none'
-                        toast.error('Invalid image file', toastConfig)
+                        showToast('Error', 'Invalid image file', 'error')
                       }}
                     />
                     <button
