@@ -1,0 +1,2247 @@
+/* Light Mode (Default) */
+:root,
+html.light {
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-hover: #e2e8f0;
+
+  /* Text Colors */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-muted: #cbd5e1;
+
+  /* Border Colors */
+  --border-color: #e2e8f0;
+  --border-light: #f1f5f9;
+
+  /* Accent Colors */
+  --accent: #06b6d4;
+  --accent-foreground: #ffffff;
+  --accent-hover: #0891b2;
+  --accent-light: #cffafe;
+
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Component Specific */
+  --sidebar-bg: #e8ecf1;
+  --sidebar-text: #1e293b;
+  --sidebar-hover: #d1d8e0;
+  --navbar-bg: #ffffff;
+  --navbar-text: #1e293b;
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --input-focus: #06b6d4;
+
+  color-scheme: light;
+}
+
+/* Dark Mode */
+html.dark {
+  /* Background Colors */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-hover: #475569;
+
+  /* Text Colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Border Colors */
+  --border-color: #334155;
+  --border-light: #475569;
+
+  /* Accent Colors */
+  --accent: #06b6d4;
+  --accent-foreground: #0f172a;
+  --accent-hover: #0891b2;
+  --accent-light: #164e63;
+
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Component Specific */
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #f1f5f9;
+  --sidebar-hover: #334155;
+  --navbar-bg: #1e293b;
+  --navbar-text: #f1f5f9;
+  --input-bg: #334155;
+  --input-border: #475569;
+  --input-focus: #06b6d4;
+
+  color-scheme: dark;
+}
+
+/* Apply dark mode to all elements when dark class is present */
+html.dark {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+html.dark body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+html.dark * {
+  color-scheme: dark;
+}
+
+/* Dark mode utility classes for text */
+html.dark {
+  --foreground: 210 40% 96%;
+  --foreground-rgb: 241, 245, 249;
+}
+
+/* Ensure backgrounds and text contrast in dark mode */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+html.dark button {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+html.dark button:hover {
+  background-color: var(--bg-hover);
+}
+
+html.dark a {
+  color: var(--accent);
+}
+
+html.dark a:hover {
+  color: var(--accent-hover);
+}
+
+/* ------------------------------------------------------------
+   App-wide surface overrides
+   Many pages/components hard-code light backgrounds (white/#f8fafc).
+   These rules ensure dark mode flips the main surfaces everywhere.
+------------------------------------------------------------- */
+
+/* Base document surfaces */
+html,
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Core app wrappers */
+html.dark .app-container,
+html.dark .app-wrapper,
+html.dark .wrapper {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+/* Common page containers */
+html.dark .dashboard-container,
+html.dark .books-container,
+html.dark .settings-container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+/* Common page panels/cards */
+html.dark .settings-header,
+html.dark .settings-body,
+html.dark .settings-panel,
+html.dark .overdue,
+html.dark .recent-checkouts,
+html.dark .books-header,
+html.dark .table-container {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+/* Common “input-like” surfaces that are often white */
+html.dark .search-bar,
+html.dark .search-box,
+html.dark .chart-controls select {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+/* Sidebar & Navbar CSS vars defined inside component CSS (:root) */
+/* Use !important so they win even if component CSS loads after theme.css */
+html.dark {
+  --background-color: var(--sidebar-bg) !important;
+  --primary-color: var(--text-primary) !important;
+  --text-color: var(--text-primary) !important;
+  --secondary-color: var(--bg-secondary) !important;
+  --hover-color: var(--bg-hover) !important;
+  --text-muted: var(--text-secondary) !important;
+  --active-bg: var(--bg-tertiary) !important;
+  --active-text: var(--accent) !important;
+}
+
+/* Sidebar: Help Guide nav button (was using hard-coded light hover) */
+html.dark .help-btn {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .help-btn:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--accent) !important;
+}
+
+html.dark .help-btn[data-tooltip]:hover::after {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Sidebar: Help Guide uses .nav-action-btn (make it match link colors) */
+html.dark .sidebar-nav .nav-action-btn {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .sidebar-nav .nav-action-btn svg,
+html.dark .sidebar-nav .nav-action-btn span {
+  color: inherit !important;
+}
+
+/* Borrowed page (fix remaining white table/pagination) */
+html.dark .borrowed-container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+html.dark .borrowed-content {
+  background: transparent !important;
+  color: var(--text-primary);
+}
+
+html.dark .borrowed-header,
+html.dark .borrowed-container .table-container {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+html.dark .borrowed-container .search-bar:focus-within {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .borrowed-container .search-bar input {
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrowed-container .search-input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+/* Borrowed status filter dropdown */
+html.dark .borrowed-container .filter-select {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  color-scheme: dark;
+}
+
+html.dark .borrowed-container .filter-select option {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Borrowed page: Refresh button uses variant="secondary" (white by default) */
+html.dark .borrowed-container .btn-secondary {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+html.dark .borrowed-container .btn-secondary:hover {
+  background-color: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+}
+
+html.dark .borrowed-table {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .borrowed-table thead {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .borrowed-table th {
+  background: var(--bg-tertiary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrowed-table td {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Some styles paint cell backgrounds, which can make a hovered row look white.
+   Force the hover background onto the cells too. */
+html.dark .borrowed-table tbody tr:hover:not(.disabled-row) td {
+  background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+html.dark .borrowed-table tbody tr.clickable-row:hover:not(.disabled-row) td {
+  background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+html.dark .borrowed-table tbody tr.overdue td {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+html.dark .borrowed-table tbody tr.overdue:hover td,
+html.dark .borrowed-table tbody tr.overdue.clickable-row:hover td {
+  background: var(--bg-hover) !important;
+  background-color: var(--bg-hover) !important;
+}
+
+/* ------------------------------------------------------------
+   Dashboard page (override hard-coded light CSS)
+------------------------------------------------------------- */
+
+html.dark .dashboard-container::-webkit-scrollbar-track {
+  background: var(--bg-primary) !important;
+}
+
+html.dark .dashboard-container::-webkit-scrollbar-thumb {
+  background-color: var(--bg-hover) !important;
+  border-color: var(--bg-primary) !important;
+}
+
+html.dark .dashboard-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--border-light) !important;
+}
+
+/* Primary dashboard surfaces */
+html.dark .dashboard-container .chart-wrapper,
+html.dark .dashboard-container .recent-checkouts-container,
+html.dark .dashboard-container .top-books-container,
+html.dark .dashboard-container .report-generator,
+html.dark .dashboard-container .month-selector {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+/* Chart header text */
+html.dark .dashboard-container .chart-title {
+  color: var(--text-primary) !important;
+}
+
+html.dark .dashboard-container .chart-subtitle {
+  color: var(--text-secondary) !important;
+}
+
+/* Chart tabs */
+html.dark .dashboard-container .chart-tabs {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .dashboard-container .chart-tab {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .dashboard-container .chart-tab:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+/* Chart loading + tooltip */
+html.dark .dashboard-container .chart-loading-overlay {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+html.dark .dashboard-container .chart-loading-overlay p {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .dashboard-container .custom-tooltip {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .dashboard-container .tooltip-label,
+html.dark .dashboard-container .tooltip-number {
+  color: var(--text-primary) !important;
+}
+
+html.dark .dashboard-container .tooltip-value {
+  color: var(--text-secondary) !important;
+}
+
+/* Dashboard tables (Top Borrowers uses an unclassed <table>) */
+html.dark .dashboard-container table {
+  background: transparent !important;
+}
+
+html.dark .dashboard-container th {
+  background: var(--bg-tertiary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .dashboard-container td {
+  background: transparent !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .dashboard-container tr:hover td {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Recent Checkouts component */
+html.dark .dashboard-container .table-wrapper {
+  border-color: var(--border-color) !important;
+}
+
+html.dark .dashboard-container .checkouts-table thead {
+  background: var(--bg-tertiary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .dashboard-container .checkouts-table tbody tr:hover {
+  background-color: var(--bg-hover) !important;
+  box-shadow: none !important;
+}
+
+html.dark .dashboard-container .recent-checkouts-title,
+html.dark .dashboard-container .top-books-title,
+html.dark .dashboard-container .current-month,
+html.dark .dashboard-container .borrowers-header h3 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .dashboard-container .recent-checkouts-subtitle,
+html.dark .dashboard-container .top-books-subtitle {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .dashboard-container .view-all-link:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Top Books filters + list */
+html.dark .dashboard-container .book-filter-btn.inactive {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .dashboard-container .book-filter-btn:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .dashboard-container .books-list::-webkit-scrollbar-track {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .dashboard-container .books-list::-webkit-scrollbar-thumb {
+  background: var(--bg-hover) !important;
+}
+
+html.dark .dashboard-container .no-books {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Top Books BookCard (scoped to Dashboard) */
+html.dark .dashboard-container .book-card {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .dashboard-container .book-card:hover {
+  box-shadow: none !important;
+}
+
+html.dark .dashboard-container .book-card h4,
+html.dark .dashboard-container .borrow-count {
+  color: var(--text-primary) !important;
+}
+
+html.dark .dashboard-container .book-author {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .dashboard-container .borrow-count {
+  border-top-color: var(--border-color) !important;
+}
+
+/* Report generator select (has higher-specificity light styles) */
+html.dark .dashboard-container .date-selector select {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Month selector buttons */
+html.dark .dashboard-container .month-nav-btn {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .dashboard-container .month-nav-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Top Borrower month selector (inline styles need overriding via !important) */
+html.dark .borrower-month-selector {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrower-month-selector button {
+  color: var(--text-primary) !important;
+}
+
+/* Dashboard skeletons */
+html.dark .skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-hover) 37%,
+    var(--bg-tertiary) 63%
+  ) !important;
+}
+
+html.dark .skeleton-card,
+html.dark .table-skeleton,
+html.dark .top-borrowers-skeleton,
+html.dark .recent-checkouts-skeleton,
+html.dark .top-books-skeleton {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .skeleton-card-icon,
+html.dark .skeleton-card-title,
+html.dark .skeleton-card-value,
+html.dark .chart-skeleton,
+html.dark .book-skeleton-card {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .table-skeleton-row {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .borrowed-table tr:hover:not(.disabled-row) {
+  background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Borrowed.css also defines clickable-row hover using a light rgba() background.
+   Override that selector explicitly to prevent white hover in dark mode. */
+html.dark .borrowed-table tbody tr.clickable-row:hover:not(.disabled-row) {
+  background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Borrowed: overdue rows are hard-coded light red in Borrowed.css */
+html.dark .borrowed-table tr.overdue {
+  background: var(--bg-tertiary) !important;
+  border-left-color: var(--error) !important;
+}
+
+html.dark .borrowed-table tr.overdue:hover {
+  background: var(--bg-hover) !important;
+  background-color: var(--bg-hover) !important;
+}
+
+/* Extra-specific form used in Borrowed.css (tbody + clickable-row) */
+html.dark .borrowed-table tbody tr.overdue.clickable-row:hover {
+  background: var(--bg-hover) !important;
+  background-color: var(--bg-hover) !important;
+}
+
+html.dark .borrowed-table tr.disabled-row {
+  background-color: var(--bg-tertiary) !important;
+}
+
+html.dark .borrowed-table tr.disabled-row td {
+  color: var(--text-muted) !important;
+}
+
+html.dark .borrowed-container .loading-cell {
+  background-color: rgba(15, 23, 42, 0.7) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrowed-loading-text {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrowed-container .pagination {
+  background: var(--bg-tertiary) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+html.dark .borrowed-container .pagination-btn {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrowed-container .pagination-btn:disabled {
+  border-color: var(--border-color) !important;
+}
+
+html.dark .borrowed-container .pagination-info {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrowed-container .pagination-total {
+  color: var(--text-secondary) !important;
+}
+
+/* ------------------------------------------------------------
+   Students pages (list + details)
+------------------------------------------------------------- */
+
+/* Students list page */
+html.dark .students-container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .students-header {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .students-container .search-bar {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .students-container .search-bar:focus-within {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .students-container .search-icon {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .students-container .search-bar input {
+  color: var(--text-primary) !important;
+}
+
+html.dark .students-container .search-bar input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+/* Filter select is styled inline in JSX; override with !important */
+html.dark .students-container .filter-select {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .students-container .filter-select option {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .students-container .table-container {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .students-container .students-table {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .students-container .students-table thead {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .students-container .students-table th {
+  background: var(--bg-tertiary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .students-container .students-table td {
+  background: transparent !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .students-container .students-table tbody tr:hover td {
+  background-color: var(--bg-hover) !important;
+}
+
+html.dark .students-container .loading-cell {
+  background-color: rgba(15, 23, 42, 0.7) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .students-container .student-loading-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Action buttons */
+html.dark .students-container .action-btn {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .students-container .action-btn:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .students-container .action-btn.edit:hover {
+  color: var(--accent) !important;
+}
+
+/* Pagination (Students page has its own styles) */
+html.dark .students-container .pagination {
+  background: var(--bg-tertiary) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+html.dark .students-container .pagination-btn {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .students-container .pagination-btn:disabled {
+  border-color: var(--border-color) !important;
+}
+
+html.dark .students-container .pagination-btn:not(:disabled):hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .students-container .pagination-info {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Delete confirmation modal */
+html.dark .delete-modal-content {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .delete-modal-header h3 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .delete-modal-body p {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .cancel-delete-btn {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .cancel-delete-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Add/Edit Student modals */
+html.dark .add-student-modal-content,
+html.dark .edit-student-modal-content {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .add-student-modal-header,
+html.dark .edit-student-modal-header,
+html.dark .add-student-modal-footer,
+html.dark .edit-student-modal-footer {
+  border-color: var(--border-color) !important;
+}
+
+html.dark .add-student-modal-header h2,
+html.dark .edit-student-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-student-modal-close,
+html.dark .edit-student-modal-close {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .add-student-modal-close:hover,
+html.dark .edit-student-modal-close:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-student-field-group label,
+html.dark .edit-student-field-group label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .add-student-input-wrapper input,
+html.dark .edit-student-input-wrapper input {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-student-input-wrapper input::placeholder,
+html.dark .edit-student-input-wrapper input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .add-student-input-wrapper svg,
+html.dark .edit-student-input-wrapper svg {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .add-student-cancel-btn {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-student-cancel-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Add Staff modal */
+html.dark .add-staff-modal-content {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .add-staff-modal-header,
+html.dark .add-staff-modal-footer {
+  border-color: var(--border-color) !important;
+}
+
+html.dark .add-staff-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-staff-modal-close {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .add-staff-modal-close:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-staff-field-group label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .add-staff-input-wrapper input {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-staff-input-wrapper input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .add-staff-input-wrapper svg {
+  color: var(--text-tertiary) !important;
+}
+
+/* Add Staff modal buttons */
+html.dark .add-staff-modal-content .btn-secondary {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+html.dark .add-staff-modal-content .btn-secondary:hover {
+  background-color: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* Help guide modal */
+html.dark .help-modal-content {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .help-modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .help-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .help-close-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .help-close-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .help-back-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+html.dark .help-back-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .help-guide-menu-item {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .help-guide-menu-item:hover {
+  background: var(--bg-hover) !important;
+  box-shadow: none !important;
+}
+
+html.dark .help-guide-menu-text h3 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .help-guide-menu-text p {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .help-chevron {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .help-guide-menu-item:hover .help-chevron {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .help-guide-section {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .help-section-desc {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .help-example {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .example-header h4 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .example-steps li {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .example-steps li::before {
+  color: var(--accent) !important;
+}
+
+html.dark .help-section-icon {
+  background: var(--bg-tertiary) !important;
+  color: var(--accent) !important;
+}
+
+html.dark .example-icon,
+html.dark .help-section-icon,
+html.dark .help-section-icon * {
+  color: var(--accent) !important;
+}
+
+/* Student details page */
+html.dark .student-details-container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .student-details-container .student-info-card,
+html.dark .student-details-container .borrowed-books-section {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .student-details-container .student-main-info h1,
+html.dark .student-details-container .borrowed-books-section h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .student-details-container .student-id,
+html.dark .student-details-container .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .student-details-container .stat-value,
+html.dark .student-details-container .amount {
+  color: var(--text-primary) !important;
+}
+
+html.dark .student-details-container .edit-button {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .student-details-container .edit-button:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+  color: var(--accent) !important;
+}
+
+html.dark .student-details-container .book-card {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+/* StudentDetails: variant classes override .book-card background in component CSS */
+html.dark .student-details-container .book-card.unpaid-book,
+html.dark .student-details-container .book-card.borrowed-book,
+html.dark .student-details-container .book-card.returned-book {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .student-details-container .book-title {
+  color: var(--text-primary) !important;
+}
+
+html.dark .student-details-container .book-author {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .student-details-container .detail-group {
+  border-bottom-color: var(--border-color) !important;
+}
+
+/* StudentDetails: .detail-* class names collide with modal CSS; force correct layout + dark surfaces */
+html.dark .student-details-container .detail-item {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 0.875rem !important;
+}
+
+html.dark .student-details-container .detail-label {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .student-details-container .detail-value {
+  color: var(--text-primary) !important;
+}
+
+html.dark .student-details-container .student-icon {
+  background: var(--bg-tertiary) !important;
+  color: var(--accent) !important;
+}
+
+html.dark .student-details-container .payment-details,
+html.dark .student-details-container .no-books-message {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .student-details-container .no-books-message h3 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .student-details-container .no-books-message p {
+  color: var(--text-secondary) !important;
+}
+
+/* Student details skeletons */
+html.dark .student-details-container .skeleton {
+  background: var(--bg-secondary) !important;
+}
+
+/* ------------------------------------------------------------
+   Profile page
+------------------------------------------------------------- */
+
+html.dark .profile-wrapper,
+html.dark .profile-container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Keep avatar ring from looking too bright on dark */
+html.dark .profile-avatar,
+html.dark .avatar-upload {
+  border-color: var(--bg-secondary) !important;
+}
+
+/* ------------------------------------------------------------
+   Auth pages (Sign In)
+   SignInPage.css hard-codes light colors; override for dark mode.
+------------------------------------------------------------- */
+
+html.dark .container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .container .left-side {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.85)) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .container .left-side::before {
+  opacity: 0.08 !important;
+}
+
+html.dark .container .left-side h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .container .input-field-wrapper {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .container .or-divider {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .container .or-divider div {
+  background: var(--border-color) !important;
+}
+
+html.dark .container .sign-up,
+html.dark .container .remember-me {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .container .forgot-password,
+html.dark .container .sign-up a {
+  color: var(--accent) !important;
+}
+
+html.dark .container .forgot-password:hover,
+html.dark .container .sign-up a:hover {
+  color: var(--accent-hover) !important;
+}
+
+/* InputField on auth pages (InputField.css hard-codes white) */
+html.dark .container .input-container {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .container .input-icon {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .container .input-field {
+  color: var(--text-primary) !important;
+}
+
+html.dark .container .input-field::placeholder {
+  color: var(--text-muted) !important;
+}
+
+html.dark .container .password-toggle {
+  background: transparent !important;
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .container .remember-me input[type='checkbox'] {
+  accent-color: var(--accent) !important;
+}
+
+html.dark .student-details-container .student-icon-skeleton,
+html.dark .student-details-container .name-skeleton,
+html.dark .student-details-container .id-skeleton,
+html.dark .student-details-container .stat-label-skeleton,
+html.dark .student-details-container .stat-value-skeleton,
+html.dark .student-details-container .section-header-skeleton,
+html.dark .student-details-container .book-card-skeleton,
+html.dark .student-details-container .book-title-skeleton,
+html.dark .student-details-container .book-author-skeleton,
+html.dark .student-details-container .detail-skeleton {
+  background: var(--bg-tertiary) !important;
+}
+
+/* ------------------------------------------------------------
+   Borrow Book modal
+------------------------------------------------------------- */
+
+html.dark .borrow-modal-content {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .borrow-modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .borrow-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrow-modal-close {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrow-modal-close:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrow-form-group label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrow-input,
+html.dark .borrow-search-wrapper {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrow-input::placeholder,
+html.dark .borrow-search-input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .borrow-input-icon,
+html.dark .borrow-search-icon {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .borrow-modal-footer {
+  border-top-color: var(--border-color) !important;
+}
+
+/* ------------------------------------------------------------
+   Renew Book modal
+------------------------------------------------------------- */
+
+html.dark .renew-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+}
+
+html.dark .renew-modal-content {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .renew-modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .renew-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .renew-modal-close {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .renew-modal-close:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .renew-info-group label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .renew-info-group p {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .renew-info-group .calendar-icon,
+html.dark .renew-info-group .user-icon,
+html.dark .renew-info-group .book-icon {
+  color: var(--text-tertiary) !important;
+}
+
+/* Highlight “New Due Date” group */
+html.dark .renew-info-group:last-child {
+  background: var(--accent-light) !important;
+  background-color: var(--accent-light) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .renew-info-group:last-child p {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .renew-modal-footer {
+  border-top-color: var(--border-color) !important;
+}
+
+html.dark .renew-cancel-btn {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .renew-cancel-btn:hover {
+  background: var(--bg-hover) !important;
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ------------------------------------------------------------
+   Overdue Payment modal
+------------------------------------------------------------- */
+
+html.dark .overdue-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+}
+
+html.dark .overdue-modal-content {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .overdue-modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .overdue-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .overdue-modal-close {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .overdue-modal-close:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .overdue-info-group label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .overdue-info-group p {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .overdue-info-group .calendar-icon,
+html.dark .overdue-info-group .money-icon,
+html.dark .overdue-info-group .user-icon,
+html.dark .overdue-info-group .book-icon {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .or-number-input,
+html.dark .action-select {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .or-number-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+html.dark .overdue-modal-footer {
+  border-top-color: var(--border-color) !important;
+}
+
+/* Payment summary: remove light red panel in dark mode */
+html.dark .overdue-payment-summary {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .breakdown-label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .breakdown-value,
+html.dark .summary-amount {
+  color: var(--error) !important;
+}
+
+html.dark .breakdown-divider {
+  background: var(--border-color) !important;
+}
+
+html.dark .summary-label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .overdue-cancel-btn {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .overdue-cancel-btn:hover {
+  background: var(--bg-hover) !important;
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Book dropdown */
+html.dark .borrow-search-results {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+html.dark .borrow-search-item {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .borrow-search-item:hover,
+html.dark .borrow-search-item.highlighted {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrow-no-results,
+html.dark .borrow-search-item.no-results {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrow-no-results:hover {
+  background: transparent !important;
+}
+
+/* Modal scrollbars */
+html.dark .borrow-modal-content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .borrow-modal-content::-webkit-scrollbar-thumb {
+  background: var(--bg-hover) !important;
+}
+
+html.dark .borrow-search-results::-webkit-scrollbar-track {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .borrow-search-results::-webkit-scrollbar-thumb {
+  background: var(--bg-hover) !important;
+}
+
+/* ------------------------------------------------------------
+   Import Books modal
+------------------------------------------------------------- */
+
+html.dark .import-books-content {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .import-books-content .modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .import-books-content .modal-header h2 {
+  background: none !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .import-books-content .close-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .import-books-content .close-btn:hover {
+  background: var(--bg-hover) !important;
+}
+
+html.dark .import-books-content .import-form {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+html.dark .import-books-content .drop-zone {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .import-books-content .drop-zone p {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .import-books-content .drop-zone.drag-active {
+  background-color: var(--bg-hover) !important;
+}
+
+html.dark .import-books-content .format-info {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+html.dark .import-books-content .format-info h3 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .import-books-content .format-table {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .import-books-content .format-table div {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .import-books-content .selected-file {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .import-books-content .file-name {
+  color: var(--text-primary) !important;
+}
+
+html.dark .import-books-content .remove-file:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+html.dark .import-books-content .csv-preview {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .import-books-content .csv-preview h3 {
+  background: var(--bg-tertiary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .import-books-content .preview-note {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .import-books-content .preview-table-wrapper thead {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .import-books-content .preview-table-wrapper th {
+  background: var(--bg-tertiary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .import-books-content .preview-table-wrapper td {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .import-books-content .call-number {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Import progress */
+html.dark .import-books-content .loading-title {
+  color: var(--text-primary) !important;
+}
+
+html.dark .import-books-content .progress-wrapper {
+  background: var(--bg-tertiary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .import-books-content .progress-bar {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .import-books-content .progress-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Scrollbars inside modal */
+html.dark .import-books-content::-webkit-scrollbar-track,
+html.dark .import-books-content .preview-table-wrapper::-webkit-scrollbar-track {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .import-books-content::-webkit-scrollbar-thumb,
+html.dark .import-books-content .preview-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--bg-hover) !important;
+}
+
+/* ------------------------------------------------------------
+   Books page - category dropdown (native select options)
+------------------------------------------------------------- */
+
+html.dark .books-header .sort-select,
+html.dark .books-header .category-select {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  color-scheme: dark;
+}
+
+html.dark .books-header .sort-select option,
+html.dark .books-header .category-select option {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Navbar surface */
+html.dark .navbar {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+html.dark .navbar .nav-item,
+html.dark .navbar .user-profile {
+  color: var(--text-primary) !important;
+}
+
+html.dark .navbar .user-profile:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+html.dark .navbar .search-box {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .navbar .search-box input {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .navbar .search-box input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .navbar .sidebar-toggle {
+  color: var(--text-secondary) !important;
+}
+
+/* Shared pagination component (fix white bg + hover in dark mode) */
+html.dark .pagination {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+html.dark .pagination-btn {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .pagination-btn:hover:not(:disabled) {
+  background: var(--bg-hover) !important;
+  background-color: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .pagination-btn:disabled {
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+  opacity: 0.6;
+}
+
+html.dark .pagination-info {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .pagination-total {
+  color: var(--text-secondary) !important;
+}
+
+/* Books scrollbars (Books.css hard-codes light track/thumb) */
+html.dark .books-container::-webkit-scrollbar-track,
+html.dark .books-container .books-table-wrapper::-webkit-scrollbar-track {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .books-container::-webkit-scrollbar-thumb,
+html.dark .books-container .books-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-light) !important;
+  border-color: var(--bg-secondary) !important;
+}
+
+html.dark .books-container::-webkit-scrollbar-thumb:hover,
+html.dark .books-container .books-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* Books page (table + sticky action column) */
+html.dark .books-container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+html.dark .books-header,
+html.dark .books-container .table-container {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+/* Books header view toggle (table/grid) */
+html.dark .books-header .view-toggle {
+  background: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .books-header .toggle-btn {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .books-header .toggle-btn:hover {
+  background: var(--bg-hover) !important;
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-header .toggle-btn.active {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .books-container .search-bar:focus-within {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .books-container .search-input {
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .books-table {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .books-container .books-table thead,
+html.dark .books-container .books-table thead tr {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .books-container .books-table th {
+  background: var(--bg-tertiary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .books-container .books-table th:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+html.dark .books-container .books-table td {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* No-data/placeholder rows often use colspan + a light bg */
+html.dark .books-container .books-table tbody td[colspan] {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Sticky action column is explicitly white in Books.css */
+html.dark .books-container .books-table .col-action,
+html.dark .books-container .books-table td.col-action,
+html.dark .books-container .books-table th.col-action {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  box-shadow: -2px 0 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .books-container .books-table tbody tr:hover {
+  background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+}
+
+/* Some table styles apply hover background via row styling that can still appear light.
+   Force the hovered row *cells* to stay dark. */
+html.dark .books-container .books-table tbody tr:hover > td {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .books-table tbody tr:hover td.col-action {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Action button hover is light in Books.css */
+html.dark .books-container .action-btn:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .loading-cell {
+  background: rgba(15, 23, 42, 0.7) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .table-loading-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Books page (grid view cards) */
+html.dark .books-container .book-grid-container {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .book-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .books-container .book-card:hover {
+  border-color: var(--border-light) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .books-container .book-cover-container {
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .books-container .book-cover-placeholder {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .books-container .book-status-badge {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .book-title {
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .book-author {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .books-container .book-publisher,
+html.dark .books-container .book-year,
+html.dark .books-container .book-isbn {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .books-container .book-info .label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .books-container .book-actions {
+  background: var(--bg-tertiary) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+html.dark .books-container .book-actions .action-btn {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .books-container .book-actions .action-btn:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+}
+
+/* Prevent light hover fills in dark mode */
+html.dark .books-container .book-actions .view-btn:hover,
+html.dark .books-container .book-actions .edit-btn:hover,
+html.dark .books-container .book-actions .delete-btn:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* AddBook / EditBook page (uses AddBook.css classes) */
+html.dark .add-book-container {
+  background: var(--bg-primary) !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-book-content {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-book-form,
+html.dark .page-header {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .page-header h1,
+html.dark .variants-section-title,
+html.dark .form-group label {
+  color: var(--text-primary) !important;
+}
+
+html.dark .back-btn {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .back-btn:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-book-form .form-group input,
+html.dark .add-book-form .form-group select,
+html.dark .add-book-form .form-group textarea,
+html.dark .add-book-form .select-field {
+  background: var(--input-bg) !important;
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .add-book-form .form-group input::placeholder,
+html.dark .add-book-form .form-group textarea::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .add-book-form .select-field option {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* AddBook scrollbars (AddBook.css hard-codes light track/thumb) */
+html.dark .add-book-form .form-grid::-webkit-scrollbar-track {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .add-book-form .form-grid::-webkit-scrollbar-thumb {
+  background: var(--border-light) !important;
+  border-color: var(--bg-secondary) !important;
+}
+
+html.dark .add-book-form .form-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* Variants summary + disabled manage variants button */
+html.dark .variants-summary {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .variants-summary p {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .manage-variants-btn:disabled {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+}
+
+/* Cover upload/preview blocks */
+html.dark .cover-preview-link {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .file-info {
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .cover-url-input,
+html.dark .cover-url-input input {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .cover-url-input input:focus {
+  background: var(--input-bg) !important;
+}
+
+html.dark .image-upload-container {
+  border-color: var(--border-light) !important;
+}
+
+html.dark .image-upload-label svg {
+  color: var(--text-tertiary) !important;
+}
+
+/* AddVariantModal (Manage Book Variants) */
+html.dark .variant-modal-content {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+html.dark .variant-modal-header,
+html.dark .variant-modal-footer {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .variant-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .variant-close-btn {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .variant-close-btn:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .variant-modal-body {
+  color: var(--text-primary) !important;
+}
+
+html.dark .variant-modal-body::-webkit-scrollbar-track {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .variant-modal-body::-webkit-scrollbar-thumb {
+  background: var(--border-light) !important;
+}
+
+html.dark .variant-modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover) !important;
+}
+
+html.dark .variant-info-section {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .variant-count {
+  color: var(--text-primary) !important;
+}
+
+html.dark .variant-count-label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .variant-add-btn:disabled {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+}
+
+html.dark .variant-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark .variant-card-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .variant-badge {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .variant-badge-icon {
+  color: var(--accent) !important;
+}
+
+html.dark .variant-label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .variant-cancel-btn {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .variant-cancel-btn:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Modal/progress surfaces from AddBook.css */
+html.dark .modal-content,
+html.dark .progress-container {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .close-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .close-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Confirm dialog/toast inside Books */
+html.dark .confirm-dialog,
+html.dark .confirm-toast {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .confirm-title h4 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .confirm-title p {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .confirm-actions .cancel-btn {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}

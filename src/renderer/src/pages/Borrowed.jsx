@@ -156,8 +156,7 @@ const Borrowed = () => {
 
     try {
       await returnBook(token, borrowId, {
-        returned_date: new Date().toISOString().split('T')[0],
-        status: 'Returned'
+        returned_date: new Date().toISOString().split('T')[0]
       })
       await updateBook(token, borrowItem.book, {
         status: 'Available'
@@ -467,7 +466,7 @@ const Borrowed = () => {
                         <td>
                           <div className="status-badge-container">
                             <span className={`status-badge ${getStatusBadgeClass(item)}`}>
-                              {getStatusText(item.status)}
+                              {getStatusText(item)}
                             </span>
                           </div>
                         </td>

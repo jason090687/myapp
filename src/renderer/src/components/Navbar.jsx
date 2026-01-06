@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { useSelector } from 'react-redux'
 import { globalSearch } from '../services/searchService'
 import SearchResults from './SearchResults'
-import './Sidebar.css' // Change from Sidebar.css to Navbar.css
+import './Navbar.css'
 import './SkeletonLoader.css'
 import { useNavigate } from 'react-router-dom' // Add this import
 import { Bell } from 'lucide-react'

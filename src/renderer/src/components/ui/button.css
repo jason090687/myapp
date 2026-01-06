@@ -52,12 +52,14 @@
 }
 
 .btn-secondary {
-  background-color: #e5e5e5;
-  color: #171717;
+  background-color: white;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
 }
 
 .btn-secondary:hover {
-  background-color: #d4d4d4;
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .btn-secondary:disabled {
@@ -80,25 +82,14 @@
 }
 
 .btn-primary {
-  background-color: #0369a1;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary {
   background-color: white;
   color: #0f172a;
-  padding: 0.75rem 1.5rem;
   border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .btn-outline {
@@ -131,40 +122,7 @@
 }
 
 /* Dark mode variants */
-@media (prefers-color-scheme: dark) {
-  .btn-default {
-    background-color: #fafafa;
-    color: #171717;
-  }
-
-  .btn-default:hover {
-    background-color: #e5e5e5;
-  }
-
-  .btn-secondary {
-    background-color: #404040;
-    color: #fafafa;
-  }
-
-  .btn-secondary:hover {
-    background-color: #525252;
-  }
-
-  .btn-outline {
-    border: 1px solid #525252;
-    background-color: #0a0a0a;
-    color: #fafafa;
-  }
-
-  .btn-outline:hover {
-    background-color: #1a1a1a;
-  }
-
-  .btn-ghost {
-    color: #fafafa;
-  }
-
-  .btn-ghost:hover {
-    background-color: #262626;
-  }
+/* Note: App theme is controlled via html.dark/html.light, not OS preference */
+html.dark .btn-outline {
+  border-color: #525252;
 }

@@ -59,8 +59,13 @@ const StudentsPage = () => {
     return students
   }
 
-  const handleRowClick = (studentId) => {
-    navigate(`/students/${studentId}`)
+  const handleRowClick = (student) => {
+    const studentPk = student?.id ?? student?.student_id ?? student?.pk
+    if (!studentPk) {
+      showToast('Error', 'Student record is missing an internal id', 'error')
+      return
+    }
+    navigate(`/students/${studentPk}`)
   }
 
   const handleAddStudent = async (studentData) => {
@@ -81,7 +86,12 @@ const StudentsPage = () => {
   const handleEditStudent = async (studentData) => {
     try {
       if (!selectedStudent) return
-      await updateStudentDetails(token, selectedStudent.id_number, studentData)
+      const studentPk = selectedStudent?.id ?? selectedStudent?.student_id ?? selectedStudent?.pk
+      if (!studentPk) {
+        showToast('Error', 'Student record is missing an internal id', 'error')
+        return
+      }
+      await updateStudentDetails(token, studentPk, studentData)
       showToast('Success', 'Student updated successfully!', 'success')
       setIsEditModalOpen(false)
       setSelectedStudent(null)
@@ -215,15 +225,13 @@ const StudentsPage = () => {
                 ) : (
                   getFilteredStudents().map((student) => (
                     <tr key={student.id_number} className="table-row">
-                      <td onClick={() => handleRowClick(student.id_number)}>{student.id_number}</td>
-                      <td onClick={() => handleRowClick(student.id_number)}>{student.name}</td>
-                      <td onClick={() => handleRowClick(student.id_number)}>
-                        {student.year_level}
-                      </td>
-                      <td onClick={() => handleRowClick(student.id_number)}>
+                      <td onClick={() => handleRowClick(student)}>{student.id_number}</td>
+                      <td onClick={() => handleRowClick(student)}>{student.name}</td>
+                      <td onClick={() => handleRowClick(student)}>{student.year_level}</td>
+                      <td onClick={() => handleRowClick(student)}>
                         {student.borrowed_books_count}
                       </td>
-                      <td onClick={() => handleRowClick(student.id_number)}>
+                      <td onClick={() => handleRowClick(student)}>
                         <span className={`status ${student.active ? 'active' : 'inactive'}`}>
                           {student.active ? 'Active' : 'Inactive'}
                         </span>
@@ -246,9 +254,18 @@ const StudentsPage = () => {
                             className="action-btn delete"
                             onClick={(e) => {
                               e.stopPropagation()
+                              const studentPk = student?.id ?? student?.student_id ?? student?.pk
+                              if (!studentPk) {
+                                showToast(
+                                  'Error',
+                                  'Student record is missing an internal id',
+                                  'error'
+                                )
+                                return
+                              }
                               setDeleteConfirm({
                                 isOpen: true,
-                                studentId: student.id_number,
+                                studentId: studentPk,
                                 studentName: student.name
                               })
                             }}

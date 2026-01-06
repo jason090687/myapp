@@ -124,7 +124,7 @@ const StaffDetailPage = () => {
                           <FaEdit />
                         </button>
                       </div>
-                      <p className="student-id">ID: {staff?.id_number}</p>
+                      <p className="student-id">Employee ID: {staff?.id_number}</p>
                     </div>
                   </div>
                   <div className="student-stats">

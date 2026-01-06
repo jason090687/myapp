@@ -181,18 +181,6 @@ const ProfilePage = () => {
                     ))}
                   </div>
                 </div>
-
-                {/* <div className="profile-section">
-                  <div className="section-header">
-                    <h2>Security</h2>
-                  </div>
-                  <div className="security-options">
-                    <button className="security-button">
-                      <FaKey />
-                      Change Password
-                    </button>
-                  </div>
-                </div> */}
               </div>
             </>
           )}

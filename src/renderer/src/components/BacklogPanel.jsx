@@ -87,91 +87,98 @@ function BacklogPanel({ isOpen, onClose }) {
   }
 
   return (
-    <div className={`backlog-panel ${isOpen ? 'open' : ''}`}>
-      <div className="backlog-header">
-        <h2>Activity Log</h2>
-        <div className="header-actions">
-          {activities.length > 0 && (
-            <button className="clear-btn" onClick={clearActivities} title="Clear all activities">
-              <Trash2 size={16} />
+    <>
+      <div
+        className={`backlog-overlay ${isOpen ? 'open' : ''}`}
+        onClick={onClose}
+        aria-hidden={!isOpen}
+      />
+      <div className={`backlog-panel ${isOpen ? 'open' : ''}`}>
+        <div className="backlog-header">
+          <h2>Activity Log</h2>
+          <div className="header-actions">
+            {activities.length > 0 && (
+              <button className="clear-btn" onClick={clearActivities} title="Clear all activities">
+                <Trash2 size={16} />
+              </button>
+            )}
+            <button className="close-btn" onClick={onClose}>
+              <X size={20} />
             </button>
-          )}
-          <button className="close-btn" onClick={onClose}>
-            <X size={20} />
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="backlog-quick-stats">
+          <div className="stat">
+            <span className="stat-label">Total</span>
+            <span className="stat-value">{activities.length}</span>
+          </div>
+          <div className="stat">
+            <span className="stat-label">Today</span>
+            <span className="stat-value">
+              {
+                activities.filter((a) => {
+                  const date = new Date(a.timestamp)
+                  const today = new Date()
+                  return date.toLocaleDateString() === today.toLocaleDateString()
+                }).length
+              }
+            </span>
+          </div>
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="activity-filters">
+          <button
+            className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+            onClick={() => setFilterType('all')}
+          >
+            All
+          </button>
+          <button
+            className={`filter-btn ${filterType === 'book_added' ? 'active' : ''}`}
+            onClick={() => setFilterType('book_added')}
+          >
+            Books
+          </button>
+          <button
+            className={`filter-btn ${filterType === 'student_added' ? 'active' : ''}`}
+            onClick={() => setFilterType('student_added')}
+          >
+            Users
           </button>
         </div>
-      </div>
 
-      {/* Quick Stats */}
-      <div className="backlog-quick-stats">
-        <div className="stat">
-          <span className="stat-label">Total</span>
-          <span className="stat-value">{activities.length}</span>
-        </div>
-        <div className="stat">
-          <span className="stat-label">Today</span>
-          <span className="stat-value">
-            {
-              activities.filter((a) => {
-                const date = new Date(a.timestamp)
-                const today = new Date()
-                return date.toLocaleDateString() === today.toLocaleDateString()
-              }).length
-            }
-          </span>
-        </div>
-      </div>
-
-      {/* Filter Buttons */}
-      <div className="activity-filters">
-        <button
-          className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
-          onClick={() => setFilterType('all')}
-        >
-          All
-        </button>
-        <button
-          className={`filter-btn ${filterType === 'book_added' ? 'active' : ''}`}
-          onClick={() => setFilterType('book_added')}
-        >
-          Books
-        </button>
-        <button
-          className={`filter-btn ${filterType === 'student_added' ? 'active' : ''}`}
-          onClick={() => setFilterType('student_added')}
-        >
-          Users
-        </button>
-      </div>
-
-      {/* Activities List */}
-      <div className="activities-section">
-        {filteredActivities.length > 0 ? (
-          filteredActivities.map((activity) => (
-            <div key={activity.id} className={`activity-item ${activity.type}`}>
-              <div className="activity-icon-wrapper">
-                <div className={`activity-icon ${getActivityColor(activity.type)}`}>
-                  {getActivityIcon(activity.type) === 'book' && <BookOpen size={16} />}
-                  {getActivityIcon(activity.type) === 'users' && <Users size={16} />}
-                  {getActivityIcon(activity.type) === 'alert' && <AlertCircle size={16} />}
+        {/* Activities List */}
+        <div className="activities-section">
+          {filteredActivities.length > 0 ? (
+            filteredActivities.map((activity) => (
+              <div key={activity.id} className={`activity-item ${activity.type}`}>
+                <div className="activity-icon-wrapper">
+                  <div className={`activity-icon ${getActivityColor(activity.type)}`}>
+                    {getActivityIcon(activity.type) === 'book' && <BookOpen size={16} />}
+                    {getActivityIcon(activity.type) === 'users' && <Users size={16} />}
+                    {getActivityIcon(activity.type) === 'alert' && <AlertCircle size={16} />}
+                  </div>
+                </div>
+                <div className="activity-content">
+                  <div className="activity-title">{getActivityLabel(activity.type)}</div>
+                  <div className="activity-description">{activity.description}</div>
+                  <div className="activity-time">{formatTime(activity.timestamp)}</div>
                 </div>
               </div>
-              <div className="activity-content">
-                <div className="activity-title">{getActivityLabel(activity.type)}</div>
-                <div className="activity-description">{activity.description}</div>
-                <div className="activity-time">{formatTime(activity.timestamp)}</div>
-              </div>
+            ))
+          ) : (
+            <div className="empty-message">
+              {filterType === 'all'
+                ? 'No activities yet'
+                : `No ${filterType.split('_')[0]} activities`}
             </div>
-          ))
-        ) : (
-          <div className="empty-message">
-            {filterType === 'all'
-              ? 'No activities yet'
-              : `No ${filterType.split('_')[0]} activities`}
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

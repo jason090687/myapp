@@ -7,12 +7,14 @@ import { Provider, useSelector, useDispatch } from 'react-redux'
 import { persistor, store } from './app/store'
 import { PersistGate } from 'redux-persist/integration/react'
 import './styles/global.css'
+import './styles/theme.css'
 import { Toaster } from 'react-hot-toast'
 import { logout } from './Features/authSlice' // Import the logout action
 import { ActivityProvider } from './context/ActivityContext'
-import './i18n/config' // Import i18n configuration
+import { ThemeProvider } from './context/ThemeContext'
+import './i18n/config' 
 
-// SessionProvider component to handle session expiration
+
 const SessionProvider = ({ children }) => {
   const dispatch = useDispatch()
   const { token } = useSelector((state) => state.auth)
@@ -26,19 +28,17 @@ const SessionProvider = ({ children }) => {
         inactivityTimer = setTimeout(
           () => {
             dispatch(logout())
-            window.location.href = '/' // Redirect to login page
+            window.location.href = '/'
           },
           15 * 60 * 1000
         ) // 15 minutes in milliseconds
       }
     }
 
-    // Reset timer on user activity
     const handleActivity = () => {
       resetTimer()
     }
 
-    // Add event listeners for user activity
     if (token) {
       window.addEventListener('mousemove', handleActivity)
       window.addEventListener('keydown', handleActivity)
@@ -65,12 +65,14 @@ const SessionProvider = ({ children }) => {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <ActivityProvider>
-        <SessionProvider>
-          <Toaster position="top-center" reverseOrder={false} />
-          <RouterProvider router={router} />
-        </SessionProvider>
-      </ActivityProvider>
+      <ThemeProvider defaultTheme="system">
+        <ActivityProvider>
+          <SessionProvider>
+            <Toaster position="top-center" reverseOrder={false} />
+            <RouterProvider router={router} />
+          </SessionProvider>
+        </ActivityProvider>
+      </ThemeProvider>
     </PersistGate>
   </Provider>
 )

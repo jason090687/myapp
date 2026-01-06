@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
 import { FaSave, FaUndo } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import { useTheme } from '../../context/ThemeContext'
+import ThemeToggle from '../ThemeToggle'
 
 function GeneralSettings() {
   const { t, i18n } = useTranslation()
+  const { setTheme } = useTheme()
 
   const defaultSettings = {
     language: 'en',
     dateFormat: 'MM/DD/YYYY',
     timeFormat: '12h',
     pageSize: 25,
-    theme: 'light',
     showWelcomeScreen: true
   }
 
@@ -45,12 +47,6 @@ function GeneralSettings() {
     try {
       localStorage.setItem('appSettings', JSON.stringify(settings))
       setSaved(true)
-      // Apply theme immediately
-      if (settings.theme === 'dark') {
-        document.documentElement.classList.add('dark-theme')
-      } else {
-        document.documentElement.classList.remove('dark-theme')
-      }
       // Change language
       i18n.changeLanguage(settings.language)
       setTimeout(() => setSaved(false), 3000)
@@ -68,7 +64,7 @@ function GeneralSettings() {
     ) {
       setSettings(defaultSettings)
       localStorage.removeItem('appSettings')
-      document.documentElement.classList.remove('dark-theme')
+      setTheme('system')
       i18n.changeLanguage('en')
     }
   }
@@ -128,14 +124,7 @@ function GeneralSettings() {
 
         <div className="form-group">
           <label>{t('settings.theme')}</label>
-          <select
-            value={settings.theme}
-            onChange={(e) => setSettings((prev) => ({ ...prev, theme: e.target.value }))}
-          >
-            <option value="light">{t('settings.light')}</option>
-            <option value="dark">{t('settings.dark')}</option>
-            <option value="auto">{t('settings.auto')}</option>
-          </select>
+          <ThemeToggle />
         </div>
 
         <div className="form-group">

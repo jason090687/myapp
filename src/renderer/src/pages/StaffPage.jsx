@@ -54,8 +54,13 @@ const StaffPage = () => {
     return () => clearTimeout(timer)
   }, [token, currentPage, searchTerm])
 
-  const handleRowClick = (studentId) => {
-    navigate(`/staff/${studentId}`)
+  const handleRowClick = (employee) => {
+    const employeePk = employee?.id ?? employee?.employee_id ?? employee?.pk
+    if (!employeePk) {
+      showToast('Error', 'Employee record is missing an internal id', 'error')
+      return
+    }
+    navigate(`/staff/${employeePk}`)
   }
 
   // Filter employees based on selected status
@@ -84,7 +89,12 @@ const StaffPage = () => {
   const handleEditStaff = async (staffData) => {
     try {
       if (!selectedStaff) return
-      await updateStudentDetails(token, selectedStaff.id_number, staffData)
+      const employeePk = selectedStaff?.id ?? selectedStaff?.employee_id ?? selectedStaff?.pk
+      if (!employeePk) {
+        showToast('Error', 'Employee record is missing an internal id', 'error')
+        return
+      }
+      await updateStudentDetails(token, employeePk, staffData)
       showToast('Success', 'Staff member updated successfully!', 'success')
       setIsEditModalOpen(false)
       setSelectedStaff(null)
@@ -218,14 +228,12 @@ const StaffPage = () => {
                 ) : (
                   getFilteredEmployees().map((employee) => (
                     <tr key={employee.id_number} className="table-row">
-                      <td onClick={() => handleRowClick(employee.id_number)}>
-                        {employee.id_number}
-                      </td>
-                      <td onClick={() => handleRowClick(employee.id_number)}>{employee.name}</td>
-                      <td onClick={() => handleRowClick(employee.id_number)}>
+                      <td onClick={() => handleRowClick(employee)}>{employee.id_number}</td>
+                      <td onClick={() => handleRowClick(employee)}>{employee.name}</td>
+                      <td onClick={() => handleRowClick(employee)}>
                         {employee.borrowed_books_count}
                       </td>
-                      <td onClick={() => handleRowClick(employee.id_number)}>
+                      <td onClick={() => handleRowClick(employee)}>
                         <span className={`status ${employee.active ? 'active' : 'inactive'}`}>
                           {employee.active ? 'Active' : 'Inactive'}
                         </span>
@@ -248,9 +256,19 @@ const StaffPage = () => {
                             className="action-btn delete"
                             onClick={(e) => {
                               e.stopPropagation()
+                              const employeePk =
+                                employee?.id ?? employee?.employee_id ?? employee?.pk
+                              if (!employeePk) {
+                                showToast(
+                                  'Error',
+                                  'Employee record is missing an internal id',
+                                  'error'
+                                )
+                                return
+                              }
                               setDeleteConfirm({
                                 isOpen: true,
-                                staffId: employee.id_number,
+                                staffId: employeePk,
                                 staffName: employee.name
                               })
                             }}

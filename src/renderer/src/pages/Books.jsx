@@ -214,20 +214,18 @@ function Books() {
         </ErrorBoundary>
       </div>
 
-      {windowWidth <= 1500 && (
-        <ErrorBoundary>
-          {selectedBook && isDetailsModalOpen && (
-            <BookDetailsModal
-              key={`modal-${selectedBook.id}`}
-              book={selectedBook}
-              isOpen={true}
-              onClose={handleCloseDetailsModal}
-              onEdit={handleEditBook}
-              onDelete={handleDeleteBook}
-            />
-          )}
-        </ErrorBoundary>
-      )}
+      <ErrorBoundary>
+        {selectedBook && isDetailsModalOpen && (
+          <BookDetailsModal
+            key={`modal-${selectedBook.id}`}
+            book={selectedBook}
+            isOpen={true}
+            onClose={handleCloseDetailsModal}
+            onEdit={handleEditBook}
+            onDelete={handleDeleteBook}
+          />
+        )}
+      </ErrorBoundary>
 
       <ConfirmDeleteModal
         isOpen={deleteConfirm.isOpen}

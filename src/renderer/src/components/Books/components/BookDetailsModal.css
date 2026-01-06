@@ -4,40 +4,41 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  z-index: 200;
+  z-index: 3000;
   padding: 1rem;
   padding-top: calc(var(--navbar-height) + 2rem);
 }
 
 .book-details-content {
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  background: var(--bg-primary);
   width: 95%;
   max-width: 700px;
   max-height: calc(100vh - var(--navbar-height) - 4rem);
-  border-radius: 1.2rem;
+  border-radius: 16px;
   box-shadow:
-    0 20px 40px -12px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    0 24px 64px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: modalEnter 0.3s ease-out;
   margin: 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border-color);
 }
 
 .book-details-header {
   padding: 1.25rem;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(to right, #f8fafc, #fff);
+  background: var(--bg-primary);
 }
 
 .header-content {
@@ -46,42 +47,42 @@
   gap: 1rem;
 }
 
-.header-content h2 {
-  font-size: 1.5rem;
+.book-details-header .header-content h2 {
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
 }
 
-.status-tag {
-  padding: 0.5rem 1rem;
+.book-details-header .status-tag {
+  padding: 0.375rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
-.status-tag.available {
-  background: #dcfce7;
-  color: #16a34a;
+.book-details-header .status-tag.available {
+  color: var(--success);
 }
-.status-tag.borrowed {
-  background: #fef3c7;
-  color: #b45309;
+.book-details-header .status-tag.borrowed {
+  color: var(--warning);
 }
-.status-tag.lost {
-  background: #fee2e2;
-  color: #dc2626;
+.book-details-header .status-tag.lost {
+  color: var(--error);
 }
 
-.close-button {
+.book-details-header .close-button {
   width: 36px;
   height: 36px;
-  border-radius: 12px;
-  border: none;
-  background: #f1f5f9;
-  color: #94a3b8; /* Lighter color */
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -91,23 +92,22 @@
   z-index: 10;
 }
 
-.close-button svg {
+.book-details-header .close-button svg {
   width: 16px; /* Smaller size */
   height: 16px;
   position: relative;
   z-index: 11;
-  opacity: 0.7; /* Add some transparency */
+  opacity: 0.9;
 }
 
 /* Add specific hover states */
-.close-button:hover {
-  background: #e2e8f0;
-  color: #dc2626;
-  transform: rotate(90deg);
+.book-details-header .close-button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
-.close-button:active {
-  transform: rotate(90deg) scale(0.95);
+.book-details-header .close-button:active {
+  transform: scale(0.98);
 }
 
 .book-details-body {
@@ -116,66 +116,114 @@
   flex: 1;
 }
 
-.details-grid {
+.book-details-content .details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  padding: 0.5rem;
+  padding: 0;
 }
 
-.detail-item {
+.book-details-content .detail-item {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   padding: 0.875rem;
   border-radius: 0.875rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.02),
-    0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  box-shadow: none;
 }
 
-.detail-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
-  border-color: #cbd5e1;
+.book-details-content .detail-item:hover {
+  border-color: var(--border-light);
 }
 
 /* Make certain items span full width */
-.detail-item:nth-child(1), /* Title */
-.detail-item:nth-child(2) {
+.book-details-content .detail-item:nth-child(1), /* Book Cover */
+.book-details-content .detail-item:nth-child(2) {
   /* Author */
   grid-column: span 2;
 }
 
-.detail-label {
+.book-details-content .detail-label {
   font-size: 0.75rem;
-  color: #64748b;
-  font-weight: 500;
+  color: var(--text-tertiary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.25rem;
 }
 
-.detail-value {
+.book-details-content .detail-value {
   font-size: 0.95rem;
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
-.book-details-footer {
+/* Book cover block inside details modal (avoid collisions with grid styles) */
+.book-details-content .book-cover-container {
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.book-details-content .book-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.book-details-content .default-book-cover {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+}
+
+.book-details-content .book-cover-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-hover) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 12px;
+}
+
+.book-details-content .pulse {
+  animation: book-details-pulse 1.25s infinite;
+}
+
+@keyframes book-details-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.book-details-content .book-details-footer {
   padding: 1.25rem;
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  background: #f8fafc;
+  background: var(--bg-primary);
 }
 
-.action-button {
+.book-details-content .action-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -185,31 +233,35 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
-  border: none;
+  border: 1px solid transparent;
   min-width: 120px;
 }
 
-.action-button.edit {
-  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
-  color: white;
+.book-details-content .action-button.edit {
+  background: var(--accent);
+  color: var(--accent-foreground);
   width: 20%;
-  box-shadow:
-    0 4px 12px rgba(10, 11, 100, 0.15),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
-.action-button.delete {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
+.book-details-content .action-button.delete {
+  background: var(--error);
+  color: var(--text-primary);
   width: 20%;
-  box-shadow:
-    0 4px 12px rgba(239, 68, 68, 0.15),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
-.action-button:hover {
+.book-details-content .action-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.book-details-content .action-button.edit:hover {
+  background: var(--accent-hover);
+}
+
+.book-details-content .action-button.delete:hover {
+  filter: brightness(0.95);
 }
 
 @keyframes modalEnter {
@@ -236,8 +288,9 @@
 
 .modal-exit {
   animation: modalExit 0.2s ease-out forwards;
+  -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  background: white;
+  background: var(--bg-primary);
 }
 
 @media screen and (max-width: 1500px) {
@@ -246,23 +299,23 @@
     padding: 0;
   }
 
-  .details-grid {
+  .book-details-content .details-grid {
     gap: 0.75rem;
   }
 
-  .detail-item {
+  .book-details-content .detail-item {
     padding: 0.75rem;
   }
 
-  .detail-label {
+  .book-details-content .detail-label {
     font-size: 0.7rem;
   }
 
-  .detail-value {
+  .book-details-content .detail-value {
     font-size: 0.875rem;
   }
 
-  .action-button {
+  .book-details-content .action-button {
     padding: 0.625rem 1rem;
     min-width: 100px;
   }
@@ -275,11 +328,11 @@
     border-radius: 0;
   }
 
-  .details-grid {
+  .book-details-content .details-grid {
     grid-template-columns: 1fr;
   }
 
-  .detail-item:nth-child(n) {
+  .book-details-content .detail-item:nth-child(n) {
     grid-column: span 1;
   }
 
@@ -307,24 +360,24 @@
     padding: 1rem;
   }
 
-  .details-grid {
+  .book-details-content .details-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
 
-  .detail-item {
+  .book-details-content .detail-item {
     padding: 0.75rem;
-    background: #f8fafc;
+    background: var(--bg-secondary);
     border-radius: 0.5rem;
   }
 
-  .book-details-footer {
+  .book-details-content .book-details-footer {
     padding: 1rem;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .action-button {
+  .book-details-content .action-button {
     width: 100%;
     justify-content: center;
   }
@@ -345,20 +398,20 @@
     font-size: 1.125rem;
   }
 
-  .detail-label {
+  .book-details-content .detail-label {
     font-size: 0.75rem;
   }
 
-  .detail-value {
+  .book-details-content .detail-value {
     font-size: 0.875rem;
   }
 
-  .status-tag {
+  .book-details-header .status-tag {
     font-size: 0.7rem;
     padding: 0.35rem 0.75rem;
   }
 
-  .action-button {
+  .book-details-content .action-button {
     padding: 0.625rem 1rem;
     font-size: 0.875rem;
   }
@@ -367,10 +420,9 @@
 /* Touch device optimizations */
 @media (hover: none) {
   .book-details-body {
-    -webkit-overflow-scrolling: touch;
   }
 
-  .action-button:active {
+  .book-details-content .action-button:active {
     transform: translateY(1px);
   }
 }

@@ -9,9 +9,13 @@ const InputField = ({
   icon: Icon,
   value = '',
   onChange = () => {},
-  name = ''
+  name = '',
+  className = '',
+  ...rest
 }) => {
   const [showPassword, setShowPassword] = useState(false)
+
+  const normalizedValue = value === null || value === undefined ? '' : String(value)
 
   const handleChange = (e) => {
     onChange({ target: { name, value: e.target.value } })
@@ -29,10 +33,11 @@ const InputField = ({
       <input
         type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
         placeholder={placeholder}
-        value={value}
+        value={normalizedValue}
         onChange={handleChange}
         name={name}
-        className="input-field"
+        className={`input-field ${className}`.trim()}
+        {...rest}
       />
       {type === 'password' && (
         <button type="button" onClick={togglePasswordVisibility} className="password-toggle">
@@ -47,9 +52,10 @@ InputField.propTypes = {
   type: PropTypes.string,
   placeholder: PropTypes.string,
   icon: PropTypes.elementType.isRequired,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
-  name: PropTypes.string
+  name: PropTypes.string,
+  className: PropTypes.string
 }
 
 export default InputField

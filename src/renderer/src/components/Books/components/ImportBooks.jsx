@@ -251,8 +251,8 @@ function ImportBooks({ onClose, onRefresh }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay import-books-overlay" onClick={handleOverlayClick}>
+      <div className="modal-content import-books-content" onClick={(e) => e.stopPropagation()}>
         {importing ? (
           <div className="loading-container">
             <div className="loading-content">

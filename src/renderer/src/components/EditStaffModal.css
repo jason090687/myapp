@@ -16,7 +16,8 @@
 
 /* Modal Content */
 .edit-staff-modal-content {
-  background: white;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 1rem;
   width: 90%;
   max-width: 480px;
@@ -33,20 +34,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .edit-staff-modal-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .edit-staff-modal-close {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -57,8 +58,8 @@
 }
 
 .edit-staff-modal-close:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* Modal Body */
@@ -79,7 +80,7 @@
 .edit-staff-field-group label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 /* Input Wrapper with Icon */
@@ -92,7 +93,7 @@
 .edit-staff-input-wrapper svg {
   position: absolute;
   left: 0.875rem;
-  color: #94a3b8;
+  color: var(--text-tertiary);
   pointer-events: none;
   z-index: 1;
   width: 20px;
@@ -104,22 +105,22 @@
 .edit-staff-input-wrapper input {
   width: 100%;
   padding: 0.75rem 0.875rem 0.75rem 2.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--input-border);
   border-radius: 0.5rem;
   font-size: 0.9375rem;
-  color: #1e293b;
+  color: var(--text-primary);
   transition: all 0.2s ease;
-  background-color: #ffffff;
+  background-color: var(--input-bg);
 }
 
 .edit-staff-input-wrapper input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 }
 
 .edit-staff-input-wrapper input::placeholder {
-  color: #cbd5e1;
+  color: var(--text-tertiary);
 }
 
 /* Toggle Wrapper */
@@ -152,7 +153,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #cbd5e1;
+  background-color: var(--border-light);
   transition: 0.3s;
   border-radius: 24px;
 }
@@ -164,13 +165,13 @@
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: var(--bg-primary);
   transition: 0.3s;
   border-radius: 50%;
 }
 
 .edit-staff-toggle input:checked + .edit-staff-slider {
-  background-color: #3b82f6;
+  background-color: var(--accent);
 }
 
 .edit-staff-toggle input:checked + .edit-staff-slider:before {
@@ -180,7 +181,7 @@
 .edit-staff-toggle-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 /* Modal Footer */
@@ -189,7 +190,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-color);
 }
 
 /* Animations */
