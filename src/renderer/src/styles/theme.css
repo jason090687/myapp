@@ -30,7 +30,7 @@ html.light {
   --info: #3b82f6;
 
   /* Component Specific */
-  --sidebar-bg: #e8ecf1;
+  --sidebar-bg: #ffffff;
   --sidebar-text: #1e293b;
   --sidebar-hover: #d1d8e0;
   --navbar-bg: #ffffff;
@@ -73,7 +73,7 @@ html.dark {
   --info: #3b82f6;
 
   /* Component Specific */
-  --sidebar-bg: #1e293b;
+  --sidebar-bg: #334155;
   --sidebar-text: #f1f5f9;
   --sidebar-hover: #334155;
   --navbar-bg: #1e293b;

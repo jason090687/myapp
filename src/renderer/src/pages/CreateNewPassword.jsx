@@ -124,7 +124,7 @@ function CreateNewPassword() {
               </div>
 
               <div className="reset-button">
-                <Button type="submit" disabled={isLoading}>
+                <Button variant="primary" type="submit" disabled={isLoading}>
                   {isLoading ? (
                     <div className="spinner-wrapper">
                       <div className="spinner" />

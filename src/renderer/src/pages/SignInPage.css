@@ -15,6 +15,7 @@
   padding: 2rem;
   position: relative;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -32,7 +33,7 @@
 
 .left-side h2 {
   font-size: 2.5rem;
-  color: #0a0b64;
+  color: #06b6d4;
   margin-bottom: 2rem;
   font-weight: 800;
   text-align: center;
@@ -63,7 +64,7 @@
 }
 
 .forgot-password {
-  color: #0a0b64;
+  color: #06b6d4;
   text-align: right;
   font-size: 0.875rem;
   text-decoration: none;
@@ -72,7 +73,7 @@
 }
 
 .forgot-password:hover {
-  color: #1e3a8a;
+  color: #06b6d4;
   text-decoration: underline;
 }
 
@@ -101,14 +102,14 @@
 }
 
 .sign-up a {
-  color: #0a0b64;
-  font-weight: 600;
+  color: #06b6d4;
+  font-weight: 500;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .sign-up a:hover {
-  color: #1e3a8a;
+  color: #06b6d4;
   text-decoration: underline;
 }
 
@@ -269,13 +270,14 @@
 .remember-me input[type='checkbox'] {
   width: 16px;
   height: 16px;
-  accent-color: #0a0b64;
+  accent-color: #06b6d4;
   cursor: pointer;
 }
 
 .remember-me label {
   font-size: 0.875rem;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 }
 

@@ -95,8 +95,8 @@ function ForgotPassword() {
                 />
               </div>
 
-              <div className="login-button">
-                <Button type="submit" disabled={isSubmitting || !email}>
+              <div className="forgot-password-button">
+                <Button variant="primary" type="submit" disabled={isSubmitting || !email}>
                   {isSubmitting ? (
                     <div className="spinner-wrapper">
                       <div className="spinner" />

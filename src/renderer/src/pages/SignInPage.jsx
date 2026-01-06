@@ -134,17 +134,17 @@ function SignInPage() {
                 </a>
               </div>
 
-              <div className="login-button">
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? (
-                    <div className="spinner-wrapper">
-                      <div className="spinner" />
-                    </div>
-                  ) : (
-                    'Log In'
-                  )}
-                </Button>
-              </div>
+              {/* <div className="login-button"> */}
+              <Button type="submit" variant="primary" disabled={isLoading}>
+                {isLoading ? (
+                  <div className="spinner-wrapper">
+                    <div className="spinner" />
+                  </div>
+                ) : (
+                  'Log In'
+                )}
+              </Button>
+              {/* </div> */}
             </form>
 
             <div className="or-divider">

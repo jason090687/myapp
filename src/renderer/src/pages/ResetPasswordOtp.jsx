@@ -135,6 +135,7 @@ const ResetPasswordOtp = () => {
               <div className="button-wrapper">
                 <Button
                   type="submit"
+                  variant="primary"
                   disabled={isSubmitting || otp.join('').length !== 6}
                   className="submit-button"
                 >

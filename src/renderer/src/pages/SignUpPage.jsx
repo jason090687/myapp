@@ -189,7 +189,12 @@ function SignUpPage() {
             </p>
           )}
 
-          <Button onClick={handleRegister} disabled={!isFormValid() || isLoading}>
+          <Button
+            variant="primary"
+            type="button"
+            onClick={handleRegister}
+            disabled={!isFormValid() || isLoading}
+          >
             {isLoading ? (
               <div className="spinner-wrapper">
                 <div className="spinner" />
