@@ -28,10 +28,9 @@ const StudentsPage = () => {
     studentName: ''
   })
   const [filterStatus, setFilterStatus] = useState('all')
-  const { token } = useSelector((state) => state.auth)
+  const { token, user } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
 
-  // Effect for fetching students with search
   useEffect(() => {
     const loadStudents = async () => {
       try {
@@ -40,8 +39,7 @@ const StudentsPage = () => {
         setStudents(data.results)
         setTotalPages(Math.ceil(data.count / 10))
       } catch (error) {
-        console.error('Error loading students:', error)
-        toast.error('Failed to load students')
+        showToast('Error', 'Failed to load students', 'error')
       } finally {
         setIsLoading(false)
       }
@@ -53,10 +51,12 @@ const StudentsPage = () => {
 
   // Filter students based on selected status
   const getFilteredStudents = () => {
-    if (filterStatus === 'all') return students
-    if (filterStatus === 'active') return students.filter((s) => s.active)
-    if (filterStatus === 'inactive') return students.filter((s) => !s.active)
-    return students
+    const visibleStudents = students.filter((s) => !s?.cancelled)
+
+    if (filterStatus === 'all') return visibleStudents
+    if (filterStatus === 'active') return visibleStudents.filter((s) => s.active)
+    if (filterStatus === 'inactive') return visibleStudents.filter((s) => !s.active)
+    return visibleStudents
   }
 
   const handleRowClick = (student) => {
@@ -107,7 +107,19 @@ const StudentsPage = () => {
   const handleDeleteStudent = async () => {
     try {
       // API call for delete - implement based on your backend
-      await deleteStudent(token, deleteConfirm.studentId)
+      const studentId = deleteConfirm.studentId
+      if (!studentId) return
+
+      const cancelledBy = user?.id ?? user?.user_id ?? user?.pk
+      const cancelData = {
+        cancelledBy,
+        cancelledAt: new Date().toISOString()
+      }
+
+      await deleteStudent(token, studentId, cancelData)
+
+      // Optimistically update UI so the row disappears immediately
+      setStudents((prev) => prev.filter((s) => (s?.id ?? s?.student_id ?? s?.pk) !== studentId))
       showToast('Success', 'Student deleted successfully!', 'success')
       setDeleteConfirm({ isOpen: false, studentId: null, studentName: '' })
       // Refresh students list

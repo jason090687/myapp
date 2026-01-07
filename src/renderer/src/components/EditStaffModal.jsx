@@ -8,6 +8,7 @@ const EditStaffModal = ({ isOpen, onClose, onSubmit, studentData }) => {
   const [formData, setFormData] = useState({
     name: '',
     id_number: '',
+    rfid_number: '',
     active: false
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -17,6 +18,7 @@ const EditStaffModal = ({ isOpen, onClose, onSubmit, studentData }) => {
       setFormData({
         name: studentData.name || '',
         id_number: studentData.id_number || '',
+        rfid_number: studentData.rfid_number || '',
         active: studentData.active || false
       })
     }
@@ -84,6 +86,22 @@ const EditStaffModal = ({ isOpen, onClose, onSubmit, studentData }) => {
                   onChange={handleChange}
                   required
                   placeholder="Enter employee ID number"
+                />
+              </div>
+            </div>
+
+            <div className="edit-staff-field-group">
+              <label htmlFor="rfid_number">Employee RFID</label>
+              <div className="edit-staff-input-wrapper">
+                <Hash size={18} />
+                <input
+                  type="text"
+                  id="rfid_number"
+                  name="rfid_number"
+                  value={formData.rfid_number}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter employee RFID number"
                 />
               </div>
             </div>

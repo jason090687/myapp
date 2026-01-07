@@ -10,6 +10,7 @@ const AddStaffBookModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
     id_number: '',
+    rfid_number: '',
     active: true
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -83,6 +84,22 @@ const AddStaffBookModal = ({ isOpen, onClose, onSubmit }) => {
                   onChange={handleChange}
                   required
                   placeholder="Enter employee ID number"
+                />
+              </div>
+            </div>
+
+            <div className="add-staff-field-group">
+              <label htmlFor="rfid_number">RFID Number</label>
+              <div className="add-staff-input-wrapper">
+                <Hash size={18} />
+                <input
+                  type="text"
+                  id="rfid_number"
+                  name="rfid_number"
+                  value={formData.rfid_number}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter RFID number"
                 />
               </div>
             </div>

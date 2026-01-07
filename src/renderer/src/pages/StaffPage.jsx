@@ -32,19 +32,25 @@ const StaffPage = () => {
     staffId: null,
     staffName: ''
   })
-  const { token } = useSelector((state) => state.auth)
+  const { user, token } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
 
   const navigate = useNavigate()
+
+  const toVisibleEmployees = (data) => {
+    const list = data?.results || data || []
+    return Array.isArray(list) ? list.filter((e) => !e?.cancelled) : []
+  }
 
   useEffect(() => {
     const loadEmployees = async () => {
       try {
         setIsLoading(true)
         const data = await fetchEmployees(token, currentPage, searchTerm)
-        // Check if data.results exists, otherwise use data directly
-        setEmployees(data.results || data)
-        setTotalPages(Math.ceil((data.count || data.length) / 10))
+        const visibleEmployees = toVisibleEmployees(data)
+        setEmployees(visibleEmployees)
+        const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
+        setTotalPages(Math.ceil(totalCount / 10))
       } catch (error) {
         console.error('Error loading employees:', error)
         showToast('Error', 'Failed to load employees', 'error')
@@ -70,12 +76,10 @@ const StaffPage = () => {
 
   // Filter employees based on selected status
   const getFilteredEmployees = () => {
-    const visibleEmployees = employees.filter((e) => !e?.cancelled)
-
-    if (filterStatus === 'all') return visibleEmployees
-    if (filterStatus === 'active') return visibleEmployees.filter((e) => e.active)
-    if (filterStatus === 'inactive') return visibleEmployees.filter((e) => !e.active)
-    return visibleEmployees
+    if (filterStatus === 'all') return employees
+    if (filterStatus === 'active') return employees.filter((e) => e.active)
+    if (filterStatus === 'inactive') return employees.filter((e) => !e.active)
+    return employees
   }
 
   const handleAddStaff = async (staffData) => {
@@ -85,8 +89,10 @@ const StaffPage = () => {
       setIsAddModalOpen(false)
       // Refresh employees list
       const data = await fetchEmployees(token, currentPage, searchTerm)
-      setEmployees(data.results || data)
-      setTotalPages(Math.ceil((data.count || data.length) / 10))
+      const visibleEmployees = toVisibleEmployees(data)
+      setEmployees(visibleEmployees)
+      const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
+      setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
       showToast('Error', error.message || 'Failed to add staff member', 'error')
       throw error
@@ -107,8 +113,10 @@ const StaffPage = () => {
       setSelectedStaff(null)
       // Refresh employees list
       const data = await fetchEmployees(token, currentPage, searchTerm)
-      setEmployees(data.results || data)
-      setTotalPages(Math.ceil((data.count || data.length) / 10))
+      const visibleEmployees = toVisibleEmployees(data)
+      setEmployees(visibleEmployees)
+      const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
+      setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
       showToast('Error', error.message || 'Failed to update staff member', 'error')
       throw error
@@ -120,17 +128,22 @@ const StaffPage = () => {
       const staffId = deleteConfirm.staffId
       if (!staffId) return
 
-      await deleteEmployee(token, staffId)
+      const cancelledBy = user?.id ?? user?.user_id ?? user?.pk
+      const cancelData = {
+        cancelledBy,
+        cancelledAt: new Date().toISOString()
+      }
 
-      // Optimistically update UI so the row disappears immediately
+      await deleteEmployee(token, staffId, cancelData)
       setEmployees((prev) => prev.filter((e) => (e?.id ?? e?.employee_id ?? e?.pk) !== staffId))
       showToast('Success', 'Staff member deleted successfully!', 'success')
       setDeleteConfirm({ isOpen: false, staffId: null, staffName: '' })
 
-      // Refresh employees list (keeps pagination/filters accurate)
       const data = await fetchEmployees(token, currentPage, searchTerm)
-      setEmployees(data.results || data)
-      setTotalPages(Math.ceil((data.count || data.length) / 10))
+      const visibleEmployees = toVisibleEmployees(data)
+      setEmployees(visibleEmployees)
+      const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
+      setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
       showToast('Error', error.message || 'Failed to delete staff member', 'error')
     }
@@ -219,6 +232,7 @@ const StaffPage = () => {
               <thead>
                 <tr>
                   <th>Employee ID</th>
+                  <th>Employee RFID</th>
                   <th>Name</th>
                   <th>Borrowed Books</th>
                   <th>Status</th>
@@ -245,6 +259,7 @@ const StaffPage = () => {
                     return (
                       <tr key={employeePk ?? employee.id_number} className="table-row">
                         <td onClick={() => handleRowClick(employee)}>{employee.id_number}</td>
+                        <td onClick={() => handleRowClick(employee)}>{employee.rfid_number}</td>
                         <td onClick={() => handleRowClick(employee)}>{employee.name}</td>
                         <td onClick={() => handleRowClick(employee)}>
                           {employee.borrowed_books_count}

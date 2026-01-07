@@ -927,13 +927,19 @@ export const fetchAllStudentsForSearch = async (token) => {
 
 export const deleteStudent = async (token, studentId, cancelData = {}) => {
   try {
+    const cancelledAt = cancelData?.cancelledAt ?? new Date().toISOString()
+    const payload = {
+      cancelled: true,
+      cancelled_at: cancelledAt
+    }
+
+    if (cancelData?.cancelledBy !== undefined && cancelData?.cancelledBy !== null) {
+      payload.cancelled_by = cancelData.cancelledBy
+    }
+
     const response = await axios.patch(
       `${API_URL}/students/${studentId}/`,
-      {
-        cancelled: true,
-        cancelled_by: cancelData.cancelledBy,
-        cancelled_at: cancelData.cancelledAt
-      },
+      payload,
       getAuthHeaders(token)
     )
     return response.data
@@ -978,13 +984,19 @@ export const createEmployee = async (token, employeeData) => {
 
 export const deleteEmployee = async (token, employeeId, cancelData = {}) => {
   try {
+    const cancelledAt = cancelData?.cancelledAt ?? new Date().toISOString()
+    const payload = {
+      cancelled: true,
+      cancelled_at: cancelledAt
+    }
+
+    if (cancelData?.cancelledBy !== undefined && cancelData?.cancelledBy !== null) {
+      payload.cancelled_by = cancelData.cancelledBy
+    }
+
     const response = await axios.patch(
-      `${API_URL}/employees/${employeeId}/`,
-      {
-        cancelled: true,
-        cancelled_by: cancelData.cancelledBy,
-        cancelled_at: cancelData.cancelledAt
-      },
+      `${API_URL}/students/${employeeId}/`,
+      payload,
       getAuthHeaders(token)
     )
     return response.data
