@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react'
-import { FaSave, FaBell, FaEnvelope, FaExclamationTriangle } from 'react-icons/fa'
+import { FaSave, FaBell } from 'react-icons/fa'
 
 function NotificationSettings() {
   const defaultSettings = {
-    emailNotifications: true,
     overdueReminders: true,
     newBookAlerts: false,
     returnReminders: true,
     systemUpdates: true,
-    reminderDaysBefore: 3,
-    emailDigest: 'daily',
-    soundNotifications: true,
-    desktopNotifications: true
+    reminderDaysBefore: 3
   }
 
   const [settings, setSettings] = useState(defaultSettings)
@@ -34,13 +30,6 @@ function NotificationSettings() {
       localStorage.setItem('notificationSettings', JSON.stringify(settings))
       setSaved(true)
 
-      // Request notification permissions if desktop notifications are enabled
-      if (settings.desktopNotifications && 'Notification' in window) {
-        if (Notification.permission === 'default') {
-          Notification.requestPermission()
-        }
-      }
-
       setTimeout(() => setSaved(false), 3000)
     } catch (error) {
       console.error('Error saving notification settings:', error)
@@ -54,40 +43,6 @@ function NotificationSettings() {
       <p className="settings-description">Configure how and when you receive notifications</p>
 
       <div className="settings-form">
-        {/* Email Notifications */}
-        <div className="settings-card">
-          <h3>
-            <FaEnvelope /> Email Notifications
-          </h3>
-
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={settings.emailNotifications}
-                onChange={(e) =>
-                  setSettings((prev) => ({ ...prev, emailNotifications: e.target.checked }))
-                }
-              />
-              Enable email notifications
-            </label>
-          </div>
-
-          <div className="form-group">
-            <label>Email Digest Frequency</label>
-            <select
-              value={settings.emailDigest}
-              onChange={(e) => setSettings((prev) => ({ ...prev, emailDigest: e.target.value }))}
-              disabled={!settings.emailNotifications}
-            >
-              <option value="realtime">Real-time</option>
-              <option value="daily">Daily Digest</option>
-              <option value="weekly">Weekly Digest</option>
-              <option value="never">Never</option>
-            </select>
-          </div>
-        </div>
-
         {/* Alert Types */}
         <div className="settings-card">
           <h3>
@@ -158,39 +113,6 @@ function NotificationSettings() {
                 }
               />
               System updates and announcements
-            </label>
-          </div>
-        </div>
-
-        {/* Desktop & Sound */}
-        <div className="settings-card">
-          <h3>
-            <FaExclamationTriangle /> Desktop & Sound
-          </h3>
-
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={settings.desktopNotifications}
-                onChange={(e) =>
-                  setSettings((prev) => ({ ...prev, desktopNotifications: e.target.checked }))
-                }
-              />
-              Show desktop notifications
-            </label>
-          </div>
-
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={settings.soundNotifications}
-                onChange={(e) =>
-                  setSettings((prev) => ({ ...prev, soundNotifications: e.target.checked }))
-                }
-              />
-              Play sound for notifications
             </label>
           </div>
         </div>

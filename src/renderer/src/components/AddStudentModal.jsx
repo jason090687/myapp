@@ -9,6 +9,7 @@ const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
   const { addActivity } = useActivity()
   const [formData, setFormData] = useState({
     name: '',
+    rfid_number: '',
     id_number: '',
     year_level: '',
     active: true
@@ -68,6 +69,21 @@ const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
                   onChange={handleChange}
                   required
                   placeholder="Enter student's full name"
+                />
+              </div>
+            </div>
+            <div className="add-student-field-group">
+              <label htmlFor="refid_number">REFID Number</label>
+              <div className="add-student-input-wrapper">
+                <User size={18} />
+                <input
+                  type="text"
+                  id="rfid_number"
+                  name="rfid_number"
+                  value={formData.rfid_number}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter student's RFID number"
                 />
               </div>
             </div>

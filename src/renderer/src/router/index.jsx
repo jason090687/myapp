@@ -13,7 +13,7 @@ import NotificationSettings from '../components/settings/NotificationSettings.js
 import SystemSettings from '../components/settings/SystemSettings.jsx'
 import Help from '../pages/Help'
 import CreateNewPassword from '../pages/CreateNewPassword.jsx'
-import ProfilePage from '../pages/ProfilePage.jsx'
+// import ProfilePage from '../pages/ProfilePage.jsx'
 import OtpVerification from '../pages/OtpVerification'
 import ActivationSuccess from '../pages/ActivationSuccess.jsx'
 import ResetPasswordOtp from '../pages/ResetPasswordOtp'
@@ -87,14 +87,14 @@ const router = createHashRouter([
       </ProtectedRoute>
     )
   },
-  {
-    path: '/profile',
-    element: (
-      <ProtectedRoute>
-        <ProfilePage />
-      </ProtectedRoute>
-    )
-  },
+  // {
+  //   path: '/profile',
+  //   element: (
+  //     <ProtectedRoute>
+  //       <ProfilePage />
+  //     </ProtectedRoute>
+  //   )
+  // },
   {
     path: '/settings',
     element: (

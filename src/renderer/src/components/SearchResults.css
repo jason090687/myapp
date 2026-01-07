@@ -65,3 +65,9 @@
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
+
+.result-empty {
+  padding: 0.9rem 1rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}

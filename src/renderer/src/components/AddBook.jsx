@@ -24,6 +24,7 @@ import { fetchUserDetails, addNewBook } from '../Features/api'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
 import { useActivity } from '../context/ActivityContext'
+import { Button } from './ui/button'
 
 const AddBook = () => {
   const navigate = useNavigate()
@@ -56,7 +57,7 @@ const AddBook = () => {
     date_received: '',
     subject: '',
     additional_author: '',
-    total_copies: '',
+    copies: '',
     status: 'Available',
     date_processed: new Date()
       .toLocaleString('sv-SE', {
@@ -99,7 +100,7 @@ const AddBook = () => {
   }, [userDetails])
 
   useEffect(() => {
-    const total = parseInt(formData.total_copies) || 0
+    const total = parseInt(formData.copies) || 0
     setVariants((prev) => {
       const currentLength = prev.length
       if (currentLength < total) {
@@ -120,7 +121,7 @@ const AddBook = () => {
       }
       return prev
     })
-  }, [formData.total_copies])
+  }, [formData.copies])
 
   useEffect(() => {
     const handleResize = () => {
@@ -161,7 +162,7 @@ const AddBook = () => {
   }
 
   const isFormValid = () => {
-    const totalCopiesNum = parseInt(formData.total_copies)
+    const totalCopiesNum = parseInt(formData.copies)
     const hasValidVariants =
       variants.length === totalCopiesNum && variants.every((variant) => variant.isbn?.trim())
     return (
@@ -170,7 +171,7 @@ const AddBook = () => {
       formData.publisher?.trim() &&
       formData.place_of_publication?.trim() &&
       formData.year?.trim() &&
-      formData.total_copies &&
+      formData.copies &&
       formData.date_received?.trim() &&
       formData.status &&
       formData.date_processed &&
@@ -244,7 +245,7 @@ const AddBook = () => {
                 })
                 .replace(' ', 'T')
             )
-          } else if (key !== 'book_cover' && key !== 'total_copies') {
+          } else if (key !== 'book_cover' && key !== 'copies') {
             bookData.append(key, formData[key])
           }
         })
@@ -255,8 +256,7 @@ const AddBook = () => {
         bookData.set('accession_number', variant.accession_number)
         bookData.set('call_number', variant.call_number)
         bookData.set('barcode', variant.barcode)
-        bookData.set('copies', 1) // Each variant is one copy
-        bookData.set('copy_number', currentCopy + 1)
+        bookData.set('copies', currentCopy + 1)
         bookData.set('processed_by', userDetails.id || currentUser.id)
 
         // Add the book cover if it exists
@@ -342,7 +342,7 @@ const AddBook = () => {
     { name: 'physical_description', label: 'Physical Description', icon: FaBox },
     { name: 'subject', label: 'Subject', icon: FaTag },
     {
-      name: 'total_copies',
+      name: 'copies',
       label: 'Total Copies*',
       icon: FaHashtag,
       type: 'number',
@@ -357,10 +357,9 @@ const AddBook = () => {
       <div className={`add-book-container ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="add-book-content">
           <div className="page-header">
-            <button onClick={() => navigate('/books')} className="back-btn">
+            <Button variant="secondary" type="button" onClick={() => navigate('/books')}>
               <FaArrowLeft /> Back to Books
-            </button>
-            {/* <h1>Add New Book</h1> */}
+            </Button>
           </div>
 
           {/* Progress Bar Overlay */}
@@ -421,15 +420,14 @@ const AddBook = () => {
               <div className="form-group variants-group">
                 <div className="variants-section-header">
                   <h3 className="variants-section-title">Book Variants (Edition, ISBN, etc.)</h3>
-                  <button
+                  <Button
+                    variant="primary"
                     type="button"
                     onClick={() => setIsVariantModalOpen(true)}
-                    className="manage-variants-btn"
-                    disabled={!formData.total_copies || parseInt(formData.total_copies) <= 0}
+                    disabled={!formData.copies || parseInt(formData.copies) <= 0}
                   >
-                    <FaCog />
-                    <span>Manage Variants</span>
-                  </button>
+                    Manage Variants
+                  </Button>
                 </div>
 
                 {variants.length > 0 ? (
@@ -468,10 +466,10 @@ const AddBook = () => {
                     required
                   >
                     <option value="Available">Available</option>
-                    <option value="Available">Borrowed</option>
-                    <option value="Available">Damaged</option>
-                    <option value="Available">Overdue</option>
-                    <option value="Available">Lost</option>
+                    <option value="Borrowed">Borrowed</option>
+                    <option value="Damaged">Damaged</option>
+                    <option value="Overdue">Overdue</option>
+                    <option value="Lost">Lost</option>
                   </select>
                 </div>
               </div>
@@ -530,9 +528,9 @@ const AddBook = () => {
                         showToast('Error', 'Invalid image file', 'error')
                       }}
                     />
-                    <button
+                    <Button
+                      variant="secondary"
                       type="button"
-                      className="cancel-image-btn"
                       onClick={() => {
                         setFormData((prev) => ({
                           ...prev,
@@ -543,7 +541,7 @@ const AddBook = () => {
                       }}
                     >
                       ×
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -561,15 +559,15 @@ const AddBook = () => {
             </div>
 
             <div className="page-footer">
-              <button
+              <Button
+                variant="secondary"
                 type="button"
                 onClick={() => navigate('/books')}
-                className="cancel-btn"
                 disabled={isLoading}
               >
                 Cancel
-              </button>
-              <button type="submit" className="submit-btn" disabled={isLoading || !isFormValid()}>
+              </Button>
+              <Button variant="primary" type="submit" disabled={isLoading || !isFormValid()}>
                 {isLoading ? (
                   <span className="spinner-wrapper">
                     <div className="spinner"></div>
@@ -578,7 +576,7 @@ const AddBook = () => {
                 ) : (
                   'Add Book'
                 )}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -586,7 +584,7 @@ const AddBook = () => {
       <AddVariantModal
         isOpen={isVariantModalOpen}
         onClose={() => setIsVariantModalOpen(false)}
-        totalCopiesLimit={parseInt(formData.total_copies) || 0}
+        totalCopiesLimit={parseInt(formData.copies) || 0}
         usedCopies={0}
         variants={variants}
         onVariantsChange={setVariants}

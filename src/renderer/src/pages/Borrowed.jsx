@@ -394,7 +394,7 @@ const Borrowed = () => {
                   }}
                 >
                   <option value="all">All Status</option>
-                  <option value="borrowed">Active</option>
+                  <option value="borrowed">Borrowed</option>
                   <option value="overdue">Overdue</option>
                   <option value="returned">Returned</option>
                 </select>

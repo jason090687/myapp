@@ -8,6 +8,7 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, student }) => {
   const [formData, setFormData] = useState({
     name: '',
     id_number: '',
+    rfid_number: '',
     year_level: '',
     active: false
   })
@@ -18,6 +19,7 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, student }) => {
       setFormData({
         name: student.name || '',
         id_number: student.id_number || '',
+        rfid_number: student.rfid_number || '',
         year_level: student.year_level || '',
         active: student.active || false
       })
@@ -86,6 +88,22 @@ const EditStudentModal = ({ isOpen, onClose, onSubmit, student }) => {
                   onChange={handleChange}
                   required
                   placeholder="Enter student ID number"
+                />
+              </div>
+            </div>
+
+            <div className="edit-student-field-group">
+              <label htmlFor="rfid_number">RFID Number</label>
+              <div className="edit-student-input-wrapper">
+                <Hash size={18} />
+                <input
+                  type="text"
+                  id="rfid_number"
+                  name="rfid_number"
+                  value={formData.rfid_number}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter student RFID number"
                 />
               </div>
             </div>

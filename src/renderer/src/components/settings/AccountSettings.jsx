@@ -1,16 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { FaSave, FaKey, FaUser } from 'react-icons/fa'
-import { updateUserProfile, changePassword } from '../../Features/api'
+import { updateUserProfile, changePassword, fetchUserDetails } from '../../Features/api'
 
 function AccountSettings() {
-  const { user, token } = useSelector((state) => state.auth)
-  const [profileData, setProfileData] = useState({
-    username: user?.username || '',
-    email: user?.email || '',
-    firstName: user?.first_name || '',
-    lastName: user?.last_name || ''
-  })
+  const { token } = useSelector((state) => state.auth)
+  const [profileData, setProfileData] = useState({})
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -20,6 +15,21 @@ function AccountSettings() {
 
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
+
+  useEffect(() => {
+    if (!token) return
+
+    const loadUserProfile = async () => {
+      try {
+        const data = await fetchUserDetails(token)
+        setProfileData(data || {})
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+      }
+    }
+
+    loadUserProfile()
+  }, [token])
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault()
@@ -57,15 +67,16 @@ function AccountSettings() {
 
     try {
       await changePassword(token, {
-        old_password: passwordData.currentPassword,
-        new_password: passwordData.newPassword
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+        re_new_password: passwordData.confirmPassword
       })
       setMessage({ type: 'success', text: 'Password changed successfully!' })
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
     } catch (error) {
       setMessage({
         type: 'error',
-        text: error.response?.data?.message || 'Failed to change password'
+        text: error.message || 'Failed to change password'
       })
     } finally {
       setLoading(false)
@@ -85,7 +96,7 @@ function AccountSettings() {
           <FaUser /> Profile Information
         </h3>
         <form onSubmit={handleProfileUpdate} className="settings-form">
-          <div className="form-group">
+          {/* <div className="form-group">
             <label>Username</label>
             <input
               type="text"
@@ -95,13 +106,13 @@ function AccountSettings() {
               className="disabled-input"
             />
             <small>Username cannot be changed</small>
-          </div>
+          </div> */}
 
           <div className="form-group">
             <label>Email Address</label>
             <input
               type="email"
-              value={profileData.email}
+              value={profileData?.email ?? ''}
               onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
               required
             />
@@ -112,8 +123,8 @@ function AccountSettings() {
               <label>First Name</label>
               <input
                 type="text"
-                value={profileData.firstName}
-                onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                value={profileData?.first_name ?? ''}
+                onChange={(e) => setProfileData({ ...profileData, first_name: e.target.value })}
               />
             </div>
 
@@ -121,8 +132,8 @@ function AccountSettings() {
               <label>Last Name</label>
               <input
                 type="text"
-                value={profileData.lastName}
-                onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                value={profileData?.last_name ?? ''}
+                onChange={(e) => setProfileData({ ...profileData, last_name: e.target.value })}
               />
             </div>
           </div>

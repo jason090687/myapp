@@ -1,5 +1,12 @@
 import { useNavigate } from 'react-router-dom'
-import { FaBook, FaBookReader, FaCog, FaQuestionCircle } from 'react-icons/fa'
+import {
+  FaBook,
+  FaBookReader,
+  FaCog,
+  FaQuestionCircle,
+  FaUserGraduate,
+  FaUserTie
+} from 'react-icons/fa'
 import './SearchResults.css'
 
 const SearchResults = ({ results, onResultClick }) => {
@@ -13,6 +20,10 @@ const SearchResults = ({ results, onResultClick }) => {
         return <FaBookReader />
       case 'setting':
         return <FaCog />
+      case 'student':
+        return <FaUserGraduate />
+      case 'staff':
+        return <FaUserTie />
       case 'help':
         return <FaQuestionCircle />
       default:
@@ -22,12 +33,23 @@ const SearchResults = ({ results, onResultClick }) => {
 
   const handleResultClick = (result) => {
     onResultClick() // Close search results
-    navigate(result.link)
+    const target = result?.link || result?.path
+    if (target) navigate(target)
   }
+
+  if (!results) return null
+
+  const entries = Object.entries(results).map(([category, items]) => [
+    category,
+    Array.isArray(items) ? items : []
+  ])
+  const hasAny = entries.some(([, items]) => items.length > 0)
 
   return (
     <div className="search-results">
-      {Object.entries(results).map(([category, items]) => {
+      {!hasAny && <div className="result-empty">No results found</div>}
+
+      {entries.map(([category, items]) => {
         if (items.length === 0) return null
 
         return (
@@ -35,7 +57,10 @@ const SearchResults = ({ results, onResultClick }) => {
             <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
             <ul>
               {items.map((item) => (
-                <li key={item.id} onClick={() => handleResultClick(item)}>
+                <li
+                  key={item.id ?? `${category}-${item.title}`}
+                  onClick={() => handleResultClick(item)}
+                >
                   <span className="result-icon">{getIcon(item.type)}</span>
                   <div className="result-content">
                     <div className="result-title">{item.title}</div>

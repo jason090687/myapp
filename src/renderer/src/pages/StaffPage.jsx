@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { createStudent, fetchEmployees, updateStudentDetails, deleteStudent } from '../Features/api'
+import {
+  createStudent,
+  fetchEmployees,
+  updateStudentDetails,
+  deleteEmployee
+} from '../Features/api'
 import { useSelector } from 'react-redux'
 import { FaSearch, FaChevronLeft, FaChevronRight, FaEdit, FaTrash } from 'react-icons/fa'
 import { Plus, Filter } from 'lucide-react'
@@ -65,10 +70,12 @@ const StaffPage = () => {
 
   // Filter employees based on selected status
   const getFilteredEmployees = () => {
-    if (filterStatus === 'all') return employees
-    if (filterStatus === 'active') return employees.filter((e) => e.active)
-    if (filterStatus === 'inactive') return employees.filter((e) => !e.active)
-    return employees
+    const visibleEmployees = employees.filter((e) => !e?.cancelled)
+
+    if (filterStatus === 'all') return visibleEmployees
+    if (filterStatus === 'active') return visibleEmployees.filter((e) => e.active)
+    if (filterStatus === 'inactive') return visibleEmployees.filter((e) => !e.active)
+    return visibleEmployees
   }
 
   const handleAddStaff = async (staffData) => {
@@ -110,10 +117,17 @@ const StaffPage = () => {
 
   const handleDeleteStaff = async () => {
     try {
-      await deleteStudent(token, deleteConfirm.staffId)
+      const staffId = deleteConfirm.staffId
+      if (!staffId) return
+
+      await deleteEmployee(token, staffId)
+
+      // Optimistically update UI so the row disappears immediately
+      setEmployees((prev) => prev.filter((e) => (e?.id ?? e?.employee_id ?? e?.pk) !== staffId))
       showToast('Success', 'Staff member deleted successfully!', 'success')
       setDeleteConfirm({ isOpen: false, staffId: null, staffName: '' })
-      // Refresh employees list
+
+      // Refresh employees list (keeps pagination/filters accurate)
       const data = await fetchEmployees(token, currentPage, searchTerm)
       setEmployees(data.results || data)
       setTotalPages(Math.ceil((data.count || data.length) / 10))
@@ -226,61 +240,64 @@ const StaffPage = () => {
                     </td>
                   </tr>
                 ) : (
-                  getFilteredEmployees().map((employee) => (
-                    <tr key={employee.id_number} className="table-row">
-                      <td onClick={() => handleRowClick(employee)}>{employee.id_number}</td>
-                      <td onClick={() => handleRowClick(employee)}>{employee.name}</td>
-                      <td onClick={() => handleRowClick(employee)}>
-                        {employee.borrowed_books_count}
-                      </td>
-                      <td onClick={() => handleRowClick(employee)}>
-                        <span className={`status ${employee.active ? 'active' : 'inactive'}`}>
-                          {employee.active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="action-buttons-container">
-                          <button
-                            className="action-btn edit"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedStaff(employee)
-                              setIsEditModalOpen(true)
-                            }}
-                            title="Edit"
-                            aria-label="Edit staff member"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className="action-btn delete"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              const employeePk =
-                                employee?.id ?? employee?.employee_id ?? employee?.pk
-                              if (!employeePk) {
-                                showToast(
-                                  'Error',
-                                  'Employee record is missing an internal id',
-                                  'error'
-                                )
-                                return
-                              }
-                              setDeleteConfirm({
-                                isOpen: true,
-                                staffId: employeePk,
-                                staffName: employee.name
-                              })
-                            }}
-                            title="Delete"
-                            aria-label="Delete staff member"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  getFilteredEmployees().map((employee) => {
+                    const employeePk = employee?.id ?? employee?.employee_id ?? employee?.pk
+                    return (
+                      <tr key={employeePk ?? employee.id_number} className="table-row">
+                        <td onClick={() => handleRowClick(employee)}>{employee.id_number}</td>
+                        <td onClick={() => handleRowClick(employee)}>{employee.name}</td>
+                        <td onClick={() => handleRowClick(employee)}>
+                          {employee.borrowed_books_count}
+                        </td>
+                        <td onClick={() => handleRowClick(employee)}>
+                          <span className={`status ${employee.active ? 'active' : 'inactive'}`}>
+                            {employee.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons-container">
+                            <button
+                              className="action-btn edit"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedStaff(employee)
+                                setIsEditModalOpen(true)
+                              }}
+                              title="Edit"
+                              aria-label="Edit staff member"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                const employeePk =
+                                  employee?.id ?? employee?.employee_id ?? employee?.pk
+                                if (!employeePk) {
+                                  showToast(
+                                    'Error',
+                                    'Employee record is missing an internal id',
+                                    'error'
+                                  )
+                                  return
+                                }
+                                setDeleteConfirm({
+                                  isOpen: true,
+                                  staffId: employeePk,
+                                  staffName: employee.name
+                                })
+                              }}
+                              title="Delete"
+                              aria-label="Delete staff member"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>

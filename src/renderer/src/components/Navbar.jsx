@@ -22,7 +22,9 @@ const Navbar = ({
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState(null)
   const [isSearching, setIsSearching] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const searchRef = useRef(null)
+  const userMenuRef = useRef(null)
   const { activities } = useActivity()
   const { token } = useSelector((state) => state.auth)
   const navigate = useNavigate() // Add navigation hook
@@ -32,6 +34,10 @@ const Navbar = ({
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setSearchResults(null)
+      }
+
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -59,29 +65,59 @@ const Navbar = ({
     return () => clearTimeout(timer)
   }, [searchTerm, token])
 
-  const handleProfileClick = () => {
-    navigate('/profile') // Navigate to profile page
-  }
-
   const renderUserProfile = () => {
     if (isLoading) {
       return (
-        <div className="nav-item user-profile">
-          <div className="skeleton skeleton-wave skeleton-icon"></div>
-          <div className="skeleton skeleton-wave skeleton-user"></div>
+        <div className="user-menu-wrapper">
+          <div className="user-profile-skeleton">
+            <div className="skeleton-circle" />
+            <div className="skeleton-text" />
+          </div>
         </div>
       )
     }
 
     return (
-      <div
-        className="nav-item user-profile"
-        onClick={handleProfileClick}
-        role="button"
-        tabIndex={0}
-      >
-        <FaUserCircle className="user-avatar" />
-        <span>{userDetails?.first_name || 'User'}</span>
+      <div className="user-menu-wrapper" ref={userMenuRef}>
+        <button
+          className="user-profile-button"
+          onClick={() => setIsUserMenuOpen((prev) => !prev)}
+          aria-haspopup="menu"
+          aria-expanded={isUserMenuOpen}
+          aria-label="User menu"
+        >
+          <div className="user-avatar-container">
+            <FaUserCircle className="user-icon" />
+          </div>
+          <span className="user-name-text">{userDetails?.first_name || 'User'}</span>
+        </button>
+
+        {isUserMenuOpen && (
+          <div className="user-dropdown-menu" role="menu">
+            <div className="dropdown-item-group">
+              <button
+                className="dropdown-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setIsUserMenuOpen(false)
+                  navigate('/settings/account')
+                }}
+              >
+                <span className="menu-item-text">Account</span>
+              </button>
+              <button
+                className="dropdown-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setIsUserMenuOpen(false)
+                  navigate('/settings/general')
+                }}
+              >
+                <span className="menu-item-text">General</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -102,7 +138,7 @@ const Navbar = ({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {searchResults && Object.values(searchResults).some((arr) => arr.length > 0) && (
+          {searchResults && (
             <SearchResults
               results={searchResults}
               onResultClick={() => {
@@ -123,7 +159,6 @@ const Navbar = ({
           <Bell size={18} />
           {activities.length > 0 && <span className="notification-badge">{activities.length}</span>}
         </button>
-        <div className="nav-item"></div>
         {renderUserProfile()}
       </div>
 

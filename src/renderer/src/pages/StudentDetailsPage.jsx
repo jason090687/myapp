@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { FaArrowLeft, FaGraduationCap, FaBook, FaEdit } from 'react-icons/fa'
+import { FaGraduationCap, FaBook, FaEdit } from 'react-icons/fa'
 import { ArrowLeft } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { Button } from '../components/ui/button'
@@ -131,7 +131,10 @@ const StudentDetailsPage = () => {
                           <FaEdit />
                         </button>
                       </div>
-                      <p className="student-id">ID Number: {student?.id_number}</p>
+                      <div className="student-identifiers">
+                        <p className="student-id">ID Number: {student?.id_number}</p>
+                        <p className="student-id">RFID Number: {student?.rfid_number}</p>
+                      </div>
                     </div>
                   </div>
                   <div className="student-stats">

@@ -24,6 +24,7 @@ import '../components/AddBook.css'
 import { updateBook, fetchBookDetails } from '../Features/api'
 import { useToaster } from '../components/Toast/useToaster'
 import { useSelector } from 'react-redux'
+import { Button } from '../components/ui/button'
 
 const EditBook = () => {
   const navigate = useNavigate()
@@ -52,6 +53,7 @@ const EditBook = () => {
     barcode: '',
     date_received: '',
     subject: '',
+    copies: '',
     additional_author: '',
     status: 'Available',
     date_processed: new Date()
@@ -72,22 +74,6 @@ const EditBook = () => {
   }
 
   const [formData, setFormData] = useState(initialFormState)
-
-  // useEffect(() => {
-  //   const loadUserDetails = async () => {
-  //     try {
-  //       const response = await fetchUserDetails(token)
-  //       setUserDetails(response)
-  //     } catch (error) {
-  //       console.error('Error fetching user details:', error)
-  //     } finally {
-  //       setIsLoading(false)
-  //     }
-  //   }
-  //   if (token) {
-  //     loadUserDetails()
-  //   }
-  // }, [])
 
   // Fetch book details
   useEffect(() => {
@@ -133,6 +119,7 @@ const EditBook = () => {
           ? new Date(bookDetails.date_received).toISOString().split('T')[0]
           : '',
         subject: bookDetails.subject || '',
+        copies: bookDetails.copies || '',
         additional_author: bookDetails.additional_author || '',
         status: bookDetails.status || 'Available',
         date_processed: bookDetails.date_processed
@@ -258,6 +245,7 @@ const EditBook = () => {
     { name: 'call_number', label: 'Call Number', icon: FaHashtag },
     { name: 'barcode', label: 'Barcode', icon: FaQrcode },
     { name: 'subject', label: 'Subject', icon: FaTag },
+    { name: 'copies', label: 'Total Copies*', icon: FaHashtag, required: true },
     { name: 'additional_author', label: 'Additional Author', icon: FaPen }
   ]
 
@@ -405,17 +393,17 @@ const EditBook = () => {
             </div>
 
             <div className="page-footer">
-              <button
+              <Button
+                variant="secondary"
                 type="button"
                 onClick={() => navigate('/books')}
-                className="cancel-btn"
                 disabled={isLoading || isPageLoading}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
                 type="submit"
-                className="submit-btn"
                 disabled={isLoading || !isFormValid() || isPageLoading}
               >
                 {isLoading ? (
@@ -431,7 +419,7 @@ const EditBook = () => {
                 ) : (
                   'Update Book'
                 )}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

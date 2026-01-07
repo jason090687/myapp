@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import InputField from './InputField'
 import { FaBookmark, FaVolumeUp, FaBarcode, FaHashtag, FaQrcode, FaTrash } from 'react-icons/fa'
 import './AddVariantModal.css'
+import { Button } from './ui/button'
+import { X } from 'lucide-react'
 
 const AddVariantModal = ({ isOpen, onClose, totalCopiesLimit, variants, onVariantsChange }) => {
   const [localVariants, setLocalVariants] = useState(variants)
@@ -48,9 +50,10 @@ const AddVariantModal = ({ isOpen, onClose, totalCopiesLimit, variants, onVarian
             <FaBookmark className="variant-header-icon" />
             <h2>Manage Book Variants</h2>
           </div>
-          <button onClick={onClose} className="variant-close-btn" aria-label="Close modal">
-            &times;
-          </button>
+          <Button variant="ghost" type="button" onClick={onClose} aria-label="Close modal">
+            {/* &times; */}
+            <X />
+          </Button>
         </div>
         <div className="variant-modal-body">
           <div className="variant-info-section">
@@ -58,7 +61,8 @@ const AddVariantModal = ({ isOpen, onClose, totalCopiesLimit, variants, onVarian
               <span className="variant-count">{localVariants.length}</span>
               <span className="variant-count-label">of {totalCopiesLimit}</span>
             </div>
-            <button
+            <Button
+              variant="primary"
               type="button"
               onClick={addVariant}
               className="variant-add-btn"
@@ -66,7 +70,7 @@ const AddVariantModal = ({ isOpen, onClose, totalCopiesLimit, variants, onVarian
             >
               <FaBookmark />
               <span>Add Variant</span>
-            </button>
+            </Button>
           </div>
 
           {localVariants.map((variant, index) => (
@@ -76,14 +80,14 @@ const AddVariantModal = ({ isOpen, onClose, totalCopiesLimit, variants, onVarian
                   <FaBookmark className="variant-badge-icon" />
                   <span>Variant #{index + 1}</span>
                 </div>
-                <button
+                <Button
+                  variant="secondary"
                   type="button"
                   onClick={() => removeVariant(index)}
-                  className="variant-remove-btn"
                   aria-label={`Remove variant ${index + 1}`}
                 >
                   <FaTrash />
-                </button>
+                </Button>
               </div>
 
               <div className="variant-fields-grid">
@@ -154,13 +158,13 @@ const AddVariantModal = ({ isOpen, onClose, totalCopiesLimit, variants, onVarian
           ))}
 
           <div className="variant-modal-footer">
-            <button type="button" onClick={onClose} className="variant-cancel-btn">
+            <Button variant="secondary" type="button" onClick={onClose}>
               Cancel
-            </button>
-            <button type="button" onClick={handleSave} className="variant-save-btn">
+            </Button>
+            <Button variant="primary" type="button" onClick={handleSave}>
               <FaBookmark />
               Save Variants
-            </button>
+            </Button>
           </div>
         </div>
       </div>

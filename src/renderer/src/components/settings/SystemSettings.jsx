@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { FaSave, FaTrash, FaSync, FaDatabase, FaCog } from 'react-icons/fa'
+import { Button } from '../ui/button'
 
 function SystemSettings() {
   const defaultSettings = {
@@ -109,7 +110,7 @@ function SystemSettings() {
   }
 
   return (
-    <div className="settings-section">
+    <div className="settings-section system-settings">
       <h2>System Settings</h2>
       <p className="settings-description">Configure system performance and maintenance</p>
 
@@ -139,14 +140,12 @@ function SystemSettings() {
             <label>Cache Size</label>
             <div className="info-display">
               <span>{cacheSize}</span>
-              <button
-                className="btn-secondary btn-sm"
-                onClick={handleClearCache}
-                disabled={loading}
-              >
-                <FaTrash />
-                <span>{loading ? 'Clearing...' : 'Clear Cache'}</span>
-              </button>
+              <div className="info-actions">
+                <Button variant="secondary" onClick={handleClearCache} disabled={loading}>
+                  {/* <FaTrash /> */}
+                  <span>{loading ? 'Clearing...' : 'Clear Cache'}</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -221,7 +220,7 @@ function SystemSettings() {
 
           <div className="form-group">
             <button className="btn-secondary" onClick={handleClearLogs}>
-              <FaTrash />
+              {/* <FaTrash /> */}
               <span>Clear All Logs</span>
             </button>
           </div>

@@ -201,6 +201,7 @@ const StudentsPage = () => {
               <thead>
                 <tr>
                   <th>ID Number</th>
+                  <th>RFID Number</th>
                   <th>Name</th>
                   <th>Year Level</th>
                   <th>Borrowed Books</th>
@@ -226,6 +227,7 @@ const StudentsPage = () => {
                   getFilteredStudents().map((student) => (
                     <tr key={student.id_number} className="table-row">
                       <td onClick={() => handleRowClick(student)}>{student.id_number}</td>
+                      <td onClick={() => handleRowClick(student)}>{student.rfid_number}</td>
                       <td onClick={() => handleRowClick(student)}>{student.name}</td>
                       <td onClick={() => handleRowClick(student)}>{student.year_level}</td>
                       <td onClick={() => handleRowClick(student)}>

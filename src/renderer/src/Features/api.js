@@ -144,9 +144,13 @@ export const changePassword = async (token, passwordData) => {
     )
     return response.data
   } catch (error) {
+    const data = error.response?.data
     throw new Error(
-      error.response?.data?.detail ||
-        error.response?.data?.old_password?.[0] ||
+      data?.detail ||
+        data?.current_password?.[0] ||
+        data?.new_password?.[0] ||
+        data?.re_new_password?.[0] ||
+        data?.old_password?.[0] ||
         'Failed to change password'
     )
   }
@@ -969,6 +973,26 @@ export const createEmployee = async (token, employeeData) => {
   } catch (error) {
     console.error('Error creating employee:', error.response?.data || error.message)
     throw new Error(error.response?.data?.message || 'Failed to create employee')
+  }
+}
+
+export const deleteEmployee = async (token, employeeId, cancelData = {}) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/employees/${employeeId}/`,
+      {
+        cancelled: true,
+        cancelled_by: cancelData.cancelledBy,
+        cancelled_at: cancelData.cancelledAt
+      },
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error deleting employee:', error.response?.data || error.message)
+    throw new Error(
+      error.response?.data?.detail || error.response?.data?.message || 'Failed to delete employee'
+    )
   }
 }
 
