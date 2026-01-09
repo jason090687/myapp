@@ -192,8 +192,8 @@
   font-size: 0.875rem;
   width: 100%;
   background-color: white;
-  height: 40px; /* Match input height */
-  padding-left: 40px; /* Space for icon alignment */
+  height: 40px;
+  padding-left: 40px;
   position: relative;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>');
   background-repeat: no-repeat;
@@ -217,17 +217,16 @@
   pointer-events: none;
 }
 
-/* Status-specific colors */
 .select-icon svg[data-icon*='check'] {
-  color: #22c55e; /* green */
+  color: #22c55e;
 }
 
 .select-icon svg[data-icon*='exchange'] {
-  color: #f59e0b; /* amber */
+  color: #f59e0b;
 }
 
 .select-icon svg[data-icon*='times'] {
-  color: #ef4444; /* red */
+  color: #ef4444;
 }
 
 .select-field:focus {
@@ -241,10 +240,9 @@
   font-size: 0.875rem;
 }
 
-/* Update form-group for InputField compatibility */
 .form-group .input-container {
   margin: 0;
-  height: 40px; /* Add consistent height */
+  height: 40px;
 }
 
 .form-group svg {
@@ -351,7 +349,7 @@
   outline: none;
   background: transparent;
   padding: 0.625rem 0.75rem 0.625rem 2.5rem;
-  height: 40px; /* Match the wrapper height */
+  height: 40px;
 }
 
 .borrow-search-input:focus {
@@ -368,7 +366,7 @@
 }
 
 .borrow-search-results {
-  position: absolute; /* Change from fixed to absolute */
+  position: absolute;
   top: 100%;
   left: 0;
   right: 0;
@@ -376,9 +374,9 @@
   border: none;
   border-radius: 1rem;
   margin-top: 4px;
-  max-height: 180px; /* Reduced height */
+  max-height: 180px;
   overflow-y: auto;
-  z-index: 1003; /* Higher than search wrapper */
+  z-index: 1003;
   box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(0, 0, 0, 0.05);
@@ -429,12 +427,12 @@
 }
 
 .spinner {
-  width: 14px; /* Reduced from 16px */
-  height: 14px; /* Reduced from 16px */
-  border: 1.5px solid #ffffff; /* Reduced from 2px */
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #ffffff;
   border-radius: 50%;
   border-top-color: transparent;
-  animation: spin 0.7s linear infinite; /* Slightly faster animation */
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {

@@ -265,12 +265,12 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                   required
                   placeholder="Enter lexile level"
                   className="borrow-input"
-                  readOnly
+                  // readOnly
                 />
               </div>
             </div>
             <div className="borrow-form-group">
-              <label htmlFor="due_date">Due Date*</label>
+              <label htmlFor="due_date">Return Date*</label>
               <div className="borrow-input-wrapper">
                 <Calendar className="borrow-input-icon" size={18} />
                 <input

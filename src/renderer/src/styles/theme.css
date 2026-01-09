@@ -2245,3 +2245,89 @@ html.dark .confirm-actions .cancel-btn {
   border-color: var(--border-color) !important;
   color: var(--text-secondary) !important;
 }
+
+/* ------------------------------------------------------------
+   Request Borrow Modal (uses BorrowBookModal styles)
+------------------------------------------------------------- */
+
+html.dark .borrow-modal-content {
+  background: var(--bg-primary) !important;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.dark .borrow-modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+html.dark .borrow-modal-header h2 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrow-modal-close {
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrow-modal-close:hover {
+  background: var(--bg-tertiary) !important;
+  color: #ef4444 !important;
+}
+
+html.dark .borrow-form-group label {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrow-input {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .borrow-input:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+html.dark .borrow-input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .borrow-input:disabled,
+html.dark .borrow-input:read-only {
+  background: var(--bg-secondary) !important;
+  opacity: 0.7;
+}
+
+html.dark .borrow-input-icon {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrow-modal-footer {
+  border-top-color: var(--border-color) !important;
+}
+
+html.dark .borrow-cancel-btn {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .borrow-cancel-btn:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Borrow Modal scrollbars */
+html.dark .borrow-modal-content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary) !important;
+}
+
+html.dark .borrow-modal-content::-webkit-scrollbar-thumb {
+  background: var(--bg-secondary) !important;
+}
+
+html.dark .borrow-modal-content::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color) !important;
+}

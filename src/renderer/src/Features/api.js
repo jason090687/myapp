@@ -313,6 +313,35 @@ export const borrowBook = async (token, borrowData) => {
   }
 }
 
+// Fetch pending borrow requests
+export const fetchBorrowRequests = async (token, status = 'pending') => {
+  try {
+    const response = await axios.get(`${API_URL}/borrow/list/`, getAuthHeaders(token))
+    return response.data
+  } catch (error) {
+    console.error('Error fetching borrow requests:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrow requests')
+  }
+}
+
+// Approve/Update borrow request with student_id
+export const approveBorrowRequest = async (token, requestId, approvalData) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/borrow/${requestId}/`,
+      {
+        student: approvalData.student_id,
+        ...approvalData
+      },
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error approving borrow request:', error)
+    throw new Error(error.response?.data?.message || 'Failed to approve borrow request')
+  }
+}
+
 // Update the return book function to use the simple endpoint
 export const returnBook = async (token, bookId, returnData) => {
   try {

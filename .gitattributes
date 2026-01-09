@@ -1,7 +1,0 @@
-# Normalize line endings in the repository to LF
-# This prevents stray CR (shown as "␍") from being committed.
-* text=auto eol=lf
-
-# Windows command scripts should remain CRLF
-*.bat text eol=crlf
-*.cmd text eol=crlf

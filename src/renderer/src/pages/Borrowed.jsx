@@ -222,6 +222,25 @@ const Borrowed = () => {
   const getFilteredBooks = () => {
     let filtered = borrowedBooks
 
+    // Hide records that don't have an associated student
+    filtered = filtered.filter((book) => {
+      const studentIdLike =
+        book.student_id ?? book.student ?? book.studentId ?? book.studentID ?? book.id_number
+
+      if (
+        studentIdLike !== null &&
+        studentIdLike !== undefined &&
+        `${studentIdLike}`.trim() !== ''
+      ) {
+        return true
+      }
+
+      const studentName = `${book.student_name || ''}`.trim().toLowerCase()
+      if (!studentName) return false
+      if (studentName.includes('undefined') || studentName.includes('null')) return false
+      return true
+    })
+
     // Apply status filter
     if (filterStatus === 'borrowed') {
       filtered = filtered.filter((book) => !book.is_returned && !isOverdue(book.due_date))
