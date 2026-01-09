@@ -2,8 +2,8 @@ import axios from 'axios'
 
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
 // const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
-const API_URL = 'http://192.168.2.175:8000/api/v1'
-// const API_URL = 'http://127.0.0.1:8000/api/v1'
+// const API_URL = 'http://192.168.2.175:8000/api/v1'
+const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 // const apiConfig = {
 //   baseURL: API_URL,
@@ -156,12 +156,13 @@ export const changePassword = async (token, passwordData) => {
   }
 }
 
-export const fetchBooks = async (token, page = 1, search = '') => {
+export const fetchBooks = async (token, page = 1, search = '', subject = '') => {
   try {
-    const response = await axios.get(
-      `${API_URL}/marc/search/?page=${page}&page_size=10&search=${encodeURIComponent(search)}`,
-      getAuthHeaders(token)
-    )
+    let url = `${API_URL}/marc/search/?page=${page}&page_size=10&search=${encodeURIComponent(search)}`
+    if (subject) {
+      url += `&subject=${encodeURIComponent(subject)}`
+    }
+    const response = await axios.get(url, getAuthHeaders(token))
     return response.data
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch books')

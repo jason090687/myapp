@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { FaTimes, FaEdit, FaTrash, FaBook } from 'react-icons/fa'
+import { X, Edit2, Trash2, BookOpen } from 'lucide-react'
 import { formatDate } from '../utils/bookUtils'
-import { fetchBookDetails } from '../../../Features/api' // Updated import path
+import { fetchBookDetails } from '../../../Features/api'
 import { useSelector } from 'react-redux'
 import './BookDetailsModal.css'
+import { Button } from '../../ui/button'
 
 const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
   const [bookDetails, setBookDetails] = useState(null)
@@ -88,7 +89,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
           </>
         ) : (
           <div className="default-book-cover">
-            <FaBook size={24} />
+            <BookOpen size={48} strokeWidth={1.5} />
           </div>
         )}
       </div>
@@ -149,9 +150,9 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
             <h2>Book Details</h2>
             <span className={`status-tag ${book.status?.toLowerCase()}`}>{book.status}</span>
           </div>
-          <button className="close-button" onClick={handleClose}>
-            <FaTimes />
-          </button>
+          <Button variant="ghost" onClick={handleClose} aria-label="Close modal">
+            <X size={20} />
+          </Button>
         </div>
 
         <div className="book-details-body">
@@ -169,12 +170,12 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
         </div>
 
         <div className="book-details-footer">
-          <button className="action-button edit" onClick={() => onEdit(book)}>
-            <FaEdit /> Edit
-          </button>
-          <button className="action-button delete" onClick={() => handleDelete(book.id)}>
-            <FaTrash /> Delete
-          </button>
+          <Button variant="primary" onClick={() => onEdit(book)}>
+            <Edit2 size={18} /> Edit
+          </Button>
+          <Button variant="ghost" onClick={() => handleDelete(book.id)}>
+            <Trash2 size={18} /> Delete
+          </Button>
         </div>
       </div>
     </div>

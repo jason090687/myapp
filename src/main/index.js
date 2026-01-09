@@ -35,6 +35,8 @@ function createWindow() {
     }
   })
 
+  // window.loadURL('http://localhost:5174')
+
   // Center the window
   mainWindow.center()
 

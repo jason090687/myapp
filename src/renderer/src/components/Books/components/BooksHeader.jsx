@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { Search, Plus, FileUp, FileDown, Grid3x3, List, Filter } from 'lucide-react'
 import { Button } from '../../ui/button'
@@ -14,9 +14,19 @@ function BooksHeader({
   selectedCategory,
   onViewChange,
   viewMode = 'table',
-  onExport
+  onExport,
+  books = []
 }) {
   const [showImport, setShowImport] = useState(false)
+
+  // Get unique subjects from books
+  const uniqueSubjects = useMemo(() => {
+    const subjects = books
+      .filter((book) => !book.cancelled && book.subject)
+      .map((book) => book.subject.trim())
+      .filter((subject) => subject !== '')
+    return [...new Set(subjects)].sort()
+  }, [books])
 
   return (
     <div className="top-label">
@@ -63,15 +73,12 @@ function BooksHeader({
               }}
               value={selectedCategory || ''}
             >
-              <option value="">All Categories</option>
-              <option value="Fiction">Fiction</option>
-              <option value="Non-Fiction">Non-Fiction</option>
-              <option value="Science">Science</option>
-              <option value="History">History</option>
-              <option value="Biography">Biography</option>
-              <option value="Reference">Reference</option>
-              <option value="Children">Children</option>
-              <option value="Education">Education</option>
+              <option value="">All Subjects</option>
+              {uniqueSubjects.map((subject) => (
+                <option key={subject} value={subject}>
+                  {subject}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -141,7 +148,8 @@ BooksHeader.propTypes = {
   selectedCategory: PropTypes.string,
   onViewChange: PropTypes.func.isRequired,
   viewMode: PropTypes.string,
-  onExport: PropTypes.func.isRequired
+  onExport: PropTypes.func.isRequired,
+  books: PropTypes.array
 }
 
 export default BooksHeader

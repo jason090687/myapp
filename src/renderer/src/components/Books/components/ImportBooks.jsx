@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
-import { uploadNewBook } from '../../../Features/api'
+import { fetchUserDetails, uploadNewBook } from '../../../Features/api'
 import { toast } from 'react-hot-toast'
 import './ImportBooks.css'
+import { Button } from '../../ui/button'
 
 function ImportBooks({ onClose, onRefresh }) {
   const { token } = useSelector((state) => state.auth)
@@ -12,31 +13,57 @@ function ImportBooks({ onClose, onRefresh }) {
   const [dragActive, setDragActive] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [selectedFile, setSelectedFile] = useState(null)
-  const [loadingText, setLoadingText] = useState('')
   const [parsedData, setParsedData] = useState(null)
   const [isCancelling, setIsCancelling] = useState(false)
-  const [isCancelled, setIsCancelled] = useState(false)
   const cancelRef = useRef(false)
+  const [loading, setLoading] = useState(true)
+  const [customUser, setCustomUser] = useState(null)
 
   const loadingMessages = [
-    { text: 'Processing your library data...', icon: '📚' },
-    { text: 'Organizing books...', icon: '📖' },
-    { text: 'Adding new books to shelf...', icon: '📑' },
-    { text: 'Cataloging items...', icon: '🗃️' },
-    { text: 'Almost there...', icon: '✨' }
+    { text: 'Analyzing library collection...', icon: '📚' },
+    { text: 'Validating book entries...', icon: '📖' },
+    { text: 'Building your digital catalog...', icon: '📑' },
+    { text: 'Organizing metadata...', icon: '🗃️' },
+    { text: 'Finalizing import...', icon: '✨' }
   ]
 
   const [currentLoadingState, setCurrentLoadingState] = useState(loadingMessages[0])
 
   useEffect(() => {
-    if (importing) {
-      const interval = setInterval(() => {
-        const randomIndex = Math.floor(Math.random() * loadingMessages.length)
-        setCurrentLoadingState(loadingMessages[randomIndex])
-      }, 3000)
-      return () => clearInterval(interval)
+    const loadUserData = async () => {
+      try {
+        const response = await fetchUserDetails(token)
+        setCustomUser(response)
+      } catch (error) {
+        console.error('Error fetching user details:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [importing])
+    loadUserData()
+  }, [token])
+
+  // Update loading message based on progress
+  useEffect(() => {
+    if (importing && progress.total > 0) {
+      const percentage = (progress.current / progress.total) * 100
+      let messageIndex = 0
+
+      if (percentage < 20) {
+        messageIndex = 0 // Analyzing library collection...
+      } else if (percentage < 40) {
+        messageIndex = 1 // Validating book entries...
+      } else if (percentage < 60) {
+        messageIndex = 2 // Building your digital catalog...
+      } else if (percentage < 80) {
+        messageIndex = 3 // Organizing metadata...
+      } else {
+        messageIndex = 4 // Finalizing import...
+      }
+
+      setCurrentLoadingState(loadingMessages[messageIndex])
+    }
+  }, [importing, progress])
 
   const uploadBooks = async (books) => {
     setProgress({ current: 0, total: books.length })
@@ -51,7 +78,26 @@ function ImportBooks({ onClose, onRefresh }) {
 
         try {
           const formData = new FormData()
-          const fields = ['call_number', 'accession_number', 'author', 'title', 'copies', 'year']
+          const fields = [
+            'name',
+            'title',
+            'author',
+            'series_title',
+            'publisher',
+            'place_of_publication',
+            'year',
+            'edition',
+            'volume',
+            'physical_description',
+            'isbn',
+            'accession_number',
+            'call_number',
+            'barcode',
+            'subject',
+            'description',
+            'additional_author',
+            'copies'
+          ]
           fields.forEach((field) => {
             let value = book[field]
             if (field === 'copies' || field === 'year') {
@@ -60,8 +106,30 @@ function ImportBooks({ onClose, onRefresh }) {
                 throw new Error(`Invalid value for ${field}: ${book[field]}`)
               }
             }
-            formData.append(field, value === '' ? '' : value) // Changed null to empty string
+            if (field === 'date_received') {
+              if (value && value.trim()) {
+                try {
+                  const date = new Date(value)
+                  if (!isNaN(date.getTime())) {
+                    value = date.toISOString().split('T')[0]
+                  } else {
+                    value = null
+                  }
+                } catch (e) {
+                  value = null
+                }
+              } else {
+                value = null
+              }
+            }
+            formData.append(field, value === null ? '' : value)
           })
+
+          formData.append('date_received', new Date().toISOString())
+          formData.append('processed_by', customUser?.id || '')
+          formData.append('date_processed', new Date().toISOString())
+          formData.append('created_at', new Date().toISOString())
+          formData.append('status', 'available')
 
           await uploadNewBook(token, formData)
           successCount++
@@ -119,16 +187,31 @@ function ImportBooks({ onClose, onRefresh }) {
                 const isAllDashes = row.every((cell) => cell === '-')
                 return !isHeaderRow && !isAllDashes
               })
-              .filter((row) => row.length >= 6)
+              .filter((row) => row.length >= 19)
               .map((row) => ({
-                call_number: row[0]?.trim() || '',
-                accession_number: row[1]?.trim() || '',
+                name: row[0]?.trim() || '',
+                title: row[1]?.trim() || '',
                 author: row[2]?.trim() || '',
-                title: row[3]?.trim() || '',
-                copies: row[4]?.trim() ? parseInt(row[4].trim()) : '',
-                year: row[5]?.trim() ? parseInt(row[5].trim()) : ''
+                series_title: row[3]?.trim() || '',
+                publisher: row[4]?.trim() || '',
+                place_of_publication: row[5]?.trim() || '',
+                year: row[6]?.trim() ? parseInt(row[6].trim()) : '',
+                edition: row[7]?.trim() || '',
+                volume: row[8]?.trim() || '',
+                physical_description: row[9]?.trim() || '',
+                isbn: row[10]?.trim() || '',
+                accession_number: row[11]?.trim() || '',
+                call_number: row[12]?.trim() || '',
+                barcode: row[13]?.trim() || '',
+                // date_received: row[14]?.trim() || '',
+                subject: row[15]?.trim() || '',
+                description: row[16]?.trim() || '',
+                additional_author: row[17]?.trim() || '',
+                copies: row[18]?.trim() ? parseInt(row[18].trim()) : ''
               }))
-              .filter((book) => book.call_number || book.accession_number || book.title)
+              .filter(
+                (book) => book.call_number || book.accession_number || book.title || book.name
+              )
 
             if (books.length === 0) {
               throw new Error('No valid books found in the file')
@@ -222,25 +305,49 @@ function ImportBooks({ onClose, onRefresh }) {
           <table>
             <thead>
               <tr>
-                <th>Call Number</th>
-                <th>Accession Number</th>
-                <th>Author</th>
+                <th>Name</th>
                 <th>Title</th>
-                <th>Copies</th>
+                <th>Author</th>
+                <th>Series Title</th>
+                <th>Publisher</th>
+                <th>Place of Pub.</th>
                 <th>Year</th>
+                <th>Edition</th>
+                <th>Volume</th>
+                <th>Physical Desc.</th>
+                <th>ISBN</th>
+                <th>Accession #</th>
+                <th>Call Number</th>
+                <th>Barcode</th>
+                <th>Subject</th>
+                <th>Description</th>
+                <th>Additional Author</th>
+                <th>Copies</th>
               </tr>
             </thead>
             <tbody>
               {parsedData.map((book, index) => (
                 <tr key={index}>
+                  <td>{book.name || ''}</td>
+                  <td>{book.title || ''}</td>
+                  <td>{book.author || ''}</td>
+                  <td>{book.series_title || ''}</td>
+                  <td>{book.publisher || ''}</td>
+                  <td>{book.place_of_publication || ''}</td>
+                  <td>{book.year || ''}</td>
+                  <td>{book.edition || ''}</td>
+                  <td>{book.volume || ''}</td>
+                  <td>{book.physical_description || ''}</td>
+                  <td>{book.isbn || ''}</td>
+                  <td>{book.accession_number || ''}</td>
                   <td className="call-number" data-content={book.call_number}>
                     {book.call_number || ''}
                   </td>
-                  <td>{book.accession_number || ''}</td>
-                  <td>{book.author || ''}</td>
-                  <td>{book.title || ''}</td>
+                  <td>{book.barcode || ''}</td>
+                  <td>{book.subject || ''}</td>
+                  <td>{book.description || ''}</td>
+                  <td>{book.additional_author || ''}</td>
                   <td>{book.copies || ''}</td>
-                  <td>{book.year || ''}</td>
                 </tr>
               ))}
             </tbody>
@@ -251,96 +358,132 @@ function ImportBooks({ onClose, onRefresh }) {
   }
 
   return (
-    <div className="modal-overlay import-books-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content import-books-content" onClick={(e) => e.stopPropagation()}>
+    <div className="import-modal-overlay" onClick={handleOverlayClick}>
+      <div className="import-modal-container" onClick={(e) => e.stopPropagation()}>
         {importing ? (
-          <div className="loading-container">
-            <div className="loading-content">
-              <div className="loading-icon">{currentLoadingState.icon}</div>
-              <h3 className="loading-title">
-                {isCancelling ? 'Cancelling import...' : currentLoadingState.text}
-              </h3>
-              <div className="progress-wrapper">
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                  />
-                </div>
-                <div className="progress-text">
-                  {progress.current} of {progress.total} books
-                </div>
+          <div className="import-loading">
+            <h3 className="loading-message">
+              {isCancelling ? 'Cancelling import...' : currentLoadingState.text}
+            </h3>
+            <div className="progress-container">
+              <div className="progress-track">
+                <div
+                  className="progress-indicator"
+                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                />
               </div>
-              {!isCancelling && (
-                <button className="cancel-import-btn" onClick={handleCancelImport}>
-                  Cancel
-                </button>
-              )}
+              <p className="progress-label">
+                {progress.current} of {progress.total} books imported
+              </p>
             </div>
+            {!isCancelling && (
+              <Button varinat="ghost" onClick={handleCancelImport}>
+                Cancel Import
+              </Button>
+            )}
           </div>
         ) : (
           <>
-            <div className="modal-header">
-              <h2>Import Books</h2>
-              <button className="close-btn" onClick={onClose}>
+            <div className="import-header">
+              <div className="header-content">
+                <h2>Import Books</h2>
+                <p className="header-subtitle">
+                  Upload CSV file to bulk import books into your library
+                </p>
+              </div>
+              <Button variant="ghost" onClick={onClose} aria-label="Close">
                 <FaTimes />
-              </button>
+              </Button>
             </div>
 
-            <div className="import-form">
+            <div className="import-body">
               {selectedFile ? (
                 <>
-                  <div className="selected-file">
-                    <FaFile className="file-icon" />
-                    <span className="file-name">{selectedFile.name}</span>
-                    <button className="remove-file" onClick={removeFile}>
-                      <FaTrash />
-                    </button>
+                  <div className="file-selected">
+                    <div className="file-info">
+                      <div className="file-icon-wrapper">
+                        <FaFile />
+                      </div>
+                      <div className="file-details">
+                        <p className="file-name">{selectedFile.name}</p>
+                        <p className="file-size">{(selectedFile.size / 1024).toFixed(2)} KB</p>
+                      </div>
+                      <Button variant="ghost" onClick={removeFile} title="Remove file">
+                        <FaTrash />
+                      </Button>
+                    </div>
                   </div>
                   {parsedData && (
                     <>
+                      <div className="preview-header">
+                        <h3>Preview</h3>
+                        <span className="preview-count">{parsedData.length} books found</span>
+                      </div>
                       {renderPreviewTable()}
-                      <div className="action-buttons">
-                        <button className="submit-btn" onClick={handleSubmit}>
+                      <div className="import-actions">
+                        <Button variant="primary" type="submit" onClick={handleSubmit}>
+                          <FaCloudUploadAlt />
                           Import {parsedData.length} Books
-                        </button>
+                        </Button>
                       </div>
                     </>
                   )}
                 </>
               ) : (
-                <div
-                  className={`drop-zone ${dragActive ? 'drag-active' : ''}`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <FaCloudUploadAlt className="upload-icon" />
-                  <p>Drag and drop your CSV file here</p>
-                  <p>or</p>
-                  <label className="file-input-label">
-                    <input
-                      type="file"
-                      accept=".csv,.txt"
-                      onChange={(e) => processFile(e.target.files[0])}
-                    />
-                    <span>Choose File</span>
-                  </label>
-                </div>
-              )}
-              {!selectedFile && (
-                <div className="format-info">
-                  <h3>Expected Format (Tab-separated):</h3>
-                  <div className="format-table">
-                    <div>CALL NUMBER</div>
-                    <div>ACC. # (Accession Number)</div>
-                    <div>AUTHOR/S</div>
-                    <div>TITLE/S</div>
-                    <div># OF COPIES</div>
-                    <div>COPYRIGHT</div>
+                <>
+                  <div
+                    className={`upload-area ${dragActive ? 'active' : ''}`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <div className="upload-icon-wrapper">
+                      <FaCloudUploadAlt />
+                    </div>
+                    <h3 className="upload-title">Drop your CSV file here</h3>
+                    <p className="upload-subtitle">or click below to browse</p>
+                    <label className="btn-upload">
+                      <input
+                        type="file"
+                        accept=".csv,.txt"
+                        onChange={(e) => processFile(e.target.files[0])}
+                        hidden
+                      />
+                      Choose File
+                    </label>
                   </div>
-                </div>
+                  <div className="format-guide">
+                    <div className="guide-header">
+                      <h4>CSV Format Guide</h4>
+                    </div>
+                    <div className="guide-content">
+                      <p className="guide-description">
+                        Your CSV file should contain the following 19 columns in order:
+                      </p>
+                      <div className="columns-grid">
+                        <span>Name</span>
+                        <span>Title</span>
+                        <span>Author</span>
+                        <span>Series Title</span>
+                        <span>Publisher</span>
+                        <span>Place of Publication</span>
+                        <span>Year</span>
+                        <span>Edition</span>
+                        <span>Volume</span>
+                        <span>Physical Description</span>
+                        <span>ISBN</span>
+                        <span>Accession Number</span>
+                        <span>Call Number</span>
+                        <span>Barcode</span>
+                        <span>Subject</span>
+                        <span>Description</span>
+                        <span>Additional Author</span>
+                        <span>Copies</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </>

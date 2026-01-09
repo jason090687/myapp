@@ -13,6 +13,9 @@ import BookDetailsModal from '../components/Books/components/BookDetailsModal'
 import ConfirmDeleteModal from '../components/Books/components/ConfirmDeleteModal'
 import ErrorBoundary from '../components/ErrorBoundary'
 import ToastContainer from '../components/Toast/ToastContainer'
+import { fetchBooks } from '../Features/api'
+import { toast } from 'react-toastify'
+import ExportProgressModal from '../components/Books/components/ExportProgressModal'
 
 function Books() {
   const navigate = useNavigate()
@@ -36,65 +39,163 @@ function Books() {
 
   const { handleAddBook, handleEditBook } = useBookModals()
 
-  const handleExportToCSV = useCallback(() => {
-    // Filter out cancelled books
-    const booksToExport = books.filter((book) => !book.cancelled)
+  const handleExportToCSV = useCallback(async () => {
+    try {
+      // Show progress modal
+      setExportProgress({
+        isOpen: true,
+        progress: 0,
+        currentPage: 0,
+        totalPages: 0,
+        exportedCount: 0
+      })
 
-    if (booksToExport.length === 0) {
-      return
+      // Fetch all books across all pages
+      let allBooksData = []
+      let currentPage = 1
+      let hasMore = true
+      let totalPages = 1
+
+      while (hasMore) {
+        const data = await fetchBooks(token, currentPage, debouncedSearchTerm)
+        if (data && data.results) {
+          const filteredBooks = data.results.filter((book) => !book.cancelled)
+          allBooksData = [...allBooksData, ...filteredBooks]
+          hasMore = data.next !== null
+
+          // Calculate total pages from count
+          if (data.count && currentPage === 1) {
+            totalPages = Math.ceil(data.count / 10)
+          }
+
+          // Update progress
+          const progress = totalPages > 0 ? (currentPage / totalPages) * 90 : 0
+          setExportProgress({
+            isOpen: true,
+            progress,
+            currentPage,
+            totalPages,
+            exportedCount: allBooksData.length
+          })
+
+          currentPage++
+        } else {
+          hasMore = false
+        }
+      }
+
+      if (allBooksData.length === 0) {
+        setExportProgress({
+          isOpen: false,
+          progress: 0,
+          currentPage: 0,
+          totalPages: 0,
+          exportedCount: 0
+        })
+        toast.warning('No books to export')
+        return
+      }
+
+      // Update progress for CSV generation
+      setExportProgress((prev) => ({
+        ...prev,
+        progress: 95
+      }))
+
+      // Define CSV headers - UPPERCASE
+      const headers = [
+        'NAME',
+        'TITLE',
+        'AUTHOR',
+        'SERIES_TITLE',
+        'PUBLISHER',
+        'PLACE_OF_PUBLICATION',
+        'YEAR',
+        'EDITION',
+        'VOLUME',
+        'PHYSICAL_DESCRIPTION',
+        'ISBN',
+        'ACCESSION_NUMBER',
+        'CALL_NUMBER',
+        'BARCODE',
+        'SUBJECT',
+        'DESCRIPTION',
+        'ADDITIONAL_AUTHOR',
+        'COPIES'
+      ]
+
+      // Convert books data to CSV rows
+      const csvRows = [
+        headers.join(','),
+        ...allBooksData.map((book) =>
+          [
+            `"${(book.name || '').replace(/"/g, '""')}"`,
+            `"${(book.title || '').replace(/"/g, '""')}"`,
+            `"${(book.author || '').replace(/"/g, '""')}"`,
+            `"${(book.series_title || '').replace(/"/g, '""')}"`,
+            `"${(book.publisher || '').replace(/"/g, '""')}"`,
+            `"${(book.place_of_publication || '').replace(/"/g, '""')}"`,
+            book.year || '',
+            `"${(book.edition || '').replace(/"/g, '""')}"`,
+            `"${(book.volume || '').replace(/"/g, '""')}"`,
+            `"${(book.physical_description || '').replace(/"/g, '""')}"`,
+            `"${book.isbn || ''}"`,
+            `"${book.accession_number || ''}"`,
+            `"${book.call_number || ''}"`,
+            `"${book.barcode || ''}"`,
+            `"${(book.subject || '').replace(/"/g, '""')}"`,
+            `"${(book.description || '').replace(/"/g, '""')}"`,
+            `"${(book.additional_author || '').replace(/"/g, '""')}"`,
+            book.copies || 0
+          ].join(',')
+        )
+      ]
+
+      // Create CSV content
+      const csvContent = csvRows.join('\n')
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `books_export_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      // Complete progress
+      setExportProgress((prev) => ({
+        ...prev,
+        progress: 100
+      }))
+
+      // Close modal after brief delay
+      setTimeout(() => {
+        setExportProgress({
+          isOpen: false,
+          progress: 0,
+          currentPage: 0,
+          totalPages: 0,
+          exportedCount: 0
+        })
+        toast.success(`Successfully exported ${allBooksData.length} books`)
+      }, 500)
+    } catch (error) {
+      console.error('Export failed:', error)
+      setExportProgress({
+        isOpen: false,
+        progress: 0,
+        currentPage: 0,
+        totalPages: 0,
+        exportedCount: 0
+      })
+      toast.error('Failed to export books')
     }
-
-    // Define CSV headers
-    const headers = [
-      'Title',
-      'Author',
-      'ISBN',
-      'Publisher',
-      'Year',
-      'Category',
-      'Status',
-      'Copies',
-      'Available',
-      'Date Received',
-      'Accession Number'
-    ]
-
-    // Convert books data to CSV rows
-    const csvRows = [
-      headers.join(','),
-      ...booksToExport.map((book) =>
-        [
-          `"${(book.title || '').replace(/"/g, '""')}"`,
-          `"${(book.author || '').replace(/"/g, '""')}"`,
-          `"${book.isbn || ''}"`,
-          `"${(book.publisher || '').replace(/"/g, '""')}"`,
-          book.year || '',
-          `"${(book.category || '').replace(/"/g, '""')}"`,
-          `"${book.status || ''}"`,
-          book.copies || 0,
-          book.available_copies || 0,
-          book.date_received || '',
-          `"${book.accession_number || ''}"`
-        ].join(',')
-      )
-    ]
-
-    // Create CSV content
-    const csvContent = csvRows.join('\n')
-
-    // Create blob and download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-
-    link.setAttribute('href', url)
-    link.setAttribute('download', `books_export_${new Date().toISOString().split('T')[0]}.csv`)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }, [books])
+  }, [token, debouncedSearchTerm])
 
   const handleGridDelete = useCallback(
     (book) => {
@@ -113,17 +214,24 @@ function Books() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [viewMode, setViewMode] = useState('table')
   const [selectedCategory, setSelectedCategory] = useState('')
-
-  const handleCategoryChange = useCallback((category) => {
-    setSelectedCategory(category)
-  }, [])
-
-  // Filter books by category
-  const filteredBooks = books.filter((book) => {
-    if (book.cancelled) return false
-    if (!selectedCategory) return true
-    return book.category === selectedCategory
+  const [exportProgress, setExportProgress] = useState({
+    isOpen: false,
+    progress: 0,
+    currentPage: 0,
+    totalPages: 0,
+    exportedCount: 0
   })
+
+  const handleCategoryChange = useCallback(
+    (category) => {
+      setSelectedCategory(category)
+      fetchBooksData(1, debouncedSearchTerm, category)
+    },
+    [fetchBooksData, debouncedSearchTerm]
+  )
+
+  // No client-side filtering needed - filtering is done server-side
+  const filteredBooks = books.filter((book) => !book.cancelled)
 
   useEffect(() => {
     const handleResize = () => {
@@ -153,8 +261,8 @@ function Books() {
   }, [])
 
   useEffect(() => {
-    fetchBooksData(1, debouncedSearchTerm)
-  }, [debouncedSearchTerm, fetchBooksData])
+    fetchBooksData(1, debouncedSearchTerm, selectedCategory)
+  }, [debouncedSearchTerm, selectedCategory, fetchBooksData])
 
   useEffect(() => {
     const handleResize = () => {
@@ -189,6 +297,7 @@ function Books() {
               viewMode={viewMode}
               onViewChange={setViewMode}
               onExport={handleExportToCSV}
+              books={books}
             />
 
             {viewMode === 'grid' ? (
@@ -198,6 +307,10 @@ function Books() {
                 onEditBook={handleEditBook}
                 onDeleteBook={handleGridDelete}
                 onViewDetails={handleGridViewDetails}
+                pagination={pagination}
+                onPageChange={(page) =>
+                  handlePageChange(page, debouncedSearchTerm, selectedCategory)
+                }
               />
             ) : (
               <BooksTable
@@ -207,7 +320,9 @@ function Books() {
                 onDeleteBook={handleDeleteBook}
                 onRowClick={handleRowClick}
                 pagination={pagination}
-                onPageChange={handlePageChange}
+                onPageChange={(page) =>
+                  handlePageChange(page, debouncedSearchTerm, selectedCategory)
+                }
               />
             )}
           </div>
@@ -233,6 +348,14 @@ function Books() {
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
         isDeleting={isDeleting}
+      />
+
+      <ExportProgressModal
+        isOpen={exportProgress.isOpen}
+        progress={exportProgress.progress}
+        currentPage={exportProgress.currentPage}
+        totalPages={exportProgress.totalPages}
+        exportedCount={exportProgress.exportedCount}
       />
 
       <ToastContainer />
