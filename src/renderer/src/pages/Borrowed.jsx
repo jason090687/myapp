@@ -222,23 +222,16 @@ const Borrowed = () => {
   const getFilteredBooks = () => {
     let filtered = borrowedBooks
 
-    // Hide records that don't have an associated student
+    // Hide records without a valid student
     filtered = filtered.filter((book) => {
-      const studentIdLike =
+      const studentId =
         book.student_id ?? book.student ?? book.studentId ?? book.studentID ?? book.id_number
+      const studentName = (book.student_name || '').trim().toLowerCase()
 
-      if (
-        studentIdLike !== null &&
-        studentIdLike !== undefined &&
-        `${studentIdLike}`.trim() !== ''
-      ) {
-        return true
-      }
-
-      const studentName = `${book.student_name || ''}`.trim().toLowerCase()
-      if (!studentName) return false
-      if (studentName.includes('undefined') || studentName.includes('null')) return false
-      return true
+      return (
+        (studentId != null && String(studentId).trim()) ||
+        (studentName && !studentName.includes('undefined') && !studentName.includes('null'))
+      )
     })
 
     // Apply status filter
