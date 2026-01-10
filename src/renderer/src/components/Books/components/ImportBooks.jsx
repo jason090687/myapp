@@ -29,6 +29,114 @@ function ImportBooks({ onClose, onRefresh }) {
 
   const [currentLoadingState, setCurrentLoadingState] = useState(loadingMessages[0])
 
+  const normalizeHeader = (value) =>
+    (value ?? '')
+      .toString()
+      .replace(/^\uFEFF/, '')
+      .trim()
+      .toLowerCase()
+
+  const toIntOrEmpty = (value) => {
+    const text = (value ?? '').toString().trim()
+    if (!text) return ''
+    const n = parseInt(text, 10)
+    return Number.isNaN(n) ? '' : n
+  }
+
+  const looksLikeExportedBooksCsv = (rows) => {
+    if (!Array.isArray(rows) || rows.length === 0) return false
+    const header = rows[0]
+    if (!Array.isArray(header)) return false
+
+    const normalized = header.map(normalizeHeader)
+    return (
+      normalized.includes('title') &&
+      normalized.includes('author') &&
+      normalized.includes('isbn') &&
+      normalized.includes('copies')
+    )
+  }
+
+  const parseExportedBooksCsv = (rows) => {
+    const header = rows[0]
+    const headerIndex = new Map()
+
+    header.forEach((h, idx) => {
+      const key = normalizeHeader(h)
+      if (key) headerIndex.set(key, idx)
+    })
+
+    const get = (row, key) => {
+      const idx = headerIndex.get(key)
+      if (idx === undefined) return ''
+      const raw = row[idx]
+      return (raw ?? '').toString().trim()
+    }
+
+    return rows
+      .slice(1)
+      .filter((row) => Array.isArray(row) && row.some((cell) => (cell ?? '').toString().trim()))
+      .map((row) => ({
+        title: get(row, 'title'),
+        author: get(row, 'author'),
+        series_title: get(row, 'series_title'),
+        publisher: get(row, 'publisher'),
+        place_of_publication: get(row, 'place_of_publication'),
+        year: toIntOrEmpty(get(row, 'year')),
+        edition: get(row, 'edition'),
+        volume: get(row, 'volume'),
+        physical_description: get(row, 'physical_description'),
+        isbn: get(row, 'isbn'),
+        accession_number: get(row, 'accession_number'),
+        call_number: get(row, 'call_number'),
+        barcode: get(row, 'barcode'),
+        subject: get(row, 'subject'),
+        description: get(row, 'description'),
+        additional_author: get(row, 'additional_author'),
+        copies: toIntOrEmpty(get(row, 'copies'))
+      }))
+      .filter((book) => book.call_number || book.accession_number || book.title)
+  }
+
+  const parseLegacyBooksCsv = (rows) => {
+    return rows
+      .slice(2) // Start from row 3 (legacy format)
+      .filter((row) => {
+        // Skip rows containing header-like content or all dashes
+        const isHeaderRow = row.some(
+          (cell) =>
+            cell?.includes('TITLE/S') ||
+            cell?.includes('AUTHOR/S') ||
+            cell?.includes('ACC.') ||
+            cell === '-'
+        )
+        const isAllDashes = row.every((cell) => cell === '-')
+        return !isHeaderRow && !isAllDashes
+      })
+      .filter((row) => row.length >= 19)
+      .map((row) => ({
+        title: row[1]?.trim() || '',
+        author: row[2]?.trim() || '',
+        series_title: row[3]?.trim() || '',
+        publisher: row[4]?.trim() || '',
+        place_of_publication: row[5]?.trim() || '',
+        year: row[6]?.trim() ? parseInt(row[6].trim(), 10) : '',
+        edition: row[7]?.trim() || '',
+        volume: row[8]?.trim() || '',
+        physical_description: row[9]?.trim() || '',
+        isbn: row[10]?.trim() || '',
+        accession_number: row[11]?.trim() || '',
+        call_number: row[12]?.trim() || '',
+        barcode: row[13]?.trim() || '',
+        // date_received: row[14]?.trim() || '',
+        subject: row[15]?.trim() || '',
+        description: row[16]?.trim() || '',
+        additional_author: row[17]?.trim() || '',
+        copies: row[18]?.trim() ? parseInt(row[18].trim(), 10) : ''
+      }))
+      .filter((book) => book.call_number || book.accession_number || book.title)
+  }
+
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -79,7 +187,6 @@ function ImportBooks({ onClose, onRefresh }) {
         try {
           const formData = new FormData()
           const fields = [
-            'name',
             'title',
             'author',
             'series_title',
@@ -173,54 +280,30 @@ function ImportBooks({ onClose, onRefresh }) {
             }
 
             const rows = results.data
-            const books = rows
-              .slice(2) // Start from row 3
-              .filter((row) => {
-                // Skip rows containing header-like content or all dashes
-                const isHeaderRow = row.some(
-                  (cell) =>
-                    cell?.includes('TITLE/S') ||
-                    cell?.includes('AUTHOR/S') ||
-                    cell?.includes('ACC.') ||
-                    cell === '-'
-                )
-                const isAllDashes = row.every((cell) => cell === '-')
-                return !isHeaderRow && !isAllDashes
-              })
-              .filter((row) => row.length >= 19)
-              .map((row) => ({
-                name: row[0]?.trim() || '',
-                title: row[1]?.trim() || '',
-                author: row[2]?.trim() || '',
-                series_title: row[3]?.trim() || '',
-                publisher: row[4]?.trim() || '',
-                place_of_publication: row[5]?.trim() || '',
-                year: row[6]?.trim() ? parseInt(row[6].trim()) : '',
-                edition: row[7]?.trim() || '',
-                volume: row[8]?.trim() || '',
-                physical_description: row[9]?.trim() || '',
-                isbn: row[10]?.trim() || '',
-                accession_number: row[11]?.trim() || '',
-                call_number: row[12]?.trim() || '',
-                barcode: row[13]?.trim() || '',
-                // date_received: row[14]?.trim() || '',
-                subject: row[15]?.trim() || '',
-                description: row[16]?.trim() || '',
-                additional_author: row[17]?.trim() || '',
-                copies: row[18]?.trim() ? parseInt(row[18].trim()) : ''
-              }))
-              .filter(
-                (book) => book.call_number || book.accession_number || book.title || book.name
-              )
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+              throw new Error('CSV file is empty')
+            }
+
+            // Preferred: accept the CSV exported by this app (header-based)
+            let books = []
+            if (looksLikeExportedBooksCsv(rows)) {
+              books = parseExportedBooksCsv(rows)
+            } else {
+              // Fallback: legacy positional format
+              books = parseLegacyBooksCsv(rows)
+            }
 
             if (books.length === 0) {
-              throw new Error('No valid books found in the file')
+              throw new Error(
+                'No valid books found. Make sure you are importing a CSV exported from the app or a CSV that matches the required format.'
+              )
             }
 
             setParsedData(books)
           } catch (error) {
             console.error('Error parsing CSV:', error)
-            toast.error('Invalid CSV file format or no valid books found')
+            toast.error(error?.message || 'Invalid CSV file format or no valid books found')
           }
         },
         error: (error) => {
@@ -305,7 +388,6 @@ function ImportBooks({ onClose, onRefresh }) {
           <table>
             <thead>
               <tr>
-                <th>Name</th>
                 <th>Title</th>
                 <th>Author</th>
                 <th>Series Title</th>
@@ -328,7 +410,6 @@ function ImportBooks({ onClose, onRefresh }) {
             <tbody>
               {parsedData.map((book, index) => (
                 <tr key={index}>
-                  <td>{book.name || ''}</td>
                   <td>{book.title || ''}</td>
                   <td>{book.author || ''}</td>
                   <td>{book.series_title || ''}</td>
@@ -462,7 +543,6 @@ function ImportBooks({ onClose, onRefresh }) {
                         Your CSV file should contain the following 19 columns in order:
                       </p>
                       <div className="columns-grid">
-                        <span>Name</span>
                         <span>Title</span>
                         <span>Author</span>
                         <span>Series Title</span>

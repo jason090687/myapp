@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Trash2, X, BookOpen, Users, AlertCircle, Bell } from 'lucide-react'
 import { useActivity } from '../context/ActivityContext'
 import RequestBorrowModal from './RequestBorrowModal'
-import { approveBorrowRequest, fetchBorrowRequests } from '../Features/api'
+import { approveBorrowRequest, fetchBorrowRequests, fetchUserDetails } from '../Features/api'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
 import './BacklogPanel.css'
@@ -14,6 +14,7 @@ function BacklogPanel({ isOpen, onClose }) {
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [borrowRequests, setBorrowRequests] = useState([])
   const [requestsCleared, setRequestsCleared] = useState(false)
+  const [userData, setUserData] = useState(null)
   const { token } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
 
@@ -41,6 +42,18 @@ function BacklogPanel({ isOpen, onClose }) {
     const interval = setInterval(fetchRequests, 30000)
     return () => clearInterval(interval)
   }, [isOpen, token, requestsCleared])
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const response = await fetchUserDetails(token)
+        setUserData(response)
+      } catch (error) {
+        console.error('Error fetching user details:', error)
+      }
+    }
+    loadUserData()
+  }, [token])
 
   const handleClearAll = () => {
     clearActivities()
@@ -117,16 +130,19 @@ function BacklogPanel({ isOpen, onClose }) {
         id: request.id,
         bookId: request.book,
         bookTitle: request.book_title,
-        borrowDate: request.borrow_date,
-        returnDate: request.due_date,
-        purpose: request.purpose
+        studentName: request.student_name,
+        requestDate: request.request_date,
+        responseNotes: request.response_notes,
+        respnseAt: request.response_at,
+        responseBy: request.response_by,
+        isRead: request.is_read
       }
     }))
 
     return [...requestActivities, ...activities].sort(
       (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
     )
-  }, [borrowRequests, activities])
+  }, [borrowRequests, activities, userData])
 
   const filteredActivities = useMemo(() => {
     if (filterType === 'all') return allActivities
@@ -160,8 +176,8 @@ function BacklogPanel({ isOpen, onClose }) {
   const handleActivityClick = (activity) => {
     if (activity.type === 'borrow_request' && activity.data) {
       setSelectedRequest(activity.data)
-      onClose() // Close the backpanel first
-      // Delay opening modal slightly to ensure smooth transition
+      onClose()
+
       setTimeout(() => {
         setIsRequestModalOpen(true)
       }, 150)
@@ -171,10 +187,15 @@ function BacklogPanel({ isOpen, onClose }) {
   const handleApproveRequest = async (approvalData) => {
     try {
       await approveBorrowRequest(token, approvalData.id, approvalData)
+
+      approvalData.isRead = true
+      approvalData.responseBy = userData ? userData.id : 'Admin'
+      approvalData.responseAt = new Date().toISOString()
+
       showToast('Success', 'Borrow request approved successfully!', 'success')
       setIsRequestModalOpen(false)
       setSelectedRequest(null)
-      // Refresh the requests list
+
       const response = await fetchBorrowRequests(token, 'pending')
       setBorrowRequests(response.results || [])
     } catch (error) {

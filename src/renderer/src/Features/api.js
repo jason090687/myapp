@@ -2,8 +2,8 @@ import axios from 'axios'
 
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
 // const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
-// const API_URL = 'http://192.168.2.175:8000/api/v1'
-const API_URL = 'http://127.0.0.1:8000/api/v1'
+const API_URL = 'http://192.168.2.175:8000/api/v1'
+// const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 // const apiConfig = {
 //   baseURL: API_URL,
@@ -317,7 +317,7 @@ export const borrowBook = async (token, borrowData) => {
 // Fetch pending borrow requests
 export const fetchBorrowRequests = async (token, status = 'pending') => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/list/`, getAuthHeaders(token))
+    const response = await axios.get(`${API_URL}/borrow/requests/`, getAuthHeaders(token))
     return response.data
   } catch (error) {
     console.error('Error fetching borrow requests:', error)
@@ -329,11 +329,8 @@ export const fetchBorrowRequests = async (token, status = 'pending') => {
 export const approveBorrowRequest = async (token, requestId, approvalData) => {
   try {
     const response = await axios.patch(
-      `${API_URL}/borrow/${requestId}/`,
-      {
-        student: approvalData.student_id,
-        ...approvalData
-      },
+      `${API_URL}/borrow/requests/${requestId}/`,
+      approvalData,
       getAuthHeaders(token)
     )
     return response.data

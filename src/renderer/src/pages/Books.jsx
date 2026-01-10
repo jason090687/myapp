@@ -104,7 +104,6 @@ function Books() {
 
       // Define CSV headers - UPPERCASE
       const headers = [
-        'NAME',
         'TITLE',
         'AUTHOR',
         'SERIES_TITLE',
@@ -129,7 +128,6 @@ function Books() {
         headers.join(','),
         ...allBooksData.map((book) =>
           [
-            `"${(book.name || '').replace(/"/g, '""')}"`,
             `"${(book.title || '').replace(/"/g, '""')}"`,
             `"${(book.author || '').replace(/"/g, '""')}"`,
             `"${(book.series_title || '').replace(/"/g, '""')}"`,

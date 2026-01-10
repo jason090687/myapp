@@ -1956,6 +1956,15 @@ html.dark .books-container .book-author {
   color: var(--text-tertiary) !important;
 }
 
+html.dark .books-container .book-metadata .metadata-item {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .books-container .book-metadata .metadata-icon {
+  color: var(--text-tertiary) !important;
+  opacity: 0.9 !important;
+}
+
 html.dark .books-container .book-publisher,
 html.dark .books-container .book-year,
 html.dark .books-container .book-isbn {
@@ -1986,6 +1995,19 @@ html.dark .books-container .book-actions .view-btn:hover,
 html.dark .books-container .book-actions .edit-btn:hover,
 html.dark .books-container .book-actions .delete-btn:hover {
   background: var(--bg-hover) !important;
+}
+
+html.dark .books-container .empty-state-icon {
+  background: var(--bg-secondary) !important;
+  color: var(--text-tertiary) !important;
+}
+
+html.dark .books-container .empty-state-title {
+  color: var(--text-primary) !important;
+}
+
+html.dark .books-container .empty-state-description {
+  color: var(--text-secondary) !important;
 }
 
 /* AddBook / EditBook page (uses AddBook.css classes) */

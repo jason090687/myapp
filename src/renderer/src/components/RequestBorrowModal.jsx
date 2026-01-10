@@ -11,6 +11,25 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest }) {
   const [isLoading, setIsLoading] = useState(false)
   const { showToast } = useToaster()
 
+  const formatDate = (value) => {
+    if (!value) return ''
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return String(value)
+    return date.toLocaleDateString()
+  }
+
+  const requestedDate =
+    borrowRequest?.requestDate ?? borrowRequest?.resquestDate ?? borrowRequest?.borrowDate
+  const responseDate =
+    borrowRequest?.responseAt ?? borrowRequest?.response_at ?? borrowRequest?.respnseAt
+  const studentName =
+    borrowRequest?.studentName ?? borrowRequest?.student_name ?? borrowRequest?.student?.name
+  const dueDate =
+    borrowRequest?.returnDate ??
+    borrowRequest?.return_date ??
+    borrowRequest?.dueDate ??
+    borrowRequest?.due_date
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -21,14 +40,15 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest }) {
 
     try {
       setIsLoading(true)
-      await onApprove({
+
+      const approvalData = {
         id: borrowRequest.id,
-        student_id: parseInt(studentId),
-        book: borrowRequest.bookId,
-        borrow_date: borrowRequest.borrowDate,
-        due_date: borrowRequest.returnDate,
-        purpose: borrowRequest.purpose
-      })
+        book: borrowRequest.bookId ?? borrowRequest.book,
+        student_id: studentId,
+        request_date: requestedDate
+      }
+
+      await onApprove(approvalData)
       setStudentId('')
       onClose()
       showToast('Success', 'Borrow request approved successfully!', 'success')
@@ -74,15 +94,28 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest }) {
               </div>
             </div>
 
-            {/* Borrow Date - Read Only */}
             <div className="borrow-form-group">
-              <label htmlFor="borrow-date">Borrow Date</label>
+              <label htmlFor="request-date">Requested Date</label>
               <div className="borrow-input-wrapper">
                 <Calendar className="borrow-input-icon" size={18} />
                 <input
                   type="text"
-                  id="borrow-date"
-                  value={new Date(borrowRequest.borrowDate).toLocaleDateString()}
+                  id="request-date"
+                  value={formatDate(requestedDate)}
+                  readOnly
+                  className="borrow-input"
+                />
+              </div>
+            </div>
+
+            <div className="borrow-form-group">
+              <label htmlFor="student-name">Student Name</label>
+              <div className="borrow-input-wrapper">
+                <User className="borrow-input-icon" size={18} />
+                <input
+                  type="text"
+                  id="student-name"
+                  value={studentName || ''}
                   readOnly
                   className="borrow-input"
                 />
@@ -97,29 +130,39 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest }) {
                 <input
                   type="text"
                   id="due-date"
-                  value={new Date(borrowRequest.returnDate).toLocaleDateString()}
+                  value={formatDate(dueDate)}
                   readOnly
                   className="borrow-input"
                 />
               </div>
             </div>
 
-            {/* Student ID Input - Required Field */}
             <div className="borrow-form-group">
-              <label htmlFor="student-id" className="required">
-                Student ID
-              </label>
+              <label htmlFor="response-date">Response Date</label>
+              <div className="borrow-input-wrapper">
+                <Calendar className="borrow-input-icon" size={18} />
+                <input
+                  type="text"
+                  id="response-date"
+                  value={formatDate(responseDate)}
+                  readOnly
+                  className="borrow-input"
+                />
+              </div>
+            </div>
+
+            <div className="borrow-form-group">
+              <label htmlFor="student-id">Student ID</label>
               <div className="borrow-input-wrapper">
                 <User className="borrow-input-icon" size={18} />
                 <input
                   type="text"
                   id="student-id"
-                  placeholder="Enter student ID"
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
-                  required
-                  disabled={isLoading}
+                  placeholder="Enter student ID"
                   className="borrow-input"
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -160,8 +203,14 @@ RequestBorrowModal.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     bookId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     bookTitle: PropTypes.string,
-    borrowDate: PropTypes.string,
-    returnDate: PropTypes.string,
+    studentName: PropTypes.string,
+    requestDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    resquestDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    responseAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    respnseAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    borrowDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    returnDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    dueDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
     purpose: PropTypes.string
   })
 }
