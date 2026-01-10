@@ -222,18 +222,6 @@ const Borrowed = () => {
   const getFilteredBooks = () => {
     let filtered = borrowedBooks
 
-    // Hide records without a valid student
-    filtered = filtered.filter((book) => {
-      const studentId =
-        book.student_id ?? book.student ?? book.studentId ?? book.studentID ?? book.id_number
-      const studentName = (book.student_name || '').trim().toLowerCase()
-
-      return (
-        (studentId != null && String(studentId).trim()) ||
-        (studentName && !studentName.includes('undefined') && !studentName.includes('null'))
-      )
-    })
-
     // Apply status filter
     if (filterStatus === 'borrowed') {
       filtered = filtered.filter((book) => !book.is_returned && !isOverdue(book.due_date))

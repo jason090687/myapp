@@ -128,7 +128,6 @@ function ImportBooks({ onClose, onRefresh }) {
         accession_number: row[11]?.trim() || '',
         call_number: row[12]?.trim() || '',
         barcode: row[13]?.trim() || '',
-        // date_received: row[14]?.trim() || '',
         subject: row[15]?.trim() || '',
         description: row[16]?.trim() || '',
         additional_author: row[17]?.trim() || '',

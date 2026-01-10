@@ -128,12 +128,26 @@
   align-items: center;
 }
 
+.borrow-textarea {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid hsl(214.3 31.8% 91.4%);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: hsl(222.2 84% 4.9%);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  font-family: inherit;
+}
+
 .borrow-input-icon {
   position: absolute;
   left: 0.875rem;
   color: #94a3b8;
   pointer-events: none;
   z-index: 1;
+  top: 15px;
 }
 
 .borrow-input {
@@ -174,10 +188,56 @@
   flex-shrink: 0;
 }
 
+.borrow-mark-read-btn,
+.borrow-reject-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.borrow-mark-read-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  border: none;
+}
+
+.borrow-mark-read-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.borrow-reject-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  border: none;
+}
+
+.borrow-reject-btn:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.borrow-submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border: none;
+}
+
+.borrow-submit-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
 .borrow-submit-btn:disabled,
-.borrow-cancel-btn:disabled {
+.borrow-cancel-btn:disabled,
+.borrow-mark-read-btn:disabled,
+.borrow-reject-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .select-wrapper {

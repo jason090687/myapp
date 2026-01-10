@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom' // Add this import
 import { Bell } from 'lucide-react'
 import BacklogPanel from './BacklogPanel'
 import { useActivity } from '../context/ActivityContext'
+import { getNotificationsCount } from '../Features/api'
 
 const Navbar = ({
   isCollapsed = false,
@@ -23,11 +24,32 @@ const Navbar = ({
   const [searchResults, setSearchResults] = useState(null)
   const [isSearching, setIsSearching] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [notificationsCount, setNotificationsCount] = useState(0)
   const searchRef = useRef(null)
   const userMenuRef = useRef(null)
   const { activities } = useActivity()
   const { token } = useSelector((state) => state.auth)
   const navigate = useNavigate() // Add navigation hook
+
+  // Fetch notifications count
+  useEffect(() => {
+    if (!token) return
+
+    const fetchCount = async () => {
+      try {
+        const response = await getNotificationsCount(token)
+        setNotificationsCount(response.count || 0)
+        console.log()
+      } catch (error) {
+        console.error('Error fetching notifications count:', error)
+      }
+    }
+
+    fetchCount()
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchCount, 30000)
+    return () => clearInterval(interval)
+  }, [token])
 
   // Handle click outside search results
   useEffect(() => {
@@ -157,7 +179,9 @@ const Navbar = ({
           title="View activity log"
         >
           <Bell size={18} />
-          {activities.length > 0 && <span className="notification-badge">{activities.length}</span>}
+          {notificationsCount + activities.length > 0 && (
+            <span className="notification-badge">{notificationsCount + activities.length}</span>
+          )}
         </button>
         {renderUserProfile()}
       </div>

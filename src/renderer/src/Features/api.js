@@ -2,8 +2,8 @@ import axios from 'axios'
 
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
 // const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
-const API_URL = 'http://192.168.2.175:8000/api/v1'
-// const API_URL = 'http://127.0.0.1:8000/api/v1'
+// const API_URL = 'http://192.168.2.175:8000/api/v1'
+const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 // const apiConfig = {
 //   baseURL: API_URL,
@@ -317,7 +317,10 @@ export const borrowBook = async (token, borrowData) => {
 // Fetch pending borrow requests
 export const fetchBorrowRequests = async (token, status = 'pending') => {
   try {
-    const response = await axios.get(`${API_URL}/borrow/requests/`, getAuthHeaders(token))
+    const response = await axios.get(
+      `${API_URL}/borrow/requests/?status=pending&is_read=true`,
+      getAuthHeaders(token)
+    )
     return response.data
   } catch (error) {
     console.error('Error fetching borrow requests:', error)
@@ -325,18 +328,71 @@ export const fetchBorrowRequests = async (token, status = 'pending') => {
   }
 }
 
-// Approve/Update borrow request with student_id
+// Mark request as read
+export const markRequestAsRead = async (token, requestId) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/borrow/requests/${requestId}/mark-read/`,
+      {
+        is_read: true
+      },
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error marking request as read:', error)
+    throw new Error(error.response?.data?.message || 'Failed to mark request as read')
+  }
+}
+
+// Get notifications count for borrow requests
+export const getNotificationsCount = async (token) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/borrow/requests/notifications/count/`,
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error fetching notifications count:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch notifications count')
+  }
+}
+
+// Approve borrow request
 export const approveBorrowRequest = async (token, requestId, approvalData) => {
   try {
-    const response = await axios.patch(
-      `${API_URL}/borrow/requests/${requestId}/`,
-      approvalData,
+    const response = await axios.post(
+      `${API_URL}/borrow/requests/${requestId}/respond/`,
+      {
+        action: 'approve',
+        student_id: approvalData.student_id,
+        response_notes: approvalData.response_notes || ''
+      },
       getAuthHeaders(token)
     )
     return response.data
   } catch (error) {
     console.error('Error approving borrow request:', error)
     throw new Error(error.response?.data?.message || 'Failed to approve borrow request')
+  }
+}
+
+// Reject borrow request
+export const rejectBorrowRequest = async (token, requestId, rejectionData) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/borrow/requests/${requestId}/respond/`,
+      {
+        action: 'reject',
+        response_notes: rejectionData.response_notes || ''
+      },
+      getAuthHeaders(token)
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error rejecting borrow request:', error)
+    throw new Error(error.response?.data?.message || 'Failed to reject borrow request')
   }
 }
 

@@ -1,8 +1,25 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Trash2, X, BookOpen, Users, AlertCircle, Bell } from 'lucide-react'
+import {
+  Trash2,
+  X,
+  BookOpen,
+  Users,
+  AlertCircle,
+  Bell,
+  Check,
+  XCircle,
+  Eye,
+  Mail
+} from 'lucide-react'
 import { useActivity } from '../context/ActivityContext'
 import RequestBorrowModal from './RequestBorrowModal'
-import { approveBorrowRequest, fetchBorrowRequests, fetchUserDetails } from '../Features/api'
+import {
+  approveBorrowRequest,
+  rejectBorrowRequest,
+  markRequestAsRead,
+  fetchBorrowRequests,
+  fetchUserDetails
+} from '../Features/api'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
 import './BacklogPanel.css'
@@ -31,7 +48,10 @@ function BacklogPanel({ isOpen, onClose }) {
     const fetchRequests = async () => {
       try {
         const response = await fetchBorrowRequests(token, 'pending')
-        setBorrowRequests(response.results || [])
+        const unreadRequests = (response.results || []).filter(
+          (request) => request.is_read !== true
+        )
+        setBorrowRequests(unreadRequests)
       } catch (error) {
         console.error('Error fetching borrow requests:', error)
       }
@@ -114,7 +134,7 @@ function BacklogPanel({ isOpen, onClose }) {
       student_added: '👨‍🎓 Student Added',
       staff_added: '👨‍💼 Staff Added',
       overdue: '⏰ Overdue Book',
-      borrow_request: '🔔 Borrow Request'
+      borrow_request: '�️ Mark as Read'
     }
     return labels[type] || type
   }
@@ -130,12 +150,16 @@ function BacklogPanel({ isOpen, onClose }) {
         id: request.id,
         bookId: request.book,
         bookTitle: request.book_title,
+        student: request.student,
+        studentId: request.student,
         studentName: request.student_name,
         requestDate: request.request_date,
+        notes: request.notes,
         responseNotes: request.response_notes,
-        respnseAt: request.response_at,
-        responseBy: request.response_by,
-        isRead: request.is_read
+        responseAt: request.response_at,
+        responseBy: request.response_by === userData?.id,
+        isRead: request.is_read === true,
+        status: request.status == 'approved' ? 'approved' : 'pending'
       }
     }))
 
@@ -184,13 +208,31 @@ function BacklogPanel({ isOpen, onClose }) {
     }
   }
 
+  const handleMarkAsRead = async (requestId, e) => {
+    e.stopPropagation()
+    try {
+      await markRequestAsRead(token, requestId)
+
+      setBorrowRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request.id === requestId ? { ...request, is_read: true } : request
+        )
+      )
+
+      showToast('Success', 'Request marked as read', 'info')
+    } catch (error) {
+      console.error('Error marking request as read:', error)
+      showToast('Error', 'Failed to mark request as read', 'error')
+    }
+  }
+
   const handleApproveRequest = async (approvalData) => {
     try {
       await approveBorrowRequest(token, approvalData.id, approvalData)
 
-      approvalData.isRead = true
-      approvalData.responseBy = userData ? userData.id : 'Admin'
-      approvalData.responseAt = new Date().toISOString()
+      setBorrowRequests((prevRequests) =>
+        prevRequests.filter((request) => request.id !== approvalData.id)
+      )
 
       showToast('Success', 'Borrow request approved successfully!', 'success')
       setIsRequestModalOpen(false)
@@ -200,7 +242,51 @@ function BacklogPanel({ isOpen, onClose }) {
       setBorrowRequests(response.results || [])
     } catch (error) {
       console.error('Error approving request:', error)
+      showToast('Error', 'Failed to approve request', 'error')
       throw error
+    }
+  }
+
+  const handleRejectRequest = async (requestId, e) => {
+    e.stopPropagation()
+    try {
+      await rejectBorrowRequest(token, requestId, { response_notes: 'Request rejected' })
+
+      setBorrowRequests((prevRequests) =>
+        prevRequests.filter((request) => request.id !== requestId)
+      )
+
+      showToast('Success', 'Borrow request rejected', 'info')
+
+      const response = await fetchBorrowRequests(token, 'pending')
+      setBorrowRequests(response.results || [])
+    } catch (error) {
+      console.error('Error rejecting request:', error)
+      showToast('Error', 'Failed to reject request', 'error')
+    }
+  }
+
+  const handleQuickApprove = async (activity, e) => {
+    e.stopPropagation()
+    setSelectedRequest(activity.data)
+    onClose()
+
+    setTimeout(() => {
+      setIsRequestModalOpen(true)
+    }, 150)
+  }
+
+  const handleRequestUpdate = (requestId, updates) => {
+    setBorrowRequests((prevRequests) =>
+      prevRequests.map((request) =>
+        request.id === requestId ? { ...request, ...updates } : request
+      )
+    )
+
+    if (updates.status === 'rejected') {
+      setBorrowRequests((prevRequests) =>
+        prevRequests.filter((request) => request.id !== requestId)
+      )
     }
   }
 
@@ -266,8 +352,7 @@ function BacklogPanel({ isOpen, onClose }) {
             filteredActivities.map((activity) => (
               <div
                 key={activity.id}
-                className={`activity-item ${activity.type} ${activity.type === 'borrow_request' ? 'clickable' : ''}`}
-                onClick={() => handleActivityClick(activity)}
+                className={`activity-item ${activity.type} ${activity.type === 'borrow_request' && activity.data?.isRead === false ? 'unread' : ''}`}
               >
                 <div className="activity-icon-wrapper">
                   <div className={`activity-icon ${getActivityColor(activity.type)}`}>
@@ -278,10 +363,45 @@ function BacklogPanel({ isOpen, onClose }) {
                   </div>
                 </div>
                 <div className="activity-content">
-                  <div className="activity-title">{getActivityLabel(activity.type)}</div>
+                  <div className="activity-title">
+                    {getActivityLabel(activity.type)}
+                    {activity.type === 'borrow_request' && activity.data?.isRead === false && (
+                      <span className="unread-badge">New</span>
+                    )}
+                  </div>
                   <div className="activity-description">{activity.description}</div>
                   <div className="activity-time">{formatTime(activity.timestamp)}</div>
                 </div>
+                {activity.type === 'borrow_request' && (
+                  <div className="activity-actions">
+                    {!activity.data?.isRead && !activity.data?.is_read ? (
+                      <button
+                        className="action-btn mark-read-btn"
+                        onClick={(e) => handleMarkAsRead(activity.data.id, e)}
+                        title="Mark as read"
+                      >
+                        <Mail size={14} />
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          className="action-btn approve-btn"
+                          onClick={(e) => handleQuickApprove(activity, e)}
+                          title="Approve request"
+                        >
+                          <Check size={14} />
+                        </button>
+                        <button
+                          className="action-btn reject-btn"
+                          onClick={(e) => handleRejectRequest(activity.data.id, e)}
+                          title="Reject request"
+                        >
+                          <XCircle size={14} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           ) : (
@@ -301,6 +421,7 @@ function BacklogPanel({ isOpen, onClose }) {
           setSelectedRequest(null)
         }}
         onApprove={handleApproveRequest}
+        onRequestUpdate={handleRequestUpdate}
         borrowRequest={selectedRequest}
       />
     </>
