@@ -216,60 +216,58 @@
   transform: translateY(0);
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .export-modal-content {
-    background: #1f2937;
-  }
+/* Dark mode support (use app theme toggle, not OS theme) */
+html.dark .export-modal-content {
+  background: #1f2937;
+}
 
-  .export-modal-header h3 {
-    color: #f9fafb;
-  }
+html.dark .export-modal-header h3 {
+  color: #f9fafb;
+}
 
-  .export-modal-header {
-    border-bottom-color: #374151;
-  }
+html.dark .export-modal-header {
+  border-bottom-color: #374151;
+}
 
-  .export-modal-description {
-    color: #9ca3af;
-  }
+html.dark .export-modal-description {
+  color: #9ca3af;
+}
 
-  .date-filter-group label {
-    color: #e5e7eb;
-  }
+html.dark .date-filter-group label {
+  color: #e5e7eb;
+}
 
-  .date-input {
-    background: #111827;
-    border-color: #374151;
-    color: #f9fafb;
-  }
+html.dark .date-input {
+  background: #111827;
+  border-color: #374151;
+  color: #f9fafb;
+}
 
-  .date-input:hover {
-    border-color: #4b5563;
-  }
+html.dark .date-input:hover {
+  border-color: #4b5563;
+}
 
-  .modal-close-btn {
-    color: #9ca3af;
-  }
+html.dark .modal-close-btn {
+  color: #9ca3af;
+}
 
-  .modal-close-btn:hover {
-    background: #374151;
-    color: #f9fafb;
-  }
+html.dark .modal-close-btn:hover {
+  background: #374151;
+  color: #f9fafb;
+}
 
-  .export-modal-footer {
-    border-top-color: #374151;
-  }
+html.dark .export-modal-footer {
+  border-top-color: #374151;
+}
 
-  .modal-cancel-btn {
-    background: #111827;
-    color: #9ca3af;
-    border-color: #374151;
-  }
+html.dark .modal-cancel-btn {
+  background: #111827;
+  color: #9ca3af;
+  border-color: #374151;
+}
 
-  .modal-cancel-btn:hover {
-    background: #1f2937;
-    color: #e5e7eb;
-    border-color: #4b5563;
-  }
+html.dark .modal-cancel-btn:hover {
+  background: #1f2937;
+  color: #e5e7eb;
+  border-color: #4b5563;
 }

@@ -12,8 +12,7 @@ import { Toaster } from 'react-hot-toast'
 import { logout } from './Features/authSlice' // Import the logout action
 import { ActivityProvider } from './context/ActivityContext'
 import { ThemeProvider } from './context/ThemeContext'
-import './i18n/config' 
-
+import './i18n/config'
 
 const SessionProvider = ({ children }) => {
   const dispatch = useDispatch()
@@ -65,7 +64,7 @@ const SessionProvider = ({ children }) => {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <ThemeProvider defaultTheme="system">
+      <ThemeProvider defaultTheme="light">
         <ActivityProvider>
           <SessionProvider>
             <Toaster position="top-center" reverseOrder={false} />

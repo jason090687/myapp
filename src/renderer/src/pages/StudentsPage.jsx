@@ -39,7 +39,7 @@ const StudentsPage = () => {
         setStudents(data.results)
         setTotalPages(Math.ceil(data.count / 10))
       } catch (error) {
-        showToast('Error', 'Failed to load students', 'error')
+        window.showToast('Error', 'Failed to load students', 'error')
       } finally {
         setIsLoading(false)
       }
@@ -62,7 +62,7 @@ const StudentsPage = () => {
   const handleRowClick = (student) => {
     const studentPk = student?.id ?? student?.student_id ?? student?.pk
     if (!studentPk) {
-      showToast('Error', 'Student record is missing an internal id', 'error')
+      window.showToast('Error', 'Student record is missing an internal id', 'error')
       return
     }
     navigate(`/students/${studentPk}`)
@@ -78,7 +78,7 @@ const StudentsPage = () => {
       setStudents(data.results)
       setTotalPages(Math.ceil(data.count / 10))
     } catch (error) {
-      showToast('Error', error.message || 'Failed to add student', 'error')
+      window.showToast('Error', error.message || 'Failed to add student', 'error')
       throw error
     }
   }
@@ -88,18 +88,18 @@ const StudentsPage = () => {
       if (!selectedStudent) return
       const studentPk = selectedStudent?.id ?? selectedStudent?.student_id ?? selectedStudent?.pk
       if (!studentPk) {
-        showToast('Error', 'Student record is missing an internal id', 'error')
+        window.showToast('Error', 'Student record is missing an internal id', 'error')
         return
       }
       await updateStudentDetails(token, studentPk, studentData)
-      showToast('Success', 'Student updated successfully!', 'success')
+      window.showToast('Success', 'Student updated successfully!', 'success')
       setIsEditModalOpen(false)
       setSelectedStudent(null)
       // Refresh students list
       const data = await searchStudents(token, searchTerm, currentPage)
       setStudents(data.results)
     } catch (error) {
-      showToast('Error', error.message || 'Failed to update student', 'error')
+      window.showToast('Error', error.message || 'Failed to update student', 'error')
       throw error
     }
   }
@@ -120,13 +120,13 @@ const StudentsPage = () => {
 
       // Optimistically update UI so the row disappears immediately
       setStudents((prev) => prev.filter((s) => (s?.id ?? s?.student_id ?? s?.pk) !== studentId))
-      showToast('Success', 'Student deleted successfully!', 'success')
+      window.showToast('Success', 'Student deleted successfully!', 'success')
       setDeleteConfirm({ isOpen: false, studentId: null, studentName: '' })
       // Refresh students list
       const data = await searchStudents(token, searchTerm, currentPage)
       setStudents(data.results)
     } catch (error) {
-      showToast('Error', error.message || 'Failed to delete student', 'error')
+      window.showToast('Error', error.message || 'Failed to delete student', 'error')
     }
   }
 

@@ -146,39 +146,37 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .export-modal-content {
-    background: #1e293b;
-  }
+/* Dark mode support (use app theme toggle, not OS theme) */
+html.dark .export-modal-content {
+  background: #1e293b;
+}
 
-  .export-modal-header h3 {
-    color: #f1f5f9;
-  }
+html.dark .export-modal-header h3 {
+  color: #f1f5f9;
+}
 
-  .export-modal-subtitle {
-    color: #94a3b8;
-  }
+html.dark .export-modal-subtitle {
+  color: #94a3b8;
+}
 
-  .export-progress-bar {
-    background: #334155;
-  }
+html.dark .export-progress-bar {
+  background: #334155;
+}
 
-  .export-progress-text {
-    color: #cbd5e1;
-  }
+html.dark .export-progress-text {
+  color: #cbd5e1;
+}
 
-  .export-stats {
-    border-top-color: #334155;
-  }
+html.dark .export-stats {
+  border-top-color: #334155;
+}
 
-  .export-stat-label {
-    color: #94a3b8;
-  }
+html.dark .export-stat-label {
+  color: #94a3b8;
+}
 
-  .export-stat-value {
-    color: #f1f5f9;
-  }
+html.dark .export-stat-value {
+  color: #f1f5f9;
 }
 
 @media (max-width: 640px) {

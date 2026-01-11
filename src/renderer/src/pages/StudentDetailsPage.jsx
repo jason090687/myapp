@@ -93,10 +93,10 @@ const StudentDetailsPage = () => {
       setStudent(data)
       setIsEditModalOpen(false)
       // Show success toast
-      showToast('Success', 'Student updated successfully!', 'success', 4000)
+      window.showToast('Success', 'Student updated successfully!', 'success', 4000)
     } catch (error) {
       console.error('Error updating student:', error)
-      showToast('Error', error.message || 'Failed to update student', 'error', 4000)
+      window.showToast('Error', error.message || 'Failed to update student', 'error', 4000)
       throw error
     }
   }

@@ -140,17 +140,17 @@ const Borrowed = () => {
       await updateBook(token, borrowData.book, {
         status: 'Borrowed'
       })
-      showToast('Success', 'Book borrowed successfully!', 'success')
+      window.showToast('Success', 'Book borrowed successfully!', 'success')
     } catch (error) {
       console.error('Error borrowing book:', error)
-      showToast('Error', error.message || 'Failed to borrow book', 'error')
+      window.showToast('Error', error.message || 'Failed to borrow book', 'error')
     }
   }
 
   const handleReturnBook = async (borrowId) => {
     const borrowItem = borrowedBooks.find((item) => item.id === borrowId)
     if (!borrowItem) {
-      showToast('Error', 'Borrow record not found', 'error')
+      window.showToast('Error', 'Borrow record not found', 'error')
       return
     }
 
@@ -162,10 +162,10 @@ const Borrowed = () => {
         status: 'Available'
       })
       await fetchBorrowedData(pagination.currentPage)
-      showToast('Success', 'Book returned successfully!', 'success')
+      window.showToast('Success', 'Book returned successfully!', 'success')
     } catch (error) {
       console.error('Error returning book:', error)
-      showToast('Error', error.message || 'Failed to return book', 'error')
+      window.showToast('Error', error.message || 'Failed to return book', 'error')
     }
   }
 
@@ -184,10 +184,10 @@ const Borrowed = () => {
       await renewBook(token, renewData.id, { due_date: renewData.due_date })
       setIsRenewModalOpen(false)
       await fetchBorrowedData(pagination.currentPage)
-      showToast('Success', 'Book renewed successfully!', 'success')
+      window.showToast('Success', 'Book renewed successfully!', 'success')
     } catch (error) {
       console.error('Error renewing book:', error)
-      showToast('Error', error.message || 'Failed to renew book', 'error')
+      window.showToast('Error', error.message || 'Failed to renew book', 'error')
       throw error
     }
   }
@@ -208,10 +208,10 @@ const Borrowed = () => {
 
       // Refresh the data from server
       await fetchBorrowedData(pagination.currentPage)
-      showToast('Success', 'Action completed successfully!', 'success')
+      window.showToast('Success', 'Action completed successfully!', 'success')
     } catch (error) {
       console.error('Error processing payment:', error)
-      showToast('Error', error.message || 'Failed to process action', 'error')
+      window.showToast('Error', error.message || 'Failed to process action', 'error')
       throw error
     }
   }

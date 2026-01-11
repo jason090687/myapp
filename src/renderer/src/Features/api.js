@@ -2,8 +2,8 @@ import axios from 'axios'
 
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
 // const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
-// const API_URL = 'http://192.168.2.175:8000/api/v1'
-const API_URL = 'http://127.0.0.1:8000/api/v1'
+const API_URL = 'http://192.168.2.175:8000/api/v1'
+// const API_URL = 'http://127.0.0.1:8000/api/v1'
 
 // const apiConfig = {
 //   baseURL: API_URL,

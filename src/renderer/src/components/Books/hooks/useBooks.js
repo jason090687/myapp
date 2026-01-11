@@ -118,7 +118,7 @@ export const useBooks = (token) => {
 
       console.log('Delete request - bookId:', bookId, 'cancelData:', cancelData)
       await deleteBook(token, bookId, cancelData)
-      window.showToast('Success', 'Book cancelled successfully!', 'success', 4000)
+      window.showToast('Success', 'Book deleted successfully!', 'success', 4000)
 
       // Log activity
       addActivity({
