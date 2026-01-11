@@ -17,11 +17,18 @@ const OverdueModal = ({
   studentMap = {}
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedAction, setSelectedAction] = useState('pay')
+  const [selectedAction, setSelectedAction] = useState('return')
   const [orNumber, setOrNumber] = useState('')
   const { token } = useSelector((state) => state.auth)
   const { addActivity } = useActivity()
   const { showToast } = useToaster()
+
+  useEffect(() => {
+    if (!isOpen) return
+    setSelectedAction('return')
+    setOrNumber('')
+    setIsSubmitting(false)
+  }, [isOpen, borrowData?.id])
 
   // Get days overdue
   const getDaysOverdue = () => {
@@ -151,23 +158,6 @@ const OverdueModal = ({
               <span>{new Date(borrowData.due_date).toLocaleDateString()}</span>
             </p>
           </div>
-          {/* <div className="overdue-info-group">
-            <label>Days Overdue</label>
-            <p>
-              {Math.ceil((new Date() - new Date(borrowData.due_date)) / (1000 * 60 * 60 * 24))} days
-            </p>
-          </div> */}
-          {/* <div className="overdue-info-group">
-            <label>Amount Due (₱50/day)</label>
-            {isLoadingAmount ? (
-              <div className="amount-loading">Loading amount...</div>
-            ) : (
-              <p className="amount">
-                <DollarSign className="money-icon" size={18} />₱
-                {typeof overdueAmount === 'number' ? overdueAmount.toFixed(2) : '0.00'}
-              </p>
-            )}
-          </div> */}
           <div className="overdue-info-group">
             <label>Payment Date</label>
             <p>
@@ -236,8 +226,8 @@ const OverdueModal = ({
             {isSubmitting
               ? 'Processing...'
               : selectedAction === 'return'
-                ? 'Return and Pay'
-                : 'Renew and Pay'}
+                ? 'Return Book and Pay'
+                : 'Renew Book and Pay'}
           </Button>
         </div>
       </div>

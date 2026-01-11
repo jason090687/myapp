@@ -35,6 +35,9 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const { token } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
 
+  const keepPendingOnly = (results) =>
+    (results || []).filter((request) => request.status === 'pending')
+
   useEffect(() => {
     if (!isOpen) {
       setRequestsCleared(false)
@@ -48,11 +51,8 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
     const fetchRequests = async () => {
       try {
         const response = await fetchBorrowRequests(token, 'pending')
-        // Show only pending requests (filter out approved/rejected)
-        const pendingOnly = (response.results || []).filter(
-          (request) => request.status === 'pending'
-        )
-        setBorrowRequests(pendingOnly)
+        // Defensive: API may still include non-pending results
+        setBorrowRequests(keepPendingOnly(response.results))
       } catch (error) {
         console.error('Error fetching borrow requests:', error)
       }
@@ -240,9 +240,6 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
       showToast('Success', 'Borrow request approved successfully!', 'success')
       setIsRequestModalOpen(false)
       setSelectedRequest(null)
-
-      const response = await fetchBorrowRequests(token, 'pending')
-      setBorrowRequests(response.results || [])
       if (onRequestUpdate) onRequestUpdate()
     } catch (error) {
       console.error('Error approving request:', error)
@@ -261,9 +258,6 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
       )
 
       showToast('Success', 'Borrow request rejected', 'info')
-
-      const response = await fetchBorrowRequests(token, 'pending')
-      setBorrowRequests(response.results || [])
       if (onRequestUpdate) onRequestUpdate()
     } catch (error) {
       console.error('Error rejecting request:', error)
@@ -288,7 +282,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
       )
     )
 
-    if (updates.status === 'rejected') {
+    if (updates.status === 'rejected' || updates.status === 'approved') {
       setBorrowRequests((prevRequests) =>
         prevRequests.filter((request) => request.id !== requestId)
       )

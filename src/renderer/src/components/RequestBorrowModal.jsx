@@ -153,6 +153,22 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
               </div>
             </div>
 
+            {/* Notes */}
+            <div className="borrow-form-group">
+              <label htmlFor="notes">Notes</label>
+              <div className="borrow-input-wrapper">
+                <FileText className="borrow-input-icon" size={18} />
+                <input
+                  type="text"
+                  name="notes"
+                  id="notes"
+                  className="borrow-input"
+                  value={requestNotes}
+                  readOnly
+                />
+              </div>
+            </div>
+
             {/* Due Date */}
             <div className="borrow-form-group">
               <label htmlFor="due-date">Due Date</label>
@@ -165,21 +181,6 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
                   onChange={(e) => setDueDate(e.target.value)}
                   className="borrow-input"
                   required
-                />
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className="borrow-form-group">
-              <label htmlFor="notes">Notes</label>
-              <div className="borrow-input-wrapper">
-                <FileText className="borrow-input-icon" size={18} />
-                <textarea
-                  name="notes"
-                  id="notes"
-                  className="borrow-input"
-                  value={requestNotes}
-                  readOnly
                 />
               </div>
             </div>

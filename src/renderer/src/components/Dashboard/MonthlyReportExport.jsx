@@ -5,6 +5,7 @@ import { Download, X } from 'lucide-react'
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
 import './MonthlyReportExport.css'
 import { Button } from '../../components/ui/button'
+import { useToaster } from '../Toast/useToaster'
 
 const parseMonthId = (monthId) => {
   if (!monthId) return null
@@ -34,6 +35,18 @@ const getMonthRange = (monthId) => {
 
 const parseDateInputLocal = (value, mode) => {
   if (!value) return null
+  const monthParsed = parseMonthId(value)
+  if (monthParsed) {
+    if (mode === 'end') {
+      const end = new Date(monthParsed.year, monthParsed.month, 0)
+      end.setHours(23, 59, 59, 999)
+      return end
+    }
+    const start = new Date(monthParsed.year, monthParsed.month - 1, 1)
+    start.setHours(0, 0, 0, 0)
+    return start
+  }
+
   const match = /^\s*(\d{4})-(\d{2})-(\d{2})\s*$/.exec(String(value))
   if (!match) {
     const date = new Date(value)
@@ -49,12 +62,11 @@ const parseDateInputLocal = (value, mode) => {
   return date
 }
 
-const getTodayInputValue = () => {
+const getCurrentMonthInputValue = () => {
   const now = new Date()
   const yyyy = now.getFullYear()
   const mm = String(now.getMonth() + 1).padStart(2, '0')
-  const dd = String(now.getDate()).padStart(2, '0')
-  return `${yyyy}-${mm}-${dd}`
+  return `${yyyy}-${mm}`
 }
 
 // PDF Styles - Modern shadcn-inspired black and white design
@@ -232,23 +244,32 @@ MonthlyReportPDF.propTypes = {
 const MonthlyReportExport = ({ monthlyStatsData }) => {
   const [showExportModal, setShowExportModal] = useState(false)
   const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState(getTodayInputValue())
+  const [toDate, setToDate] = useState(getCurrentMonthInputValue())
+  const [inlineError, setInlineError] = useState('')
+  const { showToast } = useToaster()
+
+  const closeModal = () => {
+    setShowExportModal(false)
+    setInlineError('')
+  }
 
   const handleExportPDF = () => {
     if (!monthlyStatsData || monthlyStatsData.length === 0) {
-      alert('No data available to export')
+      showToast('Error', 'No data available to export', 'error')
       return
     }
+    setInlineError('')
     setShowExportModal(true)
   }
 
   const generatePDF = async () => {
     if (!monthlyStatsData || monthlyStatsData.length === 0) {
-      alert('No data available to export')
+      setInlineError('No data available to export')
       return
     }
 
     try {
+      setInlineError('')
       const currentDate = new Date().toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -292,7 +313,7 @@ const MonthlyReportExport = ({ monthlyStatsData }) => {
       }
 
       if (sortedData.length === 0) {
-        alert('No data available for the selected date range')
+        setInlineError('No data available for the selected date range')
         return
       }
 
@@ -323,11 +344,12 @@ const MonthlyReportExport = ({ monthlyStatsData }) => {
 
       // Close modal
       setShowExportModal(false)
+      setInlineError('')
       setFromDate('')
-      setToDate(getTodayInputValue())
+      setToDate(getCurrentMonthInputValue())
     } catch (error) {
       console.error('Error generating PDF:', error)
-      alert('Failed to generate PDF. Please try again.')
+      showToast('Error', 'Failed to generate PDF. Please try again.', 'error')
     }
   }
 
@@ -341,43 +363,51 @@ const MonthlyReportExport = ({ monthlyStatsData }) => {
 
       {/* Export Modal */}
       {showExportModal && (
-        <div className="export-modal-overlay" onClick={() => setShowExportModal(false)}>
+        <div className="export-modal-overlay" onClick={closeModal}>
           <div className="export-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="export-modal-header">
               <h3>Export Monthly Report</h3>
-              <Button variant="ghost" onClick={() => setShowExportModal(false)}>
+              <Button variant="ghost" onClick={closeModal}>
                 <X size={20} />
               </Button>
             </div>
             <div className="export-modal-body">
               <p className="export-modal-description">
-                Select a date range to filter the report. To Date defaults to today.
+                Select a date range to filter the report. To Date defaults to the current month.
               </p>
+
+              {inlineError ? <div className="export-modal-inline-error">{inlineError}</div> : null}
               <div className="date-filters">
                 <div className="date-filter-group">
                   <label htmlFor="fromDate">From Date</label>
                   <input
-                    type="date"
+                    type="month"
                     id="fromDate"
                     value={fromDate}
-                    onChange={(e) => setFromDate(e.target.value)}
+                    onChange={(e) => {
+                      setFromDate(e.target.value)
+                      setInlineError('')
+                    }}
                     className="date-input"
                   />
                 </div>
                 <div className="date-filter-group">
                   <label htmlFor="toDate">To Date</label>
                   <input
-                    type="date"
+                    type="month"
                     id="toDate"
                     value={toDate}
-                    onChange={(e) => setToDate(e.target.value)}
+                    onChange={(e) => {
+                      setToDate(e.target.value)
+                      setInlineError('')
+                    }}
                     className="date-input"
                   />
                 </div>
               </div>
             </div>
             <div className="export-modal-footer">
-              <Button variant="secondary" onClick={() => setShowExportModal(false)}>
+              <Button variant="secondary" onClick={closeModal}>
                 Cancel
               </Button>
               <Button variant="primary" onClick={generatePDF}>

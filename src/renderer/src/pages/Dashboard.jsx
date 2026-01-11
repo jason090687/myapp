@@ -18,7 +18,8 @@ import {
   fetchMonthlyStudentStats,
   fetchAllBorrowedRecords,
   fetchNewArrivals,
-  fetchRecentCheckouts
+  fetchRecentCheckouts,
+  fetchStudents
 } from '../Features/api'
 import { CardsSkeleton } from '../components/Dashboard/DashboardSkeletons'
 
@@ -59,11 +60,6 @@ function Dashboard() {
     users: []
   })
   const [chartLoading, setChartLoading] = useState(false)
-  const [selectedBorrowerMonth, setSelectedBorrowerMonth] = useState(new Date())
-  const [penalties, setPenalties] = useState({
-    totalPenalties: 0,
-    overdueCount: 0
-  })
   const [paidFees, setPaidFees] = useState([])
   const [overdueFees, setOverdueFees] = useState([])
   const [borrowedBooks, setBorrowedBooks] = useState([])
@@ -74,36 +70,31 @@ function Dashboard() {
     setIsCollapsed(!isCollapsed)
   }
 
-  // Move fetchStudents outside useEffect and make it a component method
-  const fetchStudents = async (month, year) => {
-    try {
-      const date = new Date(year, month)
-      const monthString = date.toLocaleString('default', {
-        month: 'long',
-        year: 'numeric'
-      })
+  useEffect(() => {
+    const loadTopBorrower = async () => {
+      try {
+        const response = await fetchStudents(token)
 
-      const stats = await fetchMonthlyStudentStats(token)
-      const monthlyStats = stats.find((stat) => stat.month === monthString)
-
-      if (monthlyStats) {
-        setTopBorrowers(
-          monthlyStats.students.map((student) => ({
-            student_id: student.student_id,
-            student_name: student.student_name,
-            books_borrowed: student.books_borrowed
+        // filter if borrowed_books_count >= 5 then display in the top borrowers
+        const borrowers = (response || [])
+          .filter((student) => (student?.borrowed_books_count || 0) >= 5)
+          .map((student) => ({
+            student_id: student?.id ?? student?.student_id ?? student?.pk ?? student?.id_number,
+            student_name: student?.name ?? student?.student_name ?? 'Unknown',
+            books_borrowed: student?.borrowed_books_count || 0
           }))
-        )
-      } else {
+          .filter((b) => b.student_id != null)
+
+        setTopBorrowers(borrowers)
+      } catch (error) {
+        console.error('Error fetching top borrowers:', error)
         setTopBorrowers([])
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, borrowers: false }))
       }
-    } catch (error) {
-      console.error('Error fetching students:', error)
-      setTopBorrowers([])
-    } finally {
-      setLoadingStates((prev) => ({ ...prev, borrowers: false }))
     }
-  }
+    loadTopBorrower()
+  }, [token])
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -305,11 +296,6 @@ function Dashboard() {
     navigate(route)
   }
 
-  const handleBorrowerMonthChange = (month, year) => {
-    setSelectedBorrowerMonth(new Date(year, month))
-    fetchStudents(month, year) // Now this will work because fetchStudents is in scope
-  }
-
   const cards = [
     {
       title: 'Total Books',
@@ -384,12 +370,7 @@ function Dashboard() {
               monthlyStatsData={monthlyStatsData}
             />
 
-            <TopBorrowers
-              topBorrowers={topBorrowers}
-              selectedBorrowerMonth={selectedBorrowerMonth}
-              onMonthChange={handleBorrowerMonthChange}
-              isLoading={loadingStates.borrowers}
-            />
+            <TopBorrowers topBorrowers={topBorrowers} isLoading={loadingStates.borrowers} />
           </div>
 
           {/* Books and Checkouts */}

@@ -1,7 +1,6 @@
-import TopBorrowerMonthSelector from './TopBorrowerMonthSelector'
 import { TableSkeleton } from './DashboardSkeletons'
 
-const TopBorrowers = ({ topBorrowers, selectedBorrowerMonth, onMonthChange, isLoading }) => {
+const TopBorrowers = ({ topBorrowers, isLoading }) => {
   return (
     <div className="overdue">
       {isLoading ? (
@@ -18,11 +17,6 @@ const TopBorrowers = ({ topBorrowers, selectedBorrowerMonth, onMonthChange, isLo
             }}
           >
             <h3>Top Borrowers</h3>
-            <TopBorrowerMonthSelector
-              currentMonth={selectedBorrowerMonth.getMonth()}
-              currentYear={selectedBorrowerMonth.getFullYear()}
-              onMonthChange={onMonthChange}
-            />
           </div>
           <table>
             <thead>

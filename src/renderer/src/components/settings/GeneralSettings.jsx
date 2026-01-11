@@ -10,9 +10,6 @@ function GeneralSettings() {
 
   const defaultSettings = {
     language: 'en',
-    dateFormat: 'MM/DD/YYYY',
-    timeFormat: '12h',
-    pageSize: 25,
     showWelcomeScreen: true
   }
 
@@ -25,7 +22,7 @@ function GeneralSettings() {
       const savedSettings = localStorage.getItem('appSettings')
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings)
-        setSettings(parsed)
+        setSettings({ ...defaultSettings, ...parsed })
         // Set the language on mount
         if (parsed.language && i18n.language !== parsed.language) {
           i18n.changeLanguage(parsed.language)
@@ -34,7 +31,7 @@ function GeneralSettings() {
     } catch (error) {
       console.error('Error loading settings:', error)
     }
-  }, [i18n])
+  }, [defaultSettings, i18n])
 
   const handleLanguageChange = (e) => {
     const newLanguage = e.target.value
@@ -83,42 +80,6 @@ function GeneralSettings() {
             <option value="fr">Français (French)</option>
             <option value="de">Deutsch (German)</option>
             <option value="tl">Filipino (Tagalog)</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>{t('settings.dateFormat')}</label>
-          <select
-            value={settings.dateFormat}
-            onChange={(e) => setSettings((prev) => ({ ...prev, dateFormat: e.target.value }))}
-          >
-            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>{t('settings.timeFormat')}</label>
-          <select
-            value={settings.timeFormat}
-            onChange={(e) => setSettings((prev) => ({ ...prev, timeFormat: e.target.value }))}
-          >
-            <option value="12h">12 Hour (AM/PM)</option>
-            <option value="24h">24 Hour</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>{t('settings.itemsPerPage')}</label>
-          <select
-            value={settings.pageSize}
-            onChange={(e) => setSettings((prev) => ({ ...prev, pageSize: Number(e.target.value) }))}
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
           </select>
         </div>
 

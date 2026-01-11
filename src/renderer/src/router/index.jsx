@@ -6,11 +6,8 @@ import Dashboard from '../pages/Dashboard'
 import Books from '../pages/Books'
 import Borrowed from '../pages/Borrowed'
 import Settings from '../pages/Settings'
-import BackupSettings from '../components/settings/BackupSettings.jsx'
 import GeneralSettings from '../components/settings/GeneralSettings.jsx'
 import AccountSettings from '../components/settings/AccountSettings.jsx'
-import NotificationSettings from '../components/settings/NotificationSettings.jsx'
-import SystemSettings from '../components/settings/SystemSettings.jsx'
 import Help from '../pages/Help'
 import CreateNewPassword from '../pages/CreateNewPassword.jsx'
 // import ProfilePage from '../pages/ProfilePage.jsx'
@@ -110,18 +107,6 @@ const router = createHashRouter([
       {
         path: 'account',
         element: <AccountSettings />
-      },
-      {
-        path: 'notifications',
-        element: <NotificationSettings />
-      },
-      {
-        path: 'system',
-        element: <SystemSettings />
-      },
-      {
-        path: 'backup',
-        element: <BackupSettings />
       }
     ]
   },
