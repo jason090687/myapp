@@ -68,6 +68,7 @@ function Dashboard() {
   const [overdueFees, setOverdueFees] = useState([])
   const [borrowedBooks, setBorrowedBooks] = useState([])
   const [returnBooks, setReturnBooks] = useState([])
+  const [monthlyStatsData, setMonthlyStatsData] = useState([])
 
   const handleSidebarToggle = () => {
     setIsCollapsed(!isCollapsed)
@@ -107,68 +108,64 @@ function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [dashStats, borrowStats, returnedData] = await Promise.all([
+        const [dashStats, borrowStats, returnedData, monthlyStats] = await Promise.all([
           fetchDashboardStats(token),
           fetchBorrowedBooksStats(token),
-          fetchReturnedBooksCount(token)
+          fetchReturnedBooksCount(token),
+          fetchMonthlyStudentStats(token)
         ])
 
-        // Create simple chart data with current stats
-        const currentDate = new Date()
-        const processedDate = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          1
-        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        const borrowedDate = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          7
-        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        const returnDate = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          14
-        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        const dueDate = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          21
-        ).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        // Use monthly stats data for the chart
+        if (monthlyStats && monthlyStats.length > 0) {
+          // Store the raw data for PDF export
+          setMonthlyStatsData(monthlyStats)
 
-        setChartData({
-          labels: [processedDate, borrowedDate, returnDate, dueDate],
-          datasets: [
-            {
-              label: 'Processed',
-              data: [dashStats?.total_books || 0, null, null, null],
-              borderColor: 'rgb(59, 130, 246)',
-              backgroundColor: 'rgba(59, 130, 246, 0.2)',
-              fill: true
-            },
-            {
-              label: 'Borrowed',
-              data: [null, borrowStats.borrowed || 0, null, null],
-              borderColor: 'rgb(10, 11, 100)',
-              backgroundColor: 'rgba(10, 11, 100, 0.2)',
-              fill: true
-            },
-            {
-              label: 'Returned',
-              data: [null, null, returnedData.returnedCount || 0, null],
-              borderColor: 'rgb(16, 185, 129)',
-              backgroundColor: 'rgba(16, 185, 129, 0.2)',
-              fill: true
-            },
-            {
-              label: 'Overdue',
-              data: [null, null, null, borrowStats.overdue || 0],
-              borderColor: 'rgb(239, 68, 68)',
-              backgroundColor: 'rgba(239, 68, 68, 0.2)',
-              fill: true
-            }
-          ]
-        })
+          const labels = monthlyStats.map((stat) => stat.month)
+          const processedData = monthlyStats.map((stat) => stat.processed || 0)
+          const borrowedData = monthlyStats.map((stat) => stat.borrowed || 0)
+          const returnedData = monthlyStats.map((stat) => stat.returned || 0)
+          const overdueData = monthlyStats.map((stat) => stat.overdue || 0)
+
+          setChartData({
+            labels: labels,
+            datasets: [
+              {
+                label: 'Processed',
+                data: processedData,
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                fill: true
+              },
+              {
+                label: 'Borrowed',
+                data: borrowedData,
+                borderColor: 'rgb(10, 11, 100)',
+                backgroundColor: 'rgba(10, 11, 100, 0.2)',
+                fill: true
+              },
+              {
+                label: 'Returned',
+                data: returnedData,
+                borderColor: 'rgb(16, 185, 129)',
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                fill: true
+              },
+              {
+                label: 'Overdue',
+                data: overdueData,
+                borderColor: 'rgb(239, 68, 68)',
+                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                fill: true
+              }
+            ]
+          })
+        } else {
+          // Fallback to empty chart if no data
+          setChartData({
+            labels: [],
+            datasets: []
+          })
+        }
 
         setTotalBooks(dashStats.totalBooks)
         setBookStats({
@@ -384,6 +381,7 @@ function Dashboard() {
               isLoading={loadingStates.chart}
               activeTab={activeChartTab}
               onTabChange={handleChartTabChange}
+              monthlyStatsData={monthlyStatsData}
             />
 
             <TopBorrowers

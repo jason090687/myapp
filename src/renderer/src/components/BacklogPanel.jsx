@@ -24,7 +24,7 @@ import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
 import './BacklogPanel.css'
 
-function BacklogPanel({ isOpen, onClose }) {
+function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const { activities, clearActivities } = useActivity()
   const [filterType, setFilterType] = useState('all')
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
@@ -48,10 +48,11 @@ function BacklogPanel({ isOpen, onClose }) {
     const fetchRequests = async () => {
       try {
         const response = await fetchBorrowRequests(token, 'pending')
-        const unreadRequests = (response.results || []).filter(
-          (request) => request.is_read !== true
+        // Show only pending requests (filter out approved/rejected)
+        const pendingOnly = (response.results || []).filter(
+          (request) => request.status === 'pending'
         )
-        setBorrowRequests(unreadRequests)
+        setBorrowRequests(pendingOnly)
       } catch (error) {
         console.error('Error fetching borrow requests:', error)
       }
@@ -82,6 +83,7 @@ function BacklogPanel({ isOpen, onClose }) {
     setIsRequestModalOpen(false)
     setSelectedRequest(null)
     showToast('Success', 'Notifications cleared', 'success')
+    if (onRequestUpdate) onRequestUpdate()
   }
 
   const getActivityIcon = (type) => {
@@ -197,16 +199,16 @@ function BacklogPanel({ isOpen, onClose }) {
     return date.toLocaleDateString()
   }
 
-  const handleActivityClick = (activity) => {
-    if (activity.type === 'borrow_request' && activity.data) {
-      setSelectedRequest(activity.data)
-      onClose()
+  // const handleActivityClick = (activity) => {
+  //   if (activity.type === 'borrow_request' && activity.data) {
+  //     setSelectedRequest(activity.data)
+  //     onClose()
 
-      setTimeout(() => {
-        setIsRequestModalOpen(true)
-      }, 150)
-    }
-  }
+  //     setTimeout(() => {
+  //       setIsRequestModalOpen(true)
+  //     }, 150)
+  //   }
+  // }
 
   const handleMarkAsRead = async (requestId, e) => {
     e.stopPropagation()
@@ -220,6 +222,7 @@ function BacklogPanel({ isOpen, onClose }) {
       )
 
       showToast('Success', 'Request marked as read', 'info')
+      if (onRequestUpdate) onRequestUpdate()
     } catch (error) {
       console.error('Error marking request as read:', error)
       showToast('Error', 'Failed to mark request as read', 'error')
@@ -240,6 +243,7 @@ function BacklogPanel({ isOpen, onClose }) {
 
       const response = await fetchBorrowRequests(token, 'pending')
       setBorrowRequests(response.results || [])
+      if (onRequestUpdate) onRequestUpdate()
     } catch (error) {
       console.error('Error approving request:', error)
       showToast('Error', 'Failed to approve request', 'error')
@@ -260,6 +264,7 @@ function BacklogPanel({ isOpen, onClose }) {
 
       const response = await fetchBorrowRequests(token, 'pending')
       setBorrowRequests(response.results || [])
+      if (onRequestUpdate) onRequestUpdate()
     } catch (error) {
       console.error('Error rejecting request:', error)
       showToast('Error', 'Failed to reject request', 'error')
@@ -343,6 +348,12 @@ function BacklogPanel({ isOpen, onClose }) {
             onClick={() => setFilterType('student_added')}
           >
             Users
+          </button>
+          <button
+            className={`filter-btn ${filterType === 'borrow_request' ? 'active' : ''}`}
+            onClick={() => setFilterType('borrow_request')}
+          >
+            Request
           </button>
         </div>
 

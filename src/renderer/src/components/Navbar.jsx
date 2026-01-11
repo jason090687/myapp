@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom' // Add this import
 import { Bell } from 'lucide-react'
 import BacklogPanel from './BacklogPanel'
 import { useActivity } from '../context/ActivityContext'
-import { getNotificationsCount } from '../Features/api'
+import { getNotificationsCount, fetchBorrowRequests } from '../Features/api'
 
 const Navbar = ({
   isCollapsed = false,
@@ -25,6 +25,8 @@ const Navbar = ({
   const [isSearching, setIsSearching] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [notificationsCount, setNotificationsCount] = useState(0)
+  const [borrowRequestsCount, setBorrowRequestsCount] = useState(0)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const searchRef = useRef(null)
   const userMenuRef = useRef(null)
   const { activities } = useActivity()
@@ -50,6 +52,28 @@ const Navbar = ({
     const interval = setInterval(fetchCount, 30000)
     return () => clearInterval(interval)
   }, [token])
+
+  // Fetch pending borrow requests count
+  useEffect(() => {
+    if (!token) return
+
+    const fetchRequestsCount = async () => {
+      try {
+        const response = await fetchBorrowRequests(token, 'pending')
+        const unreadCount = (response.results || []).filter(
+          (request) => request.is_read !== true
+        ).length
+        setBorrowRequestsCount(unreadCount)
+      } catch (error) {
+        console.error('Error fetching borrow requests count:', error)
+      }
+    }
+
+    fetchRequestsCount()
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchRequestsCount, 30000)
+    return () => clearInterval(interval)
+  }, [token, refreshTrigger])
 
   // Handle click outside search results
   useEffect(() => {
@@ -179,14 +203,23 @@ const Navbar = ({
           title="View activity log"
         >
           <Bell size={18} />
-          {notificationsCount + activities.length > 0 && (
-            <span className="notification-badge">{notificationsCount + activities.length}</span>
+          {notificationsCount + borrowRequestsCount + activities.length > 0 && (
+            <span className="notification-badge">
+              {notificationsCount + borrowRequestsCount + activities.length}
+            </span>
           )}
         </button>
         {renderUserProfile()}
       </div>
 
-      <BacklogPanel isOpen={isBacklogOpen} onClose={() => setIsBacklogOpen(false)} />
+      <BacklogPanel
+        isOpen={isBacklogOpen}
+        onClose={() => {
+          setIsBacklogOpen(false)
+          setRefreshTrigger((prev) => prev + 1)
+        }}
+        onRequestUpdate={() => setRefreshTrigger((prev) => prev + 1)}
+      />
     </nav>
   )
 }

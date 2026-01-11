@@ -18,9 +18,12 @@
 
 /* Chart Header */
 .chart-header {
-  margin-bottom: 2rem;
+  /* margin-bottom: 2rem; */
   padding-bottom: 0.75rem;
   margin-left: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .chart-title-section {
@@ -44,6 +47,37 @@
   font-weight: 400;
   color: #6b7280;
   font-family: 'Inter', 'system-ui', sans-serif;
+}
+
+/* Export PDF Button */
+.export-pdf-btn,
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.export-pdf-btn:hover,
+.export-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.export-pdf-btn:active,
+.export-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Chart Tabs */

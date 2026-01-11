@@ -1,3 +1,4 @@
+// @refresh reset
 import PropTypes from 'prop-types'
 import { Line } from 'react-chartjs-2'
 import {
@@ -12,6 +13,7 @@ import {
   Filler
 } from 'chart.js'
 import { ChartSkeleton } from './DashboardSkeletons'
+import MonthlyReportExport from './MonthlyReportExport'
 import './CustomAreaChart.css'
 
 // Register Chart.js components
@@ -26,31 +28,15 @@ ChartJS.register(
   Filler
 )
 
-const CustomAreaChart = ({ chartData, chartLoading, isLoading, activeTab, onTabChange }) => {
-  const tabs = [
-    { id: 'all', label: 'All Metrics', icon: '📊' },
-    { id: 'processed', label: 'Processed', icon: '📚' },
-    { id: 'borrowed', label: 'Borrowed', icon: '📖' },
-    { id: 'returned', label: 'Returned', icon: '✅' },
-    { id: 'overdue', label: 'Overdue', icon: '⏰' }
-  ]
-
-  const getFilteredData = () => {
-    if (activeTab === 'all') {
-      return chartData
-    }
-    const tabMap = {
-      processed: 'Processed',
-      borrowed: 'Borrowed',
-      returned: 'Returned',
-      overdue: 'Overdue'
-    }
-    const label = tabMap[activeTab]
-    return {
-      labels: chartData.labels,
-      datasets: chartData.datasets?.filter((ds) => ds.label === label) || []
-    }
-  }
+const CustomAreaChart = ({
+  chartData,
+  chartLoading,
+  isLoading,
+  activeTab,
+  onTabChange,
+  monthlyStatsData
+}) => {
+  const getDisplayData = () => chartData
 
   const chartOptions = {
     responsive: true,
@@ -61,7 +47,7 @@ const CustomAreaChart = ({ chartData, chartLoading, isLoading, activeTab, onTabC
     },
     plugins: {
       legend: {
-        display: activeTab === 'all',
+        display: true,
         position: 'top',
         align: 'end',
         labels: {
@@ -165,20 +151,7 @@ const CustomAreaChart = ({ chartData, chartLoading, isLoading, activeTab, onTabC
               <h3 className="chart-title">Library Statistics</h3>
               <p className="chart-subtitle">Track your library&apos;s performance metrics</p>
             </div>
-          </div>
-
-          {/* Chart Tabs */}
-          <div className="chart-tabs">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={`chart-tab ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => onTabChange(tab.id)}
-              >
-                <span className="tab-icon">{tab.icon}</span>
-                <span className="tab-label">{tab.label}</span>
-              </button>
-            ))}
+            <MonthlyReportExport monthlyStatsData={monthlyStatsData} />
           </div>
 
           <div className="chart-container-custom">
@@ -188,7 +161,7 @@ const CustomAreaChart = ({ chartData, chartLoading, isLoading, activeTab, onTabC
                 <p>Loading chart data...</p>
               </div>
             ) : (
-              <Line data={getFilteredData()} options={chartOptions} />
+              <Line data={getDisplayData()} options={chartOptions} />
             )}
           </div>
         </>
@@ -201,8 +174,9 @@ CustomAreaChart.propTypes = {
   chartData: PropTypes.object.isRequired,
   chartLoading: PropTypes.bool,
   isLoading: PropTypes.bool,
-  activeTab: PropTypes.string.isRequired,
-  onTabChange: PropTypes.func.isRequired
+  activeTab: PropTypes.string,
+  onTabChange: PropTypes.func,
+  monthlyStatsData: PropTypes.array
 }
 
 export default CustomAreaChart

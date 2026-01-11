@@ -1103,7 +1103,7 @@ export const fetchNewArrivals = async (token) => {
 
 export const fetchMonthlyStudentStats = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/students/stats/monthly/`, getAuthHeaders(token))
+    const response = await axios.get(`${API_URL}/marc/monthly-report/`, getAuthHeaders(token))
     return response.data
   } catch (error) {
     console.error('Error fetching monthly student stats:', error)
