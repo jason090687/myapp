@@ -53,17 +53,22 @@
   padding: 2rem 2.5rem;
   border-bottom: 1px solid #e2e8f0;
   background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  flex-shrink: 0;
+}
+
+.header-content {
+  flex: 1;
 }
 
 .header-content h2 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #0f172a !important;
   margin: 0 0 0.5rem 0;
 }
 
 .header-subtitle {
-  color: #64748b;
+  color: #64748b !important;
   font-size: 0.95rem;
   margin: 0;
 }
@@ -257,7 +262,7 @@
   text-align: left;
   font-weight: 600;
   font-size: 0.875rem;
-  color: white;
+  /* color: white; */
   border-bottom: 2px solid #e2e8f0;
   white-space: nowrap;
 }
