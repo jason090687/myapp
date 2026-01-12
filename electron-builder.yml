@@ -12,6 +12,9 @@ asarUnpack:
   - resources/**
 win:
   executableName: myapp
+  target:
+    - nsis
+  signAndEditExecutable: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

@@ -13,9 +13,9 @@
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win --config",
-    "build:mac": "npm run build && electron-builder --mac --config",
-    "build:linux": "npm run build && electron-builder --linux --config"
+    "build:win": "npm run build && electron-builder --win --config electron-builder.yml",
+    "build:mac": "npm run build && electron-builder --mac --config electron-builder.yml",
+    "build:linux": "npm run build && electron-builder --linux --config electron-builder.yml"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -82,7 +82,12 @@
     ],
     "win": {
       "icon": "./build/icon.ico",
-      "target": "nsis"
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "sign": null,
+      "verifyUpdateCodeSignature": false
     },
     "linux": {
       "icon": "./build/icon.ico",
