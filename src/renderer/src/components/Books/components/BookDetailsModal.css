@@ -403,81 +403,79 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .book-details-overlay {
-    background: rgba(0, 0, 0, 0.7);
-  }
+/* Dark mode support (app-controlled) */
+html.dark .book-details-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
 
-  .book-details-content {
-    background: #1e293b;
-    border-color: #334155;
-  }
+html.dark .book-details-content {
+  background: #1e293b;
+  border-color: #334155;
+}
 
-  .book-details-header {
-    background: #0f172a;
-    border-bottom-color: #334155;
-  }
+html.dark .book-details-header {
+  background: #0f172a;
+  border-bottom-color: #334155;
+}
 
-  .book-details-header .header-content h2 {
-    color: #f1f5f9;
-  }
+html.dark .book-details-header .header-content h2 {
+  color: #f1f5f9;
+}
 
-  .book-details-header .close-button {
-    background: #1e293b;
-    border-color: #334155;
-    color: #cbd5e1;
-  }
+html.dark .book-details-header .close-button {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
 
-  .book-details-header .close-button:hover {
-    background: #334155;
-    color: #f1f5f9;
-  }
+html.dark .book-details-header .close-button:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
 
-  .book-details-body {
-    background: #1e293b;
-  }
+html.dark .book-details-body {
+  background: #1e293b;
+}
 
-  .book-details-content .detail-item {
-    background: #0f172a;
-    border-color: #334155;
-  }
+html.dark .book-details-content .detail-item {
+  background: #0f172a;
+  border-color: #334155;
+}
 
-  .book-details-content .detail-item:hover {
-    background: #1e293b;
-    border-color: #475569;
-  }
+html.dark .book-details-content .detail-item:hover {
+  background: #1e293b;
+  border-color: #475569;
+}
 
-  .book-details-content .detail-label {
-    color: #94a3b8;
-  }
+html.dark .book-details-content .detail-label {
+  color: #94a3b8;
+}
 
-  .book-details-content .detail-value {
-    color: #f1f5f9;
-  }
+html.dark .book-details-content .detail-value {
+  color: #f1f5f9;
+}
 
-  .book-details-content .book-cover-container {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    border-color: #334155;
-  }
+html.dark .book-details-content .book-cover-container {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-color: #334155;
+}
 
-  .book-details-content .default-book-cover {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    color: #64748b;
-  }
+html.dark .book-details-content .default-book-cover {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: #64748b;
+}
 
-  .book-details-content .book-details-footer {
-    background: #0f172a;
-    border-top-color: #334155;
-  }
+html.dark .book-details-content .book-details-footer {
+  background: #0f172a;
+  border-top-color: #334155;
+}
 
-  .book-details-content .action-button.delete {
-    background: #1e293b;
-    border-color: #334155;
-  }
+html.dark .book-details-content .action-button.delete {
+  background: #1e293b;
+  border-color: #334155;
+}
 
-  .book-details-content .action-button.delete:hover {
-    background: #450a0a;
-    border-color: #991b1b;
-  }
+html.dark .book-details-content .action-button.delete:hover {
+  background: #450a0a;
+  border-color: #991b1b;
 }

@@ -173,7 +173,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
           <Button variant="primary" onClick={() => onEdit(book)}>
             <Edit2 size={18} /> Edit
           </Button>
-          <Button variant="ghost" onClick={() => handleDelete(book.id)}>
+          <Button variant="secondary" onClick={() => handleDelete(book.id)}>
             <Trash2 size={18} /> Delete
           </Button>
         </div>

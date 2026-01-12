@@ -44,14 +44,12 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
     }
   }, [isOpen])
 
-  // Fetch pending borrow requests from API
   useEffect(() => {
     if (!isOpen || !token || requestsCleared) return
 
     const fetchRequests = async () => {
       try {
         const response = await fetchBorrowRequests(token, 'pending')
-        // Defensive: API may still include non-pending results
         setBorrowRequests(keepPendingOnly(response.results))
       } catch (error) {
         console.error('Error fetching borrow requests:', error)
@@ -59,7 +57,6 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
     }
 
     fetchRequests()
-    // Refresh every 30 seconds while panel is open
     const interval = setInterval(fetchRequests, 30000)
     return () => clearInterval(interval)
   }, [isOpen, token, requestsCleared])
@@ -82,7 +79,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
     setRequestsCleared(true)
     setIsRequestModalOpen(false)
     setSelectedRequest(null)
-    showToast('Success', 'Notifications cleared', 'success')
+    window.showToast('Success', 'Notifications cleared', 'success')
     if (onRequestUpdate) onRequestUpdate()
   }
 
@@ -141,7 +138,6 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
     return labels[type] || type
   }
 
-  // Combine activities with borrow requests from API
   const allActivities = useMemo(() => {
     const requestActivities = borrowRequests.map((request) => ({
       id: `request-${request.id}`,
@@ -237,7 +233,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
         prevRequests.filter((request) => request.id !== approvalData.id)
       )
 
-      showToast('Success', 'Borrow request approved successfully!', 'success')
+      window.showToast('Success', 'Borrow request approved successfully!', 'success')
       setIsRequestModalOpen(false)
       setSelectedRequest(null)
       if (onRequestUpdate) onRequestUpdate()

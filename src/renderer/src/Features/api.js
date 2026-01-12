@@ -553,7 +553,7 @@ export const fetchBorrowedBooksStats = async (token) => {
       getAuthHeaders(token)
     )
     const books = response.data.results
-    console.log(books)
+    // console.log(books)
 
     // Count books by status
     const stats = books.reduce(

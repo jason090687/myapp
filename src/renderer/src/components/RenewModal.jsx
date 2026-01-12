@@ -19,26 +19,33 @@ const RenewModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { showToast } = useToaster()
 
-  const calculateNewDueDate = (currentDueDate) => {
-    // Start with the next day
-    let newDate = new Date(currentDueDate)
-    newDate.setDate(newDate.getDate() + 1)
-
-    let daysAdded = 0
-
-    while (daysAdded < 5) {
-      // Changed from >= to <
-      // Skip weekends (0 is Sunday, 6 is Saturday)
-      if (newDate.getDay() !== 0 && newDate.getDay() !== 6) {
-        daysAdded++
-      }
-      // If we haven't reached 5 working days, add another day
-      if (daysAdded < 5) {
-        newDate.setDate(newDate.getDate() + 1)
-      }
+  const parseDateOnly = (dateStr) => {
+    if (!dateStr) return null
+    // Prefer local date parsing for YYYY-MM-DD to avoid timezone shifts.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [year, month, day] = dateStr.split('-').map(Number)
+      return new Date(year, month - 1, day)
     }
+    const parsed = new Date(dateStr)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+  }
 
-    return newDate.toISOString().split('T')[0]
+  const formatDateOnly = (dateObj) => {
+    const pad2 = (n) => String(n).padStart(2, '0')
+    const year = dateObj.getFullYear()
+    const month = pad2(dateObj.getMonth() + 1)
+    const day = pad2(dateObj.getDate())
+    return `${year}-${month}-${day}`
+  }
+
+  const calculateNewDueDate = (currentDueDate) => {
+    const baseDate = parseDateOnly(currentDueDate)
+    if (!baseDate) return ''
+
+    // Include weekends: extend by 5 calendar days.
+    const newDate = new Date(baseDate)
+    newDate.setDate(newDate.getDate() + 5)
+    return formatDateOnly(newDate)
   }
 
   const handleRenew = async () => {
@@ -52,10 +59,10 @@ const RenewModal = ({
         due_date: newDueDate
       })
 
-      showToast('Book renewed successfully!', '', 'success')
+      window.showToast('Book renewed successfully!', '', 'success')
       onClose()
     } catch (error) {
-      showToast('Failed to renew book', error.message || '', 'error')
+      window.showToast('Failed to renew book', error.message || '', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -91,14 +98,18 @@ const RenewModal = ({
             <label>Current Due Date</label>
             <p>
               <Calendar className="calendar-icon" size={18} />
-              <span>{new Date(borrowData.due_date).toLocaleDateString()}</span>
+              <span>{(parseDateOnly(borrowData.due_date) || new Date()).toLocaleDateString()}</span>
             </p>
           </div>
           <div className="renew-info-group">
             <label>New Due Date</label>
             <p>
               <Calendar className="calendar-icon" size={18} />
-              <span>{new Date(calculateNewDueDate(borrowData.due_date)).toLocaleDateString()}</span>
+              <span>
+                {(
+                  parseDateOnly(calculateNewDueDate(borrowData.due_date)) || new Date()
+                ).toLocaleDateString()}
+              </span>
             </p>
           </div>
         </div>

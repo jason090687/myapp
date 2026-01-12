@@ -12,7 +12,7 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
   const [isLoading, setIsLoading] = useState(false)
   const [dueDate, setDueDate] = useState(() => {
     const today = new Date()
-    today.setDate(today.getDate() + 7) // Default to 7 days from now
+    today.setDate(today.getDate() + 7)
     return today.toISOString().split('T')[0]
   })
   const { showToast } = useToaster()
@@ -38,10 +38,10 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
       if (onRequestUpdate) {
         onRequestUpdate(borrowRequest.id, { status: 'rejected' })
       }
-      showToast('Success', 'Request rejected', 'info')
+      window.showToast('Success', 'Request rejected', 'info')
     } catch (error) {
       console.error('Error rejecting request:', error)
-      showToast('Error', 'Failed to reject request', 'error')
+      window.showToast('Error', 'Failed to reject request', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -53,7 +53,7 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
     const studentId = borrowRequest?.student ?? borrowRequest?.studentId
 
     if (!studentId) {
-      showToast('Error', 'Student ID is missing', 'error')
+      window.showToast('Error', 'Student ID is missing', 'error')
       return
     }
 
@@ -80,7 +80,7 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
       onClose()
     } catch (error) {
       console.error('Error approving request:', error)
-      showToast('Error', error.message || 'Failed to approve borrow request', 'error')
+      window.showToast('Error', error.message || 'Failed to approve borrow request', 'error')
     } finally {
       setIsLoading(false)
     }

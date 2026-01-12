@@ -52,7 +52,9 @@
   background: #ffffff;
   padding: 1.5rem;
   border-radius: 20px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.05),
+    0 2px 4px -2px rgb(0 0 0 / 0.03);
   justify-content: space-between;
   width: 100%;
   gap: 1.5rem;
@@ -79,13 +81,13 @@
 }
 
 .search-bar input {
-    background: transparent;
-    border: none;
-    outline: none;
-    width: 100%;
-    font-size: 0.9375rem;
-    color: #1e293b;
-    padding-left: 20px;
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  padding-left: 20px;
 }
 
 .search-input:hover {
@@ -130,7 +132,6 @@
   color: #09090b;
 }
 
-
 .borrow-book-btn {
   display: flex;
   align-items: center;
@@ -165,7 +166,9 @@
   flex-direction: column;
   background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.05),
+    0 2px 4px -2px rgb(0 0 0 / 0.03);
   width: 100%;
   overflow: hidden;
   border: 1px solid #f1f5f9;
@@ -413,8 +416,6 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
-  transform: translateY(-1px);
-}
 
 .action-btn.renew:disabled {
   color: #94a3b8;
@@ -493,9 +494,6 @@
   border-radius: 10px;
   border: 1px solid #e2e8f0;
 }
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
 
 .pagination-info {
   font-size: 0.9375rem;
@@ -550,7 +548,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -883,7 +882,6 @@
 /* Table wrapper for better mobile scrolling */
 .borrowed-table-wrapper {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   margin: 0 -1rem;
   padding: 0 1rem;
 }

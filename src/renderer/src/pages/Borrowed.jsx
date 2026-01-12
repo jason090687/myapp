@@ -93,7 +93,7 @@ const Borrowed = () => {
     setLoading(true)
     try {
       const response = await fetchBorrowedBooks(token, page)
-      console.log(response)
+      // console.log(response)
       if (response) {
         const sortedBooks = sortBorrowedBooks(response.results || [])
         setBorrowedBooks(sortedBooks)
