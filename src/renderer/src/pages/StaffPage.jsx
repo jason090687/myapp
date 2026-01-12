@@ -85,7 +85,7 @@ const StaffPage = () => {
   const handleAddStaff = async (staffData) => {
     try {
       await createStudent(token, staffData)
-      window.showToast('Success', 'Staff member added successfully!', 'success')
+      showToast('Success', 'Staff member added successfully!', 'success')
       setIsAddModalOpen(false)
       // Refresh employees list
       const data = await fetchEmployees(token, currentPage, searchTerm)
@@ -94,7 +94,7 @@ const StaffPage = () => {
       const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
       setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
-      window.showToast('Error', error.message || 'Failed to add staff member', 'error')
+      showToast('Error', error.message || 'Failed to add staff member', 'error')
       throw error
     }
   }
@@ -108,7 +108,7 @@ const StaffPage = () => {
         return
       }
       await updateStudentDetails(token, employeePk, staffData)
-      window.showToast('Success', 'Staff member updated successfully!', 'success')
+      showToast('Success', 'Staff member updated successfully!', 'success')
       setIsEditModalOpen(false)
       setSelectedStaff(null)
       // Refresh employees list
@@ -118,7 +118,7 @@ const StaffPage = () => {
       const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
       setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
-      window.showToast('Error', error.message || 'Failed to update staff member', 'error')
+      showToast('Error', error.message || 'Failed to update staff member', 'error')
       throw error
     }
   }
@@ -136,7 +136,7 @@ const StaffPage = () => {
 
       await deleteEmployee(token, staffId, cancelData)
       setEmployees((prev) => prev.filter((e) => (e?.id ?? e?.employee_id ?? e?.pk) !== staffId))
-      window.showToast('Success', 'Staff member deleted successfully!', 'success')
+      showToast('Success', 'Staff member deleted successfully!', 'success')
       setDeleteConfirm({ isOpen: false, staffId: null, staffName: '' })
 
       const data = await fetchEmployees(token, currentPage, searchTerm)
@@ -145,7 +145,7 @@ const StaffPage = () => {
       const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
       setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
-      window.showToast('Error', error.message || 'Failed to delete staff member', 'error')
+      showToast('Error', error.message || 'Failed to delete staff member', 'error')
     }
   }
 

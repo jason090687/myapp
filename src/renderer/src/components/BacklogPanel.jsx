@@ -79,7 +79,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
     setRequestsCleared(true)
     setIsRequestModalOpen(false)
     setSelectedRequest(null)
-    window.showToast('Success', 'Notifications cleared', 'success')
+    showToast('Success', 'Notifications cleared', 'success')
     if (onRequestUpdate) onRequestUpdate()
   }
 
@@ -233,7 +233,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
         prevRequests.filter((request) => request.id !== approvalData.id)
       )
 
-      window.showToast('Success', 'Borrow request approved successfully!', 'success')
+      showToast('Success', 'Borrow request approved successfully!', 'success')
       setIsRequestModalOpen(false)
       setSelectedRequest(null)
       if (onRequestUpdate) onRequestUpdate()
@@ -414,7 +414,6 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
           )}
         </div>
       </div>
-      {/* Render modal outside the panel - always available even when panel is closed */}
       <RequestBorrowModal
         isOpen={isRequestModalOpen}
         onClose={() => {

@@ -287,7 +287,7 @@ export const fetchBorrowedBooks = async (token, page = 1, searchTerm = '') => {
 export const fetchStudents = async (token) => {
   try {
     const response = await axios.get(`${API_URL}/students/`, getAuthHeaders(token))
-    return response.data?.results || []
+    return response.data.results || []
   } catch (error) {
     console.error('Error fetching students:', error)
     throw new Error(error.response?.data?.message || 'Failed to fetch students')

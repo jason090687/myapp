@@ -59,10 +59,10 @@ const RenewModal = ({
         due_date: newDueDate
       })
 
-      window.showToast('Book renewed successfully!', '', 'success')
+      showToast('Book renewed successfully!', '', 'success')
       onClose()
     } catch (error) {
-      window.showToast('Failed to renew book', error.message || '', 'error')
+      showToast('Failed to renew book', error.message || '', 'error')
     } finally {
       setIsSubmitting(false)
     }

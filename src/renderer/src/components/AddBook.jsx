@@ -196,7 +196,7 @@ const AddBook = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isFormValid()) {
-      window.showToast('Error', 'Please fill in all required fields', 'error')
+      showToast('Error', 'Please fill in all required fields', 'error')
       return
     }
 

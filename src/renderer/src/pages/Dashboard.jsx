@@ -75,7 +75,6 @@ function Dashboard() {
       try {
         const response = await fetchStudents(token)
 
-        // filter if borrowed_books_count >= 5 then display in the top borrowers
         const borrowers = (response || [])
           .filter((student) => (student?.borrowed_books_count || 0) >= 5)
           .map((student) => ({
@@ -179,7 +178,7 @@ function Dashboard() {
       if (token) {
         fetchStats()
         const currentDate = new Date()
-        fetchStudents(currentDate.getMonth(), currentDate.getFullYear())
+        fetchStudents(currentDate.getMonth(), currentDate.getFullYear(), token)
         loadBooks()
       }
     }

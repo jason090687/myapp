@@ -140,10 +140,10 @@ const Borrowed = () => {
       await updateBook(token, borrowData.book, {
         status: 'Borrowed'
       })
-      window.showToast('Success', 'Book borrowed successfully!', 'success')
+      showToast('Success', 'Book borrowed successfully!', 'success')
     } catch (error) {
       console.error('Error borrowing book:', error)
-      window.showToast('Error', error.message || 'Failed to borrow book', 'error')
+      showToast('Error', error.message || 'Failed to borrow book', 'error')
     }
   }
 
@@ -162,10 +162,10 @@ const Borrowed = () => {
         status: 'Available'
       })
       await fetchBorrowedData(pagination.currentPage)
-      window.showToast('Success', 'Book returned successfully!', 'success')
+      showToast('Success', 'Book returned successfully!', 'success')
     } catch (error) {
       console.error('Error returning book:', error)
-      window.showToast('Error', error.message || 'Failed to return book', 'error')
+      showToast('Error', error.message || 'Failed to return book', 'error')
     }
   }
 
@@ -184,10 +184,10 @@ const Borrowed = () => {
       await renewBook(token, renewData.id, { due_date: renewData.due_date })
       setIsRenewModalOpen(false)
       await fetchBorrowedData(pagination.currentPage)
-      window.showToast('Success', 'Book renewed successfully!', 'success')
+      showToast('Success', 'Book renewed successfully!', 'success')
     } catch (error) {
       console.error('Error renewing book:', error)
-      window.showToast('Error', error.message || 'Failed to renew book', 'error')
+      showToast('Error', error.message || 'Failed to renew book', 'error')
       throw error
     }
   }
@@ -208,10 +208,10 @@ const Borrowed = () => {
 
       // Refresh the data from server
       await fetchBorrowedData(pagination.currentPage)
-      window.showToast('Success', 'Action completed successfully!', 'success')
+      showToast('Success', 'Action completed successfully!', 'success')
     } catch (error) {
       console.error('Error processing payment:', error)
-      window.showToast('Error', error.message || 'Failed to process action', 'error')
+      showToast('Error', error.message || 'Failed to process action', 'error')
       throw error
     }
   }

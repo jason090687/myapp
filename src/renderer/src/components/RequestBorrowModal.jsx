@@ -38,10 +38,10 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
       if (onRequestUpdate) {
         onRequestUpdate(borrowRequest.id, { status: 'rejected' })
       }
-      window.showToast('Success', 'Request rejected', 'info')
+      showToast('Success', 'Request rejected', 'info')
     } catch (error) {
       console.error('Error rejecting request:', error)
-      window.showToast('Error', 'Failed to reject request', 'error')
+      showToast('Error', 'Failed to reject request', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -53,7 +53,7 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
     const studentId = borrowRequest?.student ?? borrowRequest?.studentId
 
     if (!studentId) {
-      window.showToast('Error', 'Student ID is missing', 'error')
+      showToast('Error', 'Student ID is missing', 'error')
       return
     }
 
@@ -80,7 +80,7 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
       onClose()
     } catch (error) {
       console.error('Error approving request:', error)
-      window.showToast('Error', error.message || 'Failed to approve borrow request', 'error')
+      showToast('Error', error.message || 'Failed to approve borrow request', 'error')
     } finally {
       setIsLoading(false)
     }
