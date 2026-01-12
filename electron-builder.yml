@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: myapp
+productName: eLibrary
 directories:
   buildResources: build
 files:
@@ -11,12 +11,16 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: myapp
+  executableName: eLibrary
+  icon: build/icon.ico
   target:
     - nsis
   signAndEditExecutable: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always

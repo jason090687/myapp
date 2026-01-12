@@ -7,7 +7,7 @@ const { session } = require('electron')
 
 const iconPath =
   process.platform === 'win32'
-    ? path.join(__dirname, '../../build/ico.ico')
+    ? path.join(__dirname, '../../build/icon.ico')
     : path.join(__dirname, '../../build/icon.png')
 
 function createWindow() {
@@ -128,7 +128,7 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.countmein.myapp')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
