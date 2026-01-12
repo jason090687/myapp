@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react'
 import { FaSave, FaUndo } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
-import { useTheme } from '../../context/ThemeContext'
-import ThemeToggle from '../ThemeToggle'
 
 function GeneralSettings() {
   const { t, i18n } = useTranslation()
-  const { setTheme } = useTheme()
 
   const defaultSettings = {
     language: 'en',
@@ -61,7 +58,6 @@ function GeneralSettings() {
     ) {
       setSettings(defaultSettings)
       localStorage.removeItem('appSettings')
-      setTheme('system')
       i18n.changeLanguage('en')
     }
   }
@@ -81,11 +77,6 @@ function GeneralSettings() {
             <option value="de">Deutsch (German)</option>
             <option value="tl">Filipino (Tagalog)</option>
           </select>
-        </div>
-
-        <div className="form-group">
-          <label>{t('settings.theme')}</label>
-          <ThemeToggle />
         </div>
 
         <div className="form-group">
