@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.countmein.myapp
 productName: eLibrary
 directories:
   buildResources: build
@@ -10,6 +10,11 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
 asarUnpack:
   - resources/**
+extraResources:
+  - from: build/icon.ico
+    to: icon.ico
+  - from: build/icon.png
+    to: icon.png
 win:
   executableName: eLibrary
   icon: build/icon.ico
@@ -18,6 +23,8 @@ win:
   signAndEditExecutable: false
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
+  oneClick: false
+  runAfterFinish: true
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
   installerHeaderIcon: build/icon.ico

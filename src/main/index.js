@@ -5,10 +5,10 @@ import fs from 'fs'
 
 const { session } = require('electron')
 
-const iconPath =
-  process.platform === 'win32'
-    ? path.join(__dirname, '../../build/icon.ico')
-    : path.join(__dirname, '../../build/icon.png')
+const iconFileName = process.platform === 'win32' ? 'icon.ico' : 'icon.png'
+const iconPath = app.isPackaged
+  ? path.join(process.resourcesPath, iconFileName)
+  : path.join(__dirname, '../../build', iconFileName)
 
 function createWindow() {
   const WINDOW_WIDTH = 1366
