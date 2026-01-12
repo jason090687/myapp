@@ -73,7 +73,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <PersistGate loading={null} persistor={persistor}>
       <ActivityProvider>
         <SessionProvider>
-          <Toaster position="bottom-right" reverseOrder={false} />
+          <Toaster position="top-right" reverseOrder={false} />
           <RouterProvider router={router} />
         </SessionProvider>
       </ActivityProvider>

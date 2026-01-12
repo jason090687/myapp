@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createStudent, searchStudents, updateStudentDetails, deleteStudent } from '../Features/api'
 import { useSelector } from 'react-redux'
 import { FaSearch, FaChevronLeft, FaChevronRight, FaEdit, FaTrash } from 'react-icons/fa'
-import { Filter, Plus } from 'lucide-react'
+import { Filter, Plus, FileDown, FileUp } from 'lucide-react'
 import { useToaster } from '../components/Toast/useToaster'
 import Sidebar from '../components/Sidebar'
 import AddStudentModal from '../components/AddStudentModal'
 import EditStudentModal from '../components/EditStudentModal'
+import ImportStudents from '../components/ImportStudents'
 import './StudentsPage.css'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/button'
@@ -28,6 +29,7 @@ const StudentsPage = () => {
     studentName: ''
   })
   const [filterStatus, setFilterStatus] = useState('all')
+  const [showImportModal, setShowImportModal] = useState(false)
   const { token, user } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
 
@@ -88,7 +90,7 @@ const StudentsPage = () => {
       if (!selectedStudent) return
       const studentPk = selectedStudent?.id ?? selectedStudent?.student_id ?? selectedStudent?.pk
       if (!studentPk) {
-        window.showToast('Error', 'Student record is missing an internal id', 'error')
+        showToast('Error', 'Student record is missing an internal id', 'error')
         return
       }
       await updateStudentDetails(token, studentPk, studentData)
@@ -129,6 +131,80 @@ const StudentsPage = () => {
       showToast('Error', error.message || 'Failed to delete student', 'error')
     }
   }
+
+  const handleExportToCSV = useCallback(async () => {
+    try {
+      // Fetch all students
+      let allStudentsData = []
+      let currentPage = 1
+      let hasMore = true
+
+      while (hasMore) {
+        const data = await searchStudents(token, '', currentPage)
+        if (data && data.results) {
+          const filteredStudents = data.results.filter((student) => !student.cancelled)
+          allStudentsData = [...allStudentsData, ...filteredStudents]
+          hasMore = data.next !== null
+          currentPage++
+        } else {
+          hasMore = false
+        }
+      }
+
+      if (allStudentsData.length === 0) {
+        showToast('Warning', 'No students to export', 'warning')
+        return
+      }
+
+      // Define CSV headers
+      const headers = ['ID_NUMBER', 'RFID_NUMBER', 'NAME', 'YEAR_LEVEL', 'ACTIVE']
+
+      // Convert students data to CSV rows
+      const csvRows = [
+        headers.join(','),
+        ...allStudentsData.map((student) =>
+          [
+            `"${student.id_number || ''}"`,
+            `"${student.rfid_number || ''}"`,
+            `"${(student.name || '').replace(/"/g, '""')}"`,
+            `"${student.year_level || ''}"`,
+            student.active ? 'TRUE' : 'FALSE'
+          ].join(',')
+        )
+      ]
+
+      // Create CSV content
+      const csvContent = csvRows.join('\n')
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `students_export_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      showToast('Success', `Successfully exported ${allStudentsData.length} students`, 'success')
+    } catch (error) {
+      console.error('Export failed:', error)
+      showToast('Error', 'Failed to export students', 'error')
+    }
+  }, [token, showToast])
+
+  const handleRefreshStudents = useCallback(async () => {
+    try {
+      const data = await searchStudents(token, searchTerm, currentPage)
+      setStudents(data.results)
+      setTotalPages(Math.ceil(data.count / 10))
+    } catch (error) {
+      console.error('Error refreshing students:', error)
+    }
+  }, [token, searchTerm, currentPage])
 
   return (
     <div className="wrapper">
@@ -196,6 +272,24 @@ const StudentsPage = () => {
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
+              <Button
+                variant="secondary"
+                onClick={handleExportToCSV}
+                className="gap-2"
+                title="Export to CSV"
+                aria-label="Export students to CSV"
+              >
+                <FileDown size={16} />
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setShowImportModal(true)}
+                className="gap-2"
+                title="Import from CSV"
+                aria-label="Import students from CSV"
+              >
+                <FileUp size={16} />
+              </Button>
               <Button
                 variant="primary"
                 onClick={() => setIsAddModalOpen(true)}
@@ -362,6 +456,14 @@ const StudentsPage = () => {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Import Modal */}
+          {showImportModal && (
+            <ImportStudents
+              onClose={() => setShowImportModal(false)}
+              onRefresh={handleRefreshStudents}
+            />
           )}
         </div>
       </main>
