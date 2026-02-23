@@ -57,49 +57,6 @@ export const useBooks = (token) => {
     fetchBooksData(newPage)
   }
 
-  const fetchAllBooks = async (searchTerm = '') => {
-    setIsFetchingAll(true)
-    try {
-      let allData = []
-      let currentPage = 1
-      let hasMore = true
-
-      while (hasMore) {
-        const response = await fetchBooks(token, currentPage, searchTerm)
-        if (response && response.results) {
-          const booksData = response.results.map(mapBookData)
-          allData = [...allData, ...booksData]
-          hasMore = response.next !== null
-          currentPage++
-        } else {
-          hasMore = false
-        }
-      }
-
-      setAllBooks(allData)
-      setSortedBooks(null)
-      setSortConfig({ column: null, direction: null })
-
-      // Set initial page view
-      setBooks(allData.slice(0, 10))
-      setPagination({
-        count: allData.length,
-        next: allData.length > 10,
-        previous: false,
-        currentPage: 1
-      })
-      // Removed success toast notification
-    } catch (error) {
-      console.error('Error fetching all books:', error)
-      toast.error('Failed to load all books. Please try again.', {
-        position: 'top-right',
-        autoClose: 3000
-      })
-    } finally {
-      setIsFetchingAll(false)
-    }
-  }
-
   const handleDeleteBook = async (id, bookTitle) => {
     // Open confirmation modal
     setDeleteConfirm({ isOpen: true, bookId: id, bookTitle: bookTitle || 'this book' })
@@ -126,17 +83,32 @@ export const useBooks = (token) => {
         description: `Cancelled "${bookTitle}"`
       })
 
-      // If we're on a page with only one item, go to previous page
-      if (books.length === 1 && pagination.currentPage > 1) {
-        await fetchBooksData(pagination.currentPage - 1)
+      // // If we're on a page with only one item, go to previous page
+      // if (books.length === 1 && pagination.currentPage > 1) {
+      //   await fetchBooksData(pagination.currentPage - 1)
+      // } else {
+      //   // Otherwise just refresh current page
+      //   await fetchBooksData(pagination.currentPage)
+      // }
+
+      const currentPage = pagination.currentPage
+      const data = await fetchBooks(token, currentPage)
+
+      // If page is now empty and not first page → move back one page
+      if (data.results.length === 0 && currentPage > 1) {
+        await fetchBooksData(currentPage - 1)
       } else {
-        // Otherwise just refresh current page
-        await fetchBooksData(pagination.currentPage)
+        setBooks(data.results)
+        setPagination({
+          currentPage,
+          totalPages: Math.ceil(data.count / 10),
+          totalItems: data.count
+        })
       }
 
       // Also update the full book list if it exists
       if (allBooks.length > 0) {
-        await fetchAllBooks()
+        await fetchBooksData()
       }
     } catch (error) {
       console.error('Error cancelling book:', error.message)
@@ -177,7 +149,7 @@ export const useBooks = (token) => {
     deleteConfirm,
     isDeleting,
     fetchBooksData,
-    fetchAllBooks,
+    // fetchAllBooks,
     handleDeleteBook,
     confirmDelete,
     cancelDelete,

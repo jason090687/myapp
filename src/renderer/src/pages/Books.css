@@ -176,7 +176,7 @@
   text-overflow: ellipsis;
   vertical-align: middle;
   line-height: 1.5;
-  text-align: center;
+  text-align: start;
   word-break: break-word;
 }
 

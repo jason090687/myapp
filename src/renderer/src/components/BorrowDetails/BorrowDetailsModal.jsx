@@ -1,22 +1,35 @@
 import React, { useState } from 'react'
-import { FaTimes, FaUndo, FaMoneyBill } from 'react-icons/fa'
+import {
+  FaTimes,
+  FaUndo,
+  FaMoneyBill,
+  FaUser,
+  FaBook,
+  FaLayerGroup,
+  FaCalendarAlt,
+  FaClock,
+  FaInfoCircle
+} from 'react-icons/fa'
 import './BorrowDetailsModal.css'
 
+const fieldIcons = {
+  'Student Name': <FaUser />,
+  'Book Title': <FaBook />,
+  'Lexile Level': <FaLayerGroup />,
+  'Borrow Date': <FaCalendarAlt />,
+  'Due Date': <FaClock />,
+  Status: <FaInfoCircle />
+}
+
 const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, onPay }) => {
-  const [processingAction, setProcessingAction] = useState(null) // Track which action is processing
+  const [processingAction, setProcessingAction] = useState(null)
 
   if (!isOpen || !borrowData) return null
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString()
 
-  // Check if book is overdue
-  const isOverdue = (dueDate) => {
-    const today = new Date()
-    const due = new Date(dueDate)
-    return due < today
-  }
+  const isOverdue = (dueDate) => new Date(dueDate) < new Date()
 
-  // Check various conditions
   const isDue = isOverdue(borrowData.due_date)
   const canRenew = borrowData.renewed_count < 3
   const shouldShowButtons = !borrowData.is_returned
@@ -37,7 +50,6 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
       onClose()
     } catch (error) {
       console.error('Error returning book:', error)
-      toast.error('Failed to return book')
     } finally {
       setProcessingAction(null)
     }
@@ -47,10 +59,8 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
     setProcessingAction('renew')
     try {
       await onRenew(data)
-      // Don't close the modal here
     } catch (error) {
       console.error('Error renewing book:', error)
-      toast.error('Failed to renew book')
     } finally {
       setProcessingAction(null)
     }
@@ -62,18 +72,24 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
       await onPay(data)
     } catch (error) {
       console.error('Error processing payment:', error)
-      toast.error('Failed to process payment')
     } finally {
       setProcessingAction(null)
     }
   }
 
+  const Spinner = () => (
+    <div className="button-spinner">
+      <div className="spinner" />
+    </div>
+  )
+
   return (
     <div className="borrow-details-overlay" onClick={onClose}>
       <div className="borrow-details-content" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div className="borrow-details-header">
-          <div className="header-content">
-            <h2>Borrow Details</h2>
+          <div className="header-content-detail">
+            <h2 className="header-title-detail">Borrow Details</h2>
             <span className={`status-tag ${borrowData.status?.toLowerCase()}`}>
               {borrowData.status}
             </span>
@@ -83,75 +99,71 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
           </button>
         </div>
 
+        {/* Body – form-field style */}
         <div className="borrow-details-body">
-          {detailItems.map(
-            ({ label, value }) =>
-              value && (
-                <div key={label} className="detail-item">
-                  <span className="detail-label">{label}</span>
+          {detailItems.map(({ label, value }) =>
+            value ? (
+              <div key={label} className="detail-item">
+                <span className="detail-label">{label}</span>
+                <div className="detail-field">
+                  <span className="detail-field-icon">{fieldIcons[label]}</span>
                   <span className="detail-value">{value}</span>
                 </div>
-              )
+              </div>
+            ) : null
           )}
         </div>
 
-        <div className="borrow-details-footer">
-          {shouldShowButtons && (
-            <>
+        {/* Footer */}
+        {shouldShowButtons && (
+          <div className="borrow-details-footer">
+            <button
+              className="action-button return"
+              onClick={() => handleReturn(borrowData.id)}
+              disabled={processingAction !== null}
+            >
+              {processingAction === 'return' ? (
+                <Spinner />
+              ) : (
+                <>
+                  <FaUndo /> Return Book
+                </>
+              )}
+            </button>
+
+            {isDue && !borrowData.paid && (
               <button
-                className="action-button return"
-                onClick={() => handleReturn(borrowData.id)}
+                className="action-button pay"
+                onClick={() => handlePay(borrowData)}
                 disabled={processingAction !== null}
               >
-                {processingAction === 'return' ? (
-                  <div className="button-spinner">
-                    <div className="spinner"></div>
-                  </div>
+                {processingAction === 'pay' ? (
+                  <Spinner />
                 ) : (
                   <>
-                    <FaUndo /> Return Book
+                    <FaMoneyBill /> Pay Overdue
                   </>
                 )}
               </button>
+            )}
 
-              {isDue && !borrowData.paid && (
-                <button
-                  className="action-button pay"
-                  onClick={() => handlePay(borrowData)}
-                  disabled={processingAction !== null}
-                >
-                  {processingAction === 'pay' ? (
-                    <div className="button-spinner">
-                      <div className="spinner"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <FaMoneyBill /> Pay Overdue
-                    </>
-                  )}
-                </button>
-              )}
-
-              {canRenew && (
-                <button
-                  className="action-button renew"
-                  onClick={() => handleRenew(borrowData)}
-                  disabled={borrowData.paid || processingAction !== null}
-                >
-                  {processingAction === 'renew' ? (
-                    <div className="button-spinner">
-                      <div className="spinner"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <FaUndo /> Renew
-                    </>
-                  )}
-                </button>
-              )}
-            </>
-          )}
-        </div>
+            {canRenew && (
+              <button
+                className="action-button renew"
+                onClick={() => handleRenew(borrowData)}
+                disabled={borrowData.paid || processingAction !== null}
+              >
+                {processingAction === 'renew' ? (
+                  <Spinner />
+                ) : (
+                  <>
+                    <FaUndo /> Renew
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
