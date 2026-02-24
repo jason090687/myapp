@@ -55,6 +55,11 @@
   background: linear-gradient(to bottom, #ffffff, #f8fafc);
 }
 
+.header-content {
+  display: flex;
+  flex-direction: stack;
+}
+
 .header-content h2 {
   font-size: 1.875rem;
   font-weight: 700;

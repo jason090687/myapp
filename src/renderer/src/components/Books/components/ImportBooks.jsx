@@ -533,7 +533,7 @@ function ImportBooks({ onClose, onRefresh }) {
                       Choose File
                     </label>
                   </div>
-                  <div className="format-guide">
+                  {/* <div className="format-guide">
                     <div className="guide-header">
                       <h4>CSV Format Guide</h4>
                     </div>
@@ -561,7 +561,7 @@ function ImportBooks({ onClose, onRefresh }) {
                         <span>Copies</span>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </>
               )}
             </div>

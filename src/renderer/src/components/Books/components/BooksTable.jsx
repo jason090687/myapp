@@ -132,7 +132,7 @@ const BooksTable = ({
 
   const renderTableBody = () => (
     <tbody>
-      {books.slice(0, 10).map((book, index) => (
+      {books.map((book, index) => (
         <tr
           key={book.id || index}
           onClick={(e) => handleRowClick(e, book)}
@@ -159,15 +159,6 @@ const BooksTable = ({
           </td>
         </tr>
       ))}
-      {books.length < 10 &&
-        [...Array(10 - books.length)].map((_, index) => (
-          <tr key={`empty-${index}`} style={{ height: '61px' }}>
-            {TABLE_COLUMNS.map((column) => (
-              <td key={column.key} className={`col-${column.key}`}></td>
-            ))}
-            <td className="col-action"></td>
-          </tr>
-        ))}
     </tbody>
   )
 

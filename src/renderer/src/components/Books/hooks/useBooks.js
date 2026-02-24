@@ -115,10 +115,8 @@ export const useBooks = (token) => {
         cancelledBy: parseInt(userId) || null,
         cancelledAt: new Date().toISOString()
       }
-
-      console.log('Delete request - bookId:', bookId, 'cancelData:', cancelData)
       await deleteBook(token, bookId, cancelData)
-      window.showToast('Success', 'Book deleted successfully!', 'success', 4000)
+      showToast('Success', 'Book deleted successfully!', 'success', 4000)
 
       // Log activity
       addActivity({
@@ -126,22 +124,15 @@ export const useBooks = (token) => {
         description: `Cancelled "${bookTitle}"`
       })
 
-      // If we're on a page with only one item, go to previous page
+      // After delete, always try to fill the page with next available book
+      // First, refetch the current page
+      await fetchBooksData(pagination.currentPage)
+      // If the current page is now empty and not the first page, go to previous page
       if (books.length === 1 && pagination.currentPage > 1) {
         await fetchBooksData(pagination.currentPage - 1)
-      } else {
-        // Otherwise just refresh current page
-        await fetchBooksData(pagination.currentPage)
-      }
-
-      // Also update the full book list if it exists
-      if (allBooks.length > 0) {
-        await fetchAllBooks()
       }
     } catch (error) {
-      console.error('Error cancelling book:', error.message)
-      console.error('Error details:', error.response?.data)
-      window.showToast('Error', 'Failed to cancel book', 'error', 4000)
+      showToast('Error', 'Failed to cancel book', 'error', 4000)
     } finally {
       setIsDeleting(false)
       setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })

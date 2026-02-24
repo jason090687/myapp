@@ -39,6 +39,31 @@ function Books() {
 
   const { handleAddBook, handleEditBook } = useBookModals()
 
+  const handleGridDelete = useCallback(
+    (book) => {
+      handleDeleteBook(book.id, book.title)
+    },
+    [handleDeleteBook]
+  )
+
+  const handleGridViewDetails = useCallback((book) => {
+    setSelectedBook(book)
+    setIsDetailsModalOpen(true)
+  }, [])
+
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const [selectedBook, setSelectedBook] = useState(null)
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+  const [viewMode, setViewMode] = useState('table')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [exportProgress, setExportProgress] = useState({
+    isOpen: false,
+    progress: 0,
+    currentPage: 0,
+    totalPages: 0,
+    exportedCount: 0
+  })
+
   const handleExportToCSV = useCallback(async () => {
     try {
       // Show progress modal
@@ -194,31 +219,6 @@ function Books() {
       toast.error('Failed to export books')
     }
   }, [token, debouncedSearchTerm])
-
-  const handleGridDelete = useCallback(
-    (book) => {
-      handleDeleteBook(book.id, book.title)
-    },
-    [handleDeleteBook]
-  )
-
-  const handleGridViewDetails = useCallback((book) => {
-    setSelectedBook(book)
-    setIsDetailsModalOpen(true)
-  }, [])
-
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
-  const [selectedBook, setSelectedBook] = useState(null)
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-  const [viewMode, setViewMode] = useState('table')
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [exportProgress, setExportProgress] = useState({
-    isOpen: false,
-    progress: 0,
-    currentPage: 0,
-    totalPages: 0,
-    exportedCount: 0
-  })
 
   const handleCategoryChange = useCallback(
     (category) => {

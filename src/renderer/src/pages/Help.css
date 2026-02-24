@@ -220,11 +220,11 @@
   margin-bottom: 1.25rem;
 }
 
-.card-icon {
+/* .card-icon {
   font-size: 1.75rem;
   color: #3b82f6;
   flex-shrink: 0;
-}
+} */
 
 .card-header h3 {
   margin: 0;
