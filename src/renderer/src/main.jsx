@@ -11,6 +11,7 @@ import './styles/theme.css'
 import { Toaster } from 'react-hot-toast'
 import { logout } from './Features/authSlice' // Import the logout action
 import { ActivityProvider } from './context/ActivityContext'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './i18n/config'
 
 // Theme removed: force app to always use light mode.
@@ -68,13 +69,17 @@ const SessionProvider = ({ children }) => {
   return children
 }
 
+const queryClient = new QueryClient()
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <ActivityProvider>
         <SessionProvider>
           <Toaster position="top-right" reverseOrder={false} />
-          <RouterProvider router={router} />
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
         </SessionProvider>
       </ActivityProvider>
     </PersistGate>

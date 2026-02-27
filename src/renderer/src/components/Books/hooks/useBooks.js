@@ -2,183 +2,320 @@ import { useState, useCallback, useEffect } from 'react'
 import { fetchBooks, deleteBook, fetchUserDetails } from '../../../Features/api'
 import { toast } from 'react-toastify'
 import { useActivity } from '../../../context/ActivityContext'
+import { useNavigate } from 'react-router-dom'
+import { useBookSearch } from './useBookSearch'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export const useBooks = (token) => {
+  const navigate = useNavigate()
   const { addActivity } = useActivity()
-  const [books, setBooks] = useState([])
-  const [allBooks, setAllBooks] = useState([])
-  const [sortedBooks, setSortedBooks] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isFetchingAll, setIsFetchingAll] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const queryClient = useQueryClient()
+  const { debouncedSearchTerm, handleSearch } = useBookSearch()
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 0,
     totalItems: 0
   })
   const [sortConfig, setSortConfig] = useState({ column: '', direction: '' })
-  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, bookId: null, bookTitle: '' })
-  const [userDetails, setUserDetails] = useState({})
+  const [deleteConfirm, setDeleteConfirm] = useState({
+    isOpen: false,
+    bookId: null,
+    bookTitle: ''
+  })
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+  const [selectedBook, setSelectedBook] = useState(null)
+  const [exportProgress, setExportProgress] = useState({
+    isOpen: false,
+    progress: 0,
+    currentPage: 0,
+    totalPages: 0,
+    exportedCount: 0
+  })
 
-  const fetchBooksData = useCallback(
-    async (page = 1, search = '') => {
-      setIsLoading(true)
-      try {
-        const data = await fetchBooks(token, page, search)
-        setBooks(data.results)
-        setPagination({
-          currentPage: page,
-          totalPages: Math.ceil(data.count / 10),
-          totalItems: data.count
-        })
-      } catch (error) {
-        toast.error('Failed to fetch books')
-        console.error('Error fetching books:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [token]
-  )
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['books', token, pagination.currentPage, debouncedSearchTerm],
+    queryFn: () => fetchBooks(token, pagination.currentPage, debouncedSearchTerm),
+    enabled: !!token,
+    keepPreviousData: true,
+    onError: () => {
+      toast.error('Failed to fetch books')
+    }
+  })
+
+  const books = data?.results || []
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetchUserDetails(token)
-        setUserDetails(response)
-      } catch (error) {
-        console.error('Error fetching user details:', error)
-      }
+    if (data?.count !== undefined) {
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: Math.ceil(data.count / 10),
+        totalItems: data.count
+      }))
     }
-    fetchUser()
-  }, [token])
+  }, [data])
 
-  const handlePageChange = (newPage) => {
-    fetchBooksData(newPage)
-  }
+  const { data: userDetails } = useQuery({
+    queryKey: ['user', token],
+    queryFn: () => fetchUserDetails(token),
+    enabled: !!token
+  })
 
-  const handleDeleteBook = async (id, bookTitle) => {
-    // Open confirmation modal
-    setDeleteConfirm({ isOpen: true, bookId: id, bookTitle: bookTitle || 'this book' })
-  }
+  const deleteMutation = useMutation({
+    mutationFn: ({ bookId, cancelData }) => deleteBook(token, bookId, cancelData),
 
-  const confirmDelete = async () => {
-    const { bookId, bookTitle } = deleteConfirm
-    setIsDeleting(true)
-
-    try {
-      const userId = userDetails?.id
-      const cancelData = {
-        cancelledBy: parseInt(userId) || null,
-        cancelledAt: new Date().toISOString()
-      }
-      await deleteBook(token, bookId, cancelData)
+    onSuccess: (_, variables) => {
       showToast('Success', 'Book deleted successfully!', 'success', 4000)
 
-      // Log activity
       addActivity({
         type: 'book_deleted',
-        description: `Cancelled "${bookTitle}"`
+        description: `Cancelled "${variables.bookTitle}"`
       })
 
-      // // If we're on a page with only one item, go to previous page
-      // if (books.length === 1 && pagination.currentPage > 1) {
-      //   await fetchBooksData(pagination.currentPage - 1)
-      // } else {
-      //   // Otherwise just refresh current page
-      //   await fetchBooksData(pagination.currentPage)
-      // }
+      queryClient.invalidateQueries(['books'])
+    },
 
-      const currentPage = pagination.currentPage
-      const data = await fetchBooks(token, currentPage)
-
-      // If page is now empty and not first page → move back one page
-      if (data.results.length === 0 && currentPage > 1) {
-        await fetchBooksData(currentPage - 1)
-      } else {
-        setBooks(data.results)
-        setPagination({
-          currentPage,
-          totalPages: Math.ceil(data.count / 10),
-          totalItems: data.count
-        })
-      }
-
-      // Also update the full book list if it exists
-      if (allBooks.length > 0) {
-        await fetchBooksData()
-      }
-    } catch (error) {
-      showToast('Error', 'Failed to cancel book', 'error', 4000)
-    } finally {
-      setIsDeleting(false)
-      setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
+    onError: () => {
+      toast.error('Failed to cancel book')
     }
+  })
+
+  const handleDeleteBook = (id, bookTitle) => {
+    setDeleteConfirm({
+      isOpen: true,
+      bookId: id,
+      bookTitle: bookTitle || 'this book'
+    })
+  }
+
+  const confirmDelete = () => {
+    const { bookId, bookTitle } = deleteConfirm
+
+    const cancelData = {
+      cancelledBy: parseInt(userDetails?.id) || null,
+      cancelledAt: new Date().toISOString()
+    }
+
+    deleteMutation.mutate({
+      bookId,
+      cancelData,
+      bookTitle
+    })
+
+    setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
   }
 
   const cancelDelete = () => {
     setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
   }
 
+  const handlePageChange = (newPage) => {
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: newPage
+    }))
+  }
+
+  const sortedBooks = sortConfig.column
+    ? [...books].sort((a, b) => {
+        if (a[sortConfig.column] < b[sortConfig.column])
+          return sortConfig.direction === 'asc' ? -1 : 1
+        if (a[sortConfig.column] > b[sortConfig.column])
+          return sortConfig.direction === 'asc' ? 1 : -1
+        return 0
+      })
+    : books
+
   const handleSort = (column) => {
     const direction =
       sortConfig.column === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+
     setSortConfig({ column, direction })
+  }
 
-    const sortedBooks = [...books].sort((a, b) => {
-      if (a[column] < b[column]) return direction === 'asc' ? -1 : 1
-      if (a[column] > b[column]) return direction === 'asc' ? 1 : -1
-      return 0
-    })
+  const filteredBooks = sortedBooks.filter((book) => !book.cancelled)
 
-    setBooks(sortedBooks)
+  const handleExportToCSV = useCallback(async () => {
+    try {
+      setExportProgress({
+        isOpen: true,
+        progress: 0,
+        currentPage: 0,
+        totalPages: 0,
+        exportedCount: 0
+      })
+
+      let allBooksData = []
+      let currentPage = 1
+      let hasMore = true
+      let totalPages = 1
+
+      while (hasMore) {
+        const response = await fetchBooks(token, currentPage, debouncedSearchTerm)
+
+        if (response?.results) {
+          const filtered = response.results.filter((b) => !b.cancelled)
+          allBooksData = [...allBooksData, ...filtered]
+
+          hasMore = response.next !== null
+
+          if (response.count && currentPage === 1) {
+            totalPages = Math.ceil(response.count / 10)
+          }
+
+          const progress = totalPages > 0 ? (currentPage / totalPages) * 90 : 0
+
+          setExportProgress({
+            isOpen: true,
+            progress,
+            currentPage,
+            totalPages,
+            exportedCount: allBooksData.length
+          })
+
+          currentPage++
+        } else {
+          hasMore = false
+        }
+      }
+
+      if (!allBooksData.length) {
+        toast.warning('No books to export')
+        setExportProgress({
+          isOpen: false,
+          progress: 0,
+          currentPage: 0,
+          totalPages: 0,
+          exportedCount: 0
+        })
+        return
+      }
+
+      const headers = [
+        'TITLE',
+        'AUTHOR',
+        'SERIES_TITLE',
+        'PUBLISHER',
+        'PLACE_OF_PUBLICATION',
+        'YEAR',
+        'EDITION',
+        'VOLUME',
+        'PHYSICAL_DESCRIPTION',
+        'ISBN',
+        'ACCESSION_NUMBER',
+        'CALL_NUMBER',
+        'BARCODE',
+        'SUBJECT',
+        'DESCRIPTION',
+        'ADDITIONAL_AUTHOR',
+        'COPIES'
+      ]
+
+      // Convert books data to CSV rows
+      const csvRows = [
+        headers.join(','),
+        ...allBooksData.map((book) =>
+          [
+            `"${(book.title || '').replace(/"/g, '""')}"`,
+            `"${(book.author || '').replace(/"/g, '""')}"`,
+            `"${(book.series_title || '').replace(/"/g, '""')}"`,
+            `"${(book.publisher || '').replace(/"/g, '""')}"`,
+            `"${(book.place_of_publication || '').replace(/"/g, '""')}"`,
+            book.year || '',
+            `"${(book.edition || '').replace(/"/g, '""')}"`,
+            `"${(book.volume || '').replace(/"/g, '""')}"`,
+            `"${(book.physical_description || '').replace(/"/g, '""')}"`,
+            `"${book.isbn || ''}"`,
+            `"${book.accession_number || ''}"`,
+            `"${book.call_number || ''}"`,
+            `"${book.barcode || ''}"`,
+            `"${(book.subject || '').replace(/"/g, '""')}"`,
+            `"${(book.description || '').replace(/"/g, '""')}"`,
+            `"${(book.additional_author || '').replace(/"/g, '""')}"`,
+            book.copies || 0
+          ].join(',')
+        )
+      ]
+
+      // Create CSV content
+      const csvContent = csvRows.join('\n')
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `books_export_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      // Complete progress
+      setExportProgress((prev) => ({
+        ...prev,
+        progress: 100
+      }))
+
+      // Close modal after brief delay
+      setTimeout(() => {
+        setExportProgress({
+          isOpen: false,
+          progress: 0,
+          currentPage: 0,
+          totalPages: 0,
+          exportedCount: 0
+        })
+        toast.success(`Successfully exported ${allBooksData.length} books`)
+      }, 500)
+    } catch (error) {
+      console.error('Export failed:', error)
+      setExportProgress({
+        isOpen: false,
+        progress: 0,
+        currentPage: 0,
+        totalPages: 0,
+        exportedCount: 0
+      })
+      toast.error('Failed to export books')
+    }
+  }, [token, debouncedSearchTerm])
+
+  const handleRowClick = (book) => {
+    navigate(`/books/edit-book/${book.id}`)
+  }
+
+  const handleGridViewDetails = (book) => {
+    setSelectedBook(book)
+    setIsDetailsModalOpen(true)
+  }
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false)
+    setTimeout(() => setSelectedBook(null), 300)
   }
 
   return {
-    books,
-    allBooks,
-    sortedBooks,
+    books: filteredBooks,
     isLoading,
-    isFetchingAll,
+    isFetching,
     pagination,
     sortConfig,
     deleteConfirm,
-    isDeleting,
-    fetchBooksData,
-    // fetchAllBooks,
+    exportProgress,
+    isDetailsModalOpen,
+    selectedBook,
+    debouncedSearchTerm,
+    handleSearch,
+    handlePageChange,
+    handleSort,
     handleDeleteBook,
     confirmDelete,
     cancelDelete,
-    setBooks,
-    setSortedBooks,
-    setPagination,
-    setSortConfig,
-    handlePageChange,
-    handleSort,
-    totalPages: Math.ceil((sortedBooks || allBooks).length / 10)
+    handleRowClick,
+    handleGridViewDetails,
+    handleCloseDetailsModal,
+    handleExportToCSV
   }
 }
-
-const mapBookData = (book) => ({
-  id: book.id,
-  title: book.title,
-  author: book.author,
-  seriesTitle: book.series_title,
-  publisher: book.publisher,
-  placeOfPublication: book.place_of_publication,
-  year: book.year,
-  edition: book.edition,
-  volume: book.volume,
-  physicalDescription: book.physical_description,
-  isbn: book.isbn,
-  accessionNo: book.accession_number,
-  call_number: book.call_number,
-  barcode: book.barcode,
-  dateReceived: book.date_received,
-  subject: book.subject,
-  dateProcessed: book.date_processed,
-  processedBy: book.name,
-  status: book.status,
-  copies: book.copies,
-  copy_number: book.copy_number || '1 of ' + (book.copies || 1)
-})

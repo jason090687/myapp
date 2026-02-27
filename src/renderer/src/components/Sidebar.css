@@ -4,6 +4,7 @@
   --navbar-height: 60px;
   --transition-duration: 0.2s;
   --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-accent: #06b6d4;
 }
 
 * {
@@ -393,7 +394,7 @@ body {
   left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  background: var(--accent);
+  background: var(--sidebar-accent);
   color: var(--accent-foreground);
   padding: 5px 10px;
   border-radius: 5px;
@@ -1183,6 +1184,7 @@ checkout-header a {
   width: calc(100% - 2rem);
   height: 1px;
   margin: 0.5rem 1rem;
+  background-color: gray;
 }
 
 .sidebar.collapsed .nav-separator {
