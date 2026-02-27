@@ -1,4 +1,4 @@
-import './ExportProgressModal.css'
+import '../styles/ExportProgressModal.css'
 
 const ExportProgressModal = ({ isOpen, progress, currentPage, totalPages, exportedCount }) => {
   if (!isOpen) return null

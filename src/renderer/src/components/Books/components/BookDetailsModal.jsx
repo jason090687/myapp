@@ -3,7 +3,7 @@ import { X, Edit2, Trash2, BookOpen } from 'lucide-react'
 import { formatDate } from '../utils/bookUtils'
 import { fetchBookDetails } from '../../../Features/api'
 import { useSelector } from 'react-redux'
-import './BookDetailsModal.css'
+import '../styles/BookDetailsModal.css'
 import { Button } from '../../ui/button'
 
 const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {

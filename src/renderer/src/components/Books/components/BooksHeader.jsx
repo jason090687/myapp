@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Search, Plus, FileUp, FileDown, Grid3x3, List, Filter } from 'lucide-react'
 import { Button } from '../../ui/button'
 import ImportBooks from './ImportBooks'
-import './BooksHeader.css'
+import '../styles/BooksHeader.css'
 
 function BooksHeader({
   onSearch,

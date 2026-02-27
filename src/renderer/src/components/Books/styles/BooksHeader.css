@@ -63,6 +63,7 @@
   gap: 1.5rem;
   flex-wrap: wrap;
   background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(226, 232, 240, 0.8);
   padding: 1rem 1.5rem;

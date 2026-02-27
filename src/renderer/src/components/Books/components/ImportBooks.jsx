@@ -4,7 +4,7 @@ import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
 import { fetchUserDetails, uploadNewBook } from '../../../Features/api'
 import { toast } from 'react-hot-toast'
-import './ImportBooks.css'
+import '../styles/ImportBooks.css'
 import { Button } from '../../ui/button'
 
 function ImportBooks({ onClose, onRefresh }) {
