@@ -149,6 +149,7 @@ const Borrowed = () => {
 
   const handleReturnBook = async (borrowId) => {
     const borrowItem = borrowedBooks.find((item) => item.id === borrowId)
+
     if (!borrowItem) {
       window.showToast('Error', 'Borrow record not found', 'error')
       return
@@ -156,7 +157,8 @@ const Borrowed = () => {
 
     try {
       await returnBook(token, borrowId, {
-        returned_date: new Date().toISOString().split('T')[0]
+        returned_date: new Date().toISOString().split('T')[0],
+        status: 'Returned'
       })
       await updateBook(token, borrowItem.book, {
         status: 'Available'

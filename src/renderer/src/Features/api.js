@@ -403,7 +403,8 @@ export const returnBook = async (token, bookId, returnData) => {
       `${API_URL}/borrow/return/${bookId}/`,
       {
         is_returned: true,
-        returned_date: returnData.returned_date || new Date().toISOString().split('T')[0]
+        returned_date: returnData.returned_date || new Date().toISOString().split('T')[0],
+        status: returnData.status || 'returned'
       },
       getAuthHeaders(token)
     )
