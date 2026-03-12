@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { FaSave, FaKey, FaUser } from 'react-icons/fa'
-import { updateUserProfile, changePassword, fetchUserDetails } from '../../Features/api'
+import { changePassword, fetchUserDetails, updateUserProfile } from '../../api/auth'
 
 function AccountSettings() {
   const { token } = useSelector((state) => state.auth)

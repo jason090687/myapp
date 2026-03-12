@@ -12,11 +12,16 @@ import ConfirmDeleteModal from '../components/Books/components/ConfirmDeleteModa
 import ErrorBoundary from '../components/ErrorBoundary'
 import ToastContainer from '../components/Toast/ToastContainer'
 import ExportProgressModal from '../components/Books/components/ExportProgressModal'
+import AddBookModal from '../components/Books/components/AddBooksModal'
+import UpdateBookModal from '../components/Books/components/UpdateBooksModal'
 
 function Books() {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768)
   const { token } = useSelector((state) => state.auth)
-  const { handleAddBook, handleEditBook } = useBookModals()
+  const [isAddBookOpen, setIsAddBookOpen] = useState(false)
+  const [isEditBookOpen, setIsEditBookOpen] = useState(false)
+  const [selectedBookId, setSelectedBookId] = useState(null)
+
   const [viewMode, setViewMode] = useState('table')
 
   const {
@@ -30,13 +35,25 @@ function Books() {
     handleCloseDetailsModal,
     handleRowClick,
     handleSearch,
+    handleCategoryChange,
     exportProgress,
-    deleteConfirm,
     selectedBook,
     isDetailsModalOpen,
+    deleteConfirm,
     confirmDelete,
-    cancelDelete
+    cancelDelete,
+    refetch
   } = useBooks(token)
+
+  const handleEditBook = (book) => {
+    setSelectedBookId(book.id)
+    setIsEditBookOpen(true)
+  }
+
+  // const handleRowClick = (book) => {
+  //   setSelectedBookId(book.id)
+  //   setIsDetailsModalOpen(true)
+  // }
 
   useEffect(() => {
     const handleResize = () => {
@@ -64,11 +81,13 @@ function Books() {
           <div className="books-content">
             <BooksHeader
               onSearch={handleSearch}
-              onAddBook={handleAddBook}
+              onAddBook={() => setIsAddBookOpen(true)}
+              onCategoryChange={handleCategoryChange}
               token={token}
               viewMode={viewMode}
               onViewChange={setViewMode}
               onExport={handleExportToCSV}
+              onRefresh={refetch}
               books={books}
             />
 
@@ -96,6 +115,17 @@ function Books() {
           </div>
         </ErrorBoundary>
       </div>
+      <AddBookModal
+        isOpen={isAddBookOpen}
+        onClose={() => setIsAddBookOpen(false)}
+        onSuccess={() => refetch?.()}
+      />
+      <UpdateBookModal
+        isOpen={isEditBookOpen}
+        bookId={selectedBookId}
+        onClose={() => setIsEditBookOpen(false)}
+        onSuccess={() => refetch()}
+      />
 
       {/* DETAILS MODAL */}
       <ErrorBoundary>

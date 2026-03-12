@@ -45,20 +45,19 @@ const BooksTable = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const isClickable = windowWidth <= 1500
+
   const handleRowClick = useCallback(
     (e, book) => {
       if (e.target.closest('.action-buttons-container')) {
         e.stopPropagation()
         return
       }
-
-      if (windowWidth <= 1500) {
-        e.preventDefault()
-        e.stopPropagation()
+      if (isClickable) {
         onRowClick?.(book)
       }
     },
-    [windowWidth, onRowClick]
+    [isClickable, onRowClick]
   )
 
   const renderCellContent = (column, value, book) => {
@@ -71,7 +70,6 @@ const BooksTable = ({
         return value.toString()
       default:
         if (column.key === 'status') {
-          // Determine actual status based on borrowed copies
           const totalCopies = parseInt(book.copies) || 0
           const availableCopies =
             book.available_copies !== undefined ? parseInt(book.available_copies) : totalCopies
@@ -137,7 +135,7 @@ const BooksTable = ({
         <tr
           key={book.id || index}
           onClick={(e) => handleRowClick(e, book)}
-          style={{ cursor: windowWidth <= 1500 ? 'pointer' : 'default' }}
+          style={{ cursor: isClickable ? 'pointer' : 'default' }}
         >
           {TABLE_COLUMNS.map((column) => (
             <td key={column.key} className={`col-${column.key}`} data-content={book[column.key]}>

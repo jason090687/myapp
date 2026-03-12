@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+const host = window.Location
+
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
 // const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
 const API_URL = 'http://192.168.2.175:8000/api/v1'
@@ -195,24 +197,24 @@ export const fetchAllBooks = async (token, search = '') => {
   }
 }
 
-export const addNewBook = async (token, bookData) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/marc/record/`,
-      bookData, // Use bookData directly as FormData
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data' // Ensure multipart content type for file upload
-        }
-      }
-    )
-    return response.data
-  } catch (error) {
-    console.error('API Error:', error.response?.data || error.message)
-    throw error
-  }
-}
+// export const addNewBook = async (token, bookData) => {
+//   try {
+//     const response = await axios.post(
+//       `${API_URL}/marc/record/`,
+//       bookData, // Use bookData directly as FormData
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           'Content-Type': 'multipart/form-data' // Ensure multipart content type for file upload
+//         }
+//       }
+//     )
+//     return response.data
+//   } catch (error) {
+//     console.error('API Error:', error.response?.data || error.message)
+//     throw error
+//   }
+// }
 
 export const uploadNewBook = async (token, bookData) => {
   try {

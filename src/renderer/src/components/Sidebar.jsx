@@ -16,14 +16,15 @@ import {
 import { useToaster } from './Toast/useToaster'
 import logo from '../assets/logo.png'
 import './Sidebar.css'
-import { fetchUserDetails } from '../Features/api'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, reset } from '../Features/authSlice'
 import HelpGuideModal from './HelpGuideModal'
 import Navbar from './Navbar'
+import { fetchUserDetails } from '../api/auth'
+import { setAuthToken } from '../api/axios'
+import { useQuery } from '@tanstack/react-query'
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
-  const [userDetails, setUserDetails] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
   const [isBacklogOpen, setIsBacklogOpen] = useState(false)
@@ -35,30 +36,20 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
   const { token } = useSelector((state) => state.auth)
 
-  useEffect(() => {
-    if (!token) return
+  setAuthToken(token)
 
-    setIsLoading(true)
-    const fetchUserData = async () => {
-      try {
-        const response = await fetchUserDetails(token)
-        setUserDetails(response)
-      } catch (error) {
-        console.error('Error fetching user details:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchUserData()
-  }, [token])
+  const { data: userDetails } = useQuery({
+    queryKey: ['user', token],
+    queryFn: () => fetchUserDetails(),
+    enabled: !!token
+  })
 
   const menuItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/books', icon: Book, label: 'Books' },
     { path: '/borrowed', icon: Bookmark, label: 'Borrowed' },
     { path: '/students', icon: GraduationCap, label: 'Students' },
-    { path: '/staff', icon: Users, label: 'Staff' },
+    { path: '/staff', icon: Users, label: 'Employees' },
     { separator: true },
     { path: '/settings', icon: Settings, label: 'Settings' },
     {

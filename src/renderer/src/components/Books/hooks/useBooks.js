@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from 'react'
-import { fetchBooks, deleteBook, fetchUserDetails } from '../../../Features/api'
+import { fetchBooks, deleteBook } from '../../../Features/api'
 import { toast } from 'react-toastify'
 import { useActivity } from '../../../context/ActivityContext'
 import { useNavigate } from 'react-router-dom'
 import { useBookSearch } from './useBookSearch'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { fetchUserDetails } from '../../../api/auth'
+import { setAuthToken } from '../../../api/axios'
 
 export const useBooks = (token) => {
   const navigate = useNavigate()
@@ -24,6 +26,8 @@ export const useBooks = (token) => {
   })
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [selectedBook, setSelectedBook] = useState(null)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [exportProgress, setExportProgress] = useState({
     isOpen: false,
     progress: 0,
@@ -32,7 +36,7 @@ export const useBooks = (token) => {
     exportedCount: 0
   })
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['books', token, pagination.currentPage, debouncedSearchTerm],
     queryFn: () => fetchBooks(token, pagination.currentPage, debouncedSearchTerm),
     enabled: !!token,
@@ -54,9 +58,11 @@ export const useBooks = (token) => {
     }
   }, [data])
 
+  setAuthToken(token)
+
   const { data: userDetails } = useQuery({
     queryKey: ['user', token],
-    queryFn: () => fetchUserDetails(token),
+    queryFn: () => fetchUserDetails(),
     enabled: !!token
   })
 
@@ -64,7 +70,7 @@ export const useBooks = (token) => {
     mutationFn: ({ bookId, cancelData }) => deleteBook(token, bookId, cancelData),
 
     onSuccess: (_, variables) => {
-      showToast('Success', 'Book deleted successfully!', 'success', 4000)
+      toast.success('Book deleted successfully!')
 
       addActivity({
         type: 'book_deleted',
@@ -113,6 +119,11 @@ export const useBooks = (token) => {
       ...prev,
       currentPage: newPage
     }))
+  }
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category)
+    setPagination((prev) => ({ ...prev, currentPage: 1 }))
   }
 
   const sortedBooks = sortConfig.column
@@ -283,7 +294,8 @@ export const useBooks = (token) => {
   }, [token, debouncedSearchTerm])
 
   const handleRowClick = (book) => {
-    navigate(`/books/edit-book/${book.id}`)
+    setSelectedBook(book)
+    setIsDetailsModalOpen(true)
   }
 
   const handleGridViewDetails = (book) => {
@@ -300,6 +312,7 @@ export const useBooks = (token) => {
     books: filteredBooks,
     isLoading,
     isFetching,
+    refetch,
     pagination,
     sortConfig,
     deleteConfirm,
@@ -307,6 +320,7 @@ export const useBooks = (token) => {
     isDetailsModalOpen,
     selectedBook,
     debouncedSearchTerm,
+    handleCategoryChange,
     handleSearch,
     handlePageChange,
     handleSort,

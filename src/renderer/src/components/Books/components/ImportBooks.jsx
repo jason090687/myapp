@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
-import { fetchUserDetails, uploadNewBook } from '../../../Features/api'
+import { uploadNewBook } from '../../../Features/api'
 import { toast } from 'react-hot-toast'
 import '../styles/ImportBooks.css'
 import { Button } from '../../ui/button'
+import { fetchUserDetails } from '../../../api/auth'
 
 function ImportBooks({ onClose, onRefresh }) {
   const { token } = useSelector((state) => state.auth)

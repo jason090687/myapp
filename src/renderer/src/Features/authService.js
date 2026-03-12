@@ -1,13 +1,13 @@
 import {
-  registerUser,
-  loginUser,
   activateUser,
+  fetchUserDetails,
+  loginUser,
+  registerUser,
   resetPassword,
   resetPasswordConfirm,
-  fetchUserDetails,
   verifyOtp as verifyOtpApi,
   resendOtp as resendOtpApi
-} from '../Features/api'
+} from '../api/auth'
 
 // Helper to handle API errors
 const handleError = (error) => {

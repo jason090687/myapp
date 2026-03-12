@@ -10,7 +10,6 @@ import GeneralSettings from '../components/settings/GeneralSettings.jsx'
 import AccountSettings from '../components/settings/AccountSettings.jsx'
 import Help from '../pages/Help'
 import CreateNewPassword from '../pages/CreateNewPassword.jsx'
-// import ProfilePage from '../pages/ProfilePage.jsx'
 import OtpVerification from '../pages/OtpVerification'
 import ActivationSuccess from '../pages/ActivationSuccess.jsx'
 import ResetPasswordOtp from '../pages/ResetPasswordOtp'
@@ -19,8 +18,6 @@ import StudentDetailsPage from '../pages/StudentDetailsPage'
 import StaffPage from '../pages/StaffPage'
 import ErrorBoundary from '../components/ErrorBoundary'
 import StaffDetailPage from '../pages/StaffDetailPage'
-import AddBook from '../components/AddBook.jsx'
-import EditBook from '../pages/EditBook.jsx'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 const router = createHashRouter([
@@ -59,22 +56,6 @@ const router = createHashRouter([
       </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />
-  },
-  {
-    path: '/books/add-book',
-    element: (
-      <ProtectedRoute>
-        <AddBook />
-      </ProtectedRoute>
-    )
-  },
-  {
-    path: '/books/edit-book/:id',
-    element: (
-      <ProtectedRoute>
-        <EditBook />
-      </ProtectedRoute>
-    )
   },
   {
     path: '/borrowed',

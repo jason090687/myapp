@@ -17,12 +17,14 @@ import {
   approveBorrowRequest,
   rejectBorrowRequest,
   markRequestAsRead,
-  fetchBorrowRequests,
-  fetchUserDetails
+  fetchBorrowRequests
 } from '../Features/api'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
 import './BacklogPanel.css'
+import { fetchUserDetails } from '../api/auth'
+import { useQuery } from '@tanstack/react-query'
+import { setAuthToken } from '../api/axios'
 
 function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const { activities, clearActivities } = useActivity()
@@ -31,7 +33,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [borrowRequests, setBorrowRequests] = useState([])
   const [requestsCleared, setRequestsCleared] = useState(false)
-  const [userData, setUserData] = useState(null)
+  // const [userData, setUserData] = useState(null)
   const { token } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
 
@@ -61,17 +63,13 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
     return () => clearInterval(interval)
   }, [isOpen, token, requestsCleared])
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const response = await fetchUserDetails(token)
-        setUserData(response)
-      } catch (error) {
-        console.error('Error fetching user details:', error)
-      }
-    }
-    loadUserData()
-  }, [token])
+  setAuthToken(token)
+
+  const { data: userData } = useQuery({
+    queryKey: ['user', token],
+    queryFn: () => fetchUserDetails(),
+    enabled: !!token
+  })
 
   const handleClearAll = () => {
     clearActivities()
