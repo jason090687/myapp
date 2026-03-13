@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {
@@ -9,9 +9,7 @@ import {
   LogOut,
   HelpCircle,
   GraduationCap,
-  Users,
-  Bell,
-  FileText
+  Users
 } from 'lucide-react'
 import { useToaster } from './Toast/useToaster'
 import logo from '../assets/logo.png'

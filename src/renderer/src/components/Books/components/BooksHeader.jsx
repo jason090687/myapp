@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Search, Plus, FileUp, FileDown, Grid3x3, List, Filter } from 'lucide-react'
 import { Button } from '../../ui/button'
@@ -18,15 +18,6 @@ function BooksHeader({
   books = []
 }) {
   const [showImport, setShowImport] = useState(false)
-
-  // Get unique subjects from books
-  const uniqueSubjects = useMemo(() => {
-    const subjects = books
-      .filter((book) => !book.cancelled && book.subject)
-      .map((book) => book.subject.trim())
-      .filter((subject) => subject !== '')
-    return [...new Set(subjects)].sort()
-  }, [books])
 
   return (
     <div className="top-label">
@@ -73,12 +64,14 @@ function BooksHeader({
               }}
               value={selectedCategory || ''}
             >
-              <option value="">All Subjects</option>
-              {uniqueSubjects.map((subject) => (
-                <option key={subject} value={subject}>
-                  {subject}
-                </option>
-              ))}
+              <option value="">A-Z Sort</option>
+              <option value="title_asc">Title (A-Z)</option>
+              <option value="title_desc">Title (Z-A)</option>
+              <option value="author_asc">Author (A-Z)</option>
+              <option value="author_desc">Author (Z-A)</option>
+              <option value="year_desc">Year (Newest)</option>
+              <option value="year_asc">Year (Oldest)</option>
+              <option value="newest">Recently Added</option>
             </select>
           </div>
 
@@ -90,7 +83,7 @@ function BooksHeader({
             title="Add New Book"
           >
             <Plus size={18} />
-            {/* <span className="btn-text">Add New Book</span> */}
+            <span className="btn-text">Add New Book</span>
           </Button>
           <Button
             onClick={() => setShowImport(true)}
@@ -100,7 +93,7 @@ function BooksHeader({
             title="Import Books"
           >
             <FileUp size={18} />
-            {/* <span className="btn-text">Import Books</span> */}
+            <span className="btn-text">Import Books</span>
           </Button>
           <Button
             onClick={onExport}
@@ -110,7 +103,7 @@ function BooksHeader({
             title="Export CSV"
           >
             <FileDown size={18} />
-            {/* <span className="btn-text">Export CSV</span> */}
+            <span className="btn-text">Export CSV</span>
           </Button>
           <div className="view-toggle">
             <button

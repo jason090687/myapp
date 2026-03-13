@@ -15,6 +15,50 @@
   overflow: hidden;
 }
 
+.action-btn {
+  /* display: inline-flex; */
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: transparent;
+  color: #64748b;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+}
+
+.action-btn.delete {
+  color: #dc2626;
+}
+
+.action-btn:hover {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  transform: translateY(-1px);
+}
+
+/* .action-btn svg {
+  width: 20px;
+  height: 20px;
+} */
+
+.action-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.action-btn.edit:hover {
+  color: #0a0b64;
+}
+
+.action-btn.delete:hover {
+  color: #dc2626;
+}
+
 .books-table-wrapper {
   flex: 1;
   overflow-x: auto;

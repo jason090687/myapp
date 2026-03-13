@@ -17,6 +17,9 @@ const BookGrid = ({
     if (statusLower === 'available') return 'status-available'
     if (statusLower === 'borrowed') return 'status-borrowed'
     if (statusLower === 'reserved') return 'status-reserved'
+    if (statusLower === 'damaged') return 'status-damaged'
+    if (statusLower === 'lost') return 'status-lost'
+    if (statusLower === 'overdue') return 'status-overdue'
     return 'status-default'
   }
 
@@ -53,7 +56,16 @@ const BookGrid = ({
               {/* Book Cover */}
               <div className="book-cover-container">
                 {book.book_cover ? (
-                  <img src={book.book_cover} alt={book.title} className="book-cover" />
+                  <img
+                    src={book.book_cover}
+                    alt={book.title}
+                    className="book-cover"
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.style.display = 'none'
+                      e.target.parentNode.classList.add('cover-error')
+                    }}
+                  />
                 ) : (
                   <div className="book-cover-placeholder">
                     <BookOpen className="placeholder-icon" size={64} strokeWidth={1.5} />
@@ -127,7 +139,7 @@ const BookGrid = ({
                   className="action-btn action-btn-delete"
                   onClick={(e) => {
                     e.stopPropagation()
-                    onDeleteBook(book)
+                    onDeleteBook(book.id, book.title)
                   }}
                   title="Delete Book"
                   aria-label="Delete book"

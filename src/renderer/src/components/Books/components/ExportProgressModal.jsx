@@ -7,14 +7,16 @@ const ExportProgressModal = ({ isOpen, progress, currentPage, totalPages, export
     <div className="export-modal-overlay">
       <div className="export-modal-content">
         <div className="export-modal-header">
-          <h3>Exporting Books</h3>
-          <p className="export-modal-subtitle">Please wait while we prepare your export...</p>
+          <div className="export-modal-title-row">
+            <h3>Exporting Books</h3>
+            <p>Please wait while we prepare your export...</p>
+          </div>
         </div>
 
         <div className="export-progress-container">
           <div className="export-progress-bar">
             <div className="export-progress-fill" style={{ width: `${progress}%` }}>
-              <div className="export-progress-shimmer"></div>
+              <div className="export-progress-shimmer" />
             </div>
           </div>
           <div className="export-progress-text">{Math.round(progress)}%</div>
@@ -27,6 +29,7 @@ const ExportProgressModal = ({ isOpen, progress, currentPage, totalPages, export
               {currentPage} / {totalPages || '...'}
             </span>
           </div>
+          <div className="export-stat-divider" />
           <div className="export-stat-item">
             <span className="export-stat-label">Books Exported</span>
             <span className="export-stat-value">{exportedCount}</span>

@@ -1,123 +1,149 @@
+/* ===== OVERLAY ===== */
 .export-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  animation: fadeIn 0.2s ease-out;
+  padding: 1rem;
+  animation: export-fadeIn 0.2s ease;
 }
 
+/* ===== MODAL ===== */
 .export-modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 10px;
-  width: 90%;
-  max-width: 480px;
+  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  border-radius: 1.25rem;
+  width: 100%;
+  max-width: 420px;
   box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: slideUp 0.3s ease-out;
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(226, 232, 240, 0.8);
+  animation: export-slideUp 0.25s ease;
+  overflow: hidden;
 }
 
+/* ===== HEADER ===== */
 .export-modal-header {
-  /* margin-bottom: 28px; */
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #e4e4e7;
+  background: white;
 }
 
-.export-modal-header h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.025em;
+.export-modal-title-row h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem;
+  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.export-modal-subtitle {
-  font-size: 14px;
-  color: #64748b;
+.export-modal-title-row p {
+  font-size: 0.8125rem;
+  color: #71717a;
   margin: 0;
-  font-weight: 400;
 }
 
+/* ===== PROGRESS ===== */
 .export-progress-container {
-  margin-bottom: 24px;
+  padding: 1.5rem 1.75rem 0.5rem;
 }
 
 .export-progress-bar {
   width: 100%;
-  height: 12px;
-  background: #f1f5f9;
-  border-radius: 9999px;
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 999px;
   overflow: hidden;
-  position: relative;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .export-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 9999px;
-  transition: width 0.3s ease-out;
+  background: linear-gradient(90deg, #0a0b64 0%, #4f46e5 50%, #0a0b64 100%);
+  background-size: 200%;
+  border-radius: 999px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  animation: export-gradient-shift 2s ease infinite;
 }
 
 .export-progress-shimmer {
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  animation: shimmer 2s infinite;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  animation: export-shimmer 2s infinite;
 }
 
 .export-progress-text {
   text-align: center;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: #0a0b64;
   font-variant-numeric: tabular-nums;
+  background: rgba(10, 11, 100, 0.07);
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 2rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
+/* ===== STATS ===== */
 .export-stats {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0;
+  padding: 1.25rem 1.75rem 1.5rem;
+  margin-top: 1rem;
+  border-top: 1px solid #e4e4e7;
+}
+
+.export-stat-divider {
+  background: #e4e4e7;
+  margin: 0.25rem 0;
 }
 
 .export-stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 0.375rem;
 }
 
 .export-stat-label {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 500;
+  font-size: 0.6875rem;
+  color: #71717a;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .export-stat-value {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #09090b;
   font-variant-numeric: tabular-nums;
 }
 
-@keyframes fadeIn {
+/* ===== ANIMATIONS ===== */
+@keyframes export-fadeIn {
   from {
     opacity: 0;
   }
@@ -126,70 +152,52 @@
   }
 }
 
-@keyframes slideUp {
+@keyframes export-slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(24px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-@keyframes shimmer {
+@keyframes export-shimmer {
   0% {
-    left: -100%;
+    transform: translateX(-100%);
   }
   100% {
-    left: 100%;
+    transform: translateX(200%);
   }
 }
 
-/* Dark mode support (use app theme toggle, not OS theme) */
-html.dark .export-modal-content {
-  background: #1e293b;
+@keyframes export-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-html.dark .export-modal-header h3 {
-  color: #f1f5f9;
-}
-
-html.dark .export-modal-subtitle {
-  color: #94a3b8;
-}
-
-html.dark .export-progress-bar {
-  background: #334155;
-}
-
-html.dark .export-progress-text {
-  color: #cbd5e1;
-}
-
-html.dark .export-stats {
-  border-top-color: #334155;
-}
-
-html.dark .export-stat-label {
-  color: #94a3b8;
-}
-
-html.dark .export-stat-value {
-  color: #f1f5f9;
-}
-
-@media (max-width: 640px) {
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
   .export-modal-content {
-    padding: 24px;
-    max-width: 90%;
+    border-radius: 1rem;
   }
 
-  .export-modal-header h3 {
-    font-size: 18px;
+  .export-modal-header,
+  .export-progress-container,
+  .export-stats {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
   }
 
   .export-stat-value {
-    font-size: 16px;
+    font-size: 1.125rem;
   }
 }

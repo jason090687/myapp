@@ -122,6 +122,25 @@ export const useBooks = (token) => {
   }
 
   const handleCategoryChange = (category) => {
+    // Handle A-Z sort options
+    if (category === 'title_asc') {
+      setSortConfig({ column: 'title', direction: 'asc' })
+    } else if (category === 'title_desc') {
+      setSortConfig({ column: 'title', direction: 'desc' })
+    } else if (category === 'author_asc') {
+      setSortConfig({ column: 'author', direction: 'asc' })
+    } else if (category === 'author_desc') {
+      setSortConfig({ column: 'author', direction: 'desc' })
+    } else if (category === 'year_desc') {
+      setSortConfig({ column: 'year', direction: 'desc' })
+    } else if (category === 'year_asc') {
+      setSortConfig({ column: 'year', direction: 'asc' })
+    } else if (category === 'newest') {
+      setSortConfig({ column: 'date_received', direction: 'desc' })
+    } else {
+      // Clear sort config for default/empty
+      setSortConfig({ column: '', direction: '' })
+    }
     setSelectedCategory(category)
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
   }
@@ -295,17 +314,16 @@ export const useBooks = (token) => {
 
   const handleRowClick = (book) => {
     setSelectedBook(book)
-    setIsDetailsModalOpen(true)
+    setIsDetailsOpen(true)
   }
 
   const handleGridViewDetails = (book) => {
     setSelectedBook(book)
-    setIsDetailsModalOpen(true)
+    setIsDetailsOpen(true)
   }
 
   const handleCloseDetailsModal = () => {
-    setIsDetailsModalOpen(false)
-    setTimeout(() => setSelectedBook(null), 300)
+    setIsDetailsOpen(false)
   }
 
   return {
@@ -319,6 +337,7 @@ export const useBooks = (token) => {
     exportProgress,
     isDetailsModalOpen,
     selectedBook,
+    isDetailsOpen,
     debouncedSearchTerm,
     handleCategoryChange,
     handleSearch,

@@ -38,19 +38,15 @@ function ImportStudents({ onClose, onRefresh }) {
   const parseStudentsCsv = (rows) => {
     const header = rows[0]
     const headerIndex = new Map()
-
     header.forEach((h, idx) => {
       const key = normalizeHeader(h)
       if (key) headerIndex.set(key, idx)
     })
-
     const get = (row, key) => {
       const idx = headerIndex.get(key)
       if (idx === undefined) return ''
-      const raw = row[idx]
-      return (raw ?? '').toString().trim()
+      return (row[idx] ?? '').toString().trim()
     }
-
     return rows
       .slice(1)
       .filter((row) => Array.isArray(row) && row.some((cell) => (cell ?? '').toString().trim()))
@@ -71,14 +67,12 @@ function ImportStudents({ onClose, onRefresh }) {
     setProgress({ current: 0, total: students.length })
     let successCount = 0
     let errorCount = 0
-
     try {
       for (const student of students) {
         if (cancelRef.current) {
           showToast('Info', `Import cancelled. ${successCount} students were imported.`, 'info')
           return
         }
-
         try {
           await createStudent(token, student)
           successCount++
@@ -87,16 +81,11 @@ function ImportStudents({ onClose, onRefresh }) {
           console.error(`Failed to import student: ${student.name}`, error)
           errorCount++
         }
-
         if (cancelRef.current) return
         setProgress((prev) => ({ ...prev, current: prev.current + 1 }))
-
-        // Update loading message based on progress
         const percentage = ((successCount + errorCount) / students.length) * 100
-        let messageIndex = Math.min(Math.floor(percentage / 20), 4)
-        setCurrentLoadingState(loadingMessages[messageIndex])
+        setCurrentLoadingState(loadingMessages[Math.min(Math.floor(percentage / 20), 4)])
       }
-
       if (successCount > 0) {
         showToast(
           'Success',
@@ -111,9 +100,7 @@ function ImportStudents({ onClose, onRefresh }) {
         showToast('Error', 'No students were imported successfully', 'error')
       }
     } catch (error) {
-      if (!cancelRef.current) {
-        showToast('Error', 'Import failed: ' + error.message, 'error')
-      }
+      if (!cancelRef.current) showToast('Error', 'Import failed: ' + error.message, 'error')
     }
   }
 
@@ -121,40 +108,22 @@ function ImportStudents({ onClose, onRefresh }) {
     try {
       if (!file) return
       setSelectedFile(file)
-
       Papa.parse(file, {
         skipEmptyLines: true,
         complete: (results) => {
           try {
-            if (results.errors.length > 0) {
-              console.error('CSV Parsing Errors:', results.errors)
-              throw new Error('Error parsing CSV file')
-            }
-
+            if (results.errors.length > 0) throw new Error('Error parsing CSV file')
             const rows = results.data
-
-            if (!Array.isArray(rows) || rows.length === 0) {
-              throw new Error('CSV file is empty')
-            }
-
+            if (!Array.isArray(rows) || rows.length === 0) throw new Error('CSV file is empty')
             const students = parseStudentsCsv(rows)
-
-            if (students.length === 0) {
-              throw new Error(
-                'No valid students found. Make sure your CSV has the required columns: ID_NUMBER, NAME'
-              )
-            }
-
+            if (students.length === 0)
+              throw new Error('No valid students found. CSV must have ID_NUMBER and NAME columns.')
             setParsedData(students)
           } catch (error) {
-            console.error('Error parsing CSV:', error)
             showToast('Error', error?.message || 'Invalid CSV file format', 'error')
           }
         },
-        error: (error) => {
-          console.error('Error reading file:', error)
-          showToast('Error', 'Error reading file', 'error')
-        }
+        error: () => showToast('Error', 'Error reading file', 'error')
       })
     } catch (error) {
       console.error('Error processing file:', error)
@@ -168,20 +137,9 @@ function ImportStudents({ onClose, onRefresh }) {
     try {
       await uploadStudents(parsedData)
     } catch (error) {
-      if (!cancelRef.current) {
-        console.error('Error uploading students:', error)
-        showToast('Error', 'Upload failed', 'error')
-      }
+      if (!cancelRef.current) showToast('Error', 'Upload failed', 'error')
     } finally {
-      if (!cancelRef.current) {
-        setImporting(false)
-      }
-    }
-  }
-
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose()
+      if (!cancelRef.current) setImporting(false)
     }
   }
 
@@ -194,22 +152,16 @@ function ImportStudents({ onClose, onRefresh }) {
   const handleDrag = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
-    } else if (e.type === 'dragleave') {
-      setDragActive(false)
-    }
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true)
+    else if (e.type === 'dragleave') setDragActive(false)
   }
 
   const handleDrop = async (e) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-
     const file = e.dataTransfer.files[0]
-    if (file) {
-      await processFile(file)
-    }
+    if (file) await processFile(file)
   }
 
   const handleCancelImport = () => {
@@ -223,157 +175,152 @@ function ImportStudents({ onClose, onRefresh }) {
     }, 500)
   }
 
-  const renderPreviewTable = () => {
-    if (!parsedData) return null
-
-    return (
-      <div className="csv-preview">
-        <div className="preview-table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>ID Number</th>
-                <th>RFID Number</th>
-                <th>Name</th>
-                <th>Year Level</th>
-                <th>Active</th>
-              </tr>
-            </thead>
-            <tbody>
-              {parsedData.map((student, index) => (
-                <tr key={index}>
-                  <td>{student.id_number || ''}</td>
-                  <td>{student.rfid_number || ''}</td>
-                  <td>{student.name || ''}</td>
-                  <td>{student.year_level || ''}</td>
-                  <td>{student.active ? 'Yes' : 'No'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    )
-  }
+  const progressPct = progress.total > 0 ? (progress.current / progress.total) * 100 : 0
 
   return (
-    <div className="import-modal-overlay" onClick={handleOverlayClick}>
-      <div className="import-modal-container" onClick={(e) => e.stopPropagation()}>
-        {importing ? (
-          <div className="import-loading">
-            <h3 className="loading-message">
-              {isCancelling ? 'Cancelling import...' : currentLoadingState.text}
-            </h3>
-            <div className="progress-container">
-              <div className="progress-track">
-                <div
-                  className="progress-indicator"
-                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                />
-              </div>
-              <p className="progress-label">
-                {progress.current} of {progress.total} students imported
-              </p>
+    <div
+      className="import-modal-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !importing) onClose()
+      }}
+    >
+      <div className="import-modal-wrapper">
+        {/* Header */}
+        <div className="import-modal-header">
+          <div className="import-modal-title">
+            <FaCloudUploadAlt className="import-title-icon" />
+            <div>
+              <h2>Import Students</h2>
+              <p>Upload a CSV file to bulk import students into your library system</p>
             </div>
-            {!isCancelling && (
-              <Button variant="ghost" onClick={handleCancelImport}>
-                Cancel Import
-              </Button>
-            )}
           </div>
-        ) : (
-          <>
-            <div className="import-header">
-              <div className="header-content">
-                <h2>Import Students</h2>
-                <p className="header-subtitle">
-                  Upload CSV file to bulk import students into your library system
-                </p>
-              </div>
-              <Button variant="ghost" onClick={onClose} aria-label="Close">
-                <FaTimes />
-              </Button>
-            </div>
+          <button
+            className="import-modal-close"
+            onClick={onClose}
+            disabled={importing}
+            type="button"
+            aria-label="Close"
+          >
+            <FaTimes />
+          </button>
+        </div>
 
-            <div className="import-body">
-              {selectedFile ? (
-                <>
-                  <div className="file-selected">
-                    <div className="file-info">
-                      <div className="file-icon-wrapper">
-                        <FaFile />
-                      </div>
-                      <div className="file-details">
-                        <p className="file-name">{selectedFile.name}</p>
-                        <p className="file-size">{(selectedFile.size / 1024).toFixed(2)} KB</p>
-                      </div>
-                      <Button variant="ghost" onClick={removeFile} title="Remove file">
-                        <FaTrash />
-                      </Button>
-                    </div>
-                  </div>
-                  {parsedData && (
-                    <>
-                      <div className="preview-header">
-                        <h3>Preview</h3>
-                        <span className="preview-count">{parsedData.length} students found</span>
-                      </div>
-                      {renderPreviewTable()}
-                      <div className="import-actions">
-                        <Button variant="primary" type="submit" onClick={handleSubmit}>
-                          <FaCloudUploadAlt />
-                          Import {parsedData.length} Students
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div
-                    className={`upload-area ${dragActive ? 'active' : ''}`}
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
-                  >
-                    <div className="upload-icon-wrapper">
-                      <FaCloudUploadAlt />
-                    </div>
-                    <h3 className="upload-title">Drop your CSV file here</h3>
-                    <p className="upload-subtitle">or click below to browse</p>
-                    <label className="btn-upload">
-                      <input
-                        type="file"
-                        accept=".csv,.txt"
-                        onChange={(e) => processFile(e.target.files[0])}
-                        hidden
-                      />
-                      Choose File
-                    </label>
-                  </div>
-                  {/* <div className="format-guide">
-                    <div className="guide-header">
-                      <h4>CSV Format Guide</h4>
-                    </div>
-                    <div className="guide-content">
-                      <p className="guide-description">
-                        Your CSV file should contain the following columns:
-                      </p>
-                      <div className="columns-grid">
-                        <span className="required">ID_NUMBER*</span>
-                        <span>RFID_NUMBER</span>
-                        <span className="required">NAME*</span>
-                        <span>YEAR_LEVEL</span>
-                        <span>ACTIVE (TRUE/FALSE)</span>
-                      </div>
-                      <p className="guide-note">* Required fields</p>
-                    </div>
-                  </div> */}
-                </>
+        {/* Body */}
+        <div className="import-modal-body">
+          {importing ? (
+            /* ── Progress State ── */
+            <div className="import-progress-state">
+              <div className="import-progress-icon">
+                {isCancelling ? '🛑' : currentLoadingState.icon}
+              </div>
+              <h3 className="import-progress-message">
+                {isCancelling ? 'Cancelling import...' : currentLoadingState.text}
+              </h3>
+
+              <div className="import-progress-track-wrap">
+                <div className="import-progress-track">
+                  <div className="import-progress-fill" style={{ width: `${progressPct}%` }} />
+                </div>
+                <div className="import-progress-meta">
+                  <span className="import-progress-count">
+                    {progress.current} / {progress.total}
+                  </span>
+                  <span className="import-progress-pct">{Math.round(progressPct)}%</span>
+                </div>
+              </div>
+
+              {!isCancelling && (
+                <Button variant="secondary" onClick={handleCancelImport}>
+                  Cancel Import
+                </Button>
               )}
             </div>
-          </>
+          ) : selectedFile ? (
+            /* ── File Selected ── */
+            <>
+              <div className="import-file-card">
+                <div className="import-file-icon">
+                  <FaFile />
+                </div>
+                <div className="import-file-details">
+                  <p className="import-file-name">{selectedFile.name}</p>
+                  <p className="import-file-size">{(selectedFile.size / 1024).toFixed(2)} KB</p>
+                </div>
+                <Button variant="ghost" onClick={removeFile} title="Remove file">
+                  <FaTrash />
+                </Button>
+              </div>
+
+              {parsedData && (
+                <>
+                  <div className="import-preview-header">
+                    <h3>Preview</h3>
+                    <span className="import-preview-badge">{parsedData.length} students found</span>
+                  </div>
+
+                  <div className="import-preview-table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          {['ID Number', 'RFID Number', 'Name', 'Year Level', 'Active'].map((h) => (
+                            <th key={h}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parsedData.map((student, i) => (
+                          <tr key={i}>
+                            <td>{student.id_number}</td>
+                            <td>{student.rfid_number}</td>
+                            <td>{student.name}</td>
+                            <td>{student.year_level}</td>
+                            <td>{student.active ? 'Yes' : 'No'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            /* ── Upload Area ── */
+            <div
+              className={`import-upload-area ${dragActive ? 'active' : ''}`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <div className="import-upload-icon">
+                <FaCloudUploadAlt />
+              </div>
+              <h3>Drop your CSV file here</h3>
+              <p>or click below to browse your files</p>
+              <label className="import-upload-btn">
+                <input
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={(e) => processFile(e.target.files[0])}
+                  hidden
+                />
+                Choose File
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {!importing && selectedFile && parsedData && (
+          <div className="import-modal-footer">
+            <Button variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSubmit}>
+              <FaCloudUploadAlt />
+              Import {parsedData.length} Students
+            </Button>
+          </div>
         )}
       </div>
     </div>

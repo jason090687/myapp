@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { X, Edit2, Trash2, BookOpen } from 'lucide-react'
 import { formatDate } from '../utils/bookUtils'
 import { fetchBookDetails } from '../../../Features/api'
@@ -10,30 +10,68 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
   const [bookDetails, setBookDetails] = useState(null)
   const [imageLoading, setImageLoading] = useState(true)
   const [isClosing, setIsClosing] = useState(false)
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false)
   const { token } = useSelector((state) => state.auth)
+  // Ref to block the first click that opened the modal from immediately closing it
+  const justOpenedRef = useRef(false)
 
-  // Reset state when modal mounts
   useEffect(() => {
     setBookDetails(null)
     setImageLoading(true)
     setIsClosing(false)
-
-    return () => {
-      setBookDetails(null)
-      setImageLoading(true)
-      setIsClosing(false)
-    }
   }, [book?.id])
+
+  // When modal opens, mark it as "just opened" so the triggering click doesn't close it
+  useEffect(() => {
+    if (isOpen) {
+      justOpenedRef.current = true
+      // Allow overlay clicks to close after one event loop tick
+      const t = setTimeout(() => {
+        justOpenedRef.current = false
+      }, 0)
+      return () => clearTimeout(t)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen || !book?.id || !token) return
+
+    const getBookDetails = async () => {
+      try {
+        setIsLoadingDetails(true)
+        const details = await fetchBookDetails(token, book.id)
+        setBookDetails(details)
+      } catch (error) {
+        console.error('Error fetching book details:', error)
+      } finally {
+        setIsLoadingDetails(false)
+      }
+    }
+
+    getBookDetails()
+  }, [isOpen, book?.id, token])
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
 
   const handleClose = useCallback(
     (e) => {
       e?.stopPropagation()
+      // Block the click that triggered the modal from closing it
+      if (justOpenedRef.current) return
       setIsClosing(true)
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         onClose()
         setIsClosing(false)
       }, 200)
-      return () => clearTimeout(timer)
     },
     [onClose]
   )
@@ -50,58 +88,53 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     [onDelete, onClose, book?.title]
   )
 
-  useEffect(() => {
-    if (!isOpen || !book?.id) return
-
-    const getBookDetails = async () => {
-      try {
-        const details = await fetchBookDetails(token, book.id)
-        setBookDetails(details)
-      } catch (error) {
-        console.error('Error fetching book details:', error)
-      }
-    }
-
-    getBookDetails()
-  }, [isOpen, book?.id, token])
+  const handleEdit = useCallback(() => {
+    onEdit(book)
+  }, [onEdit, book])
 
   const renderBookCover = useCallback(
-    (coverUrl) => (
-      <div className="book-cover-container" style={{ display: 'flex', justifyContent: 'start' }}>
-        {coverUrl ? (
-          <>
-            {imageLoading && <div className="book-cover-skeleton pulse" />}
-            <img
-              src={
-                coverUrl.startsWith('http') ? coverUrl : `http://192.168.0.145:8000${coverUrl}` // Fixed URL format
-              }
-              alt={`Cover of ${book.title}`}
-              className={`book-cover-image ${imageLoading ? 'hidden' : ''}`}
-              onLoad={() => setImageLoading(false)}
-              onError={(e) => {
-                setImageLoading(false)
-                e.target.onerror = null
-                e.target.parentNode.innerHTML = `<div class="default-book-cover">
-                <FaBook size={24} />
-              </div>`
-              }}
-            />
-          </>
-        ) : (
-          <div className="default-book-cover">
-            <BookOpen size={48} strokeWidth={1.5} />
+    (coverUrl) => {
+      if (!coverUrl) {
+        return (
+          <div className="book-cover-container">
+            <div className="default-book-cover">
+              <BookOpen size={48} strokeWidth={1.5} />
+            </div>
           </div>
-        )}
-      </div>
-    ),
+        )
+      }
+
+      const fullUrl = coverUrl.startsWith('http')
+        ? coverUrl
+        : `http://192.168.0.145:8000${coverUrl}`
+
+      return (
+        <div className="book-cover-container">
+          {imageLoading && <div className="book-cover-skeleton pulse" />}
+          <img
+            src={fullUrl}
+            alt={`Cover of ${book?.title}`}
+            className={`book-cover-image ${imageLoading ? 'hidden' : ''}`}
+            onLoad={() => setImageLoading(false)}
+            onError={(e) => {
+              setImageLoading(false)
+              e.target.style.display = 'none'
+              e.target.parentNode.innerHTML = `<div class="default-book-cover"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>`
+            }}
+          />
+        </div>
+      )
+    },
     [imageLoading, book?.title]
   )
+
+  const displayData = bookDetails || book
 
   const details = book
     ? [
         {
           label: 'Book Cover',
-          value: renderBookCover(bookDetails?.book_cover || book.book_cover),
+          value: renderBookCover(displayData?.book_cover),
           isComponent: true
         },
         { label: 'Title', value: book.title },
@@ -135,9 +168,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
       ]
     : []
 
-  if (!isOpen || !book) {
-    return null
-  }
+  if (!isOpen || !book) return null
 
   return (
     <div className="book-details-overlay" onClick={handleClose}>
@@ -145,6 +176,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
         className={`book-details-content ${isClosing ? 'modal-exit' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="book-details-header">
           <div className="header-content">
             <h2>Book Details</h2>
@@ -155,26 +187,37 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
           </Button>
         </div>
 
+        {/* Body */}
         <div className="book-details-body">
-          <div className="details-grid">
-            {details.map(
-              ({ label, value, isComponent }) =>
-                value && (
-                  <div key={label} className="detail-item">
-                    <span className="detail-label">{label}</span>
-                    {isComponent ? value : <span className="detail-value">{value}</span>}
-                  </div>
-                )
-            )}
-          </div>
+          {isLoadingDetails ? (
+            <div className="book-details-loading">
+              <div className="book-details-spinner" />
+              <span>Loading details...</span>
+            </div>
+          ) : (
+            <div className="details-grid">
+              {details.map(
+                ({ label, value, isComponent }) =>
+                  value !== null &&
+                  value !== undefined &&
+                  value !== '' && (
+                    <div key={label} className="detail-item">
+                      <span className="detail-label">{label}</span>
+                      {isComponent ? value : <span className="detail-value">{value}</span>}
+                    </div>
+                  )
+              )}
+            </div>
+          )}
         </div>
 
+        {/* Footer */}
         <div className="book-details-footer">
-          <Button variant="primary" onClick={() => onEdit(book)}>
-            <Edit2 size={18} /> Edit
+          <Button variant="primary" onClick={handleEdit}>
+            <Edit2 size={16} /> Edit
           </Button>
           <Button variant="secondary" onClick={() => handleDelete(book.id)}>
-            <Trash2 size={18} /> Delete
+            <Trash2 size={16} /> Delete
           </Button>
         </div>
       </div>

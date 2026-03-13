@@ -5,7 +5,6 @@ import BooksHeader from '../components/Books/components/BooksHeader'
 import BooksTable from '../components/Books/components/BooksTable'
 import BookGrid from '../components/Books/components/BookGrid'
 import { useBooks } from '../components/Books/hooks/useBooks'
-import { useBookModals } from '../components/Books/hooks/useBookModals'
 import './Books.css'
 import BookDetailsModal from '../components/Books/components/BookDetailsModal'
 import ConfirmDeleteModal from '../components/Books/components/ConfirmDeleteModal'
@@ -21,6 +20,8 @@ function Books() {
   const [isAddBookOpen, setIsAddBookOpen] = useState(false)
   const [isEditBookOpen, setIsEditBookOpen] = useState(false)
   const [selectedBookId, setSelectedBookId] = useState(null)
+  const [selectedBook, setSelectedBook] = useState(null)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   const [viewMode, setViewMode] = useState('table')
 
@@ -31,14 +32,9 @@ function Books() {
     handleDeleteBook,
     handlePageChange,
     handleExportToCSV,
-    handleGridViewDetails,
-    handleCloseDetailsModal,
-    handleRowClick,
     handleSearch,
     handleCategoryChange,
     exportProgress,
-    selectedBook,
-    isDetailsModalOpen,
     deleteConfirm,
     confirmDelete,
     cancelDelete,
@@ -48,6 +44,22 @@ function Books() {
   const handleEditBook = (book) => {
     setSelectedBookId(book.id)
     setIsEditBookOpen(true)
+    setIsDetailsOpen(false)
+  }
+
+  const handleViewDetails = (book) => {
+    setSelectedBook(book)
+    setIsDetailsOpen(true)
+  }
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsOpen(false)
+  }
+
+  const handleEditFromDetails = (book) => {
+    setSelectedBookId(book.id)
+    setIsEditBookOpen(true)
+    setIsDetailsOpen(false)
   }
 
   // const handleRowClick = (book) => {
@@ -65,12 +77,6 @@ function Books() {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
-
-  useEffect(() => {
-    return () => {
-      handleCloseDetailsModal()
-    }
-  }, [handleCloseDetailsModal])
 
   return (
     <div className="app-wrapper">
@@ -97,7 +103,7 @@ function Books() {
                 isLoading={isLoading}
                 onEditBook={handleEditBook}
                 onDeleteBook={handleDeleteBook}
-                onViewDetails={handleGridViewDetails}
+                onViewDetails={handleViewDetails}
                 pagination={pagination}
                 onPageChange={handlePageChange}
               />
@@ -107,7 +113,7 @@ function Books() {
                 isLoading={isLoading}
                 onEditBook={handleEditBook}
                 onDeleteBook={handleDeleteBook}
-                onRowClick={handleRowClick}
+                onRowClick={handleViewDetails}
                 pagination={pagination}
                 onPageChange={handlePageChange}
               />
@@ -129,7 +135,7 @@ function Books() {
 
       {/* DETAILS MODAL */}
       <ErrorBoundary>
-        {selectedBook && isDetailsModalOpen && (
+        {selectedBook && isDetailsOpen && (
           <BookDetailsModal
             key={`modal-${selectedBook.id}`}
             book={selectedBook}

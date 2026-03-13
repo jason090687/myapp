@@ -135,7 +135,7 @@ const BooksTable = ({
         <tr
           key={book.id || index}
           onClick={(e) => handleRowClick(e, book)}
-          style={{ cursor: isClickable ? 'pointer' : 'default' }}
+          style={{ cursor: 'pointer' }}
         >
           {TABLE_COLUMNS.map((column) => (
             <td key={column.key} className={`col-${column.key}`} data-content={book[column.key]}>
