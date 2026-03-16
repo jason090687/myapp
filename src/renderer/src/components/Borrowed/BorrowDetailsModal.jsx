@@ -10,7 +10,7 @@ import {
   FaClock,
   FaInfoCircle
 } from 'react-icons/fa'
-import './BorrowDetailsModal.css'
+import './styles/BorrowDetailsModal.css'
 
 const fieldIcons = {
   'Student Name': <FaUser />,
@@ -39,8 +39,8 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
     { label: 'Book Title', value: borrowData.book_title },
     { label: 'Lexile Level', value: borrowData.lexile_level || 'N/A' },
     { label: 'Borrow Date', value: formatDate(borrowData.borrowed_date) },
-    { label: 'Due Date', value: formatDate(borrowData.due_date) },
-    { label: 'Status', value: borrowData.status }
+    { label: 'Due Date', value: formatDate(borrowData.due_date) }
+    // { label: 'Status', value: borrowData.status }
   ]
 
   const handleReturn = async (id) => {

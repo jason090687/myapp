@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import InputField from '../../InputField'
+import InputField from '../InputField'
 import {
   FaBook,
   FaUser,
@@ -18,17 +18,18 @@ import {
   FaImage,
   FaTimes
 } from 'react-icons/fa'
-import '../styles/UpdateBooksModal.css'
-import { useToaster } from '../../Toast/useToaster'
+import './styles/UpdateBooksModal.css'
+import { useToaster } from '../Toast/useToaster'
 import { useSelector } from 'react-redux'
-import { Button } from '../../ui/button'
-import { fetchBookDetails, updateBook } from '../../../Features/api'
+import { Button } from '../ui/button'
+import { updateBook } from '../../Features/api'
+import { fetchBookDetails } from '../../api/book'
+import { useQuery } from '@tanstack/react-query'
+import { setAuthToken } from '../../api/axios'
 
 const UpdateBookModal = ({ isOpen, onClose, onSuccess, bookId }) => {
   const { showToast } = useToaster()
   const [isLoading, setIsLoading] = useState(false)
-  const [isPageLoading, setIsPageLoading] = useState(false)
-  const [bookDetails, setBookDetails] = useState(null)
   const { token } = useSelector((state) => state.auth)
 
   const initialFormState = {
@@ -81,32 +82,22 @@ const UpdateBookModal = ({ isOpen, onClose, onSuccess, bookId }) => {
     }
   }, [isOpen])
 
-  // Fetch book details when modal opens
-  useEffect(() => {
-    if (!isOpen || !bookId || !token) return
+  setAuthToken(token)
 
-    const loadBookDetails = async () => {
-      try {
-        setIsPageLoading(true)
-        const data = await fetchBookDetails(token, bookId)
-        setBookDetails(data)
-      } catch (error) {
-        console.error('Error loading book details:', error)
-        showToast('Error', 'Failed to load book details', 'error')
-        onClose()
-      } finally {
-        setIsPageLoading(false)
-      }
+  const { data: bookDetails, isLoading: isPageLoading } = useQuery({
+    queryKey: ['bookDetails', bookId, token],
+    queryFn: () => fetchBookDetails(bookId),
+    enabled: isOpen && !!bookId && !!token,
+    onError: (error) => {
+      showToast(error?.response?.data?.detail || 'Error', 'Failed to load book details', 'error')
+      onClose()
     }
-
-    loadBookDetails()
-  }, [isOpen, bookId, token])
+  })
 
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setFormData(initialFormState)
-      setBookDetails(null)
     }
   }, [isOpen])
 

@@ -1,4 +1,4 @@
-import '../styles/BookGridSkeleton.css'
+import './styles/BookGridSkeleton.css'
 
 const BookGridSkeleton = ({ count = 4 }) => {
   return (

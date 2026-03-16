@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Calendar, X, User, BookOpen } from 'lucide-react'
-import { Button } from './ui/button'
-import './RenewModal.css'
-import { useToaster } from './Toast/useToaster'
+import { Button } from '../ui/button'
+import './styles/RenewModal.css'
+import { useToaster } from '../Toast/useToaster'
 
 const RenewModal = ({
   isOpen = false,

@@ -1,9 +1,9 @@
 import { FaEdit, FaTrash } from 'react-icons/fa'
-import { formatDate } from '../utils/bookUtils'
 import { useState, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import Pagination from '../../Pagination'
-import '../styles/BooksTable.css'
+import Pagination from '../Pagination'
+import './styles/BooksTable.css'
+import { formatDate } from '../../hooks/bookUtils'
 
 const TABLE_COLUMNS = [
   { key: 'title', label: 'TITLE', sortable: true, required: true },

@@ -1,5 +1,5 @@
 import { FaExclamationTriangle } from 'react-icons/fa'
-import '../styles/ConfirmDeleteModal.css'
+import './styles/ConfirmDeleteModal.css'
 
 const ConfirmDeleteModal = ({ isOpen, bookTitle, onConfirm, onCancel, isDeleting }) => {
   if (!isOpen) return null

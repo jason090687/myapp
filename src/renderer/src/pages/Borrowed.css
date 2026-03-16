@@ -49,12 +49,6 @@
 .borrowed-header {
   display: flex;
   align-items: center;
-  background: #ffffff;
-  padding: 1.5rem;
-  border-radius: 20px;
-  box-shadow:
-    0 4px 6px -1px rgb(0 0 0 / 0.05),
-    0 2px 4px -2px rgb(0 0 0 / 0.03);
   justify-content: space-between;
   width: 100%;
   gap: 1.5rem;
@@ -882,8 +876,6 @@
 /* Table wrapper for better mobile scrolling */
 .borrowed-table-wrapper {
   overflow-x: auto;
-  margin: 0 -1rem;
-  padding: 0 1rem;
 }
 
 /* Ensure proper table layout on small screens */

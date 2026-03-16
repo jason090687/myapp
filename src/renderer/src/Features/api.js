@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const host = window.Location
+// Re-export from API modules
+export { fetchBorrowedBooks, returnBook, renewBook, processOverduePayment } from '../api/borrow'
+export { updateBook, fetchBookDetails, addNewBook } from '../api/book'
 
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
 // const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
@@ -234,19 +236,6 @@ export const uploadNewBook = async (token, bookData) => {
   }
 }
 
-export const updateBook = async (token, bookId, bookData) => {
-  try {
-    const response = await axios.patch(
-      `${API_URL}/marc/record/${bookId}/`,
-      bookData,
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to update book')
-  }
-}
-
 export const deleteBook = async (token, bookId, cancelData = {}) => {
   try {
     await axios.patch(
@@ -270,19 +259,6 @@ export const deleteBook = async (token, bookId, cancelData = {}) => {
     console.error('Delete error:', errorDetail)
     console.error('Full error response:', error.response?.data)
     throw new Error(errorDetail || 'Failed to delete book')
-  }
-}
-
-export const fetchBorrowedBooks = async (token, page = 1, searchTerm = '') => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/borrow/list/?page=${page}&search=${searchTerm}&ordering=return_status,-returned_date`,
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error fetching borrowed books:', error.response?.data || error.message)
-    throw new Error(error.response?.data?.message || 'Failed to fetch borrowed books')
   }
 }
 
@@ -395,66 +371,6 @@ export const rejectBorrowRequest = async (token, requestId, rejectionData) => {
   } catch (error) {
     console.error('Error rejecting borrow request:', error)
     throw new Error(error.response?.data?.message || 'Failed to reject borrow request')
-  }
-}
-
-// Update the return book function to use the simple endpoint
-export const returnBook = async (token, bookId, returnData) => {
-  try {
-    const response = await axios.patch(
-      `${API_URL}/borrow/return/${bookId}/`,
-      {
-        is_returned: true,
-        returned_date: returnData.returned_date || new Date().toISOString().split('T')[0],
-        status: returnData.status || 'returned'
-      },
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error returning book:', error)
-    throw new Error(error.response?.data?.message || 'Failed to return book')
-  }
-}
-
-export const renewBook = async (token, borrowId, renewData) => {
-  try {
-    const response = await axios.patch(
-      `${API_URL}/borrow/renew/${borrowId}/`,
-      {
-        due_date: renewData.due_date,
-        renewed_count: renewData.renewed_count
-      },
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error renewing book:', error)
-    throw new Error(error.response?.data?.message || 'Failed to renew book')
-  }
-}
-
-export const processOverduePayment = async (token, borrowId, paymentData) => {
-  try {
-    const response = await axios.patch(
-      `${API_URL}/borrow/fines/${borrowId}/`,
-      {
-        ...paymentData,
-        paid: true,
-        paid_at: paymentData.paid_at,
-        is_returned: paymentData.is_returned || false,
-        returned_date: paymentData.is_returned ? new Date().toISOString().split('T')[0] : null,
-        or_number: paymentData.or_number // Add this line to include OR number
-      },
-      getAuthHeaders(token)
-    )
-
-    return response.data
-  } catch (error) {
-    console.error('Payment processing error:', error)
-    throw new Error(
-      error.response?.data?.message || error.response?.data?.detail || 'Failed to process payment'
-    )
   }
 }
 
@@ -871,15 +787,15 @@ export const resetPasswordWithOtp = async (email, otp, newPassword) => {
   }
 }
 
-export const fetchBookDetails = async (token, bookId) => {
-  try {
-    const response = await axios.get(`${API_URL}/marc/record/${bookId}/`, getAuthHeaders(token))
-    return response.data
-  } catch (error) {
-    console.error('Error fetching book details:', error)
-    throw new Error(error.response?.data?.message || 'Failed to fetch book details')
-  }
-}
+// export const fetchBookDetails = async (token, bookId) => {
+//   try {
+//     const response = await axios.get(`${API_URL}/marc/record/${bookId}/`, getAuthHeaders(token))
+//     return response.data
+//   } catch (error) {
+//     console.error('Error fetching book details:', error)
+//     throw new Error(error.response?.data?.message || 'Failed to fetch book details')
+//   }
+// }
 
 export const fetchAllUsers = async (token) => {
   try {

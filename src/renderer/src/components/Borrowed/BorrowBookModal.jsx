@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { User, BookOpen, Calendar, X } from 'lucide-react'
-import { fetchAllBooks, borrowBook, updateBook } from '../Features/api'
-import { Button } from './ui/button'
-import './BorrowBookModal.css'
+import { fetchAllBooks, borrowBook } from '../../Features/api'
+import { Button } from '../ui/button'
+import './styles/BorrowBookModal.css'
 import { useSelector } from 'react-redux'
-import { useToaster } from './Toast/useToaster'
-import { useActivity } from '../context/ActivityContext'
+import { useToaster } from '../Toast/useToaster'
+import { useActivity } from '../../context/ActivityContext'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {

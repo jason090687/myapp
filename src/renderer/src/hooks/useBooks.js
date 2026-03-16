@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect } from 'react'
-import { fetchBooks, deleteBook } from '../../../Features/api'
+import { fetchBooks, deleteBook } from '../Features/api'
 import { toast } from 'react-toastify'
-import { useActivity } from '../../../context/ActivityContext'
+import { useActivity } from '../context/ActivityContext'
 import { useNavigate } from 'react-router-dom'
 import { useBookSearch } from './useBookSearch'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchUserDetails } from '../../../api/auth'
-import { setAuthToken } from '../../../api/axios'
+import { fetchUserDetails } from '../api/auth'
+import { setAuthToken } from '../api/axios'
 
 export const useBooks = (token) => {
   const navigate = useNavigate()

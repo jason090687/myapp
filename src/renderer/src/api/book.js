@@ -64,7 +64,7 @@ export const deleteBook = async (bookId, cancelData = {}) => {
 
 export const fetchBookDetails = async (bookId) => {
   try {
-    const response = await api.get(`/marc/record/${bookId}/`)
+    const response = await api.get(`/marc/record/${bookId}/`, multipartConfig)
     return response.data
   } catch (error) {
     console.error('Error fetching book details:', error)

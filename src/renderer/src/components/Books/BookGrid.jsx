@@ -1,7 +1,7 @@
 import { Edit2, Trash2, Eye, BookOpen, Tag, Calendar, Library } from 'lucide-react'
 import BookGridSkeleton from './BookGridSkeleton'
-import Pagination from '../../Pagination'
-import '../styles/BookGrid.css'
+import './styles/BookGrid.css'
+import Pagination from '../Pagination'
 
 const BookGrid = ({
   books,
