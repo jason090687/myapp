@@ -7,6 +7,7 @@ import './styles/BorrowBookModal.css'
 import { useSelector } from 'react-redux'
 import { useToaster } from '../Toast/useToaster'
 import { useActivity } from '../../context/ActivityContext'
+import { useQuery } from '@tanstack/react-query'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
@@ -17,7 +18,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     lexile_level: '' // Add this line
   }
   const [formData, setFormData] = useState(initialFormData)
-  const [books, setBooks] = useState([])
+  // const [books, setBooks] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [bookSearch, setBookSearch] = useState('')
   const [selectedBook, setSelectedBook] = useState(null)
@@ -26,39 +27,44 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const bookInputRef = useRef(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [isStudentActive, setIsStudentActive] = useState(true)
   const dropdownRef = useRef(null)
   const { showToast } = useToaster()
   const { addActivity } = useActivity()
 
+  // const filteredBooks = useMemo(() => {
+  //   return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
+  // }, [books, bookSearch])
+
+  const {
+    data: booksData,
+    error
+  } = useQuery({
+    queryKey: ['books', bookSearch],
+    queryFn: async () => {
+      const res = await fetchAllBooks(token, bookSearch)
+      return res.results
+    },
+    enabled: isOpen,
+    staleTime: 1000 * 60 * 5
+  })
+
+  const books = useMemo(() => {
+    if (!booksData) return []
+
+    return booksData
+      .filter((book) => book.status !== 'Borrowed')
+      .map((book) => ({
+        id: book.id,
+        title: book.title,
+        lexile_level: book.lexile_level
+      }))
+  }, [booksData])
+
+  // ✅ SECOND: filteredBooks
   const filteredBooks = useMemo(() => {
     return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
   }, [books, bookSearch])
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    const fetchData = async () => {
-      setIsLoading(true)
-      try {
-        const booksResponse = await fetchAllBooks(token, bookSearch)
-        const availableBooks = booksResponse.results
-          .filter((book) => book.status !== 'Borrowed')
-          .map((book) => ({
-            id: book.id,
-            title: book.title,
-            lexile_level: book.lexile_level // Add this line
-          }))
-        setBooks(availableBooks)
-      } catch (error) {
-        console.error('Error fetching books:', error)
-        showToast('Error', 'Failed to fetch books', 'error')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [isOpen, token, bookSearch])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -90,6 +96,15 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     setIsLoading(true)
 
     try {
+      const student = await fetchStudents(token, formData.student)
+
+      if (!student || !student.active) {
+        showToast('Inactive student cannot borrow books', '', 'error')
+        setIsSubmitting(false)
+        setIsLoading(false)
+        return
+      }
+
       const borrowData = {
         id_number: parseInt(formData.id_number),
         student: parseInt(formData.student),
@@ -103,8 +118,8 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       await borrowBook(token, borrowData)
       onSubmit(borrowData)
 
-      // Log activity
       const bookTitle = books.find((b) => b.id === parseInt(formData.book))?.title || 'Unknown book'
+
       addActivity({
         type: 'book_borrowed',
         description: `"${bookTitle}" borrowed by student ${formData.student}`
@@ -116,19 +131,45 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       onClose()
     } catch (error) {
       console.error('Error borrowing book:', error)
-      showToast('Error', error.message || 'Failed to borrow book', 'error')
+      showToast('Borrow Failed', 'Student is inactive and cannot borrow books', 'error')
     } finally {
       setIsSubmitting(false)
       setIsLoading(false)
     }
   }
 
-  const handleChange = (e) => {
+  const resetForm = () => {
+    setFormData(initialFormData)
+    setBookSearch('')
+    setSelectedBook(null)
+    setIsStudentActive(true)
+    setHighlightedIndex(-1)
+  }
+
+  const handleChange = async (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
       [name]: value
     }))
+
+    if (name === 'student' && value) {
+      setIsStudentActive(null)
+
+      try {
+        const student = await fetchStudents(token, value)
+
+        if (student) {
+          setIsStudentActive(student.active)
+
+          if (!student.active) {
+            showToast('Student is inactive and cannot borrow', '', 'error')
+          }
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
   }
 
   const handleBookSelect = (book) => {
@@ -288,7 +329,10 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
           <div className="borrow-modal-footer">
             <Button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                resetForm()
+                onClose()
+              }}
               variant="secondary"
               className="borrow-cancel-btn"
             >

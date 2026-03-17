@@ -164,6 +164,11 @@ export const useBorrowed = (token) => {
   const handleCloseModal = () => setIsModalOpen(false)
 
   const handleSubmitBorrow = async (borrowData) => {
+    if (!borrowData.active) {
+      showToast('Inactive student cannot borrow books', '', 'error')
+      return
+    }
+
     setIsModalOpen(false)
     await borrowMutation.mutateAsync({
       bookId: borrowData.book,

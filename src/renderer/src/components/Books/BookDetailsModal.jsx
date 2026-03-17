@@ -2,13 +2,17 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { ArrowLeft, BookOpen, Edit2, Trash2, Calendar } from 'lucide-react'
 import { formatDate } from '../../hooks/bookUtils'
 import { useSelector } from 'react-redux'
+import axios from 'axios'
 import './styles/BookDetailsModal.css'
 import { Button } from '../ui/button'
 import { fetchBookDetails } from '../../api/book'
 import { useQuery } from '@tanstack/react-query'
 import { setAuthToken } from '../../api/axios'
 
+
+
 const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
+  const [fallbackCover, setFallbackCover] = useState(null)
   const [imageLoading, setImageLoading] = useState(true)
   const [isClosing, setIsClosing] = useState(false)
   const { token } = useSelector((state) => state.auth)
@@ -75,19 +79,51 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
 
   const displayData = bookDetails || book
 
-  /* ── helpers ─────────────────────────────────────────────── */
+  /* ── COVER LOGIC ───────────────────────────── */
+  const getOpenLibraryCover = (isbn) => {
+    return isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : null
+  }
+
   const coverUrl = displayData?.book_cover
+
   const fullCoverUrl = coverUrl
     ? coverUrl.startsWith('http')
       ? coverUrl
       : `http://192.168.0.145:8000${coverUrl}`
-    : null
+    : getOpenLibraryCover(displayData?.isbn)
 
+  const finalCover = fullCoverUrl || fallbackCover || '/no-cover.png'
+
+  /* ── TITLE FALLBACK (if no ISBN) ───────────── */
+  useEffect(() => {
+    const fetchCoverByTitle = async () => {
+      if (!displayData?.isbn && displayData?.title) {
+        try {
+          const res = await axios.get(`https://openlibrary.org/search.json?title=${displayData.title}`)
+          const data = res.data
+
+          if (data?.docs?.length > 0) {
+            const coverId = data.docs[0].cover_i
+            if (coverId) {
+              setFallbackCover(`https://covers.openlibrary.org/b/id/${coverId}-L.jpg`)
+            }
+          }
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
+
+    fetchCoverByTitle()
+  }, [displayData?.title, displayData?.isbn])
+
+  /* ── COPY LABEL ───────────────────────────── */
   const copyLabel = (() => {
     const n = book.copy_number?.toString()?.split(' of ')[0] || '1'
     const total = parseInt(book.copies) || 1
     return total > 1 ? `${n} of ${total}` : n
   })()
+
 
   /* Fields for the info grid */
   const infoFields = [
@@ -143,11 +179,15 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
                     <>
                       {imageLoading && <div className="book-cover-skeleton" />}
                       <img
-                        src={fullCoverUrl}
+                        src={finalCover}
                         alt={`Cover of ${book.title}`}
                         className={imageLoading ? 'hidden' : ''}
                         onLoad={() => setImageLoading(false)}
-                        onError={() => setImageLoading(false)}
+                        onError={(e) => {
+                          e.target.onerror = null
+                          e.target.src = '/no-cover.png'
+                          setImageLoading(false)
+                        }}
                       />
                     </>
                   ) : (

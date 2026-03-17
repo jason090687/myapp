@@ -4,6 +4,8 @@ import PropTypes from 'prop-types'
 import Pagination from '../Pagination'
 import './styles/BooksTable.css'
 import { formatDate } from '../../hooks/bookUtils'
+import { BookOpen } from 'lucide-react'
+
 
 const TABLE_COLUMNS = [
   { key: 'title', label: 'TITLE', sortable: true, required: true },
@@ -69,6 +71,30 @@ const BooksTable = ({
       case 'number':
         return value.toString()
       default:
+        if (column.key === 'title') {
+          return (
+            <div className="book-title-cell">
+              {book.book_cover ? (
+                <img
+                  src={book.book_cover}
+                  alt={book.title}
+                  className="book-cover-thumb"
+                  onError={(e) => {
+                    e.target.onerror = null
+                    e.target.src = '/no-cover.png'
+                  }}
+                />
+              ) : (
+                <div className="book-cover-holder">
+                  <BookOpen size={14} strokeWidth={1.5} />
+                </div>
+              )}
+
+              <span className="book-title-text">{value}</span>
+            </div>
+          )
+        }
+
         if (column.key === 'status') {
           const totalCopies = parseInt(book.copies) || 0
           const availableCopies =

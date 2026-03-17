@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   FaBook,
   FaUser,
@@ -23,7 +23,8 @@ import { Progress } from '../ui/progress'
 import { useToaster } from '../Toast/useToaster'
 import { useActivity } from '../../context/ActivityContext'
 import { fetchUserDetails } from '../../api/auth'
-import { setAuthToken } from '../../api/axios'
+import axios from 'axios'
+import api, { setAuthToken } from '../../api/axios'
 import { addNewBook } from '../../api/book'
 
 const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
@@ -34,6 +35,8 @@ const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
   const [variants, setVariants] = useState([])
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
+  const [autoCoverLoading, setAutoCoverLoading] = useState(false)
+  const debounceRef = useRef(null)
   const [progressData, setProgressData] = useState({
     current: 0,
     total: 0,
@@ -135,13 +138,70 @@ const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
     }
   }, [isOpen])
 
+  const fetchCoverByTitle = async (title) => {
+    if (!title) return
+
+    setAutoCoverLoading(true)
+
+    try {
+      const res = await axios.get(
+        `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}`
+      )
+      const data = res.data
+      console.log(data)
+
+      if (data?.docs?.length > 0) {
+        const coverId = data.docs[0].cover_i
+
+        if (coverId) {
+          const coverUrl = `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
+
+          // Convert to File
+          const imageRes = await axios.get(coverUrl, { responseType: 'blob' })
+          const blob = imageRes.data
+          const file = new File([blob], `${title}.jpg`, { type: blob.type })
+
+          setFormData((prev) => ({
+            ...prev,
+            book_cover: file,
+            selectedFileName: `${title}.jpg`,
+            coverPreview: coverUrl
+          }))
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setAutoCoverLoading(false)
+    }
+  }
+
+  /* ─────────────────────────────────────────────
+     🔥 DEBOUNCE
+  ───────────────────────────────────────────── */
+  const debounceFetchCover = (title) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    debounceRef.current = setTimeout(() => {
+      fetchCoverByTitle(title)
+    }, 800)
+  }
+
+
   const handleChange = (e) => {
     const { name, value, files } = e.target
+
     setFormData((prev) => ({
       ...prev,
       [name]: files ? files[0] : value || ''
     }))
+
+    // 🔥 AUTO FETCH COVER
+    if (name === 'title' && value.length > 3) {
+      debounceFetchCover(value)
+    }
   }
+
 
   const handleCoverUrlClick = () => {
     const input = document.createElement('input')
@@ -494,6 +554,10 @@ const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
                       icon={FaImage}
                       className="cover-url-input"
                     />
+
+                    {autoCoverLoading && (
+                      <p style={{ fontSize: '12px', color: '#888' }}>Fetching cover...</p>
+                    )}
                   </div>
                   {formData.coverPreview && (
                     <div className="cover-preview-link">
