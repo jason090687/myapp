@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { X, User, Hash, GraduationCap } from 'lucide-react'
-import { Button } from './ui/button'
-import './EditStudentModal.css'
+import { Button } from '../ui/button'
+import './styles/EditStudentModal.css'
 
 const EditStudentModal = ({ isOpen, onClose, onSubmit, student }) => {
   const [formData, setFormData] = useState({

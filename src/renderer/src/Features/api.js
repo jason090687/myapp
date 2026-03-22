@@ -4,6 +4,9 @@ import axios from 'axios'
 export { fetchBorrowedBooks, returnBook, renewBook, processOverduePayment } from '../api/borrow'
 export { updateBook, fetchBookDetails, addNewBook } from '../api/book'
 
+// Re-export TanStack Query hooks for backward compatibility
+export * from '../hooks'
+
 // const API_URL = 'http://192.168.0.145:8000/api/v1'
 // const API_URL = 'http://countmein.pythonanywhere.com/api/v1'
 const API_URL = 'http://192.168.2.175:8000/api/v1'

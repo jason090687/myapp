@@ -27,15 +27,22 @@ const ActionButtons = ({
         <RefreshCw size={20} />
       </button>
 
-      {isOverdue(item.due_date) && !item.is_returned && !item.paid && (
-        <button
-          className="action-btn overdue"
-          onClick={() => handleOverdueClick(item)}
-          title="Pay Overdue Fine"
-        >
-          <AlertCircle size={20} />
-        </button>
-      )}
+      <button
+        className="action-btn overdue"
+        disabled={!isOverdue(item.due_date) || item.is_returned || item.paid}
+        onClick={() => handleOverdueClick(item)}
+        title={
+          !isOverdue(item.due_date)
+            ? 'Not Overdue'
+            : item.is_returned
+              ? 'Already Returned'
+              : item.paid
+                ? 'Fine Already Paid'
+                : 'Pay Overdue Fine'
+        }
+      >
+        <AlertCircle size={20} />
+      </button>
     </div>
   )
 }

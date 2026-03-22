@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import { FaGraduationCap, FaBook, FaEdit } from 'react-icons/fa'
 import { ArrowLeft } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { Button } from '../components/ui/button'
 import './StudentDetailsPage.css'
-import { fetchStaffDetails, updateStudentDetails } from '../Features/api'
 import EditStaffModal from '../components/EditStaffModal'
+import { useEmployeeDetails, useUpdateEmployee } from '../hooks'
+import { useToaster } from '../components/Toast/useToaster'
 
 const SkeletonLoader = () => (
   <>
@@ -49,28 +49,15 @@ const SkeletonLoader = () => (
 )
 
 const StaffDetailPage = () => {
-  const [staff, setStaff] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const { staffId } = useParams()
   const navigate = useNavigate()
-  const { token } = useSelector((state) => state.auth)
+  const { showToast } = useToaster()
 
-  useEffect(() => {
-    const loadStudentDetails = async () => {
-      try {
-        const data = await fetchStaffDetails(token, staffId)
-        setStaff(data)
-      } catch (error) {
-        console.error('Error loading student details:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadStudentDetails()
-  }, [token, staffId])
+  // Fetch staff details using TanStack Query
+  const { data: staff, isLoading, refetch } = useEmployeeDetails(staffId)
+  const updateEmployeeMutation = useUpdateEmployee()
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -86,10 +73,16 @@ const StaffDetailPage = () => {
 
   const handleEditSubmit = async (updatedData) => {
     try {
-      const data = await updateStudentDetails(token, staffId, updatedData)
-      setStaff(data)
+      await updateEmployeeMutation.mutateAsync({
+        employeeId: staffId,
+        updateData: updatedData
+      })
+      showToast('Success', 'Staff member updated successfully!', 'success')
+      setIsEditModalOpen(false)
+      await refetch()
     } catch (error) {
-      console.error('Error updating student:', error)
+      console.error('Error updating staff:', error)
+      showToast('Error', error.message || 'Failed to update staff member', 'error')
       throw error
     }
   }

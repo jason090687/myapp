@@ -64,8 +64,8 @@
 }
 
 .status-tag.borrowed {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
+  background: #06b6d4;
+  color: white;
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 

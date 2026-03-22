@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchBorrowedBooks, returnBook, renewBook, processOverduePayment } from '../api/borrow'
+import { useQueryClient } from '@tanstack/react-query'
 import { useToaster } from '../components/Toast/useToaster'
 import { useSearchParams } from 'react-router-dom'
-import { updateBook } from '../api/book'
-import { setAuthToken } from '../api/axios'
+import {
+  useBorrowedBooks,
+  useReturnBook,
+  useRenewBook,
+  useProcessOverduePayment,
+  useUpdateBook
+} from './useQueries'
 
-export const useBorrowed = (token) => {
+export const useBorrowed = () => {
   const queryClient = useQueryClient()
   const { showToast } = useToaster()
 
@@ -26,19 +30,8 @@ export const useBorrowed = (token) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [filterStatus, setFilterStatus] = useState('all')
 
-  // Fetch borrowed books with TanStack Query
-  setAuthToken(token)
-
-  const {
-    data: borrowData,
-    isLoading,
-    error
-  } = useQuery({
-    queryKey: ['borrowedBooks', currentPage, searchTerm, token],
-    queryFn: () => fetchBorrowedBooks(currentPage, searchTerm),
-    enabled: !!token,
-    staleTime: 5 * 60 * 1000 // 5 minutes
-  })
+  // Fetch borrowed books with TanStack Query hook
+  const { data: borrowData, isLoading } = useBorrowedBooks(currentPage, searchTerm)
 
   // Transform data with sorting
   const sortBorrowedBooks = (books) => {
@@ -64,56 +57,36 @@ export const useBorrowed = (token) => {
 
   const totalPages = Math.ceil(pagination.count / 10)
 
-  // Mutations
-  const borrowMutation = useMutation({
-    mutationFn: ({ bookId, borrowData }) => updateBook(bookId, borrowData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })
-      showToast('Success', 'Book borrowed successfully!', 'success')
-    },
-    onError: (error) => {
-      showToast('Error', error.message || 'Failed to borrow book', 'error')
-    }
-  })
+  // Mutations using hooks
+  const updateBookMutation = useUpdateBook()
+  const returnMutation = useReturnBook()
+  const renewMutation = useRenewBook()
+  const overdueMutation = useProcessOverduePayment()
 
-  const returnMutation = useMutation({
-    mutationFn: ({ borrowId, bookId }) =>
-      returnBook(borrowId, {
-        returned_date: new Date().toISOString().split('T')[0],
-        status: 'Returned'
-      }).then(() => updateBook(bookId, { status: 'Available' })),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })
-      showToast('Success', 'Book returned successfully!', 'success')
+  // Borrow mutation wrapper
+  const borrowMutation = {
+    mutate: async ({ bookId, borrowData }) => {
+      try {
+        await updateBookMutation.mutateAsync({ bookId, bookData: borrowData })
+        queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })
+        showToast('Success', 'Book borrowed successfully!', 'success')
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to borrow book', 'error')
+        throw error
+      }
     },
-    onError: (error) => {
-      showToast('Error', error.message || 'Failed to return book', 'error')
-    }
-  })
-
-  const renewMutation = useMutation({
-    mutationFn: ({ borrowId, dueDate }) => renewBook(borrowId, { due_date: dueDate }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })
-      showToast('Success', 'Book renewed successfully!', 'success')
+    mutateAsync: async ({ bookId, borrowData }) => {
+      try {
+        await updateBookMutation.mutateAsync({ bookId, bookData: borrowData })
+        queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })
+        showToast('Success', 'Book borrowed successfully!', 'success')
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to borrow book', 'error')
+        throw error
+      }
     },
-    onError: (error) => {
-      showToast('Error', error.message || 'Failed to renew book', 'error')
-      throw error
-    }
-  })
-
-  const overdueMutation = useMutation({
-    mutationFn: (paymentData) => processOverduePayment(paymentData.id, paymentData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })
-      showToast('Success', 'Action completed successfully!', 'success')
-    },
-    onError: (error) => {
-      showToast('Error', error.message || 'Failed to process action', 'error')
-      throw error
-    }
-  })
+    isPending: updateBookMutation.isPending
+  }
 
   // Helper functions
   const isOverdue = (dueDate) => {
@@ -164,11 +137,6 @@ export const useBorrowed = (token) => {
   const handleCloseModal = () => setIsModalOpen(false)
 
   const handleSubmitBorrow = async (borrowData) => {
-    if (!borrowData.active) {
-      showToast('Inactive student cannot borrow books', '', 'error')
-      return
-    }
-
     setIsModalOpen(false)
     await borrowMutation.mutateAsync({
       bookId: borrowData.book,
@@ -321,3 +289,6 @@ export const useBorrowed = (token) => {
     isProcessingOverdue: overdueMutation.isPending
   }
 }
+
+// Re-export hooks for backward compatibility
+export { useBorrowedBooks, useReturnBook, useRenewBook, useProcessOverduePayment }

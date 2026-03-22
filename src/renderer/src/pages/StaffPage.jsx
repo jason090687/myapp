@@ -1,151 +1,52 @@
-import { useEffect, useState } from 'react'
-import {
-  createStudent,
-  fetchEmployees,
-  updateStudentDetails,
-  deleteEmployee
-} from '../Features/api'
-import { useSelector } from 'react-redux'
-import { FaSearch, FaChevronLeft, FaChevronRight, FaEdit, FaTrash } from 'react-icons/fa'
+import { useState } from 'react'
+import { FaSearch, FaEdit, FaTrash } from 'react-icons/fa'
 import { Plus, Filter } from 'lucide-react'
-import { useToaster } from '../components/Toast/useToaster'
 import Sidebar from '../components/Sidebar'
 import { Button } from '../components/ui/button'
 import './StudentsPage.css' // Reuse students page styles
 import AddStaffBookModal from '../components/AddStaffBookModal'
 import EditStaffModal from '../components/EditStaffModal'
-import { useNavigate } from 'react-router-dom'
+import { useStaff } from '../hooks'
 
 const StaffPage = () => {
-  const [employees, setEmployees] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(0)
-  const [searchTerm, setSearchTerm] = useState('')
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [selectedStaff, setSelectedStaff] = useState(null)
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [deleteConfirm, setDeleteConfirm] = useState({
-    isOpen: false,
-    staffId: null,
-    staffName: ''
-  })
-  const { user, token } = useSelector((state) => state.auth)
-  const { showToast } = useToaster()
 
-  const navigate = useNavigate()
+  // Destructure all needed values from useStaff hook
+  const {
+    staff,
+    isLoading,
+    refetch,
+    filterStatus,
+    setFilterStatus,
+    selectedStaff,
+    setSelectedStaff,
+    deleteConfirm,
+    handleRowClick,
+    handleAddStaff,
+    handleEditStaff,
+    handleDeleteStaff,
+    confirmDeleteStaff,
+    cancelDelete
+  } = useStaff()
 
-  const toVisibleEmployees = (data) => {
-    const list = data?.results || data || []
-    return Array.isArray(list) ? list.filter((e) => !e?.cancelled) : []
-  }
-
-  useEffect(() => {
-    const loadEmployees = async () => {
-      try {
-        setIsLoading(true)
-        const data = await fetchEmployees(token, currentPage, searchTerm)
-        const visibleEmployees = toVisibleEmployees(data)
-        setEmployees(visibleEmployees)
-        const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
-        setTotalPages(Math.ceil(totalCount / 10))
-      } catch (error) {
-        console.error('Error loading employees:', error)
-        showToast('Error', 'Failed to load employees', 'error')
-        setEmployees([])
-        setTotalPages(0)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    const timer = setTimeout(loadEmployees, 300) // Debounce search
-    return () => clearTimeout(timer)
-  }, [token, currentPage, searchTerm])
-
-  const handleRowClick = (employee) => {
-    const employeePk = employee?.id ?? employee?.employee_id ?? employee?.pk
-    if (!employeePk) {
-      showToast('Error', 'Employee record is missing an internal id', 'error')
-      return
-    }
-    navigate(`/staff/${employeePk}`)
-  }
-
-  // Filter employees based on selected status
-  const getFilteredEmployees = () => {
-    if (filterStatus === 'all') return employees
-    if (filterStatus === 'active') return employees.filter((e) => e.active)
-    if (filterStatus === 'inactive') return employees.filter((e) => !e.active)
-    return employees
-  }
-
-  const handleAddStaff = async (staffData) => {
+  const handleAddStaffClick = async (staffData) => {
     try {
-      await createStudent(token, staffData)
-      showToast('Success', 'Staff member added successfully!', 'success')
+      await handleAddStaff(staffData)
       setIsAddModalOpen(false)
-      // Refresh employees list
-      const data = await fetchEmployees(token, currentPage, searchTerm)
-      const visibleEmployees = toVisibleEmployees(data)
-      setEmployees(visibleEmployees)
-      const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
-      setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
-      showToast('Error', error.message || 'Failed to add staff member', 'error')
-      throw error
+      console.error('Error adding staff:', error)
     }
   }
 
-  const handleEditStaff = async (staffData) => {
+  const handleEditStaffClick = async (staffData) => {
     try {
-      if (!selectedStaff) return
-      const employeePk = selectedStaff?.id ?? selectedStaff?.employee_id ?? selectedStaff?.pk
-      if (!employeePk) {
-        window.showToast('Error', 'Employee record is missing an internal id', 'error')
-        return
-      }
-      await updateStudentDetails(token, employeePk, staffData)
-      showToast('Success', 'Staff member updated successfully!', 'success')
+      await handleEditStaff(staffData)
       setIsEditModalOpen(false)
       setSelectedStaff(null)
-      // Refresh employees list
-      const data = await fetchEmployees(token, currentPage, searchTerm)
-      const visibleEmployees = toVisibleEmployees(data)
-      setEmployees(visibleEmployees)
-      const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
-      setTotalPages(Math.ceil(totalCount / 10))
     } catch (error) {
-      showToast('Error', error.message || 'Failed to update staff member', 'error')
-      throw error
-    }
-  }
-
-  const handleDeleteStaff = async () => {
-    try {
-      const staffId = deleteConfirm.staffId
-      if (!staffId) return
-
-      const cancelledBy = user?.id ?? user?.user_id ?? user?.pk
-      const cancelData = {
-        cancelledBy,
-        cancelledAt: new Date().toISOString()
-      }
-
-      await deleteEmployee(token, staffId, cancelData)
-      setEmployees((prev) => prev.filter((e) => (e?.id ?? e?.employee_id ?? e?.pk) !== staffId))
-      showToast('Success', 'Staff member deleted successfully!', 'success')
-      setDeleteConfirm({ isOpen: false, staffId: null, staffName: '' })
-
-      const data = await fetchEmployees(token, currentPage, searchTerm)
-      const visibleEmployees = toVisibleEmployees(data)
-      setEmployees(visibleEmployees)
-      const totalCount = typeof data?.count === 'number' ? data.count : visibleEmployees.length
-      setTotalPages(Math.ceil(totalCount / 10))
-    } catch (error) {
-      showToast('Error', error.message || 'Failed to delete staff member', 'error')
+      console.error('Error editing staff:', error)
     }
   }
 
@@ -160,10 +61,9 @@ const StaffPage = () => {
               <input
                 type="text"
                 placeholder="Search staff..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
                 aria-label="Search staff"
+                disabled
               />
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -242,19 +142,19 @@ const StaffPage = () => {
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan="5" className="loading-cell">
+                    <td colSpan="6" className="loading-cell">
                       <div className="student-spinner"></div>
                       <span className="student-loading-text">Loading staff...</span>
                     </td>
                   </tr>
-                ) : getFilteredEmployees().length === 0 ? (
+                ) : staff.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="loading-cell">
+                    <td colSpan="6" className="loading-cell">
                       <span className="student-loading-text">No staff found</span>
                     </td>
                   </tr>
                 ) : (
-                  getFilteredEmployees().map((employee) => {
+                  staff.map((employee) => {
                     const employeePk = employee?.id ?? employee?.employee_id ?? employee?.pk
                     return (
                       <tr key={employeePk ?? employee.id_number} className="table-row">
@@ -290,18 +190,9 @@ const StaffPage = () => {
                                 const employeePk =
                                   employee?.id ?? employee?.employee_id ?? employee?.pk
                                 if (!employeePk) {
-                                  showToast(
-                                    'Error',
-                                    'Employee record is missing an internal id',
-                                    'error'
-                                  )
                                   return
                                 }
-                                setDeleteConfirm({
-                                  isOpen: true,
-                                  staffId: employeePk,
-                                  staffName: employee.name
-                                })
+                                confirmDeleteStaff(employeePk, employee.name)
                               }}
                               title="Delete"
                               aria-label="Delete staff member"
@@ -318,30 +209,10 @@ const StaffPage = () => {
             </table>
           </div>
 
-          <div className="pagination">
-            <button
-              className="pagination-btn"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              <FaChevronLeft />
-            </button>
-            <span className="pagination-info">
-              Page {currentPage} of {totalPages || 1}
-            </span>
-            <button
-              className="pagination-btn"
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <FaChevronRight />
-            </button>
-          </div>
-
           <AddStaffBookModal
             isOpen={isAddModalOpen}
             onClose={() => setIsAddModalOpen(false)}
-            onSubmit={handleAddStaff}
+            onSubmit={handleAddStaffClick}
           />
 
           {selectedStaff && (
@@ -351,7 +222,7 @@ const StaffPage = () => {
                 setIsEditModalOpen(false)
                 setSelectedStaff(null)
               }}
-              onSubmit={handleEditStaff}
+              onSubmit={handleEditStaffClick}
               studentData={selectedStaff}
             />
           )}
@@ -370,12 +241,7 @@ const StaffPage = () => {
                   <p className="delete-warning">This action cannot be undone.</p>
                 </div>
                 <div className="delete-modal-footer">
-                  <button
-                    className="cancel-delete-btn"
-                    onClick={() =>
-                      setDeleteConfirm({ isOpen: false, staffId: null, staffName: '' })
-                    }
-                  >
+                  <button className="cancel-delete-btn" onClick={cancelDelete}>
                     Cancel
                   </button>
                   <button className="confirm-delete-btn" onClick={handleDeleteStaff}>

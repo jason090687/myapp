@@ -1,40 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import { FaGraduationCap, FaBook, FaEdit } from 'react-icons/fa'
 import { ArrowLeft } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { Button } from '../components/ui/button'
 import './StudentDetailsPage.css'
-import { fetchStudentDetails, updateStudentDetails } from '../Features/api'
-import EditStudentModal from '../components/EditStudentModal'
+import { useStudentDetails, useUpdateStudent } from '../hooks'
+import EditStudentModal from '../components/Student/EditStudentModal'
 import { useToaster } from '../components/Toast/useToaster'
 import StudentSkeletonLoader from '../components/StudentSkeletonLoader'
 
 const StudentDetailsPage = () => {
-  const [student, setStudent] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const { studentId } = useParams()
   const navigate = useNavigate()
-  const { token } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
-
-  useEffect(() => {
-    const loadStudentDetails = async () => {
-      try {
-        const data = await fetchStudentDetails(token, studentId)
-        setStudent(data)
-      } catch (error) {
-        console.error('Error loading student details:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadStudentDetails()
-  }, [token, studentId])
+  // Fetch student details using TanStack Query
+  const { data: student, isLoading, refetch } = useStudentDetails(studentId)
+  const updateStudentMutation = useUpdateStudent()
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -50,16 +34,13 @@ const StudentDetailsPage = () => {
 
   const handleEditSubmit = async (updatedData) => {
     try {
-      const data = await updateStudentDetails(token, studentId, updatedData)
-
-      setStudent(data)
+      await updateStudentMutation.mutateAsync({ studentId, updateData: updatedData })
       setIsEditModalOpen(false)
-      // Show success toast
       showToast('Success', 'Student updated successfully!', 'success', 4000)
+      refetch()
     } catch (error) {
       console.error('Error updating student:', error)
       showToast('Error', error.message || 'Failed to update student', 'error', 4000)
-      throw error
     }
   }
 

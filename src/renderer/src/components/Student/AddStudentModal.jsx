@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { X, User, Hash, GraduationCap } from 'lucide-react'
-import { Button } from './ui/button'
-import { useActivity } from '../context/ActivityContext'
-import './AddStudentModal.css'
+import { Button } from '../ui/button'
+import { useActivity } from '../../context/ActivityContext'
+import './styles/AddStudentModal.css'
 
 const AddStudentModal = ({ isOpen, onClose, onSubmit }) => {
   const { addActivity } = useActivity()

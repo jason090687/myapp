@@ -165,12 +165,12 @@ app.whenReady().then(() => {
         'Content-Security-Policy': [
           "default-src 'self';" +
             "script-src 'self' 'unsafe-inline';" +
-            "style-src 'self' 'unsafe-inline';" +
-            "connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* http://192.168.0.145:* http://192.168.2.175:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com;" +
-            "img-src 'self' data: https: blob: http://192.168.0.145:8000; http://127.0.0.1:* http://127.0.0.1:8000; http://192.168.0.145:* http://192.168.0.145:8000; http://192.168.2.175:* http://192.168.2.175:8000; http://countmein.pythonanywhere.com:* http://countmein.pythonanywhere.com:8000;" + // Updated this line
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;" +
+            "connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* http://192.168.0.145:* http://192.168.2.175:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com https://openlibrary.org;" +
+            "img-src 'self' data: https: blob: http://192.168.0.145:8000 http://127.0.0.1:* http://127.0.0.1:8000 http://192.168.0.145:* http://192.168.0.145:8000 http://192.168.2.175:* http://192.168.2.175:8000 http://countmein.pythonanywhere.com:* http://countmein.pythonanywhere.com:8000 https://covers.openlibrary.org;" + // Updated this line
             "worker-src 'self' blob:;" +
             "frame-src 'self';" +
-            "font-src 'self' data:;" +
+            "font-src 'self' data: https://fonts.gstatic.com;" +
             "media-src 'self';" +
             "object-src 'none'"
         ]

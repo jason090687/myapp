@@ -2,20 +2,13 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { ArrowLeft, BookOpen, Edit2, Trash2, Calendar } from 'lucide-react'
 import { formatDate } from '../../hooks/bookUtils'
 import { useSelector } from 'react-redux'
-import axios from 'axios'
 import './styles/BookDetailsModal.css'
 import { Button } from '../ui/button'
-import { fetchBookDetails } from '../../api/book'
-import { useQuery } from '@tanstack/react-query'
-import { setAuthToken } from '../../api/axios'
-
-
+import { useBookDetails } from '../../hooks'
 
 const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
-  const [fallbackCover, setFallbackCover] = useState(null)
   const [imageLoading, setImageLoading] = useState(true)
   const [isClosing, setIsClosing] = useState(false)
-  const { token } = useSelector((state) => state.auth)
   const justOpenedRef = useRef(false)
 
   useEffect(() => {
@@ -33,13 +26,7 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     }
   }, [isOpen])
 
-  setAuthToken(token)
-
-  const { data: bookDetails, isLoading: isLoadingDetails } = useQuery({
-    queryKey: ['bookDetails', book?.id, token],
-    queryFn: () => fetchBookDetails(book?.id),
-    enabled: isOpen && !!book?.id && !!token
-  })
+  const { data: bookDetails, isLoading: isLoadingDetails } = useBookDetails(book?.id)
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
@@ -79,43 +66,15 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
 
   const displayData = bookDetails || book
 
-  /* ── COVER LOGIC ───────────────────────────── */
-  const getOpenLibraryCover = (isbn) => {
-    return isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : null
-  }
-
   const coverUrl = displayData?.book_cover
 
   const fullCoverUrl = coverUrl
     ? coverUrl.startsWith('http')
       ? coverUrl
       : `http://192.168.0.145:8000${coverUrl}`
-    : getOpenLibraryCover(displayData?.isbn)
+    : null
 
-  const finalCover = fullCoverUrl || fallbackCover || '/no-cover.png'
-
-  /* ── TITLE FALLBACK (if no ISBN) ───────────── */
-  useEffect(() => {
-    const fetchCoverByTitle = async () => {
-      if (!displayData?.isbn && displayData?.title) {
-        try {
-          const res = await axios.get(`https://openlibrary.org/search.json?title=${displayData.title}`)
-          const data = res.data
-
-          if (data?.docs?.length > 0) {
-            const coverId = data.docs[0].cover_i
-            if (coverId) {
-              setFallbackCover(`https://covers.openlibrary.org/b/id/${coverId}-L.jpg`)
-            }
-          }
-        } catch (err) {
-          console.error(err)
-        }
-      }
-    }
-
-    fetchCoverByTitle()
-  }, [displayData?.title, displayData?.isbn])
+  const finalCover = fullCoverUrl || '/no-cover.png'
 
   /* ── COPY LABEL ───────────────────────────── */
   const copyLabel = (() => {
@@ -123,7 +82,6 @@ const BookDetailsModal = ({ book, isOpen, onClose, onEdit, onDelete }) => {
     const total = parseInt(book.copies) || 1
     return total > 1 ? `${n} of ${total}` : n
   })()
-
 
   /* Fields for the info grid */
   const infoFields = [

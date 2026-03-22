@@ -1,13 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { User, BookOpen, Calendar, X } from 'lucide-react'
-import { fetchAllBooks, borrowBook } from '../../Features/api'
 import { Button } from '../ui/button'
 import './styles/BorrowBookModal.css'
-import { useSelector } from 'react-redux'
 import { useToaster } from '../Toast/useToaster'
 import { useActivity } from '../../context/ActivityContext'
-import { useQuery } from '@tanstack/react-query'
+import { useAllBooks, useBorrowBook, useStudentDetails } from '../../hooks'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
@@ -18,36 +16,23 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     lexile_level: '' // Add this line
   }
   const [formData, setFormData] = useState(initialFormData)
-  // const [books, setBooks] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false)
   const [bookSearch, setBookSearch] = useState('')
   const [selectedBook, setSelectedBook] = useState(null)
   const [showBookDropdown, setShowBookDropdown] = useState(false)
-  const { token } = useSelector((state) => state.auth)
   const bookInputRef = useRef(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
-  const [isStudentActive, setIsStudentActive] = useState(true)
   const dropdownRef = useRef(null)
   const { showToast } = useToaster()
   const { addActivity } = useActivity()
 
-  // const filteredBooks = useMemo(() => {
-  //   return books.filter((book) => book.title.toLowerCase().includes(bookSearch.toLowerCase()))
-  // }, [books, bookSearch])
+  const { data: booksData, isLoading } = useAllBooks(bookSearch)
+  const borrowBookMutation = useBorrowBook()
 
-  const {
-    data: booksData,
-    error
-  } = useQuery({
-    queryKey: ['books', bookSearch],
-    queryFn: async () => {
-      const res = await fetchAllBooks(token, bookSearch)
-      return res.results
-    },
-    enabled: isOpen,
-    staleTime: 1000 * 60 * 5
-  })
+  // Get student details to check active status
+  const studentId = formData.student ? parseInt(formData.student) : null
+  const { data: studentData, isLoading: isStudentLoading } = useStudentDetails(studentId)
 
   const books = useMemo(() => {
     if (!booksData) return []
@@ -93,15 +78,22 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     if (isSubmitting) return
 
     setIsSubmitting(true)
-    setIsLoading(true)
+    setIsSubmittingLocal(true)
 
     try {
-      const student = await fetchStudents(token, formData.student)
-
-      if (!student || !student.active) {
-        showToast('Inactive student cannot borrow books', '', 'error')
+      // Wait for student data to load before validation
+      if (isStudentLoading) {
+        showToast('Validating student...', 'Please wait', 'info')
         setIsSubmitting(false)
-        setIsLoading(false)
+        setIsSubmittingLocal(false)
+        return
+      }
+
+      // Validate student is active before borrowing
+      if (studentData && !studentData.active) {
+        showToast('Inactive Student', 'This student cannot borrow books', 'error')
+        setIsSubmitting(false)
+        setIsSubmittingLocal(false)
         return
       }
 
@@ -115,7 +107,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
         due_date: formData.due_date
       }
 
-      await borrowBook(token, borrowData)
+      await borrowBookMutation.mutateAsync(borrowData)
       onSubmit(borrowData)
 
       const bookTitle = books.find((b) => b.id === parseInt(formData.book))?.title || 'Unknown book'
@@ -131,10 +123,11 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       onClose()
     } catch (error) {
       console.error('Error borrowing book:', error)
-      showToast('Borrow Failed', 'Student is inactive and cannot borrow books', 'error')
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to borrow book'
+      showToast('Borrow Failed', errorMessage, 'error')
     } finally {
       setIsSubmitting(false)
-      setIsLoading(false)
+      setIsSubmittingLocal(false)
     }
   }
 
@@ -142,7 +135,6 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
     setFormData(initialFormData)
     setBookSearch('')
     setSelectedBook(null)
-    setIsStudentActive(true)
     setHighlightedIndex(-1)
   }
 
@@ -152,24 +144,6 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       ...prev,
       [name]: value
     }))
-
-    if (name === 'student' && value) {
-      setIsStudentActive(null)
-
-      try {
-        const student = await fetchStudents(token, value)
-
-        if (student) {
-          setIsStudentActive(student.active)
-
-          if (!student.active) {
-            showToast('Student is inactive and cannot borrow', '', 'error')
-          }
-        }
-      } catch (err) {
-        console.error(err)
-      }
-    }
   }
 
   const handleBookSelect = (book) => {
@@ -272,7 +246,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                 />
                 {showBookDropdown && (
                   <div className="borrow-search-results" ref={dropdownRef}>
-                    {isLoading ? (
+                    {isLoading || isSubmittingLocal ? (
                       <div className="borrow-search-item">Loading books...</div>
                     ) : filteredBooks.length > 0 ? (
                       filteredBooks.map((book, index) => (
@@ -342,7 +316,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
               type="submit"
               variant="primary"
               className="borrow-submit-btn"
-              disabled={isLoading || isSubmitting}
+              disabled={isSubmitting || isSubmittingLocal}
             >
               {isSubmitting ? 'Borrowing...' : 'Borrow Book'}
             </Button>

@@ -6,11 +6,9 @@ import OverdueModal from '../components/Borrowed/OverdueModal'
 import BorrowDetailsModal from '../components/Borrowed/BorrowDetailsModal'
 import BorrowedHeader from '../components/Borrowed/BorrowedHeader'
 import BorrowedTable from '../components/Borrowed/BorrowedTable'
-import { useSelector } from 'react-redux'
 import { useBorrowed } from '../hooks/useBorrowed'
 
 const Borrowed = () => {
-  const { token } = useSelector((state) => state.auth)
   const {
     isCollapsed,
     handleSidebarToggle,
@@ -51,7 +49,7 @@ const Borrowed = () => {
     handleOverdueSubmit,
     selectedBorrowDetails,
     setSelectedBorrowDetails
-  } = useBorrowed(token)
+  } = useBorrowed()
 
   return (
     <div className="app-wrapper">

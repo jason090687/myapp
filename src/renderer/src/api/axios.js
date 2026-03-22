@@ -12,13 +12,24 @@ const api = axios.create({
   }
 })
 
-export const setAuthToken = (token) => {
+// Get token from localStorage (for initial load before Redux hydrates)
+export const getToken = () => {
+  return localStorage.getItem('authToken') || ''
+}
+
+// Set auth token - accepts both string token and function to get token
+export const setAuthToken = (tokenOrGetter) => {
+  const token = typeof tokenOrGetter === 'function' ? tokenOrGetter() : tokenOrGetter
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`
   } else {
     delete api.defaults.headers.common['Authorization']
   }
 }
+
+// Note: Token is now managed dynamically in TanStack Query hooks
+// For legacy code, use setAuthToken(token) after Redux hydration
+// The hooks get token dynamically via getToken() in each request
 
 export const multipartConfig = {
   headers: {

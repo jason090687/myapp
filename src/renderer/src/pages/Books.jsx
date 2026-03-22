@@ -39,7 +39,7 @@ function Books() {
     confirmDelete,
     cancelDelete,
     refetch
-  } = useBooks(token)
+  } = useBooks()
 
   const handleEditBook = (book) => {
     setSelectedBookId(book.id)

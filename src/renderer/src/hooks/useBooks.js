@@ -1,33 +1,38 @@
 import { useState, useCallback, useEffect } from 'react'
-import { fetchBooks, deleteBook } from '../Features/api'
 import { toast } from 'react-toastify'
 import { useActivity } from '../context/ActivityContext'
 import { useNavigate } from 'react-router-dom'
 import { useBookSearch } from './useBookSearch'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchUserDetails } from '../api/auth'
-import { setAuthToken } from '../api/axios'
+import { useQueryClient } from '@tanstack/react-query'
+import { useSelector } from 'react-redux'
+import { useBooks as useBookQuery, useAllBooks, useDeleteBook } from './useQueries'
 
-export const useBooks = (token) => {
+export const useBooks = () => {
   const navigate = useNavigate()
   const { addActivity } = useActivity()
   const queryClient = useQueryClient()
   const { debouncedSearchTerm, handleSearch } = useBookSearch()
+  const { user } = useSelector((state) => state.auth)
+
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 0,
     totalItems: 0
   })
+
   const [sortConfig, setSortConfig] = useState({ column: '', direction: '' })
+
   const [deleteConfirm, setDeleteConfirm] = useState({
     isOpen: false,
     bookId: null,
     bookTitle: ''
   })
+
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [selectedBook, setSelectedBook] = useState(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState(null)
+
   const [exportProgress, setExportProgress] = useState({
     isOpen: false,
     progress: 0,
@@ -36,18 +41,18 @@ export const useBooks = (token) => {
     exportedCount: 0
   })
 
-  const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['books', token, pagination.currentPage, debouncedSearchTerm],
-    queryFn: () => fetchBooks(token, pagination.currentPage, debouncedSearchTerm),
-    enabled: !!token,
-    keepPreviousData: true,
-    onError: () => {
-      toast.error('Failed to fetch books')
-    }
-  })
+  // 🔥 FETCH BOOKS
+  const { data, isLoading, isFetching, refetch } = useBookQuery(
+    pagination.currentPage,
+    debouncedSearchTerm
+  )
+
+  const allBooksQuery = useAllBooks(debouncedSearchTerm)
+  const deleteBookMutation = useDeleteBook()
 
   const books = data?.results || []
 
+  // 🔥 PAGINATION UPDATE
   useEffect(() => {
     if (data?.count !== undefined) {
       setPagination((prev) => ({
@@ -58,33 +63,7 @@ export const useBooks = (token) => {
     }
   }, [data])
 
-  setAuthToken(token)
-
-  const { data: userDetails } = useQuery({
-    queryKey: ['user', token],
-    queryFn: () => fetchUserDetails(),
-    enabled: !!token
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: ({ bookId, cancelData }) => deleteBook(token, bookId, cancelData),
-
-    onSuccess: (_, variables) => {
-      toast.success('Book deleted successfully!')
-
-      addActivity({
-        type: 'book_deleted',
-        description: `Cancelled "${variables.bookTitle}"`
-      })
-
-      queryClient.invalidateQueries(['books'])
-    },
-
-    onError: () => {
-      toast.error('Failed to cancel book')
-    }
-  })
-
+  // 🔥 DELETE HANDLER (OPEN MODAL)
   const handleDeleteBook = (id, bookTitle) => {
     setDeleteConfirm({
       isOpen: true,
@@ -93,27 +72,39 @@ export const useBooks = (token) => {
     })
   }
 
-  const confirmDelete = () => {
+  // 🔥 CONFIRM DELETE (FIXED)
+  const confirmDelete = async () => {
     const { bookId, bookTitle } = deleteConfirm
 
     const cancelData = {
-      cancelledBy: parseInt(userDetails?.id) || null,
+      cancelledBy: user?.id ?? user?.user_id ?? user?.pk,
       cancelledAt: new Date().toISOString()
     }
 
-    deleteMutation.mutate({
-      bookId,
-      cancelData,
-      bookTitle
-    })
+    try {
+      await deleteBookMutation.mutateAsync({ bookId, cancelData })
 
-    setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
+      // ✅ IMPORTANT: refresh query cache
+      queryClient.invalidateQueries(['books'])
+
+      toast.success('Book deleted successfully!')
+
+      addActivity({
+        type: 'book_deleted',
+        description: `Cancelled "${bookTitle}"`
+      })
+
+      setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete book')
+    }
   }
 
   const cancelDelete = () => {
     setDeleteConfirm({ isOpen: false, bookId: null, bookTitle: '' })
   }
 
+  // 🔥 PAGINATION CHANGE
   const handlePageChange = (newPage) => {
     setPagination((prev) => ({
       ...prev,
@@ -121,8 +112,8 @@ export const useBooks = (token) => {
     }))
   }
 
+  // 🔥 SORTING
   const handleCategoryChange = (category) => {
-    // Handle A-Z sort options
     if (category === 'title_asc') {
       setSortConfig({ column: 'title', direction: 'asc' })
     } else if (category === 'title_desc') {
@@ -138,9 +129,9 @@ export const useBooks = (token) => {
     } else if (category === 'newest') {
       setSortConfig({ column: 'date_received', direction: 'desc' })
     } else {
-      // Clear sort config for default/empty
       setSortConfig({ column: '', direction: '' })
     }
+
     setSelectedCategory(category)
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
   }
@@ -155,6 +146,9 @@ export const useBooks = (token) => {
       })
     : books
 
+  // 🔥🔥🔥 FIXED FILTER (IMPORTANT)
+  const filteredBooks = sortedBooks.filter((book) => !book.cancelled && !book.cancelledAt)
+
   const handleSort = (column) => {
     const direction =
       sortConfig.column === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
@@ -162,8 +156,7 @@ export const useBooks = (token) => {
     setSortConfig({ column, direction })
   }
 
-  const filteredBooks = sortedBooks.filter((book) => !book.cancelled)
-
+  // 🔥 EXPORT CSV (FILTER FIXED TOO)
   const handleExportToCSV = useCallback(async () => {
     try {
       setExportProgress({
@@ -174,39 +167,7 @@ export const useBooks = (token) => {
         exportedCount: 0
       })
 
-      let allBooksData = []
-      let currentPage = 1
-      let hasMore = true
-      let totalPages = 1
-
-      while (hasMore) {
-        const response = await fetchBooks(token, currentPage, debouncedSearchTerm)
-
-        if (response?.results) {
-          const filtered = response.results.filter((b) => !b.cancelled)
-          allBooksData = [...allBooksData, ...filtered]
-
-          hasMore = response.next !== null
-
-          if (response.count && currentPage === 1) {
-            totalPages = Math.ceil(response.count / 10)
-          }
-
-          const progress = totalPages > 0 ? (currentPage / totalPages) * 90 : 0
-
-          setExportProgress({
-            isOpen: true,
-            progress,
-            currentPage,
-            totalPages,
-            exportedCount: allBooksData.length
-          })
-
-          currentPage++
-        } else {
-          hasMore = false
-        }
-      }
+      const allBooksData = (allBooksQuery.data || []).filter((b) => !b.cancelled && !b.cancelledAt)
 
       if (!allBooksData.length) {
         toast.warning('No books to export')
@@ -240,7 +201,6 @@ export const useBooks = (token) => {
         'COPIES'
       ]
 
-      // Convert books data to CSV rows
       const csvRows = [
         headers.join(','),
         ...allBooksData.map((book) =>
@@ -266,65 +226,24 @@ export const useBooks = (token) => {
         )
       ]
 
-      // Create CSV content
-      const csvContent = csvRows.join('\n')
-
-      // Create blob and download
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
 
-      link.setAttribute('href', url)
-      link.setAttribute('download', `books_export_${new Date().toISOString().split('T')[0]}.csv`)
-      link.style.visibility = 'hidden'
+      link.href = url
+      link.download = `books_export_${new Date().toISOString().split('T')[0]}.csv`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      // Complete progress
-      setExportProgress((prev) => ({
-        ...prev,
-        progress: 100
-      }))
-
-      // Close modal after brief delay
-      setTimeout(() => {
-        setExportProgress({
-          isOpen: false,
-          progress: 0,
-          currentPage: 0,
-          totalPages: 0,
-          exportedCount: 0
-        })
-        toast.success(`Successfully exported ${allBooksData.length} books`)
-      }, 500)
+      toast.success(`Successfully exported ${allBooksData.length} books`)
+      setExportProgress({ isOpen: false, progress: 0 })
     } catch (error) {
-      console.error('Export failed:', error)
-      setExportProgress({
-        isOpen: false,
-        progress: 0,
-        currentPage: 0,
-        totalPages: 0,
-        exportedCount: 0
-      })
+      console.error(error)
       toast.error('Failed to export books')
     }
-  }, [token, debouncedSearchTerm])
-
-  const handleRowClick = (book) => {
-    setSelectedBook(book)
-    setIsDetailsOpen(true)
-  }
-
-  const handleGridViewDetails = (book) => {
-    setSelectedBook(book)
-    setIsDetailsOpen(true)
-  }
-
-  const handleCloseDetailsModal = () => {
-    setIsDetailsOpen(false)
-  }
+  }, [allBooksQuery.data])
 
   return {
     books: filteredBooks,
@@ -346,9 +265,6 @@ export const useBooks = (token) => {
     handleDeleteBook,
     confirmDelete,
     cancelDelete,
-    handleRowClick,
-    handleGridViewDetails,
-    handleCloseDetailsModal,
     handleExportToCSV
   }
 }

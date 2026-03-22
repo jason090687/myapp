@@ -12,7 +12,6 @@ import { Toaster } from 'react-hot-toast'
 import { logout } from './Features/authSlice' // Import the logout action
 import { ActivityProvider } from './context/ActivityContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import './i18n/config'
 
 // Theme removed: force app to always use light mode.
 if (typeof document !== 'undefined') {

@@ -58,3 +58,24 @@ export const processOverduePayment = async (borrowId, paymentData) => {
     )
   }
 }
+
+export const borrowBook = async (borrowData) => {
+  try {
+    const response = await api.post(`/borrow/`, borrowData)
+    return response.data
+  } catch (error) {
+    console.error('Error borrowing book:', error)
+    throw new Error(error.response?.data?.message || 'Failed to borrow book')
+  }
+}
+
+// Fetch pending borrow requests
+export const fetchBorrowRequests = async (status = 'pending') => {
+  try {
+    const response = await api.get(`/borrow/requests/?status=${status}&is_read=true`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching borrow requests:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrow requests')
+  }
+}
