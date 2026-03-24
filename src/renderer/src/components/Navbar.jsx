@@ -6,19 +6,19 @@ import { globalSearch } from '../services/searchService'
 import SearchResults from './SearchResults'
 import './Navbar.css'
 import './SkeletonLoader.css'
-import { useNavigate } from 'react-router-dom' // Add this import
+import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import BacklogPanel from './BacklogPanel'
 import { useActivity } from '../context/ActivityContext'
-import { getNotificationsCount, fetchBorrowRequests } from '../Features/api'
+import { useBorrowRequests, useNotificationsCount } from '../hooks'
 
 const Navbar = ({
   isCollapsed = false,
-  onToggle = () => {},
+  onToggle = () => { },
   userDetails = {},
   isLoading = false,
   isBacklogOpen = false,
-  setIsBacklogOpen = () => {}
+  setIsBacklogOpen = () => { }
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState(null)
@@ -31,49 +31,28 @@ const Navbar = ({
   const userMenuRef = useRef(null)
   const { activities } = useActivity()
   const { token } = useSelector((state) => state.auth)
-  const navigate = useNavigate() // Add navigation hook
+  const navigate = useNavigate()
 
-  // Fetch notifications count
+  // Fetch notifications and borrow requests using TanStack Query hooks
+  const { data: notificationsData } = useNotificationsCount()
+  const { data: borrowRequestsData } = useBorrowRequests('pending')
+
+  // Update notifications count from hook data
   useEffect(() => {
-    if (!token) return
-
-    const fetchCount = async () => {
-      try {
-        const response = await getNotificationsCount(token)
-        setNotificationsCount(response.count || 0)
-        console.log()
-      } catch (error) {
-        console.error('Error fetching notifications count:', error)
-      }
+    if (notificationsData?.count !== undefined) {
+      setNotificationsCount(notificationsData.count || 0)
     }
+  }, [notificationsData])
 
-    fetchCount()
-    // Refresh count every 30 seconds
-    const interval = setInterval(fetchCount, 30000)
-    return () => clearInterval(interval)
-  }, [token])
-
-  // Fetch pending borrow requests count
+  // Update borrow requests count from hook data
   useEffect(() => {
-    if (!token) return
-
-    const fetchRequestsCount = async () => {
-      try {
-        const response = await fetchBorrowRequests(token, 'pending')
-        const unreadCount = (response.results || []).filter(
-          (request) => request.is_read !== true
-        ).length
-        setBorrowRequestsCount(unreadCount)
-      } catch (error) {
-        console.error('Error fetching borrow requests count:', error)
-      }
+    if (borrowRequestsData?.results) {
+      const unreadCount = borrowRequestsData.results.filter(
+        (request) => request.is_read !== true
+      ).length
+      setBorrowRequestsCount(unreadCount)
     }
-
-    fetchRequestsCount()
-    // Refresh count every 30 seconds
-    const interval = setInterval(fetchRequestsCount, 30000)
-    return () => clearInterval(interval)
-  }, [token, refreshTrigger])
+  }, [borrowRequestsData, refreshTrigger])
 
   // Handle click outside search results
   useEffect(() => {

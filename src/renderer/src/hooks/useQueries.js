@@ -981,3 +981,68 @@ export const useEmployeeDetails = (employeeId) => {
     staleTime: 0
   })
 }
+
+// ==================== UTILITY FUNCTIONS FOR SERVICES ====================
+// These are async functions (not hooks) for use in service files
+
+// Fetch books for search service
+export const fetchBooksUtil = async (token, page = 1, search = '', subject = '') => {
+  try {
+    let url = `/marc/search/?page=${page}&page_size=10&search=${encodeURIComponent(search)}`
+    if (subject) {
+      url += `&subject=${encodeURIComponent(subject)}`
+    }
+    const response = await api.get(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch books')
+  }
+}
+
+// Search students for search service
+export const searchStudentsUtil = async (token, searchTerm, page = 1) => {
+  try {
+    const response = await api.get(
+      `/students/?search=${encodeURIComponent(searchTerm)}&page=${page}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.error('Search students error:', error)
+    throw new Error(error.response?.data?.message || 'Failed to search students')
+  }
+}
+
+// Fetch employees for search service
+export const fetchEmployeesUtil = async (token) => {
+  try {
+    const response = await api.get(`/students/employees/`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return response.data
+  } catch (error) {
+    console.error('Error fetching employees:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch employees')
+  }
+}
+
+// Fetch borrowed books for search service (from api/borrow)
+export const fetchBorrowedBooksUtil = async (page = 1, searchTerm = '') => {
+  try {
+    const token = getToken()
+    const response = await api.get(
+      `/borrow/list/?page=${page}&search=${searchTerm}&ordering=return_status,-returned_date`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error fetching borrowed books:', error)
+    throw new Error(error.response?.data?.message || 'Failed to fetch borrowed books')
+  }
+}

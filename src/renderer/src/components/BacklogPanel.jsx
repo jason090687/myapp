@@ -14,17 +14,17 @@ import {
 import { useActivity } from '../context/ActivityContext'
 import RequestBorrowModal from './RequestBorrowModal'
 import {
-  approveBorrowRequest,
-  rejectBorrowRequest,
-  markRequestAsRead,
-  fetchBorrowRequests
-} from '../Features/api'
+  useBorrowRequests,
+  useApproveBorrowRequest,
+  useRejectBorrowRequest,
+  useMarkRequestAsRead,
+  useUserDetails
+} from '../hooks'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
 import './BacklogPanel.css'
-import { fetchUserDetails } from '../api/auth'
-import { useQuery } from '@tanstack/react-query'
 import { setAuthToken } from '../api/axios'
+import { getToken } from '../api/axios'
 
 function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const { activities, clearActivities } = useActivity()
@@ -33,9 +33,17 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [borrowRequests, setBorrowRequests] = useState([])
   const [requestsCleared, setRequestsCleared] = useState(false)
-  // const [userData, setUserData] = useState(null)
   const { token } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
+
+  // Initialize mutations
+  const approveMutation = useApproveBorrowRequest()
+  const rejectMutation = useRejectBorrowRequest()
+  const markAsReadMutation = useMarkRequestAsRead()
+
+  // Fetch borrow requests and user data
+  const { data: borrowRequestsData } = useBorrowRequests('pending')
+  const { data: userData } = useUserDetails()
 
   const keepPendingOnly = (results) =>
     (results || []).filter((request) => request.status === 'pending')
@@ -47,29 +55,16 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   }, [isOpen])
 
   useEffect(() => {
-    if (!isOpen || !token || requestsCleared) return
-
-    const fetchRequests = async () => {
-      try {
-        const response = await fetchBorrowRequests(token, 'pending')
-        setBorrowRequests(keepPendingOnly(response.results))
-      } catch (error) {
-        console.error('Error fetching borrow requests:', error)
-      }
+    if (token) {
+      setAuthToken(token)
     }
+  }, [token])
 
-    fetchRequests()
-    const interval = setInterval(fetchRequests, 30000)
-    return () => clearInterval(interval)
-  }, [isOpen, token, requestsCleared])
-
-  setAuthToken(token)
-
-  const { data: userData } = useQuery({
-    queryKey: ['user', token],
-    queryFn: () => fetchUserDetails(),
-    enabled: !!token
-  })
+  useEffect(() => {
+    if (borrowRequestsData?.results) {
+      setBorrowRequests(keepPendingOnly(borrowRequestsData.results))
+    }
+  }, [borrowRequestsData, requestsCleared])
 
   const handleClearAll = () => {
     clearActivities()
@@ -207,7 +202,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const handleMarkAsRead = async (requestId, e) => {
     e.stopPropagation()
     try {
-      await markRequestAsRead(token, requestId)
+      await markAsReadMutation.mutateAsync(requestId)
 
       setBorrowRequests((prevRequests) =>
         prevRequests.map((request) =>
@@ -225,7 +220,10 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
 
   const handleApproveRequest = async (approvalData) => {
     try {
-      await approveBorrowRequest(token, approvalData.id, approvalData)
+      await approveMutation.mutateAsync({
+        requestId: approvalData.id,
+        approvalData: approvalData
+      })
 
       setBorrowRequests((prevRequests) =>
         prevRequests.filter((request) => request.id !== approvalData.id)
@@ -245,7 +243,10 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const handleRejectRequest = async (requestId, e) => {
     e.stopPropagation()
     try {
-      await rejectBorrowRequest(token, requestId, { response_notes: 'Request rejected' })
+      await rejectMutation.mutateAsync({
+        requestId: requestId,
+        rejectionData: { response_notes: 'Request rejected' }
+      })
 
       setBorrowRequests((prevRequests) =>
         prevRequests.filter((request) => request.id !== requestId)

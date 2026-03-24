@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import { Button } from './ui/button'
 import './RequestBorrowModal.css'
 import { useToaster } from './Toast/useToaster'
-import { borrowBook, rejectBorrowRequest, updateBook } from '../Features/api'
+import { useBorrowBook, useUpdateBook, useRejectBorrowRequest } from '../hooks'
 import { useSelector } from 'react-redux'
 
 function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onRequestUpdate }) {
@@ -16,7 +16,12 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
     return today.toISOString().split('T')[0]
   })
   const { showToast } = useToaster()
-  const { token } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth)
+
+  // Initialize mutations
+  const borrowBookMutation = useBorrowBook()
+  const updateBookMutation = useUpdateBook()
+  const rejectBorrowMutation = useRejectBorrowRequest()
 
   const formatDate = (value) => {
     if (!value) return ''
@@ -33,7 +38,10 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
   const handleReject = async () => {
     try {
       setIsLoading(true)
-      await rejectBorrowRequest(token, borrowRequest.id, { response_notes: 'Request rejected' })
+      await rejectBorrowMutation.mutateAsync({
+        requestId: borrowRequest.id,
+        rejectionData: { response_notes: 'Request rejected' }
+      })
       onClose()
       if (onRequestUpdate) {
         onRequestUpdate(borrowRequest.id, { status: 'rejected' })
@@ -68,14 +76,17 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
 
       await onApprove({ id: borrowRequest.id, ...approvalData })
 
-      await borrowBook(token, {
+      await borrowBookMutation.mutateAsync({
         book: borrowRequest.bookId,
         student: studentId,
         due_date: dueDate,
         status: 'borrowed'
       })
 
-      await updateBook(token, borrowRequest.bookId, { status: 'borrowed' })
+      await updateBookMutation.mutateAsync({
+        bookId: borrowRequest.bookId,
+        bookData: { status: 'borrowed' }
+      })
 
       onClose()
     } catch (error) {

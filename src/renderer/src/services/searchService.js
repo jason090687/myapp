@@ -1,4 +1,9 @@
-import { fetchBooks, fetchBorrowedBooks, searchStudents, fetchEmployees } from '../Features/api'
+import {
+  fetchBooksUtil as fetchBooks,
+  fetchBorrowedBooksUtil as fetchBorrowedBooks,
+  searchStudentsUtil as searchStudents,
+  fetchEmployeesUtil as fetchEmployees
+} from '../hooks/useQueries'
 
 export const globalSearch = async (token, searchTerm) => {
   if (!searchTerm.trim()) return null

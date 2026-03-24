@@ -27,180 +27,167 @@ const getAuthHeaders = (token) => ({
 })
 
 // User APIs
-export const fetchUsers = async (token) => {
-  const response = await axios.get(`${API_URL}/accounts/auth/users/`, getAuthHeaders(token))
-  return response.data
-}
+// export const fetchUsers = async (token) => {
+//   const response = await axios.get(`${API_URL}/accounts/auth/users/`, getAuthHeaders(token))
+//   return response.data
+// }
 
-// Auth APIs
-export const registerUser = async (userData) => {
-  try {
-    const response = await axios.post(`${API_URL}/accounts/auth/users/`, userData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    return response.data
-  } catch (error) {
-    throw new Error(
-      error.response?.data?.message ||
-      'An error occurred during registration. Please try again later.'
-    )
-  }
-}
+// // Auth APIs
+// export const registerUser = async (userData) => {
+//   try {
+//     const response = await axios.post(`${API_URL}/accounts/auth/users/`, userData, {
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//     return response.data
+//   } catch (error) {
+//     throw new Error(
+//       error.response?.data?.message ||
+//       'An error occurred during registration. Please try again later.'
+//     )
+//   }
+// }
 
-export const loginUser = async (userData) => {
-  try {
-    const response = await axios.post(`${API_URL}/accounts/auth/jwt/create/`, userData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Login failed.')
-  }
-}
+// export const loginUser = async (userData) => {
+//   try {
+//     const response = await axios.post(`${API_URL}/accounts/auth/jwt/create/`, userData, {
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//     return response.data
+//   } catch (error) {
+//     throw new Error(error.response?.data?.message || 'Login failed.')
+//   }
+// }
 
-export const activateUser = async (userData) => {
-  try {
-    const response = await axios.post(`${API_URL}/accounts/auth/users/activation/`, userData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Activation failed.')
-  }
-}
+// export const activateUser = async (userData) => {
+//   try {
+//     const response = await axios.post(`${API_URL}/accounts/auth/users/activation/`, userData, {
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//     return response.data
+//   } catch (error) {
+//     throw new Error(error.response?.data?.message || 'Activation failed.')
+//   }
+// }
 
-export const resetPassword = async (userData) => {
-  try {
-    const response = await axios.post(`${API_URL}/accounts/auth/users/reset_password/`, userData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Reset password failed.')
-  }
-}
+// export const resetPassword = async (userData) => {
+//   try {
+//     const response = await axios.post(`${API_URL}/accounts/auth/users/reset_password/`, userData, {
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//     return response.data
+//   } catch (error) {
+//     throw new Error(error.response?.data?.message || 'Reset password failed.')
+//   }
+// }
 
-export const resetPasswordConfirm = async (userData) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/accounts/auth/users/reset_password_confirm/`,
-      userData,
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    )
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Reset password confirmation failed.')
-  }
-}
+// export const resetPasswordConfirm = async (userData) => {
+//   try {
+//     const response = await axios.post(
+//       `${API_URL}/accounts/auth/users/reset_password_confirm/`,
+//       userData,
+//       {
+//         headers: {
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     )
+//     return response.data
+//   } catch (error) {
+//     throw new Error(error.response?.data?.message || 'Reset password confirmation failed.')
+//   }
+// }
 
-export const fetchUserDetails = async (token) => {
-  try {
-    const response = await axios.get(`${API_URL}/accounts/auth/users/me/`, getAuthHeaders(token))
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Fetch user details failed.')
-  }
-}
+// export const fetchUserDetails = async (token) => {
+//   try {
+//     const response = await axios.get(`${API_URL}/accounts/auth/users/me/`, getAuthHeaders(token))
+//     return response.data
+//   } catch (error) {
+//     throw new Error(error.response?.data?.message || 'Fetch user details failed.')
+//   }
+// }
 
-// POST: Create a new user
-export const createUser = async (token, payload) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/accounts/auth/users/`,
-      payload,
-      getAuthHeaders(token) // Use default JSON content type
-    )
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.detail || 'Failed to create user')
-  }
-}
+// // POST: Create a new user
+// export const createUser = async (token, payload) => {
+//   try {
+//     const response = await axios.post(
+//       `${API_URL}/accounts/auth/users/`,
+//       payload,
+//       getAuthHeaders(token) // Use default JSON content type
+//     )
+//     return response.data
+//   } catch (error) {
+//     throw new Error(error.response?.data?.detail || 'Failed to create user')
+//   }
+// }
 
-// PATCH: Update user profile
-export const updateUserProfile = async (token, formData) => {
-  try {
-    const response = await axios.patch(
-      `${API_URL}/accounts/auth/users/me/`,
-      formData,
-      getAuthHeaders(token, 'multipart/form-data')
-    )
-    return response.data // Axios automatically parses JSON responses
-  } catch (error) {
-    throw new Error(error.response?.data?.detail || 'Failed to update profile')
-  }
-}
+// // PATCH: Update user profile
+// export const updateUserProfile = async (token, formData) => {
+//   try {
+//     const response = await axios.patch(
+//       `${API_URL}/accounts/auth/users/me/`,
+//       formData,
+//       getAuthHeaders(token, 'multipart/form-data')
+//     )
+//     return response.data // Axios automatically parses JSON responses
+//   } catch (error) {
+//     throw new Error(error.response?.data?.detail || 'Failed to update profile')
+//   }
+// }
 
-export const changePassword = async (token, passwordData) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/accounts/auth/users/set_password/`,
-      passwordData,
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    const data = error.response?.data
-    throw new Error(
-      data?.detail ||
-      data?.current_password?.[0] ||
-      data?.new_password?.[0] ||
-      data?.re_new_password?.[0] ||
-      data?.old_password?.[0] ||
-      'Failed to change password'
-    )
-  }
-}
+// export const changePassword = async (token, passwordData) => {
+//   try {
+//     const response = await axios.post(
+//       `${API_URL}/accounts/auth/users/set_password/`,
+//       passwordData,
+//       getAuthHeaders(token)
+//     )
+//     return response.data
+//   } catch (error) {
+//     const data = error.response?.data
+//     throw new Error(
+//       data?.detail ||
+//       data?.current_password?.[0] ||
+//       data?.new_password?.[0] ||
+//       data?.re_new_password?.[0] ||
+//       data?.old_password?.[0] ||
+//       'Failed to change password'
+//     )
+//   }
+// }
 
-export const fetchBooks = async (token, page = 1, search = '', subject = '') => {
-  try {
-    let url = `${API_URL}/marc/search/?page=${page}&page_size=10&search=${encodeURIComponent(search)}`
-    if (subject) {
-      url += `&subject=${encodeURIComponent(subject)}`
-    }
-    const response = await axios.get(url, getAuthHeaders(token))
-    return response.data
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to fetch books')
-  }
-}
+// // Add new function to fetch all books across pages
+// export const fetchAllBooks = async (token, search = '') => {
+//   try {
+//     let allBooks = []
+//     let nextPage = 1
+//     let hasMore = true
 
-// Add new function to fetch all books across pages
-export const fetchAllBooks = async (token, search = '') => {
-  try {
-    let allBooks = []
-    let nextPage = 1
-    let hasMore = true
+//     while (hasMore) {
+//       const response = await axios.get(
+//         `${API_URL}/marc/search/?page=${nextPage}&search=${encodeURIComponent(search)}`,
+//         getAuthHeaders(token)
+//       )
 
-    while (hasMore) {
-      const response = await axios.get(
-        `${API_URL}/marc/search/?page=${nextPage}&search=${encodeURIComponent(search)}`,
-        getAuthHeaders(token)
-      )
+//       allBooks = [...allBooks, ...response.data.results]
 
-      allBooks = [...allBooks, ...response.data.results]
+//       hasMore = response.data.next !== null
+//       nextPage += 1
+//     }
 
-      hasMore = response.data.next !== null
-      nextPage += 1
-    }
-
-    return { results: allBooks }
-  } catch (error) {
-    console.error('Error fetching all books:', error)
-    throw new Error(error.response?.data?.message || 'Failed to fetch all books')
-  }
-}
+//     return { results: allBooks }
+//   } catch (error) {
+//     console.error('Error fetching all books:', error)
+//     throw new Error(error.response?.data?.message || 'Failed to fetch all books')
+//   }
+// }
 
 // export const addNewBook = async (token, bookData) => {
 //   try {
@@ -292,88 +279,6 @@ export const borrowBook = async (token, borrowData) => {
   } catch (error) {
     console.error('Error borrowing book:', error)
     throw new Error(error.response?.data?.message || 'Failed to borrow book')
-  }
-}
-
-// Fetch pending borrow requests
-export const fetchBorrowRequests = async (token, status = 'pending') => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/borrow/requests/?status=pending&is_read=true`,
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error fetching borrow requests:', error)
-    throw new Error(error.response?.data?.message || 'Failed to fetch borrow requests')
-  }
-}
-
-// Mark request as read
-export const markRequestAsRead = async (token, requestId) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/borrow/requests/${requestId}/mark-read/`,
-      {
-        is_read: true
-      },
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error marking request as read:', error)
-    throw new Error(error.response?.data?.message || 'Failed to mark request as read')
-  }
-}
-
-// Get notifications count for borrow requests
-export const getNotificationsCount = async (token) => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/borrow/requests/notifications/count/`,
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error fetching notifications count:', error)
-    throw new Error(error.response?.data?.message || 'Failed to fetch notifications count')
-  }
-}
-
-// Approve borrow request
-export const approveBorrowRequest = async (token, requestId, approvalData) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/borrow/requests/${requestId}/respond/`,
-      {
-        action: 'approve',
-        student_id: approvalData.student_id,
-        response_notes: approvalData.response_notes || ''
-      },
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error approving borrow request:', error)
-    throw new Error(error.response?.data?.message || 'Failed to approve borrow request')
-  }
-}
-
-// Reject borrow request
-export const rejectBorrowRequest = async (token, requestId, rejectionData) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/borrow/requests/${requestId}/respond/`,
-      {
-        action: 'reject',
-        response_notes: rejectionData.response_notes || ''
-      },
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error rejecting borrow request:', error)
-    throw new Error(error.response?.data?.message || 'Failed to reject borrow request')
   }
 }
 
@@ -896,19 +801,6 @@ export const fetchStudentYearLevels = async (token) => {
   }
 }
 
-// First, update or add this function to your API file
-export const searchStudents = async (token, searchTerm, page = 1) => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/students/?search=${encodeURIComponent(searchTerm)}&page=${page}`,
-      getAuthHeaders(token)
-    )
-    return response.data
-  } catch (error) {
-    console.error('Search students error:', error)
-    throw new Error(error.response?.data?.message || 'Failed to search students')
-  }
-}
 
 export const fetchAllStudentsForSearch = async (token) => {
   try {
@@ -956,16 +848,7 @@ export const deleteStudent = async (token, studentId, cancelData = {}) => {
   }
 }
 
-// Employee APIs
-export const fetchEmployees = async (token) => {
-  try {
-    const response = await axios.get(`${API_URL}/students/employees/`, getAuthHeaders(token))
-    return response.data
-  } catch (error) {
-    console.error('Error fetching employees:', error)
-    throw new Error(error.response?.data?.message || 'Failed to fetch employees')
-  }
-}
+
 
 export const fetchStaffDetails = async (token, staffId) => {
   try {

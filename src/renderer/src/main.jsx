@@ -13,6 +13,10 @@ import { logout } from './Features/authSlice' // Import the logout action
 import { ActivityProvider } from './context/ActivityContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+// Polyfill Buffer for @react-pdf/renderer
+import { Buffer } from 'buffer'
+globalThis.Buffer = Buffer
+
 // Theme removed: force app to always use light mode.
 if (typeof document !== 'undefined') {
   const root = document.documentElement
