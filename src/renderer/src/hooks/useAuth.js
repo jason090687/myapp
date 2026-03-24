@@ -105,7 +105,7 @@ export const useResetPasswordWithOtp = () => {
 
 export const useChangePassword = () => {
   return useMutation({
-    mutationFn: async ({ passwordData }) => {
+    mutationFn: async (passwordData) => {
       const token = getToken()
       const response = await api.post(`/accounts/auth/users/set_password/`, passwordData, {
         headers: {
@@ -121,7 +121,7 @@ export const useChangePassword = () => {
 export const useUpdateUserProfile = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ formData }) => {
+    mutationFn: async (formData) => {
       const token = getToken()
       const response = await api.patch(`/accounts/auth/users/me/`, formData, {
         ...multipartConfig,
@@ -129,9 +129,9 @@ export const useUpdateUserProfile = () => {
       })
       return response.data
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
-      queryClient.invalidateQueries({ queryKey: ['users', variables.userId] })
+      queryClient.invalidateQueries({ queryKey: ['userDetails'] })
     }
   })
 }

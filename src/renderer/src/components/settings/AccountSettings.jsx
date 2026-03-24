@@ -68,11 +68,7 @@ function AccountSettings() {
     setMessage({ type: '', text: '' })
 
     try {
-      await changePassword.mutateAsync({
-        current_password: passwordData.current_password,
-        new_password: passwordData.new_password,
-        re_new_password: passwordData.re_new_password
-      })
+      await changePassword.mutateAsync(passwordData)
       setMessage({ type: 'success', text: 'Password changed successfully!' })
       setPasswordData({ current_password: '', new_password: '', re_new_password: '' })
     } catch (error) {
