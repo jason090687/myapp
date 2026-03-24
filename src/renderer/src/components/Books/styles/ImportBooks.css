@@ -161,7 +161,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.75rem;
-  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
+  background: #06b6d4;
   color: white;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -240,7 +240,7 @@
 
 .import-preview-badge {
   padding: 0.375rem 0.875rem;
-  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
+  background: var(--accent);
   color: white;
   border-radius: 2rem;
   font-size: 0.8125rem;
@@ -275,8 +275,8 @@
   font-size: 0.75rem;
   color: white;
   white-space: nowrap;
-  background: linear-gradient(135deg, #0a0b64 0%, #1e3a8a 100%);
-  border-bottom: 2px solid #1e3a8a;
+  background: #06b6d4;
+  /* border-bottom: 2px solid #1e3a8a; */
 }
 
 .import-preview-table-wrap td {

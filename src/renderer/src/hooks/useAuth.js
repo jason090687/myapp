@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import api, { setAuthToken, getToken } from '../api/axios'
+import api, { setAuthToken, getToken, multipartConfig } from '../api/axios'
 
 // ==================== AUTH MUTATIONS ====================
 
@@ -99,6 +99,39 @@ export const useResetPasswordWithOtp = () => {
         new_password: newPassword
       })
       return response.data
+    }
+  })
+}
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: async ({ passwordData }) => {
+      const token = getToken()
+      const response = await api.post(`/accounts/auth/users/set_password/`, passwordData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      return response.data
+    }
+  })
+}
+
+
+export const useUpdateUserProfile = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ formData }) => {
+      const token = getToken()
+      const response = await api.patch(`/accounts/auth/users/me/`, formData, {
+        ...multipartConfig,
+        headers: { ...multipartConfig.headers, Authorization: `Bearer ${token}` }
+      })
+      return response.data
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['users', variables.userId] })
     }
   })
 }

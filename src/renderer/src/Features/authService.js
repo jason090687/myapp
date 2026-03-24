@@ -2,11 +2,11 @@ import {
   activateUser,
   fetchUserDetails,
   loginUser,
-  registerUser,
   resetPassword,
   resetPasswordConfirm,
   verifyOtp as verifyOtpApi,
-  resendOtp as resendOtpApi
+  resendOtp as resendOtpApi,
+  registerUser
 } from '../api/auth'
 
 // Helper to handle API errors
@@ -14,7 +14,7 @@ const handleError = (error) => {
   throw new Error(error.response?.data?.message || 'An error occurred. Please try again.')
 }
 
-// Register User
+// Register
 const register = async (userData) => {
   try {
     return await registerUser(userData)
@@ -23,32 +23,36 @@ const register = async (userData) => {
   }
 }
 
-// Login User
+// Login
 const login = async (userData) => {
   try {
     const response = await loginUser(userData)
-    if (response) {
-      const { access: token } = response // Assuming JWT access token
-      const user = { email: userData.email } // Add user email to localStorage
 
-      // Save token and user to localStorage
+    if (response) {
+      const { access: token } = response
+      const user = { email: userData.email }
+
       localStorage.setItem('authToken', token)
       localStorage.setItem('user', JSON.stringify(user))
 
-      return { token, user } // Return token and user details
+      return { token, user }
     }
   } catch (error) {
     handleError(error)
   }
 }
 
-// Logout User
-const logout = () => {
-  localStorage.removeItem('authToken')
-  localStorage.removeItem('user')
+// Logout (no hook here)
+const logout = async () => {
+  try {
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('user')
+  } catch (error) {
+    handleError(error)
+  }
 }
 
-// Activate User Account
+// Activate
 const activate = async (userData) => {
   try {
     return await activateUser(userData)
@@ -57,7 +61,7 @@ const activate = async (userData) => {
   }
 }
 
-// Request Password Reset
+// Request Reset
 const requestResetPassword = async (userData) => {
   try {
     return await resetPassword(userData)
@@ -66,7 +70,7 @@ const requestResetPassword = async (userData) => {
   }
 }
 
-// Confirm Password Reset
+// Confirm Reset
 const confirmResetPassword = async (userData) => {
   try {
     return await resetPasswordConfirm(userData)
@@ -75,7 +79,7 @@ const confirmResetPassword = async (userData) => {
   }
 }
 
-// Fetch User Details
+// User Details
 const userDetails = async (token) => {
   try {
     return await fetchUserDetails(token)
@@ -102,7 +106,7 @@ const resendOtp = async (email) => {
   }
 }
 
-const authService = {
+export default {
   register,
   login,
   logout,
@@ -113,5 +117,3 @@ const authService = {
   verifyOtp,
   resendOtp
 }
-
-export default authService

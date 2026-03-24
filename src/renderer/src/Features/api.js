@@ -44,7 +44,7 @@ export const registerUser = async (userData) => {
   } catch (error) {
     throw new Error(
       error.response?.data?.message ||
-        'An error occurred during registration. Please try again later.'
+      'An error occurred during registration. Please try again later.'
     )
   }
 }
@@ -154,11 +154,11 @@ export const changePassword = async (token, passwordData) => {
     const data = error.response?.data
     throw new Error(
       data?.detail ||
-        data?.current_password?.[0] ||
-        data?.new_password?.[0] ||
-        data?.re_new_password?.[0] ||
-        data?.old_password?.[0] ||
-        'Failed to change password'
+      data?.current_password?.[0] ||
+      data?.new_password?.[0] ||
+      data?.re_new_password?.[0] ||
+      data?.old_password?.[0] ||
+      'Failed to change password'
     )
   }
 }

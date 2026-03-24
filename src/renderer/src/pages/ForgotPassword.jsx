@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { resetPassword, reset } from '../Features/authSlice'
 import { requestPasswordResetOtp } from '../Features/api'
 import { Button } from '../components/ui/button'
+import { useRequestPasswordResetOtp } from '../hooks'
 
 function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -18,8 +19,11 @@ function ForgotPassword() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const { isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
+  const { isError, isSuccess, message } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
+
+  const requestOtpMutation = useRequestPasswordResetOtp()
+
 
   const handleFinish = async (e) => {
     e.preventDefault()
@@ -32,7 +36,7 @@ function ForgotPassword() {
     setIsSubmitting(true) // Set loading state
 
     try {
-      await requestPasswordResetOtp(email)
+      await requestOtpMutation.mutateAsync(email)
       showToast('Success', 'OTP has been sent to your email', 'success')
       // Add small delay before navigation to show the success toast
       setTimeout(() => {

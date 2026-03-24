@@ -1,15 +1,18 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee } from './useQueries'
+import {
+  useEmployees,
+  useCreateEmployee,
+  useUpdateEmployee,
+  useDeleteEmployee,
+  useUserDetails
+} from './useQueries'
 import { useToaster } from '../components/Toast/useToaster'
 
 export const useStaff = () => {
   const navigate = useNavigate()
-  const { user } = useSelector((state) => state.auth)
   const { showToast } = useToaster()
 
-  // State management
   const [filterStatus, setFilterStatus] = useState('all')
   const [selectedStaff, setSelectedStaff] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState({
@@ -18,119 +21,112 @@ export const useStaff = () => {
     staffName: ''
   })
 
-  // TanStack Query hooks for CRUD operations
   const { data: staffData, isLoading, refetch } = useEmployees()
+  const { data: user } = useUserDetails()
+
+
   const createStaffMutation = useCreateEmployee()
   const updateStaffMutation = useUpdateEmployee()
   const deleteStaffMutation = useDeleteEmployee()
 
-  // Derived data - format employees list
+  // Normalize data
   const staff = Array.isArray(staffData?.results)
     ? staffData.results
     : Array.isArray(staffData)
       ? staffData
       : []
 
-  /**
-   * Filter staff based on selected status and cancellation status
-   */
+  // Filter staff
   const getFilteredStaff = useCallback(() => {
-    const visibleStaff = staff.filter((s) => !s?.cancelled)
+    const visible = staff.filter((s) => !s?.cancelled)
 
-    if (filterStatus === 'all') return visibleStaff
-    if (filterStatus === 'active') return visibleStaff.filter((s) => s.active)
-    if (filterStatus === 'inactive') return visibleStaff.filter((s) => !s.active)
-    return visibleStaff
+    if (filterStatus === 'all') return visible
+    if (filterStatus === 'active') return visible.filter((s) => s.active)
+    if (filterStatus === 'inactive') return visible.filter((s) => !s.active)
+
+    return visible
   }, [staff, filterStatus])
 
-  /**
-   * Navigate to staff details page to view/edit staff details
-   */
+  // Navigate to detail
   const handleRowClick = useCallback(
     (employee) => {
-      const staffPk = employee?.id_number ?? employee?.employee_id ?? employee?.pk
+      const staffPk = employee?.id
+
       if (!staffPk) {
-        showToast('Error', 'Staff record is missing an internal id', 'error')
+        showToast('Error', 'Missing employee ID', 'error')
         return
       }
+
       navigate(`/staff/${staffPk}`)
     },
     [navigate, showToast]
   )
 
-  /**
-   * Create a new staff member
-   */
+  // Create
   const handleAddStaff = useCallback(
     async (staffData) => {
       try {
         await createStaffMutation.mutateAsync(staffData)
-        showToast('Success', 'Staff member added successfully!', 'success')
+        showToast('Success', 'Staff added successfully!', 'success')
         await refetch()
         return true
       } catch (error) {
-        showToast('Error', error.message || 'Failed to add staff member', 'error')
+        showToast('Error', error.message || 'Create failed', 'error')
         throw error
       }
     },
     [createStaffMutation, refetch, showToast]
   )
 
-  /**
-   * Update an existing staff member
-   */
+  // Update
   const handleEditStaff = useCallback(
     async (staffData) => {
       try {
-        if (!selectedStaff) return
-        const staffPk = selectedStaff?.id ?? selectedStaff?.employee_id ?? selectedStaff?.pk
-        if (!staffPk) {
-          showToast('Error', 'Staff record is missing an internal id', 'error')
-          return
-        }
+        if (!selectedStaff?.id) return
+
         await updateStaffMutation.mutateAsync({
-          employeeId: staffPk,
-          updateData: staffData
+          employeeId: selectedStaff.id,
+          updateData: staffData,
+          userId: user?.id
         })
-        showToast('Success', 'Staff member updated successfully!', 'success')
+
+        showToast('Success', 'Staff updated successfully!', 'success')
         setSelectedStaff(null)
         await refetch()
         return true
       } catch (error) {
-        showToast('Error', error.message || 'Failed to update staff member', 'error')
+        showToast('Error', error.message || 'Update failed', 'error')
         throw error
       }
     },
-    [selectedStaff, updateStaffMutation, refetch, showToast]
+    [selectedStaff, updateStaffMutation, user, refetch, showToast]
   )
 
-  /**
-   * Delete (soft delete) a staff member
-   */
+  // Delete (soft delete)
   const handleDeleteStaff = useCallback(async () => {
     try {
-      const staffId = deleteConfirm.staffId
-      if (!staffId) return
+      if (!deleteConfirm.staffId) return
 
-      const cancelledBy = user?.id ?? user?.user_id ?? user?.pk
-      const cancelData = {
-        cancelledBy,
-        cancelledAt: new Date().toISOString()
-      }
+      await deleteStaffMutation.mutateAsync({
+        employeeId: deleteConfirm.staffId,
+        userId: user?.id
 
-      await deleteStaffMutation.mutateAsync({ employeeId: staffId, cancelData })
+      })
 
-      showToast('Success', 'Staff member deleted successfully!', 'success')
-      setDeleteConfirm({ isOpen: false, staffId: null, staffName: '' })
+      showToast('Success', 'Staff deleted successfully!', 'success')
+
+      setDeleteConfirm({
+        isOpen: false,
+        staffId: null,
+        staffName: ''
+      })
+
       await refetch()
     } catch (error) {
-      showToast('Error', error.message || 'Failed to delete staff member', 'error')
+      showToast('Error', error.message || 'Delete failed', 'error')
     }
-  }, [deleteConfirm.staffId, user, deleteStaffMutation, refetch, showToast])
+  }, [deleteConfirm, user, deleteStaffMutation, refetch, showToast])
 
-  /**
-   * Handle delete confirmation
-   */
   const confirmDeleteStaff = (staffId, staffName) => {
     setDeleteConfirm({
       isOpen: true,
@@ -139,11 +135,12 @@ export const useStaff = () => {
     })
   }
 
-  /**
-   * Cancel delete operation
-   */
   const cancelDelete = () => {
-    setDeleteConfirm({ isOpen: false, staffId: null, staffName: '' })
+    setDeleteConfirm({
+      isOpen: false,
+      staffId: null,
+      staffName: ''
+    })
   }
 
   return {

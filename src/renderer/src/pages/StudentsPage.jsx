@@ -27,7 +27,6 @@ const StudentsPage = () => {
     setSelectedStudent,
     deleteConfirm,
     setDeleteConfirm,
-    students,
     totalPages,
     isLoading,
     getFilteredStudents,
@@ -104,7 +103,6 @@ const StudentsPage = () => {
           )}
         </div>
       </main>
-      {/* Custom toasts handled via useToaster */}
     </div>
   )
 }

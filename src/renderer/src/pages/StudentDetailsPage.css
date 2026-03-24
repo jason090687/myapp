@@ -421,7 +421,7 @@
 }
 
 .form-group label {
-  display: block;
+  /* display: block; */
   margin-bottom: 0.5rem;
   color: #1e293b;
   font-weight: 500;

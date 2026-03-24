@@ -1,35 +1,37 @@
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useState } from 'react'
 import { FaSave, FaKey, FaUser } from 'react-icons/fa'
-import { changePassword, fetchUserDetails, updateUserProfile } from '../../api/auth'
+import { useUserDetails } from '../../hooks'
+import { useChangePassword, useUpdateUserProfile } from '../../hooks/useAuth'
+import { Button } from '../ui/button'
 
 function AccountSettings() {
-  const { token } = useSelector((state) => state.auth)
-  const [profileData, setProfileData] = useState({})
+  const { data: profileData } = useUserDetails()
+  const updateUserProfile = useUpdateUserProfile()
+  const changePassword = useChangePassword()
+
+  const [profileForm, setProfileForm] = useState({
+    email: profileData?.email ?? '',
+    first_name: profileData?.first_name ?? '',
+    last_name: profileData?.last_name ?? ''
+  })
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    current_password: '',
+    new_password: '',
+    re_new_password: ''
   })
 
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
 
-  useEffect(() => {
-    if (!token) return
-
-    const loadUserProfile = async () => {
-      try {
-        const data = await fetchUserDetails(token)
-        setProfileData(data || {})
-      } catch (error) {
-        console.error('Error fetching user profile:', error)
-      }
-    }
-
-    loadUserProfile()
-  }, [token])
+  // Update profileForm if profileData changes
+  if (profileData && profileData.email !== profileForm.email) {
+    setProfileForm({
+      email: profileData.email,
+      first_name: profileData.first_name,
+      last_name: profileData.last_name
+    })
+  }
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault()
@@ -37,7 +39,7 @@ function AccountSettings() {
     setMessage({ type: '', text: '' })
 
     try {
-      await updateUserProfile(token, profileData)
+      await updateUserProfile.mutateAsync(profileForm)
       setMessage({ type: 'success', text: 'Profile updated successfully!' })
     } catch (error) {
       setMessage({
@@ -52,12 +54,12 @@ function AccountSettings() {
   const handlePasswordChange = async (e) => {
     e.preventDefault()
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
+    if (passwordData.new_password !== passwordData.re_new_password) {
       setMessage({ type: 'error', text: 'New passwords do not match' })
       return
     }
 
-    if (passwordData.newPassword.length < 8) {
+    if (passwordData.new_password.length < 8) {
       setMessage({ type: 'error', text: 'Password must be at least 8 characters' })
       return
     }
@@ -66,17 +68,23 @@ function AccountSettings() {
     setMessage({ type: '', text: '' })
 
     try {
-      await changePassword(token, {
-        current_password: passwordData.currentPassword,
-        new_password: passwordData.newPassword,
-        re_new_password: passwordData.confirmPassword
+      await changePassword.mutateAsync({
+        current_password: passwordData.current_password,
+        new_password: passwordData.new_password,
+        re_new_password: passwordData.re_new_password
       })
       setMessage({ type: 'success', text: 'Password changed successfully!' })
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setPasswordData({ current_password: '', new_password: '', re_new_password: '' })
     } catch (error) {
+      const errors = error.response?.data
+      const text =
+        errors &&
+        Object.entries(errors)
+          .map(([key, val]) => `${key}: ${val.join(', ')}`)
+          .join(' | ')
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to change password'
+        text: text || error.message || 'Failed to change password'
       })
     } finally {
       setLoading(false)
@@ -96,24 +104,12 @@ function AccountSettings() {
           <FaUser /> Profile Information
         </h3>
         <form onSubmit={handleProfileUpdate} className="settings-form">
-          {/* <div className="form-group">
-            <label>Username</label>
-            <input
-              type="text"
-              value={profileData.username}
-              onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
-              disabled
-              className="disabled-input"
-            />
-            <small>Username cannot be changed</small>
-          </div> */}
-
           <div className="form-group">
             <label>Email Address</label>
             <input
               type="email"
-              value={profileData?.email ?? ''}
-              onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+              value={profileForm.email}
+              onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
               required
             />
           </div>
@@ -123,8 +119,8 @@ function AccountSettings() {
               <label>First Name</label>
               <input
                 type="text"
-                value={profileData?.first_name ?? ''}
-                onChange={(e) => setProfileData({ ...profileData, first_name: e.target.value })}
+                value={profileForm.first_name}
+                onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
               />
             </div>
 
@@ -132,16 +128,16 @@ function AccountSettings() {
               <label>Last Name</label>
               <input
                 type="text"
-                value={profileData?.last_name ?? ''}
-                onChange={(e) => setProfileData({ ...profileData, last_name: e.target.value })}
+                value={profileForm.last_name}
+                onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
               />
             </div>
           </div>
 
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <Button type="submit" variant="primary" disabled={loading}>
             <FaSave />
             <span>{loading ? 'Saving...' : 'Save Profile'}</span>
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -155,9 +151,9 @@ function AccountSettings() {
             <label>Current Password</label>
             <input
               type="password"
-              value={passwordData.currentPassword}
+              value={passwordData.current_password}
               onChange={(e) =>
-                setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                setPasswordData({ ...passwordData, current_password: e.target.value })
               }
               required
             />
@@ -167,8 +163,8 @@ function AccountSettings() {
             <label>New Password</label>
             <input
               type="password"
-              value={passwordData.newPassword}
-              onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+              value={passwordData.new_password}
+              onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
               required
               minLength={8}
             />
@@ -179,18 +175,18 @@ function AccountSettings() {
             <label>Confirm New Password</label>
             <input
               type="password"
-              value={passwordData.confirmPassword}
+              value={passwordData.re_new_password}
               onChange={(e) =>
-                setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                setPasswordData({ ...passwordData, re_new_password: e.target.value })
               }
               required
             />
           </div>
 
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <Button type="submit" variant="primary" disabled={loading}>
             <FaKey />
             <span>{loading ? 'Changing...' : 'Change Password'}</span>
-          </button>
+          </Button>
         </form>
       </div>
     </div>

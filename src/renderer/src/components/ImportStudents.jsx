@@ -1,14 +1,12 @@
 import { useState, useRef } from 'react'
-import { useSelector } from 'react-redux'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
-import { createStudent } from '../Features/api'
 import { useToaster } from './Toast/useToaster'
 import './ImportStudents.css'
 import { Button } from './ui/button'
+import { useCreateStudent } from '../hooks'
 
 function ImportStudents({ onClose, onRefresh }) {
-  const { token } = useSelector((state) => state.auth)
   const [importing, setImporting] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
@@ -25,6 +23,8 @@ function ImportStudents({ onClose, onRefresh }) {
     { text: 'Organizing student data...', icon: '🗃️' },
     { text: 'Finalizing import...', icon: '✨' }
   ]
+
+  const createStudentMutation = useCreateStudent()
 
   const [currentLoadingState, setCurrentLoadingState] = useState(loadingMessages[0])
 
@@ -74,7 +74,7 @@ function ImportStudents({ onClose, onRefresh }) {
           return
         }
         try {
-          await createStudent(token, student)
+          await createStudentMutation.mutateAsync(student)
           successCount++
         } catch (error) {
           if (cancelRef.current) return

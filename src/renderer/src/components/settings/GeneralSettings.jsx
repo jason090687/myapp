@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react'
 import { FaSave, FaUndo } from 'react-icons/fa'
-import { useTranslation } from 'react-i18next'
+import { Button } from '../ui/button'
+
+const defaultSettings = {
+  language: 'en',
+  showWelcomeScreen: true
+}
 
 function GeneralSettings() {
-  const { t, i18n } = useTranslation()
-
-  const defaultSettings = {
-    language: 'en',
-    showWelcomeScreen: true
-  }
-
   const [settings, setSettings] = useState(defaultSettings)
   const [saved, setSaved] = useState(false)
 
@@ -20,56 +18,43 @@ function GeneralSettings() {
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings)
         setSettings({ ...defaultSettings, ...parsed })
-        // Set the language on mount
-        if (parsed.language && i18n.language !== parsed.language) {
-          i18n.changeLanguage(parsed.language)
-        }
       }
     } catch (error) {
       console.error('Error loading settings:', error)
     }
-  }, [defaultSettings, i18n])
+  }, [])
 
   const handleLanguageChange = (e) => {
     const newLanguage = e.target.value
     setSettings((prev) => ({ ...prev, language: newLanguage }))
-    // Change language immediately
-    i18n.changeLanguage(newLanguage)
   }
 
   const handleSave = () => {
     try {
       localStorage.setItem('appSettings', JSON.stringify(settings))
       setSaved(true)
-      // Change language
-      i18n.changeLanguage(settings.language)
       setTimeout(() => setSaved(false), 3000)
     } catch (error) {
       console.error('Error saving settings:', error)
-      alert(t('messages.saveError') || 'Failed to save settings')
+      alert('Failed to save settings')
     }
   }
 
   const handleReset = () => {
-    if (
-      window.confirm(
-        t('messages.resetConfirm') || 'Are you sure you want to reset all settings to default?'
-      )
-    ) {
+    if (window.confirm('Are you sure you want to reset all settings to default?')) {
       setSettings(defaultSettings)
       localStorage.removeItem('appSettings')
-      i18n.changeLanguage('en')
     }
   }
 
   return (
     <div className="settings-section">
-      <h2>{t('settings.generalSettings')}</h2>
-      <p className="settings-description">{t('settings.generalDescription')}</p>
+      <h2>General Settings</h2>
+      <p>Configure your general app preferences below.</p>
 
       <div className="settings-form">
         <div className="form-group">
-          <label>{t('settings.language')}</label>
+          <label>Language</label>
           <select value={settings.language} onChange={handleLanguageChange}>
             <option value="en">English</option>
             <option value="es">Español (Spanish)</option>
@@ -88,19 +73,19 @@ function GeneralSettings() {
                 setSettings((prev) => ({ ...prev, showWelcomeScreen: e.target.checked }))
               }
             />
-            {t('settings.showWelcome')}
+            Show Welcome Screen
           </label>
         </div>
 
         <div className="settings-actions">
-          <button className="btn-primary" onClick={handleSave}>
+          <Button variant='primary' onClick={handleSave}>
             <FaSave />
-            <span>{saved ? t('settings.saved') : t('settings.saveChanges')}</span>
-          </button>
-          <button className="btn-secondary" onClick={handleReset}>
+            <span>{saved ? 'Saved' : 'Save Changes'}</span>
+          </Button>
+          <Button variant='secondary' onClick={handleReset}>
             <FaUndo />
-            <span>{t('settings.resetToDefault')}</span>
-          </button>
+            <span>Reset to Default</span>
+          </Button>
         </div>
       </div>
     </div>

@@ -871,93 +871,110 @@ export const useStudentDetails = (studentId) => {
   })
 }
 
-// ==================== EMPLOYEE QUERIES ====================
-
-// Fetch employees
+// ==================== FETCH EMPLOYEES ====================
 export const useEmployees = () => {
   return useQuery({
-    queryKey: ['employees'],
+    queryKey: ['students'],
     queryFn: async () => {
       const token = getToken()
-      const response = await api.get(`/employees/`, {
+      const response = await api.get(`/students/employees/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       return response.data
     },
-    staleTime: 0 // Set to 0 to always check for fresh data
+    staleTime: 0
   })
 }
 
-// Create employee
+// ==================== CREATE ====================
 export const useCreateEmployee = () => {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (employeeData) => {
       const token = getToken()
-      const response = await api.post(`/employees/`, employeeData, {
+      const response = await api.post(`/students/`, employeeData, {
         headers: { Authorization: `Bearer ${token}` }
       })
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
+      queryClient.invalidateQueries(['students'])
     }
   })
 }
 
-// Update employee
+// ==================== UPDATE ====================
 export const useUpdateEmployee = () => {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: async ({ employeeId, updateData }) => {
+    mutationFn: async ({ employeeId, updateData, userId }) => {
       const token = getToken()
-      const response = await api.patch(`/employees/${employeeId}/`, updateData, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+
+      const payload = {
+        ...updateData,
+        updated_by: userId
+      }
+
+      const response = await api.patch(
+        `/students/${employeeId}/`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
+
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
+      queryClient.invalidateQueries(['employees'])
     }
   })
 }
 
-// Delete employee
+// ==================== DELETE (SOFT DELETE) ====================
 export const useDeleteEmployee = () => {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: async ({ employeeId, cancelData }) => {
+    mutationFn: async ({ employeeId, cancelData, userId }) => {
       const token = getToken()
-      const cancelledAt = cancelData?.cancelledAt ?? new Date().toISOString()
+
       const payload = {
         cancelled: true,
-        cancelled_at: cancelledAt
+        cancelled_at: cancelData?.cancelledAt || new Date().toISOString(),
+        cancelled_by: userId
       }
 
-      if (cancelData?.cancelledBy !== undefined && cancelData?.cancelledBy !== null) {
-        payload.cancelled_by = cancelData.cancelledBy
-      }
+      const response = await api.patch(
+        `/students/${employeeId}/`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
 
-      const response = await api.patch(`/employees/${employeeId}/`, payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
+      queryClient.invalidateQueries(['employees'])
     }
   })
 }
 
-// Fetch employee details by id
+// ==================== EMPLOYEE DETAILS ====================
 export const useEmployeeDetails = (employeeId) => {
   return useQuery({
     queryKey: ['employee', employeeId],
     queryFn: async () => {
       const token = getToken()
+
+      // ✅ FIXED ENDPOINT HERE
       const response = await api.get(`/students/${employeeId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
+
       return response.data
     },
     enabled: !!employeeId,
