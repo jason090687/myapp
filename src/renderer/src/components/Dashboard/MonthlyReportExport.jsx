@@ -1,495 +1,260 @@
 import React, { useState } from 'react'
-import { Document, Page, Text, View, Image, StyleSheet, PDFViewer } from '@react-pdf/renderer'
 import logo from '../../assets/logo.png'
+import './MonthlyReportExport.css'
 
-// Replace the `styles` object and `MonthlyReportPDF` component in your MonthlyReportExport.jsx
+// ─── Icons ───────────────────────────────────────────────
+const IconDownload = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+)
 
-// ─── PDF Styles ───────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  page: {
-    paddingTop: 48,
-    paddingBottom: 48,
-    paddingHorizontal: 48,
-    fontFamily: 'Helvetica',
-    backgroundColor: '#ffffff',
-  },
+const IconClose = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
 
-  // ── School header ──
-  schoolHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    marginBottom: 28,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    borderBottomStyle: 'solid',
-  },
-  schoolLogo: {
-    width: 52,
-    height: 52,
-  },
-  schoolInfo: {
-    flex: 1,
-  },
-  schoolName: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 3,
-  },
-  schoolAddress: {
-    fontSize: 8,
-    color: '#6b7280',
-    lineHeight: 1.4,
-  },
+const IconPrint = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 6 2 18 2 18 9" />
+    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+    <rect x="6" y="14" width="12" height="8" />
+  </svg>
+)
 
-  // ── Report title block ──
-  titleBlock: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  reportLabel: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: '#6b7280',
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#111827',
-    textAlign: 'center',
-    marginBottom: 6,
-    letterSpacing: -0.3,
-  },
-  generatedDate: {
-    fontSize: 10,
-    color: '#9ca3af',
-    textAlign: 'center',
-  },
+const IconFileText = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10 9 9 9 8 9" />
+  </svg>
+)
 
-  // ── Summary cards row ──
-  summaryRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 28,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderStyle: 'solid',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-  },
-  summaryCardAccent: {
-    flex: 1,
-    backgroundColor: '#111827',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-  },
-  summaryLabel: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: '#6b7280',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  summaryLabelLight: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: '#9ca3af',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  summaryValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  summaryValueLight: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
+// ─── Helpers ─────────────────────────────────────────────
+const calculateTotals = (data) =>
+  data.reduce(
+    (acc, s) => ({
+      processed: acc.processed + (s.processed || 0),
+      borrowed: acc.borrowed + (s.borrowed || 0),
+      returned: acc.returned + (s.returned || 0),
+      overdue: acc.overdue + (s.overdue || 0),
+    }),
+    { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
+  )
 
-  // ── Section heading ──
-  sectionHeading: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: '#6b7280',
-    marginBottom: 10,
-  },
-
-  // ── Table ──
-  table: {
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderStyle: 'solid',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#111827',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    paddingVertical: 11,
-    paddingHorizontal: 16,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-    borderBottomStyle: 'solid',
-  },
-  tableRowAlt: {
-    flexDirection: 'row',
-    paddingVertical: 11,
-    paddingHorizontal: 16,
-    backgroundColor: '#f9fafb',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-    borderBottomStyle: 'solid',
-  },
-  tableFooter: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#f3f4f6',
-    borderTopWidth: 2,
-    borderTopColor: '#111827',
-    borderTopStyle: 'solid',
-  },
-
-  // ── Column widths ──
-  colMonth: { width: '28%' },
-  colNum: { width: '18%' },
-
-  // ── Cell text ──
-  headerCell: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: '#ffffff',
-  },
-  headerCellRight: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: '#ffffff',
-    textAlign: 'center',
-  },
-  cellMonth: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  cellNum: {
-    fontSize: 11,
-    color: '#374151',
-    textAlign: 'center',
-  },
-  footerCellMonth: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  footerCellNum: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#111827',
-    textAlign: 'center',
-  },
-
-  // ── Footer ──
-  pageFooter: {
-    marginTop: 36,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    borderTopStyle: 'solid',
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 9,
-    color: '#9ca3af',
-    marginBottom: 3,
-    lineHeight: 1.6,
-    textAlign: 'center',
-  },
-  footerDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#d1d5db',
-    marginVertical: 8,
-  },
-})
-
-// Helper function to merge styles (for @react-pdf/renderer compatibility)
-const mergeStyles = (...styleList) => {
-  return styleList.reduce((acc, style) => ({ ...acc, ...style }), {})
+const overdueBadgeClass = (n) => {
+  if (!n) return 'overdue-badge overdue-badge--none'
+  if (n < 5) return 'overdue-badge overdue-badge--low'
+  return 'overdue-badge overdue-badge--high'
 }
 
-// ─── PDF Document Component ───────────────────────────────────────────────────
-const MonthlyReportPDF = ({ monthlyStatsData = [] }) => {
-  // Calculate totals from data
-  const calculateTotals = (data) => {
-    return data.reduce(
-      (acc, stat) => ({
-        processed: acc.processed + (stat.processed || 0),
-        borrowed: acc.borrowed + (stat.borrowed || 0),
-        returned: acc.returned + (stat.returned || 0),
-        overdue: acc.overdue + (stat.overdue || 0),
-      }),
-      { processed: 0, borrowed: 0, returned: 0, overdue: 0 }
-    )
-  }
-
-  const data = monthlyStatsData || []
-  const totals = calculateTotals(data)
-  const generatedDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+// ─── Report Document ──────────────────────────────────────
+const ReportDocument = ({ monthlyStatsData = [] }) => {
+  const totals = calculateTotals(monthlyStatsData)
+  const generatedDate = new Date().toLocaleDateString('en-PH', {
+    year: 'numeric', month: 'long', day: 'numeric'
   })
 
   return (
-    <PDFViewer style={{ width: '100%', height: '750px', border: 'none' }}>
-      <Document>
-        <Page size="A4" style={styles.page}>
+    <div id="print-area" className="report">
 
-          {/* School Header */}
-          <View style={styles.schoolHeader}>
-            <Image src={logo} style={styles.schoolLogo} />
-            <View style={styles.schoolInfo}>
-              <Text style={styles.schoolName}>Sacred Heart of Jesus Montessori School</Text>
-              <Text style={styles.schoolAddress}>
-                JR Borja Ext., Across Capistrano Complex, Gusa, Cagayan de Oro, Philippines, 9000
-              </Text>
-            </View>
-          </View>
+      {/* HEADER */}
+      <header className="report-header">
+        <img src={logo} alt="School logo" className="report-logo" />
+        <div>
+          <div className="report-school-name">
+            Sacred Heart of Jesus Montessori School
+          </div>
+          <div className="report-school-sub">Cagayan de Oro, Philippines</div>
+        </div>
+      </header>
 
-          {/* Report Title */}
-          <View style={styles.titleBlock}>
-            <Text style={styles.reportLabel}>Official Document</Text>
-            <Text style={styles.title}>Library Monthly Report</Text>
-            <Text style={styles.generatedDate}>Generated on {generatedDate}</Text>
-          </View>
+      {/* TITLE */}
+      <div className="report-title-block">
+        <h2 className="report-title">Library Monthly Report</h2>
+        <div className="report-divider" />
+        <p className="report-subtitle">Generated on {generatedDate}</p>
+      </div>
 
-          {/* Summary Cards */}
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryCardAccent}>
-              <Text style={styles.summaryLabelLight}>Processed</Text>
-              <Text style={styles.summaryValueLight}>{totals.processed}</Text>
-            </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryLabel}>Borrowed</Text>
-              <Text style={styles.summaryValue}>{totals.borrowed}</Text>
-            </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryLabel}>Returned</Text>
-              <Text style={styles.summaryValue}>{totals.returned}</Text>
-            </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryLabel}>Overdue</Text>
-              <Text style={styles.summaryValue}>{totals.overdue}</Text>
-            </View>
-          </View>
+      {/* STAT CARDS */}
+      <div className="report-stats">
+        <div className="stat-card stat-card--primary">
+          <div className="stat-label">Processed</div>
+          <div className="stat-value">{totals.processed}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Borrowed</div>
+          <div className="stat-value">{totals.borrowed}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Returned</div>
+          <div className="stat-value">{totals.returned}</div>
+        </div>
+        <div className="stat-card stat-card--danger">
+          <div className="stat-label">Overdue</div>
+          <div className="stat-value">{totals.overdue}</div>
+        </div>
+      </div>
 
-          {/* Section label */}
-          <Text style={styles.sectionHeading}>Monthly Breakdown</Text>
-
-          {/* Table */}
-          <View style={styles.table}>
-            {/* Header */}
-            <View style={styles.tableHeader}>
-              <Text style={mergeStyles(styles.colMonth, styles.headerCell)}>Month</Text>
-              <Text style={mergeStyles(styles.colNum, styles.headerCellRight)}>Processed</Text>
-              <Text style={mergeStyles(styles.colNum, styles.headerCellRight)}>Borrowed</Text>
-              <Text style={mergeStyles(styles.colNum, styles.headerCellRight)}>Returned</Text>
-              <Text style={mergeStyles(styles.colNum, styles.headerCellRight)}>Overdue</Text>
-            </View>
-
-            {/* Rows */}
-            {data.map((stat, index) => (
-              <View key={index} style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
-                <Text style={mergeStyles(styles.colMonth, styles.cellMonth)}>{stat.month}</Text>
-                <Text style={mergeStyles(styles.colNum, styles.cellNum)}>{stat.processed || 0}</Text>
-                <Text style={mergeStyles(styles.colNum, styles.cellNum)}>{stat.borrowed || 0}</Text>
-                <Text style={mergeStyles(styles.colNum, styles.cellNum)}>{stat.returned || 0}</Text>
-                <Text style={mergeStyles(styles.colNum, styles.cellNum)}>{stat.overdue || 0}</Text>
-              </View>
+      {/* TABLE */}
+      <div className="report-table-wrap">
+        <table className="report-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Processed</th>
+              <th>Borrowed</th>
+              <th>Returned</th>
+              <th>Overdue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {monthlyStatsData.map((d, i) => (
+              <tr key={i}>
+                <td>{d.month}</td>
+                <td>{d.processed ?? '—'}</td>
+                <td>{d.borrowed ?? '—'}</td>
+                <td>{d.returned ?? '—'}</td>
+                <td>
+                  <span className={overdueBadgeClass(d.overdue)}>
+                    {d.overdue ?? 0}
+                  </span>
+                </td>
+              </tr>
             ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td>{totals.processed}</td>
+              <td>{totals.borrowed}</td>
+              <td>{totals.returned}</td>
+              <td>{totals.overdue}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
 
-            {/* Totals row */}
-            <View style={styles.tableFooter}>
-              <Text style={mergeStyles(styles.colMonth, styles.footerCellMonth)}>TOTAL</Text>
-              <Text style={mergeStyles(styles.colNum, styles.footerCellNum)}>{totals.processed}</Text>
-              <Text style={mergeStyles(styles.colNum, styles.footerCellNum)}>{totals.borrowed}</Text>
-              <Text style={mergeStyles(styles.colNum, styles.footerCellNum)}>{totals.returned}</Text>
-              <Text style={mergeStyles(styles.colNum, styles.footerCellNum)}>{totals.overdue}</Text>
-            </View>
-          </View>
+      {/* FOOTER */}
+      <footer className="report-footer">
+        <span className="report-footer-note">
+          This report is system-generated and does not require a signature.
+        </span>
+        <span className="report-footer-stamp">Library Management System</span>
+      </footer>
 
-          {/* Page Footer */}
-          <View style={styles.pageFooter}>
-            <View style={styles.footerDot} />
-            <Text style={styles.footerText}>
-              This report was automatically generated by the Library Management System.
-            </Text>
-            <Text style={styles.footerText}>
-              For questions or concerns, please contact the library administration.
-            </Text>
-          </View>
-
-        </Page>
-      </Document>
-    </PDFViewer>
+    </div>
   )
 }
 
-// ─── Modal Styles ─────────────────────────────────────────────────────────────
-const modalStyles = {
-  backdrop: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  },
-  modalContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-    width: '90%',
-    maxWidth: '1000px',
-    height: '90vh',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  modalHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '10px',
-    borderBottom: '1px solid #e5e7eb',
-    backgroundColor: '#f9fafb',
-  },
-  modalTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#111827',
-  },
-  closeButton: {
-    padding: '8px 12px',
-    backgroundColor: '#f3f4f6',
-    border: '1px solid #d1d5db',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#374151',
-    transition: 'background-color 0.2s',
-  },
-  modalContent: {
-    flex: 1,
-    overflow: 'auto',
-  },
-  pdfViewerWrapper: {
-    width: '100%',
-    height: '100%',
-  },
-}
-
-// ─── PDF Viewer Modal Component ──────────────────────────────────────────────
-const PDFViewerModal = ({ isOpen, onClose, monthlyStatsData }) => {
+// ─── Modal ────────────────────────────────────────────────
+const PDFModal = ({ isOpen, onClose, monthlyStatsData }) => {
   if (!isOpen) return null
 
+  const handlePrint = () => {
+    const content = document.getElementById('print-area').innerHTML
+    const win = window.open('', '', 'width=960,height=720')
+    win.document.write(`
+      <html>
+        <head>
+          <title>Library Monthly Report</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: 'DM Sans', Arial, sans-serif; padding: 48px; color: #0f0e0d; }
+            h2  { font-family: 'DM Serif Display', serif; font-size: 26px; }
+            .report-header { display:flex; align-items:center; gap:16px; margin-bottom:32px; padding-bottom:20px; border-bottom:2px solid #0f0e0d; }
+            .report-logo   { width:52px; }
+            .report-school-name { font-family:'DM Serif Display',serif; font-size:17px; }
+            .report-school-sub  { font-size:12px; color:#5a5752; margin-top:3px; }
+            .report-title-block { text-align:center; margin-bottom:32px; }
+            .report-subtitle    { font-size:11px; color:#5a5752; margin-top:6px; letter-spacing:.06em; text-transform:uppercase; }
+            .report-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:32px; }
+            .stat-card    { border:1px solid #ddd8ce; border-radius:10px; padding:16px 12px; text-align:center; }
+            .stat-card--primary { background:#0f0e0d; color:#faf8f4; }
+            .stat-label { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#5a5752; margin-bottom:8px; font-weight:600; }
+            .stat-card--primary .stat-label { color:rgba(255,255,255,.55); }
+            .stat-value { font-family:'DM Serif Display',serif; font-size:28px; }
+            .stat-card--danger .stat-value { color:#b94040; }
+            table  { width:100%; border-collapse:collapse; font-size:13px; }
+            thead th { background:#0f0e0d; color:#faf8f4; padding:11px 14px; text-align:left; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+            thead th:not(:first-child) { text-align:center; }
+            tbody tr { border-bottom:1px solid #ddd8ce; }
+            tbody tr:nth-child(even) { background:#f2ede4; }
+            tbody td { padding:10px 14px; }
+            tbody td:not(:first-child) { text-align:center; }
+            tfoot tr { border-top:2px solid #0f0e0d; }
+            tfoot td { padding:11px 14px; font-weight:700; }
+            tfoot td:not(:first-child) { text-align:center; }
+            .report-footer { display:flex; justify-content:space-between; margin-top:32px; padding-top:16px; border-top:1px solid #ddd8ce; font-size:11px; color:#5a5752; }
+            .overdue-badge { display:inline-flex; align-items:center; justify-content:center; min-width:30px; padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600; }
+            .overdue-badge--none { background:#e8f5e9; color:#2e7d32; }
+            .overdue-badge--low  { background:#fff3e0; color:#e65100; }
+            .overdue-badge--high { background:#fce4e4; color:#b94040; }
+          </style>
+        </head>
+        <body>${content}</body>
+      </html>
+    `)
+    win.document.close()
+    win.focus()
+    win.print()
+    win.close()
+  }
+
   return (
-    <div style={modalStyles.backdrop} onClick={onClose}>
-      <div
-        style={modalStyles.modalContainer}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={modalStyles.modalHeader}>
-          <h2 style={modalStyles.modalTitle}>Library Monthly Report</h2>
-          <button
-            style={modalStyles.closeButton}
-            onClick={onClose}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#e5e7eb'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#f3f4f6'
-            }}
-          >
-            Close
-          </button>
-        </div>
-        <div style={modalStyles.modalContent}>
-          <div style={modalStyles.pdfViewerWrapper}>
-            <MonthlyReportPDF monthlyStatsData={monthlyStatsData} />
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal-shell">
+
+        {/* Top bar */}
+        <div className="modal-topbar">
+          <span className="modal-topbar-title">
+            <IconFileText /> &nbsp;Report Preview
+          </span>
+          <div className="modal-actions">
+            <button className="modal-btn modal-btn--primary" onClick={handlePrint}>
+              <IconDownload /> Download / Print PDF
+            </button>
+            <button className="modal-btn modal-btn--ghost" onClick={onClose}>
+              <IconClose /> Close
+            </button>
           </div>
         </div>
+
+        {/* Body */}
+        <div className="modal-body">
+          <ReportDocument monthlyStatsData={monthlyStatsData} />
+        </div>
+
       </div>
     </div>
   )
 }
 
-// ─── Main Export Button Component ───────────────────────────────────────── ────
+// ─── Main Export ──────────────────────────────────────────
 const MonthlyReportExport = ({ monthlyStatsData = [] }) => {
-  const [showModal, setShowModal] = useState(false)
+  const [open, setOpen] = useState(false)
 
   return (
     <>
-      <button
-        onClick={() => setShowModal(true)}
-        style={{
-          padding: '8px 16px',
-          backgroundColor: '#3b82f6',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '4px',
-          fontWeight: '500',
-          cursor: 'pointer',
-          fontSize: '14px',
-          transition: 'background-color 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = '#2563eb'
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = '#3b82f6'
-        }}
-      >
-        Export PDF
+      <button className="export-btn" onClick={() => setOpen(true)}>
+        <IconPrint /> Export Report
       </button>
 
-      <PDFViewerModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
+      <PDFModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
         monthlyStatsData={monthlyStatsData}
       />
     </>
