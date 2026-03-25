@@ -19,6 +19,7 @@ import StaffPage from '../pages/StaffPage'
 import ErrorBoundary from '../components/ErrorBoundary'
 import StaffDetailPage from '../pages/StaffDetailPage'
 import ProtectedRoute from '../components/ProtectedRoute'
+import TransactionLog from '../pages/TransactionLog.jsx'
 
 const router = createHashRouter([
   {
@@ -62,6 +63,14 @@ const router = createHashRouter([
     element: (
       <ProtectedRoute>
         <Borrowed />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/transaction',
+    element: (
+      <ProtectedRoute>
+        <TransactionLog />
       </ProtectedRoute>
     )
   },

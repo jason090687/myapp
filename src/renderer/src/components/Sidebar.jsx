@@ -9,7 +9,9 @@ import {
   LogOut,
   HelpCircle,
   GraduationCap,
-  Users
+  Users,
+  Folder,
+  Logs
 } from 'lucide-react'
 import { useToaster } from './Toast/useToaster'
 import logo from '../assets/logo.png'
@@ -48,6 +50,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { path: '/borrowed', icon: Bookmark, label: 'Borrowed' },
     { path: '/students', icon: GraduationCap, label: 'Students' },
     { path: '/staff', icon: Users, label: 'Employees' },
+    { path: '/transaction', icon: Logs, label: 'Transaction Logs' },
     { separator: true },
     { path: '/settings', icon: Settings, label: 'Settings' },
     {

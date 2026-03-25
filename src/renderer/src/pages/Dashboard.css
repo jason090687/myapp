@@ -58,6 +58,13 @@
   margin-bottom: 2rem;
 }
 
+.report-generate {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @media (max-width: 1280px) {
   .stats-container {
     display: flex;

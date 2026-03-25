@@ -13,7 +13,6 @@ import {
   Filler
 } from 'chart.js'
 import { ChartSkeleton } from './DashboardSkeletons'
-import MonthlyReportExport from './MonthlyReportExport'
 import './CustomAreaChart.css'
 
 // Register Chart.js components
@@ -151,7 +150,7 @@ const CustomAreaChart = ({
               <h3 className="chart-title">Library Statistics</h3>
               <p className="chart-subtitle">Track your library&apos;s performance metrics</p>
             </div>
-            <MonthlyReportExport monthlyStatsData={monthlyStatsData} />
+
           </div>
 
           <div className="chart-container-custom">

@@ -176,6 +176,7 @@ const Navbar = ({
       </div>
 
       <div className="navbar-right">
+
         <button
           className="notification-btn"
           onClick={() => setIsBacklogOpen(true)}

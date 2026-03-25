@@ -4,24 +4,26 @@ import api, { getToken, multipartConfig } from '../api/axios'
 // ==================== BOOK QUERIES ====================
 
 // Fetch all books with pagination
-export const useBooks = (page = 1, search = '', subject = '') => {
+export const useBooks = (page = 1, search = "", action = "", copiesFilter = "") => {
   return useQuery({
-    queryKey: ['books', page, search, subject],
+    queryKey: ["books", page, search, action, copiesFilter],
     queryFn: async () => {
-      const token = getToken()
-      let url = `/marc/search/?page=${page}&page_size=10&search=${encodeURIComponent(search)}`
-      if (subject) {
-        url += `&subject=${encodeURIComponent(subject)}`
-      }
+      const token = getToken();
+      let url = `/marc/search/?page=${page}&page_size=10`;
+
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (action) url += `&action=${encodeURIComponent(action)}`; // only if backend supports action filtering
+      if (copiesFilter) url += `&copies__gt=${copiesFilter}`;
+
       const response = await api.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      return response.data
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    keepPreviousData: true
-  })
-}
+    staleTime: 5 * 60 * 1000,
+    keepPreviousData: true,
+  });
+};
 
 // Fetch all books across all pages
 export const useAllBooks = (search = '') => {

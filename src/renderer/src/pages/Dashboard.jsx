@@ -247,6 +247,7 @@ function Dashboard() {
 
           {/* Stats Container */}
           <div className="stats-container">
+
             <CustomAreaChart
               chartData={chartData}
               chartLoading={isMonthlyStatsLoading}
@@ -257,6 +258,8 @@ function Dashboard() {
             />
 
             <TopBorrowers topBorrowers={topBorrowers} isLoading={isBorrowersLoading} />
+
+
           </div>
 
           {/* Books and Checkouts */}
