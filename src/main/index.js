@@ -97,7 +97,12 @@ function createWindow() {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    const url = details.url || ''
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url)
+    }
+
     return { action: 'deny' }
   })
 
@@ -140,6 +145,52 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  ipcMain.handle('print-ledger', async (_event, html) => {
+    const printWin = new BrowserWindow({
+      width: 1000,
+      height: 700,
+      show: false,
+      autoHideMenuBar: true,
+      webPreferences: {
+        preload: path.join(__dirname, './preload/index.mjs'),
+        sandbox: false,
+        contextIsolation: true,
+        nodeIntegration: false
+      }
+    })
+
+    try {
+      await printWin.loadURL(
+        'data:text/html;charset=utf-8,' + encodeURIComponent(html)
+      )
+
+      await new Promise((resolve, reject) => {
+        printWin.webContents.print(
+          {
+            silent: false,
+            printBackground: true
+          },
+          (success, failureReason) => {
+            if (!success) {
+              reject(new Error(failureReason || 'Print failed'))
+              return
+            }
+            resolve()
+          }
+        )
+      })
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error printing ledger:', error)
+      return { success: false, message: error.message }
+    } finally {
+      if (!printWin.isDestroyed()) {
+        printWin.close()
+      }
+    }
+  })
 
   // Add this with your other IPC handlers
   ipcMain.on('save-pdf', async (event, { buffer, fileName }) => {

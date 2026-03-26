@@ -96,7 +96,12 @@ function createWindow() {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    const url = details.url || ''
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url)
+    }
+
     return { action: 'deny' }
   })
 
@@ -140,6 +145,52 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
+  ipcMain.handle('print-ledger', async (_event, html) => {
+    const printWin = new BrowserWindow({
+      width: 1000,
+      height: 700,
+      show: false,
+      autoHideMenuBar: true,
+      webPreferences: {
+        preload: path.join(__dirname, './preload/index.mjs'),
+        sandbox: false,
+        contextIsolation: true,
+        nodeIntegration: false
+      }
+    })
+
+    try {
+      await printWin.loadURL(
+        'data:text/html;charset=utf-8,' + encodeURIComponent(html)
+      )
+
+      await new Promise((resolve, reject) => {
+        printWin.webContents.print(
+          {
+            silent: false,
+            printBackground: true
+          },
+          (success, failureReason) => {
+            if (!success) {
+              reject(new Error(failureReason || 'Print failed'))
+              return
+            }
+            resolve()
+          }
+        )
+      })
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error printing ledger:', error)
+      return { success: false, message: error.message }
+    } finally {
+      if (!printWin.isDestroyed()) {
+        printWin.close()
+      }
+    }
+  })
+
   // Add this with your other IPC handlers
   ipcMain.on('save-pdf', async (event, { buffer, fileName }) => {
     try {
@@ -164,15 +215,15 @@ app.whenReady().then(() => {
         ...details.responseHeaders,
         'Content-Security-Policy': [
           "default-src 'self';" +
-            "script-src 'self' 'unsafe-inline';" +
-            "style-src 'self' 'unsafe-inline';" +
-            "connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* http://192.168.0.145:* http://192.168.2.175:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com;" +
-            "img-src 'self' data: https: blob: http://192.168.0.145:8000; http://127.0.0.1:* http://127.0.0.1:8000; http://192.168.0.145:* http://192.168.0.145:8000; http://192.168.2.175:* http://192.168.2.175:8000; http://countmein.pythonanywhere.com:* http://countmein.pythonanywhere.com:8000;" + // Updated this line
-            "worker-src 'self' blob:;" +
-            "frame-src 'self';" +
-            "font-src 'self' data:;" +
-            "media-src 'self';" +
-            "object-src 'none'"
+          "script-src 'self' 'unsafe-inline';" +
+          "style-src 'self' 'unsafe-inline';" +
+          "connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* http://192.168.0.145:* http://192.168.2.175:* http://countmein.pythonanywhere.com https://api.github.com https://raw.githubusercontent.com;" +
+          "img-src 'self' data: https: blob: http://192.168.0.145:8000; http://127.0.0.1:* http://127.0.0.1:8000; http://192.168.0.145:* http://192.168.0.145:8000; http://192.168.2.175:* http://192.168.2.175:8000; http://countmein.pythonanywhere.com:* http://countmein.pythonanywhere.com:8000;" + // Updated this line
+          "worker-src 'self' blob:;" +
+          "frame-src 'self';" +
+          "font-src 'self' data:;" +
+          "media-src 'self';" +
+          "object-src 'none'"
         ]
       }
     })

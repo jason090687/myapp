@@ -7,6 +7,15 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.send(channel, data)
     }
   },
+
+  invoke: (channel, data) => {
+    const validChannels = ['print-ledger']
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, data)
+    }
+    return Promise.reject(new Error(`Invalid invoke channel: ${channel}`))
+  },
+
   receive: (channel, func) => {
     const validChannels = ['update-status', 'update-progress']
     if (validChannels.includes(channel)) {

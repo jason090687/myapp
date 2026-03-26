@@ -260,6 +260,7 @@
   display: grid;
   grid-template-columns: 180px 1fr 1fr 120px 130px;
   padding: 14px 32px;
+  cursor: pointer;
 }
 
 .log-table-header {
@@ -313,6 +314,22 @@
   flex-shrink: 0;
 }
 
+.log-action-icon.delete {
+  color: #dc2626;
+}
+
+.log-action-icon.edit {
+  color: #d97706;
+}
+
+.log-action-icon.return {
+  color: #16a34a;
+}
+
+.log-action-icon.borrow {
+  color: #2563eb;
+}
+
 .log-user-cell {
   display: flex;
   align-items: center;
@@ -331,6 +348,8 @@
   color: #fff;
   flex-shrink: 0;
   letter-spacing: 0.03em;
+  background: #2563eb;
+  overflow: hidden;
 }
 
 .log-user-name {

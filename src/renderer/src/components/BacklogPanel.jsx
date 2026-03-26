@@ -293,7 +293,7 @@ function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
       />
       <div className={`backlog-panel ${isOpen ? 'open' : ''}`}>
         <div className="backlog-header">
-          <h2>Activity Log</h2>
+          <h2>Notifications</h2>
           <div className="header-actions">
             {(activities.length > 0 || borrowRequests.length > 0) && (
               <button className="clear-btn" onClick={handleClearAll} title="Clear all activities">

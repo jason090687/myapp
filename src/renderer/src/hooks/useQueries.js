@@ -351,12 +351,12 @@ export const useOverdueBorrowedBooks = (borrowedId) => {
 // ==================== STUDENT QUERIES ====================
 
 // Fetch students
-export const useStudents = (page = 1) => {
+export const useStudents = (page = 1, searchTerm = '') => {
   return useQuery({
-    queryKey: ['students', page],
+    queryKey: ['students', page, searchTerm],
     queryFn: async () => {
       const token = getToken()
-      const response = await api.get(`/students/?page=${page}`, {
+      const response = await api.get(`/students/?page=${page}&search=${encodeURIComponent(searchTerm)}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       return response.data
@@ -553,12 +553,12 @@ export const useUpdateUserProfile = () => {
 }
 
 // Fetch all users
-export const useUsers = () => {
+export const useUsers = (searchTerm = '', page = 1) => {
   return useQuery({
-    queryKey: ['users'],
+    queryKey: ['users', page, searchTerm],
     queryFn: async () => {
       const token = getToken()
-      const response = await api.get(`/accounts/auth/users/`, {
+      const response = await api.get(`/accounts/auth/users/?page=${page}&search=${encodeURIComponent(searchTerm)}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       return response.data
@@ -874,12 +874,12 @@ export const useStudentDetails = (studentId) => {
 }
 
 // ==================== FETCH EMPLOYEES ====================
-export const useEmployees = () => {
+export const useEmployees = (page = 1, searchTerm = '') => {
   return useQuery({
-    queryKey: ['students'],
+    queryKey: ['employees', page, searchTerm],
     queryFn: async () => {
       const token = getToken()
-      const response = await api.get(`/students/employees/`, {
+      const response = await api.get(`/students/employees/?page=${page}&search=${encodeURIComponent(searchTerm)}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       return response.data

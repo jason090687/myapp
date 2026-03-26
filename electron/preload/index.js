@@ -1,6 +1,5 @@
-import { contextBridge, ipcRenderer } from 'electron'
+const { contextBridge, ipcRenderer } = require('electron')
 
-// Expose protected methods to renderer process
 contextBridge.exposeInMainWorld('api', {
   send: (channel, data) => {
     const validChannels = ['save-pdf', 'ping']
@@ -8,6 +7,15 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.send(channel, data)
     }
   },
+
+  invoke: (channel, data) => {
+    const validChannels = ['print-ledger']
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, data)
+    }
+    return Promise.reject(new Error(`Invalid invoke channel: ${channel}`))
+  },
+
   receive: (channel, func) => {
     const validChannels = ['update-status', 'update-progress']
     if (validChannels.includes(channel)) {
@@ -15,15 +23,3 @@ contextBridge.exposeInMainWorld('api', {
     }
   }
 })
-
-// Custom APIs for renderer
-const api = {}
-
-// Add additional context bridge exposure if needed
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', api)
-  } catch (error) {
-    console.error(error)
-  }
-}

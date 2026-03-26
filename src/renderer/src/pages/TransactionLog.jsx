@@ -1,169 +1,442 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar"
+import Sidebar from "../components/Sidebar";
 import {
     BookOpen,
-    Trash2,
+    Users,
+    User,
     UserPlus,
-    Monitor,
-    RefreshCcw,
-    Calendar,
+    Pencil,
+    Trash2,
+    RotateCcw,
+    LibraryBig,
     Search
 } from "lucide-react";
-import './TransactionLog.css'
-import { useBooks } from "../hooks";
+import "./TransactionLog.css";
+import { useBooks, useBorrowedBooks, useEmployees, useStudents, useUsers } from "../hooks";
 
-const statusMap = {
-    SUCCESS: "success",
-    FLAGGED: "flagged",
-    PENDING: "pending",
-};
-
-const actionIcons = {
-    "Book Checkout": <BookOpen size={18} />,
-    "Item Decommissioned": <Trash2 size={18} />,
-    "Member Registration": <UserPlus size={18} />,
-    "Schema Update": <Monitor size={18} />,
-    "DB Synchronization": <RefreshCcw size={18} />,
-};
-
-const initialLogs = [
-    {
-        id: 1,
-        timestamp: "Oct 24, 2024, 14:32",
-        action: "Book Checkout",
-        user: "Dr. Elias Thorne",
-        memberId: "Member #9921",
-        status: "SUCCESS",
-        reference: "ISBN-92842",
-        initials: "ET",
-        avatarColor: "#4a6fa5",
-    },
-    {
-        id: 2,
-        timestamp: "Oct 24, 2024, 13:15",
-        action: "Item Decommissioned",
-        user: "System Admin",
-        memberId: "Internal Auth",
-        status: "FLAGGED",
-        reference: "ARC-99120",
-        initials: "SA",
-        avatarColor: "#6b7c93",
-    },
-    {
-        id: 3,
-        timestamp: "Oct 24, 2024, 11:45",
-        action: "Member Registration",
-        user: "Mira Santiago",
-        memberId: "Member #10042",
-        status: "SUCCESS",
-        reference: "REG-88219",
-        initials: "MS",
-        avatarColor: "#5a8a6e",
-    },
-    {
-        id: 4,
-        timestamp: "Oct 24, 2024, 10:20",
-        action: "Schema Update",
-        user: "Kernel Process",
-        memberId: "Automated Task",
-        status: "PENDING",
-        reference: "SYS-VOL-4",
-        initials: "SYS",
-        avatarColor: "#8a7a9e",
-    },
-    {
-        id: 5,
-        timestamp: "Oct 23, 2024, 23:58",
-        action: "DB Synchronization",
-        user: "Nightly Service",
-        memberId: "CRON Job",
-        status: "SUCCESS",
-        reference: "CRON-SYNC",
-        initials: "NS",
-        avatarColor: "#7a8a6e",
-    },
-];
-
-const isNewBook = (createdAt, days = 7) => {
-    const createdDate = new Date(createdAt);
-    const now = new Date();
-    const diffTime = Math.abs(now - createdDate);
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-    return diffDays <= days;
-};
 
 export default function TransactionLog() {
     const [currentPage, setCurrentPage] = useState(1);
-    const [isCollapsed, setIsCollapsed] = useState(false)
-    const [actionFilter, setActionFilter] = useState("All Actions");
-    const [memberIdFilter, setMemberIdFilter] = useState("");
-    const [onlyNewBooks, setOnlyNewBooks] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('')
+    const [searchInput, setSearchInput] = useState("");
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [actionFilter, setActionFilter] = useState("All");
     const [dateRange, setDateRange] = useState({
-        start: "2024-10-20",
-        end: "2024-10-27",
-    })
-
-    const { data: books, isLoading, error } = useBooks(
-        currentPage,
-        memberIdFilter,
-        actionFilter === "All Actions" ? "" : actionFilter
-    );
-
-
-    const logs = books?.results || [];
-
-    // console.log(logs)
-
-    const itemsPerPage = 3;
-
-    const handleSidebarToggle = () => {
-        setIsCollapsed(!isCollapsed)
-    }
-
-    // Filter logs by date range and "only new books" checkbox
-    const filteredLogs = logs.filter((log) => {
-        const logDate = new Date(log.created_at);
-
-        const startDate = new Date(dateRange.start);
-        startDate.setHours(0, 0, 0, 0);
-
-        const endDate = new Date(dateRange.end);
-        endDate.setHours(23, 59, 59, 999);
-
-        const inDateRange = logDate >= startDate && logDate <= endDate;
-
-        const isNew = onlyNewBooks ? isNewBook(log.created_at) : true;
-
-        return inDateRange && isNew;
+        start: "2026-01-01",
+        end: "2026-12-31",
+    });
+    const [appliedDateRange, setAppliedDateRange] = useState({
+        start: "2026-01-01",
+        end: "2026-12-31",
     });
 
-    // Pagination
-    const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
+
+
+    const { data: books, isLoading: booksLoading, error: booksError } = useBooks(1, searchTerm)
+    const { data: borrowedBooks, isLoading: borrowedBooksLoading, error: borrowedBooksError } = useBorrowedBooks(1, searchTerm)
+    const { data: students, isLoading: studentsLoading, error: userError } = useStudents(1, searchTerm)
+    const { data: staff, isLoading: staffLoading, error: staffError } = useEmployees(1, searchTerm)
+    const { data: users, isLoading: usersLoading, error: usersError } = useUsers(searchTerm, 1)
+
+    const isDataLoading = booksLoading || borrowedBooksLoading || studentsLoading || staffLoading || usersLoading;
+
+    const itemsPerPage = 10
+
+    const handleSidebarToggle = () => {
+        setIsCollapsed(!isCollapsed);
+    };
+
+    const renderLogIcon = (log) => {
+        const action = String(log.action || "").toLowerCase();
+        const type = String(log.type || "").toLowerCase();
+
+        if (action.includes("deleted")) {
+            return <Trash2 size={18} />;
+        }
+
+        if (action.includes("edited")) {
+            return <Pencil size={18} />;
+        }
+
+        if (action.includes("returned")) {
+            return <RotateCcw size={18} />;
+        }
+
+        if (action.includes("borrowed")) {
+            return <BookOpen size={18} />;
+        }
+
+        if (type === "student") {
+            return <UserPlus size={18} />;
+        }
+
+        if (type === "staff" || type === "employee") {
+            return <User size={18} />;
+        }
+
+        if (type === "user") {
+            return <Users size={18} />;
+        }
+
+        if (type === "book") {
+            return <LibraryBig size={18} />;
+        }
+
+        return <BookOpen size={18} />;
+    };
+
+    const getIconClass = (log) => {
+        const action = String(log.action || "").toLowerCase();
+
+        if (action.includes("deleted")) return "log-action-icon delete";
+        if (action.includes("edited")) return "log-action-icon edit";
+        if (action.includes("returned")) return "log-action-icon return";
+        if (action.includes("borrowed")) return "log-action-icon borrow";
+
+        return "log-action-icon";
+    };
+
+    const getTransactionAction = (item, entityName) => {
+        if (item?.cancelled === true || item?.cancelled === 1) {
+            return `${entityName} Deleted`;
+        }
+
+        if (
+            item?.updated_at &&
+            item?.created_at &&
+            new Date(item.updated_at).getTime() !== new Date(item.created_at).getTime()
+        ) {
+            return `${entityName} Edited`;
+        }
+
+        return `${entityName} Created`;
+    };
+
+    const getTransactionDate = (item) => {
+        if (item?.cancelled === true || item?.cancelled === 1) {
+            return item.cancelled_at || item.updated_at || item.created_at;
+        }
+
+        if (
+            item?.updated_at &&
+            item?.created_at &&
+            new Date(item.updated_at).getTime() !== new Date(item.created_at).getTime()
+        ) {
+            return item.updated_at;
+        }
+
+        return item.created_at;
+    };
+
+    const getProcessedBy = (item) => {
+        return (
+            item?.cancelled_by ||
+            item?.updated_by ||
+            item?.created_by ||
+            item?.processed_by ||
+            null
+        );
+    };
+
+    const allLogs = [
+        ...(books?.results || []).map((item) => ({
+            id: `book-${item.id}`,
+            type: "book",
+            created_at: getTransactionDate(item),
+            action: getTransactionAction(item, "Book"),
+            name: item.title || "Untitled Book",
+            description: item.author || "-",
+            status:
+                item.cancelled === true || item.cancelled === 1
+                    ? "Deleted"
+                    : item.status || "Available",
+            reference: item.accession_number || item.barcode || item.id,
+            processed_by: getProcessedBy(item),
+            raw: item,
+        })),
+
+        ...(borrowedBooks?.results || []).map((item) => ({
+            id: `borrow-${item.id}`,
+            type: "borrow",
+            created_at:
+                item.borrowed_date ||
+                item.returned_date ||
+                item.updated_at ||
+                item.created_at,
+            action:
+                item.cancelled === true || item.cancelled === 1
+                    ? "Borrow Deleted"
+                    : item.updated_at &&
+                        item.created_at &&
+                        new Date(item.updated_at).getTime() !== new Date(item.created_at).getTime()
+                        ? "Borrow Edited"
+                        : item.is_returned
+                            ? "Book Returned"
+                            : "Book Borrowed",
+            name:
+                item.student_name ||
+                item.employee_name ||
+                item.borrower_name ||
+                item.student?.name ||
+                item.employee?.name ||
+                "Borrower",
+            description:
+                item.book_title ||
+                item.book?.title ||
+                "Book",
+            status:
+                item.cancelled === true || item.cancelled === 1
+                    ? "Deleted"
+                    : item.status || (item.is_returned ? "Returned" : "Borrowed"),
+            reference: item.id,
+            processed_by:
+                item.cancelled_by ||
+                item.updated_by ||
+                item.created_by ||
+                null,
+            raw: item,
+        })),
+
+        ...(students?.results || []).map((item) => ({
+            id: `student-${item.id}`,
+            type: "student",
+            created_at: getTransactionDate(item),
+            action: getTransactionAction(item, "Student"),
+            name: item.name || "Unnamed Student",
+            description: item.id_number || "-",
+            status:
+                item.cancelled === true || item.cancelled === 1
+                    ? "Deleted"
+                    : item.active
+                        ? "Active"
+                        : "Inactive",
+            reference: item.rfid_number || item.id,
+            processed_by: getProcessedBy(item),
+            raw: item,
+        })),
+
+        ...(staff?.results || []).map((item) => ({
+            id: `staff-${item.id}`,
+            type: "staff",
+            created_at: getTransactionDate(item),
+            action: getTransactionAction(item, "Staff"),
+            name: item.name || "Unnamed Staff",
+            description: item.id_number || "-",
+            status:
+                item.cancelled === true || item.cancelled === 1
+                    ? "Deleted"
+                    : item.active
+                        ? "Active"
+                        : "Inactive",
+            reference: item.rfid_number || item.id,
+            processed_by: getProcessedBy(item),
+            raw: item,
+        })),
+
+        ...((users?.results || users || []).map((item) => ({
+            id: `user-${item.id}`,
+            type: "user",
+            created_at:
+                item.date_joined ||
+                getTransactionDate(item),
+            action:
+                item.cancelled === true || item.cancelled === 1
+                    ? "User Deleted"
+                    : item.updated_at &&
+                        item.created_at &&
+                        new Date(item.updated_at).getTime() !== new Date(item.created_at).getTime()
+                        ? "User Edited"
+                        : "User Created",
+            name: item.username || item.email || "Unnamed User",
+            description: item.first_name || item.last_name || "-",
+            status:
+                item.cancelled === true || item.cancelled === 1
+                    ? "Deleted"
+                    : item.is_active
+                        ? "Active"
+                        : "Inactive",
+            reference: item.id,
+            processed_by: getProcessedBy(item),
+            raw: item,
+        }))),
+    ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    const filteredLogs = allLogs.filter((log) => {
+        if (!log.created_at) return false;
+
+        const keyword = searchTerm.toLowerCase();
+
+        const matchesSearch =
+            !keyword ||
+            String(log.name || "").toLowerCase().includes(keyword) ||
+            String(log.description || "").toLowerCase().includes(keyword) ||
+            String(log.reference || "").toLowerCase().includes(keyword) ||
+            String(log.action || "").toLowerCase().includes(keyword);
+
+        const matchesAction =
+            actionFilter === "All" ||
+            (actionFilter === "Created" && log.action.toLowerCase().includes("created")) ||
+            (actionFilter === "Edited" && log.action.toLowerCase().includes("edited")) ||
+            (actionFilter === "Deleted" && log.action.toLowerCase().includes("deleted")) ||
+            (actionFilter === "Borrowed" && log.action.toLowerCase().includes("borrowed")) ||
+            (actionFilter === "Returned" && log.action.toLowerCase().includes("returned"));
+
+        const logDate = new Date(log.created_at);
+
+        const startDate = appliedDateRange.start
+            ? new Date(`${appliedDateRange.start}T00:00:00`)
+            : null;
+
+        const endDate = appliedDateRange.end
+            ? new Date(`${appliedDateRange.end}T23:59:59.999`)
+            : null;
+
+        const matchesDate =
+            (!startDate || logDate >= startDate) &&
+            (!endDate || logDate <= endDate);
+
+        return matchesSearch && matchesAction && matchesDate;
+    });
+
+    const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage));
     const paginatedLogs = filteredLogs.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
-    );
+    )
+
+    const formatDateTime = (value) => {
+        if (!value) return "-";
+
+        return new Date(value).toLocaleString("en-PH", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+        });
+    };
+
+    const escapeCSV = (value) => {
+        if (value === null || value === undefined) return '""';
+        const stringValue = String(value).replace(/"/g, '""');
+        return `"${stringValue}"`;
+    };
+
+    const handleDownloadCSV = () => {
+        if (!filteredLogs.length) {
+            alert("No transaction logs to export.");
+            return;
+        }
+
+        const headers = [
+            "Timestamp",
+            "Action",
+            "Name",
+            "Description",
+            "Status",
+            "Reference",
+            "Type",
+            "Processed By",
+        ];
+
+        const rows = filteredLogs.map((log) => [
+            formatDateTime(log.created_at),
+            log.action || "",
+            log.name || "",
+            log.description || "",
+            log.status || "",
+            log.reference || "",
+            log.type || "",
+            log.processed_by || "",
+        ]);
+
+        const csvContent = [
+            headers.map(escapeCSV).join(","),
+            ...rows.map((row) => row.map(escapeCSV).join(",")),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute(
+            "download",
+            `transaction_logs_${new Date().toISOString().slice(0, 10)}.csv`
+        );
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    };
+
+    const handlePrintLedger = async () => {
+        if (!filteredLogs.length) {
+            alert("No transaction logs to print.");
+            return;
+        }
+
+        try {
+            const html = buildLedgerHTML();
+            const result = await window.api.invoke('print-ledger', html);
+
+            if (!result?.success) {
+                alert(result?.message || "Failed to print ledger.");
+            }
+        } catch (error) {
+            console.error("Print error:", error);
+            alert("Failed to print ledger.");
+        }
+    };
 
     useEffect(() => {
-        setCurrentPage(1);
-    }, [memberIdFilter, actionFilter, dateRange, onlyNewBooks]);
+        const timer = setTimeout(() => {
+            setSearchTerm(searchInput);
+            setCurrentPage(1);
+        }, 300);
 
-    console.log(paginatedLogs)
+        return () => clearTimeout(timer);
+    }, [searchInput]);
+
+    if (isDataLoading) {
+        return <div className="app-wrapper">Loading...</div>;
+    }
+
+    if (booksError || borrowedBooksError || userError || staffError || usersError) {
+        return <div className="app-wrapper">Failed to load transaction logs.</div>;
+    }
 
     return (
         <div className="app-wrapper">
             <Sidebar isCollapsed={isCollapsed} onToggle={handleSidebarToggle} />
-            <div className={`log-container ${isCollapsed ? 'collapsed' : ''}`}>
+
+            <div className={`log-container ${isCollapsed ? "collapsed" : ""}`}>
                 <div className="log-content">
                     <div className="log-wrapper">
-                        {/* Filter Bar */}
                         <div className="log-filter-bar">
                             <div className="log-filter-group">
                                 <span className="log-filter-label">Date Range</span>
                                 <div className="log-filter-input-wrapper">
-                                    <input className="log-filter-input" type="date" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} />
+                                    <input
+                                        className="log-filter-input"
+                                        type="date"
+                                        value={dateRange.start}
+                                        onChange={(e) =>
+                                            setDateRange({ ...dateRange, start: e.target.value })
+                                        }
+                                    />
                                     <span> - </span>
-                                    <input className="log-filter-input" type="date" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} />
+                                    <input
+                                        className="log-filter-input"
+                                        type="date"
+                                        value={dateRange.end}
+                                        onChange={(e) =>
+                                            setDateRange({ ...dateRange, end: e.target.value })
+                                        }
+                                    />
                                 </div>
                             </div>
 
@@ -171,57 +444,88 @@ export default function TransactionLog() {
                                 <span className="log-filter-label">Member ID / Name</span>
                                 <div className="log-filter-input-wrapper">
                                     <Search size={14} />
-                                    <input className="log-filter-search" placeholder="Enter ID..." value={memberIdFilter} onChange={(e) => setMemberIdFilter(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="log-filter-group">
-                                <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                     <input
-                                        type="checkbox"
-                                        checked={onlyNewBooks}
-                                        onChange={(e) => setOnlyNewBooks(e.target.checked)}
+                                        className="log-filter-search"
+                                        placeholder="Search student, borrow, staff, books..."
+                                        value={searchInput}
+                                        onChange={(e) => {
+                                            setSearchInput(e.target.value);
+                                            setCurrentPage(1);
+                                        }}
                                     />
-                                    Only show new books
-                                </label>
+                                </div>
                             </div>
 
                             <div className="log-filter-group">
                                 <span className="log-filter-label">Action Type</span>
                                 <div className="log-filter-select-wrapper">
-                                    <select className="log-filter-select" value={actionFilter} onChange={(e) => setActionFilter(e.target.value)}>
-                                        <option>All Actions</option>
-                                        <option>Book Checkout</option>
-                                        <option>Item Decommissioned</option>
-                                        <option>Member Registration</option>
-                                        <option>Schema Update</option>
-                                        <option>DB Synchronization</option>
+                                    <select
+                                        className="log-filter-select"
+                                        value={actionFilter}
+                                        onChange={(e) => {
+                                            setActionFilter(e.target.value);
+                                            setCurrentPage(1);
+                                        }}
+                                    >
+                                        <option value="All">All</option>
+                                        <option value="Created">Created</option>
+                                        <option value="Edited">Edited</option>
+                                        <option value="Deleted">Deleted</option>
+                                        <option value="Borrowed">Borrowed</option>
+                                        <option value="Returned">Returned</option>
                                     </select>
                                     <span className="log-select-arrow">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9" /></svg>
+                                        <svg
+                                            width="12"
+                                            height="12"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5"
+                                        >
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
                                     </span>
                                 </div>
                             </div>
 
-                            <button className="log-apply-btn">Apply Filters</button>
+                            <button
+                                className="log-apply-btn"
+                                onClick={() => {
+                                    setAppliedDateRange(dateRange);
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                Apply Filters
+                            </button>
                         </div>
 
-                        {/* Main Card */}
                         <div className="log-card">
                             <div className="log-card-header">
                                 <div>
                                     <h2 className="log-title">Log Entries</h2>
                                     <p className="log-subtitle">
-                                        Showing {logs.length} / {books?.count || 0} books | Added in range: {filteredLogs}
+                                        Showing {paginatedLogs.length} of {filteredLogs.length} transactions
                                     </p>
                                 </div>
+
                                 <div className="log-header-actions">
-                                    <button className="log-download-btn">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                                    <button className="log-download-btn" onClick={handleDownloadCSV}>
+                                        <svg
+                                            width="14"
+                                            height="14"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5"
+                                        >
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="7 10 12 15 17 10" />
+                                            <line x1="12" y1="15" x2="12" y2="3" />
                                         </svg>
                                         Download CSV
                                     </button>
-                                    <button className="log-print-btn">Print Ledger</button>
+                                    <button className="log-print-btn" onClick={handlePrintLedger}>Print Ledger</button>
                                 </div>
                             </div>
 
@@ -236,58 +540,102 @@ export default function TransactionLog() {
                             {paginatedLogs.map((log) => (
                                 <div key={log.id} className="log-table-row">
                                     <div>
-                                        <span className={`log-status-timestamp ${isNewBook(log.created_at) ? "success" : "pending"}`}>
-                                            {isNewBook(log.created_at) ? "New" : ""}
+                                        <span className="log-timestamp">
+                                            {log.created_at
+                                                ? new Date(log.created_at).toLocaleString("en-PH", {
+                                                    year: "numeric",
+                                                    month: "2-digit",
+                                                    day: "2-digit",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    second: "2-digit",
+                                                    hour12: true,
+                                                })
+                                                : "-"}
                                         </span>
                                     </div>
 
                                     <div className="log-action-cell">
-                                        <span className="log-action-icon">
-                                            <BookOpen size={18} />
+                                        <span className={getIconClass(log)}>
+                                            {renderLogIcon(log)}
                                         </span>
-                                        {log.subject}
+                                        {log.action || "No action"}
                                     </div>
 
                                     <div className="log-user-cell">
                                         <div className="log-avatar">
-                                            {log.author?.charAt(0)}
+                                            {(log.name?.charAt(0) || "?").toUpperCase()}
                                         </div>
                                         <div>
-                                            <div className="log-user-name">{log.title}</div>
-                                            <div className="log-member-id">{log.author}</div>
+                                            <div className="log-user-name">{log.name || "Unnamed"}</div>
+                                            <div className="log-member-id">{log.description || "-"}</div>
                                         </div>
                                     </div>
 
                                     <div>
                                         <span className="log-status-badge success">
-                                            {log.copies} copies
+                                            {log.status || "-"}
                                         </span>
                                     </div>
 
                                     <div className="log-reference">
-                                        {log.accession_number}
+                                        {log.reference || "-"}
                                     </div>
                                 </div>
                             ))}
 
                             <div className="log-footer">
-                                <span className="log-page-info">Page {currentPage} of {totalPages}</span>
+                                <span className="log-page-info">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+
                                 <div className="log-pagination">
-                                    <button className="log-page-btn" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+                                    <button
+                                        className="log-page-btn"
+                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                    >
+                                        <svg
+                                            width="14"
+                                            height="14"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5"
+                                        >
+                                            <polyline points="15 18 9 12 15 6" />
+                                        </svg>
                                     </button>
+
                                     {[...Array(totalPages)].map((_, n) => (
-                                        <button key={n} className={`log-page-btn${currentPage === n ? " active" : ""}`} onClick={() => setCurrentPage(n + 1)}>{n + 1}</button>
+                                        <button
+                                            key={n}
+                                            className={`log-page-btn${currentPage === n + 1 ? " active" : ""}`}
+                                            onClick={() => setCurrentPage(n + 1)}
+                                        >
+                                            {n + 1}
+                                        </button>
                                     ))}
-                                    <button className="log-page-btn" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+
+                                    <button
+                                        className="log-page-btn"
+                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                    >
+                                        <svg
+                                            width="14"
+                                            height="14"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5"
+                                        >
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

@@ -105,11 +105,11 @@ const BooksTable = ({
             <span className={`status-badge ${actualStatus.toLowerCase()}`}>{actualStatus}</span>
           )
         }
+
         if (column.key === 'copies') {
-          const copyNum = value.toString().split(' of ')[0]
-          const totalCopies = parseInt(book.copies)
-          return totalCopies ? `${copyNum} of ${totalCopies}` : copyNum
+          return parseInt(book.copies) || 0
         }
+
         return value
     }
   }
