@@ -3,7 +3,7 @@ import { Button } from '../ui/button'
 import { Filter, Plus } from 'lucide-react'
 import { FaSearch } from 'react-icons/fa'
 
-const EmployeeHeader = ({ filterStatus, setFilterStatus, setIsAddModalOpen }) => {
+const EmployeeHeader = ({ filterStatus, setFilterStatus, setIsAddModalOpen, searchTerm, onSearchChange }) => {
     return (
         <div className="students-header">
             <div className="search-bar">
@@ -11,9 +11,10 @@ const EmployeeHeader = ({ filterStatus, setFilterStatus, setIsAddModalOpen }) =>
                 <input
                     type="text"
                     placeholder="Search staff..."
+                    value={searchTerm}
+                    onChange={onSearchChange}
                     className="search-input"
                     aria-label="Search staff"
-                    disabled
                 />
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

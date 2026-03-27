@@ -9,10 +9,12 @@ import {
     Trash2,
     RotateCcw,
     LibraryBig,
-    Search
+    Search,
+    AlertCircle
 } from "lucide-react";
 import "./TransactionLog.css";
 import { useBooks, useBorrowedBooks, useEmployees, useStudents, useUsers } from "../hooks";
+import { Button } from "../components/ui/button";
 
 
 export default function TransactionLog() {
@@ -39,6 +41,7 @@ export default function TransactionLog() {
     const { data: users, isLoading: usersLoading, error: usersError } = useUsers(searchTerm, 1)
 
     const isDataLoading = booksLoading || borrowedBooksLoading || studentsLoading || staffLoading || usersLoading;
+    const isError = booksError || borrowedBooksError || userError || staffError || usersError;
 
     const itemsPerPage = 10
 
@@ -64,6 +67,10 @@ export default function TransactionLog() {
 
         if (action.includes("borrowed")) {
             return <BookOpen size={18} />;
+        }
+
+        if (action.includes("overdue")) {
+            return <AlertCircle size={18} />;
         }
 
         if (type === "student") {
@@ -172,7 +179,9 @@ export default function TransactionLog() {
                         ? "Borrow Edited"
                         : item.is_returned
                             ? "Book Returned"
-                            : "Book Borrowed",
+                            : item.due_date && new Date(item.due_date) < new Date()
+                                ? "Book Overdue"
+                                : "Book Borrowed",
             name:
                 item.student_name ||
                 item.employee_name ||
@@ -187,7 +196,10 @@ export default function TransactionLog() {
             status:
                 item.cancelled === true || item.cancelled === 1
                     ? "Deleted"
-                    : item.status || (item.is_returned ? "Returned" : "Borrowed"),
+                    : item.status || (item.is_returned ? "Returned"
+                        : item.due_date && new Date(item.due_date) < new Date()
+                            ? "Overdue"
+                            : item.status || "Borrowed"),
             reference: item.id,
             processed_by:
                 item.cancelled_by ||
@@ -279,7 +291,8 @@ export default function TransactionLog() {
             (actionFilter === "Edited" && log.action.toLowerCase().includes("edited")) ||
             (actionFilter === "Deleted" && log.action.toLowerCase().includes("deleted")) ||
             (actionFilter === "Borrowed" && log.action.toLowerCase().includes("borrowed")) ||
-            (actionFilter === "Returned" && log.action.toLowerCase().includes("returned"));
+            (actionFilter === "Returned" && log.action.toLowerCase().includes("returned")) ||
+            (actionFilter === "Overdue" && log.action.toLowerCase().includes("overdue"));
 
         const logDate = new Date(log.created_at);
 
@@ -338,7 +351,6 @@ export default function TransactionLog() {
             "Status",
             "Reference",
             "Type",
-            "Processed By",
         ];
 
         const rows = filteredLogs.map((log) => [
@@ -349,7 +361,6 @@ export default function TransactionLog() {
             log.status || "",
             log.reference || "",
             log.type || "",
-            log.processed_by || "",
         ]);
 
         const csvContent = [
@@ -401,13 +412,6 @@ export default function TransactionLog() {
         return () => clearTimeout(timer);
     }, [searchInput]);
 
-    if (isDataLoading) {
-        return <div className="app-wrapper">Loading...</div>;
-    }
-
-    if (booksError || borrowedBooksError || userError || staffError || usersError) {
-        return <div className="app-wrapper">Failed to load transaction logs.</div>;
-    }
 
     return (
         <div className="app-wrapper">
@@ -473,6 +477,7 @@ export default function TransactionLog() {
                                         <option value="Deleted">Deleted</option>
                                         <option value="Borrowed">Borrowed</option>
                                         <option value="Returned">Returned</option>
+                                        <option value="Overdue">Overdue</option>
                                     </select>
                                     <span className="log-select-arrow">
                                         <svg
@@ -489,7 +494,8 @@ export default function TransactionLog() {
                                 </div>
                             </div>
 
-                            <button
+                            <Button
+                                variant='primary'
                                 className="log-apply-btn"
                                 onClick={() => {
                                     setAppliedDateRange(dateRange);
@@ -497,7 +503,7 @@ export default function TransactionLog() {
                                 }}
                             >
                                 Apply Filters
-                            </button>
+                            </Button>
                         </div>
 
                         <div className="log-card">
@@ -510,7 +516,7 @@ export default function TransactionLog() {
                                 </div>
 
                                 <div className="log-header-actions">
-                                    <button className="log-download-btn" onClick={handleDownloadCSV}>
+                                    <Button variant='primary' className="log-download-btn" onClick={handleDownloadCSV}>
                                         <svg
                                             width="14"
                                             height="14"
@@ -524,65 +530,112 @@ export default function TransactionLog() {
                                             <line x1="12" y1="15" x2="12" y2="3" />
                                         </svg>
                                         Download CSV
-                                    </button>
-                                    <button className="log-print-btn" onClick={handlePrintLedger}>Print Ledger</button>
+                                    </Button>
+                                    {/* <Button variant='secondary' className="log-print-btn" onClick={handlePrintLedger}>Print Ledger</Button> */}
                                 </div>
                             </div>
 
                             <div className="log-table-header">
                                 <span className="log-table-header-cell">Timestamp</span>
                                 <span className="log-table-header-cell">Action</span>
-                                <span className="log-table-header-cell">User / Member</span>
+                                <span className="log-table-header-cell">Name / Book / Member/ Borrow</span>
                                 <span className="log-table-header-cell">Status</span>
                                 <span className="log-table-header-cell align-right">Reference</span>
                             </div>
 
-                            {paginatedLogs.map((log) => (
-                                <div key={log.id} className="log-table-row">
-                                    <div>
-                                        <span className="log-timestamp">
-                                            {log.created_at
-                                                ? new Date(log.created_at).toLocaleString("en-PH", {
-                                                    year: "numeric",
-                                                    month: "2-digit",
-                                                    day: "2-digit",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                    second: "2-digit",
-                                                    hour12: true,
-                                                })
-                                                : "-"}
-                                        </span>
-                                    </div>
+                            {isDataLoading ? (
+                                <div className="log-table-loading">
+                                    {Array.from({ length: 5 }).map((_, index) => (
+                                        <div key={index} className="log-table-row log-skeleton-row">
+                                            <div>
+                                                <div className="skeleton skeleton-timestamp" />
+                                            </div>
 
-                                    <div className="log-action-cell">
-                                        <span className={getIconClass(log)}>
-                                            {renderLogIcon(log)}
-                                        </span>
-                                        {log.action || "No action"}
-                                    </div>
+                                            <div className="log-action-cell">
+                                                <div className="skeleton skeleton-icon" />
+                                                <div className="skeleton skeleton-text-md" />
+                                            </div>
 
-                                    <div className="log-user-cell">
-                                        <div className="log-avatar">
-                                            {(log.name?.charAt(0) || "?").toUpperCase()}
+                                            <div className="log-user-cell">
+                                                <div className="skeleton skeleton-avatar" />
+                                                <div>
+                                                    <div className="skeleton skeleton-text-sm" />
+                                                    <div className="skeleton skeleton-text-xs" />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <div className="skeleton skeleton-badge" />
+                                            </div>
+
+                                            <div>
+                                                <div className="skeleton skeleton-text-sm" />
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="log-user-name">{log.name || "Unnamed"}</div>
-                                            <div className="log-member-id">{log.description || "-"}</div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <span className="log-status-badge success">
-                                            {log.status || "-"}
-                                        </span>
-                                    </div>
-
-                                    <div className="log-reference">
-                                        {log.reference || "-"}
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
+                            ) : isError ? (
+                                <div className="log-table-error">
+                                    <div className="log-error-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="12" y1="8" x2="12" y2="12" />
+                                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                                        </svg>
+                                    </div>
+                                    <p className="log-error-title">Failed to load logs</p>
+                                    <p className="log-error-message">{isError}</p>
+                                    <button className="log-error-retry" onClick={paginatedLogs}>
+                                        Try again
+                                    </button>
+                                </div>
+                            )
+                                : (paginatedLogs.map((log) => (
+                                    <div key={log.id} className="log-table-row">
+                                        <div>
+                                            <span className="log-timestamp">
+                                                {log.created_at
+                                                    ? new Date(log.created_at).toLocaleString("en-PH", {
+                                                        year: "numeric",
+                                                        month: "2-digit",
+                                                        day: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        second: "2-digit",
+                                                        hour12: true,
+                                                    })
+                                                    : "-"}
+                                            </span>
+                                        </div>
+
+                                        <div className="log-action-cell">
+                                            <span className={getIconClass(log)}>
+                                                {renderLogIcon(log)}
+                                            </span>
+                                            {log.action || "No action"}
+                                        </div>
+
+                                        <div className="log-user-cell">
+                                            {/* <div className="log-avatar">
+                                                {(log.name?.charAt(0) || "?").toUpperCase()}
+                                            </div> */}
+                                            <div>
+                                                <div className="log-user-name">{log.name || "Unnamed"}</div>
+                                                <div className="log-member-id">{log.description || "-"}</div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <span className="log-status-badge success">
+                                                {log.status || "-"}
+                                            </span>
+                                        </div>
+
+                                        <div className="log-reference">
+                                            {log.reference || "-"}
+                                        </div>
+                                    </div>
+                                )))}
 
                             <div className="log-footer">
                                 <span className="log-page-info">

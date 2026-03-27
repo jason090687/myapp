@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
-import { uploadNewBook, useUserDetails } from '../../Features/api'
 import { toast } from 'react-hot-toast'
 import './styles/ImportBooks.css'
 import { Button } from '../ui/button'
+import { useAddBook } from '../../hooks'
 
 function ImportBooks({ onClose, onRefresh }) {
   const { token } = useSelector((state) => state.auth)
@@ -16,8 +16,6 @@ function ImportBooks({ onClose, onRefresh }) {
   const [parsedData, setParsedData] = useState(null)
   const [isCancelling, setIsCancelling] = useState(false)
   const cancelRef = useRef(false)
-  const [loading, setLoading] = useState(true)
-  // const [customUser, setCustomUser] = useState(null)
 
   const loadingMessages = [
     { text: 'Analyzing library collection...', icon: '📚' },
@@ -30,7 +28,7 @@ function ImportBooks({ onClose, onRefresh }) {
   const [currentLoadingState, setCurrentLoadingState] = useState(loadingMessages[0])
 
   const { data: users } = useUserDetails()
-  console.log('User details for import:', users)
+  const uploadNewBook = useAddBook()
 
   const normalizeHeader = (value) =>
     (value ?? '')

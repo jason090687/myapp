@@ -1,4 +1,6 @@
 import { FaEdit, FaTrash, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import Pagination from '../Pagination'
+import '../../pages/StudentsPage.css'
 
 const StudentTable = ({
   students,
@@ -32,7 +34,7 @@ const StudentTable = ({
 
   return (
     <>
-      <div className="table-container">
+      <div className="students-table-container">
         <table className="students-table">
           <thead>
             <tr>
@@ -97,25 +99,13 @@ const StudentTable = ({
             )}
           </tbody>
         </table>
-      </div>
-      <div className="pagination">
-        <button
-          className="pagination-btn"
-          onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          <FaChevronLeft />
-        </button>
-        <span className="pagination-info">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="pagination-btn"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <FaChevronRight />
-        </button>
+
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
       </div>
     </>
   )

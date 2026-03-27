@@ -16,14 +16,11 @@
 }
 
 .books-content {
-  min-height: calc(100vh - var(--navbar-height));
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  /* gap: 1.5rem; */
   max-width: 1920px;
   margin: 0 auto;
-  min-height: 100%;
   height: auto;
   overflow: visible;
 }
@@ -32,17 +29,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* padding: 1.5rem; */
   gap: 1.5rem;
   flex-wrap: nowrap;
   margin-bottom: 1.5rem;
-  /* background: rgba(255, 255, 255, 0.9); */
-  /* -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-   */
 }
 
 .book-title-cell {
@@ -117,30 +106,21 @@
   box-shadow: 0 6px 16px rgba(10, 11, 100, 0.2);
 }
 
-.table-container {
+.books-table-container {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.95);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  overflow: visible; /* Changed from hidden */
-  min-height: 600px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.05),
+    0 2px 4px -2px rgb(0 0 0 / 0.03);
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #f1f5f9;
+  min-height: unset;
   height: auto;
-}
-
-.books-table-wrapper {
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: visible;
-  border-radius: 1rem;
-  position: relative;
-  margin-bottom: 0; /* Remove bottom margin */
-  height: auto;
-  z-index: 1;
 }
 
 .books-table {
@@ -166,7 +146,6 @@
 
 .books-table th {
   background: rgba(248, 250, 252, 0.95);
-  padding: 1.25rem 1rem;
   text-align: center;
   font-weight: 600;
   color: #475569;
@@ -345,7 +324,6 @@
 .books-table .col-status {
 }
 
-/* Update action column styles to be consistent with other columns */
 .books-table .col-action {
   position: sticky;
   right: 0;
@@ -353,26 +331,9 @@
   /* min-width: 10px; */
   background: white;
   z-index: 2;
-  /* padding: 0.5rem; */
+  padding: 0.5rem;
   box-shadow: -2px 0 2px rgba(0, 0, 0, 0.1);
 }
-
-/* .books-table td.col-action {
-  border-bottom: 1px solid #e2e8f0;
-  border-left: none;
-  border-right: none;
-  overflow: hidden;
-} */
-
-/* .books-table thead th.col-action {
-  position: sticky;
-  right: 0;
-  top: 0;
-  background-color: #f8fafc !important;
-  z-index: 10;
-  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #e2e8f0;
-} */
 
 .action-buttons-container {
   display: flex;
@@ -387,7 +348,6 @@
   z-index: 1;
 }
 
-/* Remove any sticky positioning or special hover effects */
 .books-table td.col-action:hover::after,
 .books-table td.col-action[data-content]:hover::after {
   display: none;
@@ -650,16 +610,31 @@
     overflow: visible;
   }
 
-  .table-container {
+  .books-table-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.05),
+      0 2px 4px -2px rgb(0 0 0 / 0.03);
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+    /* Remove or reduce min-height */
+    min-height: unset; /* ← was 720px */
     height: auto;
-    min-height: 600px; /* Set minimum height for table container */
-    overflow: visible;
   }
 
   .books-table-wrapper {
-    height: auto;
-    min-height: 550px; /* Adjust for table wrapper */
+    flex: 1;
+    overflow-x: auto;
     overflow-y: auto;
+    width: 100%;
+    min-height: 600px;
+    max-height: calc(100vh - 300px);
   }
 
   .pagination {

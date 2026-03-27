@@ -4,29 +4,24 @@ import { Calendar, X, User, BookOpen } from 'lucide-react'
 import { Button } from '../ui/button'
 import './styles/OverdueModal.css'
 import { useToaster } from '../Toast/useToaster'
-import { useSelector } from 'react-redux'
-import { processOverduePayment } from '../../Features/api'
 import { useActivity } from '../../context/ActivityContext'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { setAuthToken } from '../../api/axios'
+import { useProcessOverduePayment } from '../../hooks'
+import { useMutation } from '@tanstack/react-query'
 
 const OverdueModal = ({
   isOpen,
   onClose,
   borrowData = { id: 0, student: '', book: '', due_date: new Date().toISOString() },
-  onSuccess = () => {},
+  onSuccess = () => { },
   studentMap = {}
 }) => {
   const [selectedAction, setSelectedAction] = useState('return')
   const [orNumber, setOrNumber] = useState('')
 
-  const { token } = useSelector((state) => state.auth)
   const { addActivity } = useActivity()
   const { showToast } = useToaster()
 
-  const queryClient = useQueryClient()
-
-  setAuthToken(token)
+  const processOverduePayment = useProcessOverduePayment()
 
   useEffect(() => {
     if (!isOpen) return

@@ -14,7 +14,6 @@
 }
 
 .borrowed-content {
-  height: 100%;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -153,7 +152,7 @@
 
 /* ...existing code... */
 
-.table-container {
+.borrowed-table-container {
   position: relative;
   flex: 1;
   display: flex;
@@ -166,7 +165,8 @@
   width: 100%;
   overflow: hidden;
   border: 1px solid #f1f5f9;
-  min-height: 720px;
+  /* Remove or reduce min-height */
+  min-height: unset; /* ← was 720px */
   height: auto;
 }
 
@@ -216,7 +216,6 @@
 }
 
 .borrowed-table th {
-  padding: 1.25rem 1rem;
   text-align: center;
   font-weight: 600;
   color: #64748b;
@@ -229,7 +228,6 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  height: 60px;
   box-sizing: border-box;
 }
 
@@ -434,73 +432,6 @@
   opacity: 0.7;
 }
 
-.pagination {
-  position: relative;
-  bottom: auto;
-  left: auto;
-  transform: none;
-  border-radius: 0 0 20px 20px;
-  margin: 0;
-  width: 100%;
-  padding: 1.25rem;
-  background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
-  border-top: 2px solid #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.pagination-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  background: white;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.pagination-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  border-color: #f1f5f9;
-}
-
-.pagination-btn:not(:disabled):hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-}
-
-.pagination-info {
-  font-size: 0.9375rem;
-  color: #334155;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-}
-
-.pagination-info {
-  font-size: 0.9375rem;
-  color: #475569;
-  font-weight: 500;
-}
-
-.pagination-total {
-  margin-left: 0.5rem;
-  color: #64748b;
-  font-weight: normal;
-}
-
 .status-badge {
   padding: 0.5rem 1rem;
   border-radius: 12px;
@@ -608,6 +539,13 @@
 }
 
 @media screen and (max-width: 768px) {
+  .table-container {
+    padding-bottom: 60px;
+    height: calc(100vh - 220px);
+    margin-bottom: 0.75rem;
+    min-height: unset; /* ← was 600px */
+  }
+
   .borrowed-header {
     flex-direction: column;
     gap: 0.75rem;
@@ -879,7 +817,7 @@
 }
 
 /* Ensure proper table layout on small screens */
-.table-container {
+.borrowed-table-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;

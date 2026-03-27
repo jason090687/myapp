@@ -1,9 +1,4 @@
-import {
-  fetchBooksUtil as fetchBooks,
-  fetchBorrowedBooksUtil as fetchBorrowedBooks,
-  searchStudentsUtil as searchStudents,
-  fetchEmployeesUtil as fetchEmployees
-} from '../hooks/useQueries'
+import api from '../api/axios' // or wherever your axios instance is
 
 export const globalSearch = async (token, searchTerm) => {
   if (!searchTerm.trim()) return null
@@ -22,67 +17,37 @@ export const globalSearch = async (token, searchTerm) => {
       id: item.id
     }))
 
-  // If we don't have a token (e.g., initial load), still allow settings search.
   if (!token) {
     return { books: [], borrowed: [], students: [], staff: [], settings }
   }
 
+  const headers = { Authorization: `Bearer ${token}` }
+
   const [booksResult, borrowedResult, studentsResult, staffResult] = await Promise.allSettled([
-    fetchBooks(token, 1, searchTerm),
-    fetchBorrowedBooks(token),
-    searchStudents(token, searchTerm, 1),
-    fetchEmployees(token)
+    api.get(`/marc/search/?page=1&page_size=10&search=${encodeURIComponent(searchTerm)}`, { headers }),
+    api.get(`/borrow/list/?page=1&search=${encodeURIComponent(searchTerm)}&ordering=return_status,-returned_date`, { headers }),
+    api.get(`/students/?search=${encodeURIComponent(searchTerm)}&page=1`, { headers }),
+    api.get(`/students/employees/`, { headers })
   ])
 
-  const booksResponse = booksResult.status === 'fulfilled' ? booksResult.value : null
-  const borrowedResponse = borrowedResult.status === 'fulfilled' ? borrowedResult.value : null
-  const studentsResponse = studentsResult.status === 'fulfilled' ? studentsResult.value : null
-  const staffResponse = staffResult.status === 'fulfilled' ? staffResult.value : null
+  const booksResponse = booksResult.status === 'fulfilled' ? booksResult.value.data : null
+  const borrowedResponse = borrowedResult.status === 'fulfilled' ? borrowedResult.value.data : null
+  const studentsResponse = studentsResult.status === 'fulfilled' ? studentsResult.value.data : null
+  const staffResponse = staffResult.status === 'fulfilled' ? staffResult.value.data : null
 
-  if (
-    booksResult.status === 'rejected' ||
-    borrowedResult.status === 'rejected' ||
-    studentsResult.status === 'rejected' ||
-    staffResult.status === 'rejected'
-  ) {
-    const err =
-      booksResult.status === 'rejected'
-        ? booksResult.reason
-        : borrowedResult.status === 'rejected'
-          ? borrowedResult.reason
-          : studentsResult.status === 'rejected'
-            ? studentsResult.reason
-            : staffResult.status === 'rejected'
-              ? staffResult.reason
-              : null
-    console.error('Search error:', err)
-  }
+  const books = Array.isArray(booksResponse?.results) ? booksResponse.results
+    : Array.isArray(booksResponse) ? booksResponse : []
 
-  const books = Array.isArray(booksResponse?.results)
-    ? booksResponse.results
-    : Array.isArray(booksResponse)
-      ? booksResponse
-      : []
+  const borrowed = Array.isArray(borrowedResponse?.results) ? borrowedResponse.results
+    : Array.isArray(borrowedResponse) ? borrowedResponse : []
 
-  const borrowed = Array.isArray(borrowedResponse?.results)
-    ? borrowedResponse.results
-    : Array.isArray(borrowedResponse)
-      ? borrowedResponse
-      : []
+  const students = Array.isArray(studentsResponse?.results) ? studentsResponse.results
+    : Array.isArray(studentsResponse) ? studentsResponse : []
 
-  const students = Array.isArray(studentsResponse?.results)
-    ? studentsResponse.results
-    : Array.isArray(studentsResponse)
-      ? studentsResponse
-      : []
+  const staff = Array.isArray(staffResponse?.results) ? staffResponse.results
+    : Array.isArray(staffResponse) ? staffResponse : []
 
-  const staff = Array.isArray(staffResponse?.results)
-    ? staffResponse.results
-    : Array.isArray(staffResponse)
-      ? staffResponse
-      : []
-
-  const results = {
+  return {
     books: books.map((book) => ({
       type: 'book',
       title: book.title,
@@ -93,20 +58,16 @@ export const globalSearch = async (token, searchTerm) => {
     borrowed: borrowed
       .filter(
         (item) =>
-          String(item.book_title || '')
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          String(item.student_name || '')
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
+          String(item.book_title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          String(item.student_name || '').toLowerCase().includes(searchTerm.toLowerCase())
       )
       .map((item) => ({
         type: 'borrowed',
         title: item.book_title,
         subtitle: `Borrowed by ${item.student_name}`,
-        link: `/borrowed?id=${item.id}&highlight=true`, // Updated link format
+        link: `/borrowed?id=${item.id}&highlight=true`,
         id: item.id,
-        borrowedId: item.id // Add borrowedId for reference
+        borrowedId: item.id
       })),
     students: students.map((student) => {
       const studentPk = student?.id ?? student?.student_id ?? student?.pk
@@ -122,12 +83,8 @@ export const globalSearch = async (token, searchTerm) => {
       .filter((employee) => {
         const q = searchTerm.toLowerCase()
         return (
-          String(employee?.name || '')
-            .toLowerCase()
-            .includes(q) ||
-          String(employee?.id_number || '')
-            .toLowerCase()
-            .includes(q)
+          String(employee?.name || '').toLowerCase().includes(q) ||
+          String(employee?.id_number || '').toLowerCase().includes(q)
         )
       })
       .map((employee) => {
@@ -142,6 +99,4 @@ export const globalSearch = async (token, searchTerm) => {
       }),
     settings
   }
-
-  return results
 }

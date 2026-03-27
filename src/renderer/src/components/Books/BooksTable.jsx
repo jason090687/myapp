@@ -188,7 +188,7 @@ const BooksTable = ({
   )
 
   return (
-    <div className="table-container">
+    <div className="books-table-container">
       <div className="books-table-wrapper">
         <table className="books-table" role="grid">
           {renderTableHeader()}
@@ -199,6 +199,7 @@ const BooksTable = ({
               : renderTableBody()}
         </table>
       </div>
+
       {pagination && !isLoading && books.length > 0 && (
         <Pagination
           currentPage={pagination.currentPage}

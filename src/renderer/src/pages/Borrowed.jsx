@@ -10,6 +10,7 @@ import { useBorrowed } from '../hooks/useBorrowed'
 
 const Borrowed = () => {
   const {
+    refetch,
     isCollapsed,
     handleSidebarToggle,
     windowWidth,
@@ -97,6 +98,7 @@ const Borrowed = () => {
           onClose={() => setIsRenewModalOpen(false)}
           onSubmit={handleRenewSubmit}
           borrowData={selectedBorrow || {}}
+          onSuccess={refetch}
         />
         <OverdueModal
           isOpen={isOverdueModalOpen}

@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToaster } from '../components/Toast/useToaster'
-import { verifyOtpDirectly, resendOtpDirectly } from '../Features/api'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './OtpVerification.css'
 import { Button } from '../components/ui/button'
+import { resendOtpDirectly, verifyOtpDirectly } from '../api/auth'
 
 const OtpVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])

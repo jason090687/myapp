@@ -209,7 +209,8 @@ export const useRenewBook = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['borrowed'] })
+      // queryClient.invalidateQueries({ queryKey: ['borrowed'] })
+      queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })
     }
   })
 }
@@ -874,7 +875,7 @@ export const useStudentDetails = (studentId) => {
 }
 
 // ==================== FETCH EMPLOYEES ====================
-export const useEmployees = (page = 1, searchTerm = '') => {
+export const useEmployees = (searchTerm, page = 1) => {
   return useQuery({
     queryKey: ['employees', page, searchTerm],
     queryFn: async () => {

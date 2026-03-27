@@ -12,6 +12,9 @@ const StaffPage = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [searchTerm, setSearchTerm] = useState('')
+
 
   // Destructure all needed values from useStaff hook
   const {
@@ -28,8 +31,9 @@ const StaffPage = () => {
     handleEditStaff,
     handleDeleteStaff,
     confirmDeleteStaff,
-    cancelDelete
-  } = useStaff()
+    cancelDelete,
+    totalPages
+  } = useStaff(searchTerm, currentPage)
 
   const handleAddStaffClick = async (staffData) => {
     try {
@@ -59,6 +63,8 @@ const StaffPage = () => {
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}
             setIsAddModalOpen={setIsAddModalOpen}
+            searchTerm={searchTerm}
+            onSearchChange={(e) => setSearchTerm(e.target.value)}
           />
 
           <EmployeeTable
@@ -68,6 +74,9 @@ const StaffPage = () => {
             setSelectedStaff={setSelectedStaff}
             setIsEditModalOpen={setIsEditModalOpen}
             confirmDeleteStaff={confirmDeleteStaff}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
           />
 
           <AddStaffBookModal

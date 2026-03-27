@@ -20,17 +20,12 @@ import {
 } from 'react-icons/fa'
 import './styles/UpdateBooksModal.css'
 import { useToaster } from '../Toast/useToaster'
-import { useSelector } from 'react-redux'
 import { Button } from '../ui/button'
-import { updateBook } from '../../Features/api'
-import { fetchBookDetails } from '../../api/book'
-import { useQuery } from '@tanstack/react-query'
-import { setAuthToken } from '../../api/axios'
+import { useBookDetails, useUpdateBook } from '../../hooks'
 
 const UpdateBookModal = ({ isOpen, onClose, onSuccess, bookId }) => {
   const { showToast } = useToaster()
   const [isLoading, setIsLoading] = useState(false)
-  const { token } = useSelector((state) => state.auth)
 
   const initialFormState = {
     title: '',
@@ -82,17 +77,9 @@ const UpdateBookModal = ({ isOpen, onClose, onSuccess, bookId }) => {
     }
   }, [isOpen])
 
-  setAuthToken(token)
 
-  const { data: bookDetails, isLoading: isPageLoading } = useQuery({
-    queryKey: ['bookDetails', bookId, token],
-    queryFn: () => fetchBookDetails(bookId),
-    enabled: isOpen && !!bookId && !!token,
-    onError: (error) => {
-      showToast(error?.response?.data?.detail || 'Error', 'Failed to load book details', 'error')
-      onClose()
-    }
-  })
+  const { data: bookDetails, isLoading: isPageLoading } = useBookDetails()
+  const updateBook = useUpdateBook()
 
   // Reset form when modal closes
   useEffect(() => {
@@ -214,7 +201,7 @@ const UpdateBookModal = ({ isOpen, onClose, onSuccess, bookId }) => {
         bookDataToSend.append('book_cover', formData.book_cover)
       }
 
-      await updateBook(token, bookId, bookDataToSend)
+      await updateBook(bookId, bookDataToSend)
 
       showToast('Success', 'Book updated successfully!', 'success')
       onSuccess?.()

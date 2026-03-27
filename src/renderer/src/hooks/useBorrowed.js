@@ -31,7 +31,7 @@ export const useBorrowed = () => {
   const [filterStatus, setFilterStatus] = useState('all')
 
   // Fetch borrowed books with TanStack Query hook
-  const { data: borrowData, isLoading } = useBorrowedBooks(currentPage, searchTerm)
+  const { data: borrowData, isLoading, refetch } = useBorrowedBooks(currentPage, searchTerm)
 
   // Transform data with sorting
   const sortBorrowedBooks = (books) => {
@@ -165,7 +165,13 @@ export const useBorrowed = () => {
 
   const handleRenewSubmit = async (renewData) => {
     setIsRenewModalOpen(false)
-    await renewMutation.mutateAsync({ borrowId: renewData.id, dueDate: renewData.due_date })
+    await renewMutation.mutateAsync({
+      borrowId: renewData.id,
+      renewData: {
+        due_date: renewData.due_date,
+        renewed_count: (renewData.renewed_count || 0) + 1
+      }
+    })
   }
 
   const handleOverdueClick = (borrowItem) => {
@@ -241,6 +247,7 @@ export const useBorrowed = () => {
 
   return {
     isCollapsed,
+    refetch,
     setIsCollapsed,
     handleSidebarToggle,
     windowWidth,

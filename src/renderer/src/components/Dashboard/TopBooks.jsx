@@ -49,7 +49,7 @@ const TopBooks = ({ activeBookFilter, onFilterToggle, loadingStates, topBooks, n
               />
             ))
           ) : (
-            <div className="no-books">No books found</div>
+            <div className="no-books">No top books found</div>
           )}
         </div>
       )}

@@ -6,8 +6,8 @@ import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
 import './CreateNewPassword.css'
 import { useToaster } from '../components/Toast/useToaster'
-import { resetPasswordWithOtp } from '../Features/api'
 import { Button } from '../components/ui/button'
+import { resetPasswordWithOtp } from '../api/auth'
 
 function CreateNewPassword() {
   const navigate = useNavigate()

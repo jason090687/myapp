@@ -5,7 +5,7 @@ import { Button } from '../ui/button'
 import './styles/BorrowBookModal.css'
 import { useToaster } from '../Toast/useToaster'
 import { useActivity } from '../../context/ActivityContext'
-import { useAllBooks, useBorrowBook, useStudentDetails } from '../../hooks'
+import { useBooks, useBorrowBook, useStudentDetails, useStudents } from '../../hooks'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
@@ -27,17 +27,27 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const { showToast } = useToaster()
   const { addActivity } = useActivity()
 
-  const { data: booksData, isLoading } = useAllBooks(bookSearch)
+  const { data: booksData, isLoading } = useBooks(1, bookSearch)
+  const { data: studentsData } = useStudents(1, formData.student)
+
   const borrowBookMutation = useBorrowBook()
 
-  // Get student details to check active status
-  const studentId = formData.student ? parseInt(formData.student) : null
-  const { data: studentData, isLoading: isStudentLoading } = useStudentDetails(studentId)
+  const studentFromSearch = useMemo(() => {
+    const list = Array.isArray(studentsData) ? studentsData : studentsData?.results ?? []
+    return list.find(
+      (s) => String(s.id_number) === String(formData.student)
+    ) ?? null
+  }, [studentsData, formData.student])
+
+  const studentPk = studentFromSearch?.id ?? studentFromSearch?.pk ?? null
+  const { data: studentData, isLoading: isStudentLoading } = useStudentDetails(studentPk)
 
   const books = useMemo(() => {
     if (!booksData) return []
 
-    return booksData
+    const bookList = Array.isArray(booksData) ? booksData : booksData.results ?? []
+
+    return bookList
       .filter((book) => book.status !== 'Borrowed')
       .map((book) => ({
         id: book.id,
@@ -280,7 +290,7 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
                   required
                   placeholder="Enter lexile level"
                   className="borrow-input"
-                  // readOnly
+                // readOnly
                 />
               </div>
             </div>

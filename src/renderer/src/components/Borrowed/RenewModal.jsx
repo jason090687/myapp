@@ -7,14 +7,15 @@ import { useToaster } from '../Toast/useToaster'
 
 const RenewModal = ({
   isOpen = false,
-  onClose = () => {},
-  onSubmit = () => {},
+  onClose = () => { },
+  onSubmit = () => { },
   borrowData = {
     id: '',
     student_name: '',
     book_title: '',
     due_date: ''
-  }
+  },
+  onSuccess,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { showToast } = useToaster()
@@ -60,6 +61,7 @@ const RenewModal = ({
       })
 
       showToast('Book renewed successfully!', '', 'success')
+      onSuccess()
       onClose()
     } catch (error) {
       showToast('Failed to renew book', error.message || '', 'error')

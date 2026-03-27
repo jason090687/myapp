@@ -9,7 +9,7 @@ import {
 } from './useQueries'
 import { useToaster } from '../components/Toast/useToaster'
 
-export const useStaff = () => {
+export const useStaff = (searchTerm = '', currentPage = '') => {
   const navigate = useNavigate()
   const { showToast } = useToaster()
 
@@ -21,7 +21,7 @@ export const useStaff = () => {
     staffName: ''
   })
 
-  const { data: staffData, isLoading, refetch } = useEmployees()
+  const { data: staffData, isLoading, refetch } = useEmployees(searchTerm, currentPage)
   const { data: user } = useUserDetails()
 
 
@@ -35,6 +35,8 @@ export const useStaff = () => {
     : Array.isArray(staffData)
       ? staffData
       : []
+
+  const totalPages = Math.ceil((staffData?.count || 0) / 10)
 
   // Filter staff
   const getFilteredStaff = useCallback(() => {
@@ -147,6 +149,7 @@ export const useStaff = () => {
     staff: getFilteredStaff(),
     isLoading,
     refetch,
+    totalPages,
     filterStatus,
     setFilterStatus,
     selectedStaff,

@@ -1,38 +1,27 @@
 import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { useActivity } from '../context/ActivityContext'
-import { useNavigate } from 'react-router-dom'
 import { useBookSearch } from './useBookSearch'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSelector } from 'react-redux'
 import { useBooks as useBookQuery, useAllBooks, useDeleteBook } from './useQueries'
 
 export const useBooks = () => {
-  const navigate = useNavigate()
   const { addActivity } = useActivity()
   const queryClient = useQueryClient()
   const { debouncedSearchTerm, handleSearch } = useBookSearch()
   const { user } = useSelector((state) => state.auth)
-
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 0,
     totalItems: 0
   })
-
   const [sortConfig, setSortConfig] = useState({ column: '', direction: '' })
-
   const [deleteConfirm, setDeleteConfirm] = useState({
     isOpen: false,
     bookId: null,
     bookTitle: ''
   })
-
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-  const [selectedBook, setSelectedBook] = useState(null)
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState(null)
-
   const [exportProgress, setExportProgress] = useState({
     isOpen: false,
     progress: 0,
@@ -46,6 +35,7 @@ export const useBooks = () => {
     pagination.currentPage,
     debouncedSearchTerm
   )
+
 
   const allBooksQuery = useAllBooks(debouncedSearchTerm)
   const deleteBookMutation = useDeleteBook()
@@ -132,18 +122,17 @@ export const useBooks = () => {
       setSortConfig({ column: '', direction: '' })
     }
 
-    setSelectedCategory(category)
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
   }
 
   const sortedBooks = sortConfig.column
     ? [...books].sort((a, b) => {
-        if (a[sortConfig.column] < b[sortConfig.column])
-          return sortConfig.direction === 'asc' ? -1 : 1
-        if (a[sortConfig.column] > b[sortConfig.column])
-          return sortConfig.direction === 'asc' ? 1 : -1
-        return 0
-      })
+      if (a[sortConfig.column] < b[sortConfig.column])
+        return sortConfig.direction === 'asc' ? -1 : 1
+      if (a[sortConfig.column] > b[sortConfig.column])
+        return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
     : books
 
   // 🔥🔥🔥 FIXED FILTER (IMPORTANT)
@@ -254,9 +243,6 @@ export const useBooks = () => {
     sortConfig,
     deleteConfirm,
     exportProgress,
-    isDetailsModalOpen,
-    selectedBook,
-    isDetailsOpen,
     debouncedSearchTerm,
     handleCategoryChange,
     handleSearch,
@@ -265,6 +251,6 @@ export const useBooks = () => {
     handleDeleteBook,
     confirmDelete,
     cancelDelete,
-    handleExportToCSV
+    handleExportToCSV,
   }
 }
