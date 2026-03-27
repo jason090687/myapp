@@ -1,4 +1,4 @@
-import { FaEdit, FaTrash, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { FaEdit, FaTrash } from 'react-icons/fa'
 import Pagination from '../Pagination'
 import '../../pages/StudentsPage.css'
 

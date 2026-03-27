@@ -21,7 +21,7 @@ const OverdueModal = ({
   const { addActivity } = useActivity()
   const { showToast } = useToaster()
 
-  const processOverduePayment = useProcessOverduePayment()
+  const paymentMutation = useProcessOverduePayment()
 
   useEffect(() => {
     if (!isOpen) return
@@ -46,44 +46,6 @@ const OverdueModal = ({
     newDate.setDate(newDate.getDate() + 5)
     return newDate.toISOString().split('T')[0]
   }
-
-  const paymentMutation = useMutation({
-    mutationFn: ({ borrowId, paymentData }) => processOverduePayment(borrowId, paymentData),
-
-    onSuccess: (_, variables) => {
-      const amount = variables.paymentData.amount
-
-      if (selectedAction === 'return') {
-        addActivity({
-          type: 'overdue',
-          description: `Book returned with overdue payment of ₱${amount}`
-        })
-      } else {
-        addActivity({
-          type: 'book_borrowed',
-          description: `Book renewed with overdue payment of ₱${amount}`
-        })
-      }
-
-      showToast(
-        selectedAction === 'return'
-          ? 'Book returned and payment processed successfully!'
-          : 'Book renewed and payment processed successfully!',
-        '',
-        'success'
-      )
-
-      // Refresh borrowed list
-      queryClient.invalidateQueries(['borrowedBooks'])
-
-      onClose()
-      onSuccess?.()
-    },
-
-    onError: (error) => {
-      showToast('Failed to process payment', error.message || '', 'error')
-    }
-  })
 
   const handlePayment = () => {
     if (!borrowData.id) return
@@ -114,10 +76,30 @@ const OverdueModal = ({
       paymentData.renewed_count = (borrowData.renewed_count || 0) + 1
     }
 
-    paymentMutation.mutate({
-      borrowId: borrowData.id,
-      paymentData
-    })
+    paymentMutation.mutate(
+      { borrowId: borrowData.id, paymentData },
+      {
+        onSuccess: (_, variables) => {
+          const amount = variables.paymentData.amount
+          addActivity({
+            type: selectedAction === 'return' ? 'overdue' : 'book_borrowed',
+            description: `Book ${selectedAction === 'return' ? 'returned' : 'renewed'} with overdue payment of ₱${amount}`
+          })
+          showToast(
+            selectedAction === 'return'
+              ? 'Book returned and payment processed successfully!'
+              : 'Book renewed and payment processed successfully!',
+            '',
+            'success'
+          )
+          onClose()
+          onSuccess?.()
+        },
+        onError: (error) => {
+          showToast('Failed to process payment', error.message || '', 'error')
+        }
+      }
+    )
   }
 
   if (!isOpen) return null

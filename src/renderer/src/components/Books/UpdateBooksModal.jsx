@@ -78,7 +78,8 @@ const UpdateBookModal = ({ isOpen, onClose, onSuccess, bookId }) => {
   }, [isOpen])
 
 
-  const { data: bookDetails, isLoading: isPageLoading } = useBookDetails()
+  const { data: bookDetails, isLoading: isPageLoading } = useBookDetails(bookId)
+
   const updateBook = useUpdateBook()
 
   // Reset form when modal closes
