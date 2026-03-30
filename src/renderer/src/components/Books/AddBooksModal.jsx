@@ -14,7 +14,6 @@ import {
   FaTimes
 } from 'react-icons/fa'
 import { useSelector } from 'react-redux'
-import { useQuery } from '@tanstack/react-query'
 import './styles/AddBooksModal.css'
 import { Button } from '../ui/button'
 import AddVariantModal from '../AddVariantModal'
@@ -22,10 +21,8 @@ import InputField from '../InputField'
 import { Progress } from '../ui/progress'
 import { useToaster } from '../Toast/useToaster'
 import { useActivity } from '../../context/ActivityContext'
-import { fetchUserDetails } from '../../api/auth'
 import axios from 'axios'
-import api, { setAuthToken } from '../../api/axios'
-import { addNewBook } from '../../api/book'
+import { useAddBook, useUserDetails } from '../../hooks'
 
 const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
   const { token, user: currentUser } = useSelector((state) => state.auth)
@@ -44,6 +41,9 @@ const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
     status: '',
     completed: false
   })
+
+  const { data: userDetails } = useUserDetails()
+  const addNewBook = useAddBook()
 
   const initialFormState = {
     title: '',
@@ -75,13 +75,7 @@ const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
 
   const [formData, setFormData] = useState(initialFormState)
 
-  setAuthToken(token)
 
-  const { data: userDetails } = useQuery({
-    queryKey: ['user', token],
-    queryFn: () => fetchUserDetails(),
-    enabled: !!token
-  })
 
   // Reset form when modal opens
   useEffect(() => {
@@ -307,8 +301,7 @@ const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
         }
 
         try {
-          setAuthToken(token)
-          await addNewBook(bookData)
+          await addNewBook.mutateAsync(bookData)
           successCount++
 
           addActivity({
@@ -382,6 +375,40 @@ const AddBookModal = ({ isOpen, onClose, onSuccess }) => {
 
   return (
     <>
+      {/* Progress Overlay — full screen, outside modal */}
+      {showProgress && (
+        <div className="progress-overlay">
+          <div className="progress-container">
+            <div className="progress-header">
+              <h3>Adding Book Copies</h3>
+              <div className="progress-info">
+                <span className="progress-count">
+                  {progressData.current}/{progressData.total}
+                </span>
+                <span className="progress-percentage">
+                  {Math.round((progressData.current / progressData.total) * 100)}%
+                </span>
+              </div>
+            </div>
+            <Progress
+              value={(progressData.current / progressData.total) * 100}
+              className="progress-bar-container"
+            />
+            <div className="progress-details">
+              <div className="book-title-progress">
+                <strong>{formData.title}</strong>
+              </div>
+              <div className="current-status">{progressData.status}</div>
+              {progressData.completed && (
+                <div className="completion-message">
+                  <div className="success-icon">✓</div>
+                  <span>Completing...</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {/* Modal Overlay */}
       <div
         className="add-book-modal-overlay"

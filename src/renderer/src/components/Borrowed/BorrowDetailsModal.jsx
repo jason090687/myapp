@@ -18,7 +18,7 @@ const fieldIcons = {
   'Lexile Level': <FaLayerGroup />,
   'Borrow Date': <FaCalendarAlt />,
   'Due Date': <FaClock />,
-  Status: <FaInfoCircle />
+  // 'Status': <FaInfoCircle />
 }
 
 const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, onPay }) => {
@@ -43,10 +43,10 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
     // { label: 'Status', value: borrowData.status }
   ]
 
-  const handleReturn = async (id) => {
+  const handleReturn = async () => {
     setProcessingAction('return')
     try {
-      await onReturn(id)
+      await onReturn(borrowData)
       onClose()
     } catch (error) {
       console.error('Error returning book:', error)
@@ -119,7 +119,7 @@ const BorrowDetailsModal = ({ isOpen, onClose, borrowData, onReturn, onRenew, on
           <div className="borrow-details-footer">
             <button
               className="action-button return"
-              onClick={() => handleReturn(borrowData.id)}
+              onClick={() => handleReturn()}
               disabled={processingAction !== null}
             >
               {processingAction === 'return' ? (

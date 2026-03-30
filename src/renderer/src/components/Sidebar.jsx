@@ -16,13 +16,11 @@ import {
 import { useToaster } from './Toast/useToaster'
 import logo from '../assets/logo.png'
 import './Sidebar.css'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { logout, reset } from '../Features/authSlice'
 import HelpGuideModal from './HelpGuideModal'
 import Navbar from './Navbar'
-import { fetchUserDetails } from '../api/auth'
-import { setAuthToken } from '../api/axios'
-import { useQuery } from '@tanstack/react-query'
+import { useUserDetails } from '../hooks'
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -34,15 +32,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
   const navigate = useNavigate()
   const { showToast } = useToaster()
 
-  const { token } = useSelector((state) => state.auth)
-
-  setAuthToken(token)
-
-  const { data: userDetails } = useQuery({
-    queryKey: ['user', token],
-    queryFn: () => fetchUserDetails(),
-    enabled: !!token
-  })
+  const { data: userDetails } = useUserDetails()
 
   const menuItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },

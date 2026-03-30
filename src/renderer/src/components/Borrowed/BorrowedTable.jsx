@@ -21,7 +21,6 @@ const BorrowedTable = ({
   pagination,
   totalPages,
   handlePageChange,
-  currentPage
 }) => {
   return (
     <div className="borrowed-table-container">

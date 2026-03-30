@@ -12,7 +12,7 @@ const ActionButtons = ({
       <button
         className="action-btn return"
         disabled={item.is_returned}
-        onClick={() => handleReturnBook(item.id)}
+        onClick={() => handleReturnBook(item)}
         title={item.is_returned ? 'Already Returned' : 'Return Book'}
       >
         <RotateCcw size={20} />

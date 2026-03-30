@@ -7,6 +7,7 @@ import BorrowDetailsModal from '../components/Borrowed/BorrowDetailsModal'
 import BorrowedHeader from '../components/Borrowed/BorrowedHeader'
 import BorrowedTable from '../components/Borrowed/BorrowedTable'
 import { useBorrowed } from '../hooks/useBorrowed'
+import ConfirmReturnModal from '../components/Borrowed/ConfirmReturnModal'
 
 const Borrowed = () => {
   const {
@@ -49,7 +50,10 @@ const Borrowed = () => {
     handleRenewSubmit,
     handleOverdueSubmit,
     selectedBorrowDetails,
-    setSelectedBorrowDetails
+    setSelectedBorrowDetails,
+    returnConfirm,
+    handleConfirmReturn,
+    handleCancelReturn,
   } = useBorrowed()
 
   return (
@@ -116,7 +120,14 @@ const Borrowed = () => {
             onRenew={handleRenewClick}
             onPay={handleOverdueClick}
           />
+
         )}
+        <ConfirmReturnModal
+          isOpen={returnConfirm.isOpen}
+          borrowItem={returnConfirm.borrowItem}
+          onConfirm={handleConfirmReturn}
+          onCancel={handleCancelReturn}
+        />
       </div>
     </div>
   )

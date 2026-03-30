@@ -8,22 +8,41 @@ export const useBooks = (page = 1, search = "", action = "", copiesFilter = "") 
   return useQuery({
     queryKey: ["books", page, search, action, copiesFilter],
     queryFn: async () => {
-      const token = getToken();
-      let url = `/marc/search/?page=${page}&page_size=10`;
+      const token = getToken()
 
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      if (action) url += `&action=${encodeURIComponent(action)}`; // only if backend supports action filtering
-      if (copiesFilter) url += `&copies__gt=${copiesFilter}`;
+      let allResults = []
+      let currentPage = 1
+      let hasNext = true
 
-      const response = await api.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return response.data;
+      while (hasNext) {
+        let url = `/marc/search/?page=${currentPage}&page_size=1000`
+
+        if (search) url += `&search=${encodeURIComponent(search)}`
+        if (action) url += `&action=${encodeURIComponent(action)}`
+        if (copiesFilter) url += `&copies__gt=${copiesFilter}`
+
+        const response = await api.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        const data = response.data
+
+        allResults = [...allResults, ...(data.results || [])]
+
+        // 🔥 CHECK NEXT PAGE
+        if (data.next) {
+          currentPage++
+        } else {
+          hasNext = false
+        }
+      }
+
+      return { results: allResults }
     },
     staleTime: 5 * 60 * 1000,
     keepPreviousData: true,
-  });
-};
+  })
+}
 
 // Fetch all books across all pages
 export const useAllBooks = (search = '') => {
@@ -86,6 +105,8 @@ export const useAddBook = () => {
     }
   })
 }
+
+
 
 // Update book
 export const useUpdateBook = () => {
@@ -185,7 +206,7 @@ export const useReturnBook = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['borrowed'] })
+      queryClient.invalidateQueries({ queryKey: ['borrowedBooks'] })  // was ['borrowed']
     }
   })
 }

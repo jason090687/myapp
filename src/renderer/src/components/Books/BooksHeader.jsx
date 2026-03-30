@@ -14,7 +14,9 @@ function BooksHeader({
   selectedCategory,
   onViewChange,
   viewMode = 'table',
-  onExport
+  onExport,
+  onImportStart,
+  onImportEnd
 }) {
   const [showImport, setShowImport] = useState(false)
 
@@ -125,7 +127,15 @@ function BooksHeader({
         </div>
       </div>
       {showImport && (
-        <ImportBooks token={token} onRefresh={onRefresh} onClose={() => setShowImport(false)} />
+        <ImportBooks
+          token={token}
+          onRefresh={async () => {
+            if (onImportStart) onImportStart()
+            await onRefresh()
+            if (onImportEnd) onImportEnd()
+          }}
+          onClose={() => setShowImport(false)}
+        />
       )}
     </div>
   )

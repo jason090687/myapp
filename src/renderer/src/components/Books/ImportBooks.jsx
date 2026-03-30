@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSelector } from 'react-redux'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
 import { toast } from 'react-hot-toast'
 import './styles/ImportBooks.css'
 import { Button } from '../ui/button'
-import { useAddBook } from '../../hooks'
+import { useAddBook, useUserDetails } from '../../hooks'
 
 function ImportBooks({ onClose, onRefresh }) {
-  const { token } = useSelector((state) => state.auth)
   const [importing, setImporting] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
@@ -16,6 +14,7 @@ function ImportBooks({ onClose, onRefresh }) {
   const [parsedData, setParsedData] = useState(null)
   const [isCancelling, setIsCancelling] = useState(false)
   const cancelRef = useRef(false)
+
 
   const loadingMessages = [
     { text: 'Analyzing library collection...', icon: '📚' },
@@ -28,7 +27,7 @@ function ImportBooks({ onClose, onRefresh }) {
   const [currentLoadingState, setCurrentLoadingState] = useState(loadingMessages[0])
 
   const { data: users } = useUserDetails()
-  const uploadNewBook = useAddBook()
+  const { mutateAsync: uploadNewBook } = useAddBook()
 
   const normalizeHeader = (value) =>
     (value ?? '')
@@ -187,7 +186,7 @@ function ImportBooks({ onClose, onRefresh }) {
           formData.append('date_processed', new Date().toISOString())
           formData.append('created_at', new Date().toISOString())
           formData.append('status', 'available')
-          await uploadNewBook(token, formData)
+          await uploadNewBook(formData)
           successCount++
         } catch (error) {
           if (cancelRef.current) return
@@ -198,10 +197,8 @@ function ImportBooks({ onClose, onRefresh }) {
       }
       if (successCount > 0) {
         toast.success(`Successfully imported ${successCount} books`)
-        setTimeout(() => {
-          onRefresh()
-          onClose()
-        }, 500)
+        onRefresh()
+        onClose()
       } else {
         toast.error('No books were imported successfully')
       }

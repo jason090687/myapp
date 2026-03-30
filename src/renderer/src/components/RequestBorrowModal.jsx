@@ -16,7 +16,6 @@ function RequestBorrowModal({ isOpen, onClose, onApprove, borrowRequest, onReque
     return today.toISOString().split('T')[0]
   })
   const { showToast } = useToaster()
-  const { user } = useSelector((state) => state.auth)
 
   // Initialize mutations
   const borrowBookMutation = useBorrowBook()

@@ -29,8 +29,8 @@ export const useBorrowed = () => {
   const [selectedBorrowDetails, setSelectedBorrowDetails] = useState(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const [filterStatus, setFilterStatus] = useState('all')
+  const [returnConfirm, setReturnConfirm] = useState({ isOpen: false, borrowItem: null })
 
-  // Fetch borrowed books with TanStack Query hook
   const { data: borrowData, isLoading, refetch } = useBorrowedBooks(currentPage, searchTerm)
 
   // Transform data with sorting
@@ -144,13 +144,39 @@ export const useBorrowed = () => {
     })
   }
 
-  const handleReturnBook = async (borrowId) => {
-    const borrowItem = borrowedBooks.find((item) => item.id === borrowId)
-    if (!borrowItem) {
-      showToast('Error', 'Borrow record not found', 'error')
-      return
+  const handleReturnBook = (borrowItem) => {
+    setReturnConfirm({ isOpen: true, borrowItem })
+  }
+
+  const handleConfirmReturn = async () => {
+    const borrowItem = returnConfirm.borrowItem
+    try {
+      await returnMutation.mutateAsync({
+        bookId: borrowItem.id,
+        returnData: {
+          returned_date: new Date().toISOString().split('T')[0],
+          status: 'returned'
+        }
+      })
+
+      await updateBookMutation.mutateAsync({
+        bookId: borrowItem.book,
+        bookData: {
+          status: 'Available'
+        }
+      })
+
+      refetch()
+      showToast('Success', 'Book returned successfully!', 'success')
+    } catch (error) {
+      showToast('Error', error.message || 'Failed to return book', 'error')
+    } finally {
+      setReturnConfirm({ isOpen: false, borrowItem: null })
     }
-    await returnMutation.mutateAsync({ borrowId, bookId: borrowItem.book })
+  }
+
+  const handleCancelReturn = () => {
+    setReturnConfirm({ isOpen: false, borrowItem: null })
   }
 
   const handleRenewClick = (borrowItem) => {
@@ -289,6 +315,9 @@ export const useBorrowed = () => {
     handleOverdueSubmit,
     selectedBorrowDetails,
     setSelectedBorrowDetails,
+    returnConfirm,
+    handleConfirmReturn,
+    handleCancelReturn,
     // Mutation states
     isBorrowing: borrowMutation.isPending,
     isReturning: returnMutation.isPending,

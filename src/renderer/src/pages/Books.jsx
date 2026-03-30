@@ -22,6 +22,7 @@ function Books() {
   const [selectedBookId, setSelectedBookId] = useState(null)
   const [selectedBook, setSelectedBook] = useState(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
 
   const [viewMode, setViewMode] = useState('table')
 
@@ -94,13 +95,15 @@ function Books() {
               onViewChange={setViewMode}
               onExport={handleExportToCSV}
               onRefresh={refetch}
+              onImportStart={() => setIsImporting(true)}
+              onImportEnd={() => setIsImporting(false)}
               books={books}
             />
 
             {viewMode === 'grid' ? (
               <BookGrid
                 books={books}
-                isLoading={isLoading}
+                isLoading={isLoading || isImporting}
                 onEditBook={handleEditBook}
                 onDeleteBook={handleDeleteBook}
                 onViewDetails={handleViewDetails}
@@ -110,7 +113,7 @@ function Books() {
             ) : (
               <BooksTable
                 books={books}
-                isLoading={isLoading}
+                isLoading={isLoading || isImporting}
                 onEditBook={handleEditBook}
                 onDeleteBook={handleDeleteBook}
                 onRowClick={handleViewDetails}

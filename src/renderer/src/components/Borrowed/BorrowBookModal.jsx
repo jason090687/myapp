@@ -6,6 +6,7 @@ import './styles/BorrowBookModal.css'
 import { useToaster } from '../Toast/useToaster'
 import { useActivity } from '../../context/ActivityContext'
 import { useBooks, useBorrowBook, useStudentDetails, useStudents } from '../../hooks'
+import { formatDate } from 'react-calendar/dist/cjs/shared/dateFormatter.js'
 
 function BorrowBookModal({ isOpen, onClose, onSubmit }) {
   const initialFormData = {
@@ -94,21 +95,22 @@ function BorrowBookModal({ isOpen, onClose, onSubmit }) {
       // Wait for student data to load before validation
       if (isStudentLoading) {
         showToast('Validating student...', 'Please wait', 'info')
-        setIsSubmitting(false)
-        setIsSubmittingLocal(false)
         return
       }
 
       // Validate student is active before borrowing
       if (studentData && !studentData.active) {
         showToast('Inactive Student', 'This student cannot borrow books', 'error')
-        setIsSubmitting(false)
-        setIsSubmittingLocal(false)
+        return
+      }
+
+      if (!formData.book) {
+        showToast('No Book Selected', 'Please select a book', 'error')
         return
       }
 
       const borrowData = {
-        id_number: parseInt(formData.id_number),
+        id_number: studentPk,//parseInt(formData.id_number),
         student: parseInt(formData.student),
         book: parseInt(formData.book),
         lexile_level: formData.lexile_level,

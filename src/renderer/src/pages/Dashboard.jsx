@@ -130,7 +130,7 @@ function Dashboard() {
         author: book.author,
         borrow_count: book.times_borrowed
       }))
-      .slice(0, 5)
+      .slice(0, 3)
   }, [topBooksData])
 
   // New books from API

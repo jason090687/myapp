@@ -15,6 +15,8 @@ import {
 import "./TransactionLog.css";
 import { useBooks, useBorrowedBooks, useEmployees, useStudents, useUsers } from "../hooks";
 import { Button } from "../components/ui/button";
+import Pagination from "../components/Pagination";
+import MonthlyReport from "../components/Reports/MonthlyReport";
 
 
 export default function TransactionLog() {
@@ -23,6 +25,7 @@ export default function TransactionLog() {
     const [searchInput, setSearchInput] = useState("");
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [actionFilter, setActionFilter] = useState("All");
+    const [isReportOpen, setIsReportOpen] = useState(false);
     const [dateRange, setDateRange] = useState({
         start: "2026-01-01",
         end: "2026-12-31",
@@ -31,8 +34,6 @@ export default function TransactionLog() {
         start: "2026-01-01",
         end: "2026-12-31",
     });
-
-
 
     const { data: books, isLoading: booksLoading, error: booksError } = useBooks(1, searchTerm)
     const { data: borrowedBooks, isLoading: borrowedBooksLoading, error: borrowedBooksError } = useBorrowedBooks(1, searchTerm)
@@ -151,6 +152,7 @@ export default function TransactionLog() {
             type: "book",
             created_at: getTransactionDate(item),
             action: getTransactionAction(item, "Book"),
+            isbn: item.isbn,
             name: item.title || "Untitled Book",
             description: item.author || "-",
             status:
@@ -193,6 +195,8 @@ export default function TransactionLog() {
                 item.book_title ||
                 item.book?.title ||
                 "Book",
+            due_date:
+                item.due_date,
             status:
                 item.cancelled === true || item.cancelled === 1
                     ? "Deleted"
@@ -384,24 +388,24 @@ export default function TransactionLog() {
         URL.revokeObjectURL(url);
     };
 
-    const handlePrintLedger = async () => {
-        if (!filteredLogs.length) {
-            alert("No transaction logs to print.");
-            return;
-        }
+    // const handlePrintLedger = async () => {
+    //     if (!filteredLogs.length) {
+    //         alert("No transaction logs to print.");
+    //         return;
+    //     }
 
-        try {
-            const html = buildLedgerHTML();
-            const result = await window.api.invoke('print-ledger', html);
+    //     try {
+    //         const html = buildLedgerHTML();
+    //         const result = await window.api.invoke('print-ledger', html);
 
-            if (!result?.success) {
-                alert(result?.message || "Failed to print ledger.");
-            }
-        } catch (error) {
-            console.error("Print error:", error);
-            alert("Failed to print ledger.");
-        }
-    };
+    //         if (!result?.success) {
+    //             alert(result?.message || "Failed to print ledger.");
+    //         }
+    //     } catch (error) {
+    //         console.error("Print error:", error);
+    //         alert("Failed to print ledger.");
+    //     }
+    // };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -531,7 +535,7 @@ export default function TransactionLog() {
                                         </svg>
                                         Download CSV
                                     </Button>
-                                    {/* <Button variant='secondary' className="log-print-btn" onClick={handlePrintLedger}>Print Ledger</Button> */}
+                                    <Button variant='secondary' className="log-print-btn" onClick={() => setIsReportOpen(true)}>Preview Reports</Button>
                                 </div>
                             </div>
 
@@ -616,9 +620,6 @@ export default function TransactionLog() {
                                         </div>
 
                                         <div className="log-user-cell">
-                                            {/* <div className="log-avatar">
-                                                {(log.name?.charAt(0) || "?").toUpperCase()}
-                                            </div> */}
                                             <div>
                                                 <div className="log-user-name">{log.name || "Unnamed"}</div>
                                                 <div className="log-member-id">{log.description || "-"}</div>
@@ -637,55 +638,16 @@ export default function TransactionLog() {
                                     </div>
                                 )))}
 
-                            <div className="log-footer">
-                                <span className="log-page-info">
-                                    Page {currentPage} of {totalPages}
-                                </span>
-
-                                <div className="log-pagination">
-                                    <button
-                                        className="log-page-btn"
-                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                    >
-                                        <svg
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2.5"
-                                        >
-                                            <polyline points="15 18 9 12 15 6" />
-                                        </svg>
-                                    </button>
-
-                                    {[...Array(totalPages)].map((_, n) => (
-                                        <button
-                                            key={n}
-                                            className={`log-page-btn${currentPage === n + 1 ? " active" : ""}`}
-                                            onClick={() => setCurrentPage(n + 1)}
-                                        >
-                                            {n + 1}
-                                        </button>
-                                    ))}
-
-                                    <button
-                                        className="log-page-btn"
-                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                    >
-                                        <svg
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2.5"
-                                        >
-                                            <polyline points="9 18 15 12 9 6" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={setCurrentPage}
+                            />
+                            <MonthlyReport
+                                isOpen={isReportOpen}
+                                onClose={() => setIsReportOpen()}
+                                logs={filteredLogs}
+                            />
                         </div>
                     </div>
                 </div>
