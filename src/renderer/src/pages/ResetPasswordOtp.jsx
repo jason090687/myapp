@@ -3,8 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useToaster } from '../components/Toast/useToaster'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
-import './OtpVerification.css'
-import './ResetPasswordOtp.css'
+import './styles/OtpVerification.css'
+import './styles/ResetPasswordOtp.css'
 import { Button } from '../components/ui/button'
 
 const ResetPasswordOtp = () => {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FaCheckCircle } from 'react-icons/fa'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
-import './ActivationSuccess.css'
+import './styles/ActivationSuccess.css'
 import { Button } from '../components/ui/button'
 
 const ActivationSuccess = () => {

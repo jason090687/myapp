@@ -12,8 +12,8 @@ import {
     Search,
     AlertCircle
 } from "lucide-react";
-import "./TransactionLog.css";
-import { useBooks, useBorrowedBooks, useEmployees, useStudents, useUsers } from "../hooks";
+import "./styles/TransactionLog.css";
+import { useAllBooks, useBorrowedBooks, useEmployees, useStudents, useUsers } from "../hooks";
 import { Button } from "../components/ui/button";
 import Pagination from "../components/Pagination";
 import MonthlyReport from "../components/Reports/MonthlyReport";
@@ -35,7 +35,7 @@ export default function TransactionLog() {
         end: "2026-12-31",
     });
 
-    const { data: books, isLoading: booksLoading, error: booksError } = useBooks(1, searchTerm)
+    const { data: books, isLoading: booksLoading, error: booksError } = useAllBooks(1, searchTerm)
     const { data: borrowedBooks, isLoading: borrowedBooksLoading, error: borrowedBooksError } = useBorrowedBooks(1, searchTerm)
     const { data: students, isLoading: studentsLoading, error: userError } = useStudents(1, searchTerm)
     const { data: staff, isLoading: staffLoading, error: staffError } = useEmployees(1, searchTerm)

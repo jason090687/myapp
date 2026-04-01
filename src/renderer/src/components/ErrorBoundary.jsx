@@ -1,6 +1,5 @@
 import React from 'react'
-import { useRouteError } from 'react-router-dom'
-import '../styles/ErrorPage.css'
+import './ErrorPage.css'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {

@@ -6,7 +6,7 @@ import EditStudentModal from '../components/Student/EditStudentModal'
 import ImportStudents from '../components/ImportStudents'
 import StudentHeader from '../components/Student/StudentHeader'
 import StudentTable from '../components/Student/StudentTable'
-import './StudentsPage.css'
+import './styles/StudentsPage.css'
 import { useStudent } from '../hooks'
 import StudentConfirmDeleteModal from '../components/Student/StudentConfirmDeleteModal'
 

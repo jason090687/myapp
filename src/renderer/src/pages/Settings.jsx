@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import { FaCog, FaUser } from 'react-icons/fa'
-import './Settings.css'
+import './styles/Settings.css'
 
 function Settings() {
   const [isCollapsed, setIsCollapsed] = useState(false)

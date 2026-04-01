@@ -4,7 +4,7 @@ import { FaGraduationCap, FaBook, FaEdit } from 'react-icons/fa'
 import { ArrowLeft } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { Button } from '../components/ui/button'
-import './StudentDetailsPage.css'
+import './styles/StudentDetailsPage.css'
 import { useStudentDetails, useUpdateStudent } from '../hooks'
 import EditStudentModal from '../components/Student/EditStudentModal'
 import { useToaster } from '../components/Toast/useToaster'
@@ -108,15 +108,14 @@ const StudentDetailsPage = () => {
                     student.borrowed_books.map((book, index) => (
                       <div
                         key={index}
-                        className={`book-card ${
-                          !book.paid && book.amount > 0
+                        className={`book-card ${!book.paid && book.amount > 0
                             ? 'unpaid-book'
                             : book.status?.toLowerCase() === 'borrowed'
                               ? 'borrowed-book'
                               : book.status?.toLowerCase() === 'returned'
                                 ? 'returned-book'
                                 : ''
-                        }`}
+                          }`}
                       >
                         <div className="book-content">
                           <h3 className="book-title">{book.title}</h3>

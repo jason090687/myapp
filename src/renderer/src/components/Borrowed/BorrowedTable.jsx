@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import ActionButtons from './BorrowedTableActions'
-import '../../pages/Borrowed.css'
+import '../../pages/styles/Borrowed.css'
 import Pagination from '../Pagination'
 
 const BorrowedTable = ({

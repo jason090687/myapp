@@ -5,7 +5,7 @@ import CustomAreaChart from '../components/Dashboard/CustomAreaChart'
 import TopBorrowers from '../components/Dashboard/TopBorrowers'
 import RecentCheckouts from '../components/Dashboard/RecentCheckouts'
 import TopBooks from '../components/Dashboard/TopBooks'
-import './Dashboard.css'
+import './styles/Dashboard.css'
 import { FaBook, FaBookReader, FaUndo, FaClock, FaUsers, FaMoneyBill } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import {

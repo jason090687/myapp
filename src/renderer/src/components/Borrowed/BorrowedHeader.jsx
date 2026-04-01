@@ -1,6 +1,6 @@
 import { Search, X, Filter, RefreshCw, Plus } from 'lucide-react'
 import { Button } from '../ui/button'
-import '../../pages/Borrowed.css'
+import '../../pages/styles/Borrowed.css'
 
 const BorrowedHeader = ({
   searchTerm,

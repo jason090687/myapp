@@ -1,16 +1,86 @@
-// import { RouterProvider } from 'react-router-dom'
-// import { Provider } from 'react-redux'
+import React, { useEffect } from 'react'
+import { RouterProvider } from 'react-router-dom'
+import router from './router'
+import './index.css'
+import { Provider, useSelector, useDispatch } from 'react-redux'
+import { persistor, store } from './app/store'
+import { PersistGate } from 'redux-persist/integration/react'
+import './styles/global.css'
+import './styles/update.css'
+import './styles/theme.css'
+import { Toaster } from 'react-hot-toast'
+import { logout } from './Features/authSlice'
+import { ActivityProvider } from './context/ActivityContext'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-// import { store } from './app/store'
-// import router from './router'
+// Polyfill Buffer for @react-pdf/renderer
+import { Buffer } from 'buffer'
+globalThis.Buffer = Buffer
 
-// function App() {
-//   return (
-//     <Provider store={store}>
+const SessionProvider = ({ children }) => {
+    const dispatch = useDispatch()
+    const { token } = useSelector((state) => state.auth)
 
-//       <RouterProvider router={router} />
-//     </Provider>
-//   )
-// }
+    useEffect(() => {
+        let inactivityTimer
 
-// export default App
+        const resetTimer = () => {
+            if (token) {
+                clearTimeout(inactivityTimer)
+                inactivityTimer = setTimeout(
+                    () => {
+                        dispatch(logout())
+                        window.location.href = '/'
+                    },
+                    15 * 60 * 1000
+                ) // 15 minutes in milliseconds
+            }
+        }
+
+        const handleActivity = () => {
+            resetTimer()
+        }
+
+        if (token) {
+            window.addEventListener('mousemove', handleActivity)
+            window.addEventListener('keydown', handleActivity)
+            window.addEventListener('click', handleActivity)
+            window.addEventListener('scroll', handleActivity)
+            resetTimer() // Start initial timer
+        }
+
+        // Cleanup
+        return () => {
+            if (token) {
+                clearTimeout(inactivityTimer)
+                window.removeEventListener('mousemove', handleActivity)
+                window.removeEventListener('keydown', handleActivity)
+                window.removeEventListener('click', handleActivity)
+                window.removeEventListener('scroll', handleActivity)
+            }
+        }
+    }, [token, dispatch])
+
+    return children
+}
+
+const queryClient = new QueryClient()
+
+function App() {
+    return (
+        <Provider store={store}>
+            <PersistGate loading={null} persistor={persistor}>
+                <ActivityProvider>
+                    <SessionProvider>
+                        <Toaster position="top-right" reverseOrder={false} />
+                        <QueryClientProvider client={queryClient}>
+                            <RouterProvider router={router} />
+                        </QueryClientProvider>
+                    </SessionProvider>
+                </ActivityProvider>
+            </PersistGate>
+        </Provider>
+    )
+}
+
+export default App

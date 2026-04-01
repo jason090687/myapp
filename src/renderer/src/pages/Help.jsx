@@ -15,7 +15,7 @@ import {
   FaLightbulb,
   FaRocket
 } from 'react-icons/fa'
-import './Help.css'
+import './styles/Help.css'
 
 const Help = () => {
   const [activeSection, setActiveSection] = useState('getting-started')

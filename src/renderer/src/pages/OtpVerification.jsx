@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useToaster } from '../components/Toast/useToaster'
 import background from '../assets/background.jpg'
 import logo from '../assets/logo.png'
-import './OtpVerification.css'
+import './styles/OtpVerification.css'
 import { Button } from '../components/ui/button'
 import { resendOtpDirectly, verifyOtpDirectly } from '../api/auth'
 

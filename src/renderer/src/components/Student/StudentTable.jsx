@@ -1,6 +1,6 @@
 import { FaEdit, FaTrash } from 'react-icons/fa'
 import Pagination from '../Pagination'
-import '../../pages/StudentsPage.css'
+import '../../pages/styles/StudentsPage.css'
 
 const StudentTable = ({
   students,

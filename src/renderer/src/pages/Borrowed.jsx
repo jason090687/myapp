@@ -1,5 +1,5 @@
 import Sidebar from '../components/Sidebar'
-import './Borrowed.css'
+import './styles/Borrowed.css'
 import BorrowBookModal from '../components/Borrowed/BorrowBookModal'
 import RenewModal from '../components/Borrowed/RenewModal'
 import OverdueModal from '../components/Borrowed/OverdueModal'

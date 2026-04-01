@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
-import './StudentsPage.css'
+import './styles/StudentsPage.css'
 import AddStaffBookModal from '../components/AddStaffBookModal'
 import EditStaffModal from '../components/EditStaffModal'
 import { useStaff } from '../hooks'
