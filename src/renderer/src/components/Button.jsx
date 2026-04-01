@@ -1,6 +1,6 @@
 import 'react'
 import PropTypes from 'prop-types'
-import './Button.css'
+import './styles/Button.css'
 
 const Button = ({ children, disabled = false, type = 'button', onClick, isLoading = false }) => {
   return (

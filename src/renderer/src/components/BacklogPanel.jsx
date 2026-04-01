@@ -22,7 +22,7 @@ import {
 } from '../hooks'
 import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
-import './BacklogPanel.css'
+import './styles/BacklogPanel.css'
 import { setAuthToken } from '../api/axios'
 import { getToken } from '../api/axios'
 

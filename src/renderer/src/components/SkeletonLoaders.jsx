@@ -1,5 +1,5 @@
 import React from 'react'
-import './SkeletonLoader.css'
+import './styles/SkeletonLoader.css'
 
 export const CardSkeleton = () => (
   <div className="skeleton-card">

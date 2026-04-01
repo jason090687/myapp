@@ -17,7 +17,7 @@ import {
   FaGraduationCap,
   FaUsers
 } from 'react-icons/fa'
-import './HelpGuideModal.css'
+import './styles/HelpGuideModal.css'
 
 const HelpGuideModal = ({ isOpen, onClose }) => {
   const [selectedGuide, setSelectedGuide] = useState(null)

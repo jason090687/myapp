@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { X, User, Hash } from 'lucide-react'
 import { Button } from './ui/button'
 import { useActivity } from '../context/ActivityContext'
-import './AddStaffBookModal.css'
+import './styles/AddStaffBookModal.css'
 
 const AddStaffBookModal = ({ isOpen, onClose, onSubmit }) => {
   const { addActivity } = useActivity()

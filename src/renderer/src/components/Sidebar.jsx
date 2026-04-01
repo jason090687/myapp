@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useToaster } from './Toast/useToaster'
 import logo from '../assets/logo.png'
-import './Sidebar.css'
+import './styles/Sidebar.css'
 import { useDispatch } from 'react-redux'
 import { logout, reset } from '../Features/authSlice'
 import HelpGuideModal from './HelpGuideModal'

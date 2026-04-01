@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import PropTypes from 'prop-types'
-import './InputField.css'
+import './styles/InputField.css'
 
 const InputField = ({
   type = 'text',
   placeholder = '',
   icon: Icon,
   value = '',
-  onChange = () => {},
+  onChange = () => { },
   name = '',
   className = '',
   ...rest

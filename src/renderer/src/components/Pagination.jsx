@@ -1,5 +1,5 @@
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
-import './Pagination.css'
+import './styles/Pagination.css'
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
   const getPageNumbers = () => {

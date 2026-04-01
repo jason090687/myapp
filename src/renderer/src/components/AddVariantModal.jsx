@@ -2,7 +2,7 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import InputField from './InputField'
 import { FaBookmark, FaVolumeUp, FaBarcode, FaHashtag, FaQrcode, FaTrash } from 'react-icons/fa'
-import './AddVariantModal.css'
+import './styles/AddVariantModal.css'
 import { Button } from './ui/button'
 import { X } from 'lucide-react'
 

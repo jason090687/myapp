@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { FaTimes, FaCloudUploadAlt, FaFile, FaTrash } from 'react-icons/fa'
 import Papa from 'papaparse'
 import { useToaster } from './Toast/useToaster'
-import './ImportStudents.css'
+import './styles/ImportStudents.css'
 import { Button } from './ui/button'
 import { useCreateStudent } from '../hooks'
 

@@ -7,7 +7,7 @@ import {
   FaUserGraduate,
   FaUserTie
 } from 'react-icons/fa'
-import './SearchResults.css'
+import './styles/SearchResults.css'
 
 const SearchResults = ({ results, onResultClick }) => {
   const navigate = useNavigate()
