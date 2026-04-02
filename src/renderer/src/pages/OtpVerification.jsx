@@ -188,7 +188,7 @@ const OtpVerification = () => {
               </div>
 
               <div className="text-center">
-                <button type="button" onClick={handleResendOtp} className="resend-button">
+                <Button variant='ghost' type="button" onClick={handleResendOtp}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
@@ -198,7 +198,7 @@ const OtpVerification = () => {
                     />
                   </svg>
                   Resend OTP
-                </button>
+                </Button>
               </div>
             </form>
           </div>
