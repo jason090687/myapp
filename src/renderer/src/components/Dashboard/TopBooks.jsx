@@ -1,6 +1,6 @@
 import { BookCard } from '../ui/book-card'
 import { BooksSkeleton } from './DashboardSkeletons'
-import './TopBooks.css'
+import './styles/TopBooks.css'
 
 const TopBooks = ({ activeBookFilter, onFilterToggle, loadingStates, topBooks, newBooks }) => {
   return (

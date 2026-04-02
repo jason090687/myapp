@@ -13,7 +13,7 @@ import {
   Filler
 } from 'chart.js'
 import { ChartSkeleton } from './DashboardSkeletons'
-import './CustomAreaChart.css'
+import './styles/CustomAreaChart.css'
 
 // Register Chart.js components
 ChartJS.register(

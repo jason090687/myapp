@@ -16,7 +16,7 @@ import "./styles/TransactionLog.css";
 import { useAllBooks, useBorrowedBooks, useEmployees, useStudents, useUsers } from "../hooks";
 import { Button } from "../components/ui/button";
 import Pagination from "../components/Pagination";
-import MonthlyReport from "../components/Reports/MonthlyReport";
+import { MonthlyReportTrigger } from "../components/Reports/MonthlyReportTrigger";
 
 
 export default function TransactionLog() {
@@ -535,7 +535,8 @@ export default function TransactionLog() {
                                         </svg>
                                         Download CSV
                                     </Button>
-                                    <Button variant='secondary' className="log-print-btn" onClick={() => setIsReportOpen(true)}>Preview Reports</Button>
+                                    {/* <Button variant='secondary' className="log-print-btn" onClick={() => setIsReportOpen(true)}>Preview Reports</Button> */}
+                                    <MonthlyReportTrigger logs={filteredLogs} />
                                 </div>
                             </div>
 
@@ -643,11 +644,7 @@ export default function TransactionLog() {
                                 totalPages={totalPages}
                                 onPageChange={setCurrentPage}
                             />
-                            <MonthlyReport
-                                isOpen={isReportOpen}
-                                onClose={() => setIsReportOpen()}
-                                logs={filteredLogs}
-                            />
+                            {/* MonthlyReport modal removed - use MonthlyReportTrigger instead */}
                         </div>
                     </div>
                 </div>

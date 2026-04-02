@@ -1,5 +1,5 @@
 import React from 'react'
-import './DashboardSkeletons.css'
+import './styles/DashboardSkeletons.css'
 
 export const CardsSkeleton = () => (
   <div className="cards-skeleton-grid">

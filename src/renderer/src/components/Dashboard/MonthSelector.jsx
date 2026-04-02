@@ -1,6 +1,6 @@
 import React from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
-import './MonthSelector.css'
+import './styles/MonthSelector.css'
 
 const MonthSelector = ({ currentMonth, currentYear, onMonthChange }) => {
   const months = [

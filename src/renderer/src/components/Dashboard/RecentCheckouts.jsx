@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { TableSkeleton } from './DashboardSkeletons'
-import './RecentCheckouts.css'
+import './styles/RecentCheckouts.css'
 
 const formatDate = (dateString) => {
   if (!dateString) return '-'
