@@ -31,9 +31,6 @@ const CustomAreaChart = ({
   chartData,
   chartLoading,
   isLoading,
-  activeTab,
-  onTabChange,
-  monthlyStatsData
 }) => {
   const getDisplayData = () => chartData
 

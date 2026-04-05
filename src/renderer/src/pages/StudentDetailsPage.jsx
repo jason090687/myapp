@@ -16,7 +16,7 @@ const StudentDetailsPage = () => {
   const { studentId } = useParams()
   const navigate = useNavigate()
   const { showToast } = useToaster()
-  // Fetch student details using TanStack Query
+
   const { data: student, isLoading, refetch } = useStudentDetails(studentId)
   const updateStudentMutation = useUpdateStudent()
 
@@ -109,12 +109,12 @@ const StudentDetailsPage = () => {
                       <div
                         key={index}
                         className={`book-card ${!book.paid && book.amount > 0
-                            ? 'unpaid-book'
-                            : book.status?.toLowerCase() === 'borrowed'
-                              ? 'borrowed-book'
-                              : book.status?.toLowerCase() === 'returned'
-                                ? 'returned-book'
-                                : ''
+                          ? 'unpaid-book'
+                          : book.status?.toLowerCase() === 'borrowed'
+                            ? 'borrowed-book'
+                            : book.status?.toLowerCase() === 'returned'
+                              ? 'returned-book'
+                              : ''
                           }`}
                       >
                         <div className="book-content">
