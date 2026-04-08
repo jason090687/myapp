@@ -33,7 +33,6 @@ const Navbar = ({
   const { token } = useSelector((state) => state.auth)
   const navigate = useNavigate()
 
-  // Fetch notifications and borrow requests using TanStack Query hooks
   const { data: notificationsData } = useNotificationsCount()
   const { data: borrowRequestsData } = useBorrowRequests('pending')
 

@@ -24,7 +24,6 @@ import { useSelector } from 'react-redux'
 import { useToaster } from './Toast/useToaster'
 import './styles/BacklogPanel.css'
 import { setAuthToken } from '../api/axios'
-import { getToken } from '../api/axios'
 
 function BacklogPanel({ isOpen, onClose, onRequestUpdate }) {
   const { activities, clearActivities } = useActivity()
